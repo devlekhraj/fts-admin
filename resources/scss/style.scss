@@ -40,8 +40,21 @@ body {
     }
 }
 
+td.v-data-table__td.v-data-table-column--align-start {
+    font-weight: 500;
+}
+
 .v-navigation-drawer__content {
-    background: linear-gradient(90deg, #f5fbff 0%, #ffffff 100%);
+    // background: linear-gradient(90deg, #f5fbff 0%, #ffffff 100%);
+    background-color: transparent !important;
+}
+
+nav.v-navigation-drawer {
+    // background-color: transparent;
+    // background-color: #f8fcfe;
+    // background: linear-gradient(90deg, #f5fbff 0%, #ffffff 100%);
+    // background: linear-gradient(120deg, #f1f3f5 0%, #f5fbff 100%);
+    background: linear-gradient(262deg, #ecf6ff3b 0%, #f7f7f7 100%);
 }
 
 .v-card,

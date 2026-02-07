@@ -1,53 +1,55 @@
 <template>
-	<!-- <AppPageHeader title="EMI Applications" subtitle="Manage EMI applications" /> -->
-	<AppDataTable :headers="headers" :items="items" :total="total" :loading="loading"
-		:items-per-page="options.itemsPerPage" @update:options="onOptions">
-		<template #item.user="{ item }">
-			<div class="d-flex align-center gap-2">
-				<v-avatar size="32">
-					<v-img :src="item.user?.avatar" alt="User" />
-				</v-avatar>
-				<span class="ml-3">{{ item.user?.name ?? '-' }}</span>
-			</div>
-		</template>
-		<template #item.product="{ item }">
-			<div class="d-flex align-center gap-2">
-				<v-avatar size="32" rounded>
-					<v-img :src="item.product?.thumb" alt="Product" />
-				</v-avatar>
-				<span class="ml-3">{{ item.product?.name ?? '-' }}</span>
-			</div>
-		</template>
-		<template #item.time="{ item }">
-			<span>{{ formatDateTime(item.time) }}</span>
-		</template>
-		<template #item.emi_per_month="{ item }">
-			<span>{{ formatNPR(item.emi_per_month) }}</span>
-		</template>
-		<template #item.emi_type="{ item }">
-			<div style="min-width: 150px" class="d-flex align-center">
-				<v-icon start class="mr-2" :color="getEmiIconColor(item.emi_type)"
-					:icon="getEmiTypeIcon(item.emi_type)" />
-				<span class="text-capitalize" :class="getEmiIconTextColor(item.emi_type)" style="font-weight: 500;">
-					{{ item.emi_type ? item.emi_type.split('_').join(' ') : 'Citizenship' }}
-				</span>
-			</div>
-		</template>
-		<template #item.emi_mode="{ item }">
-			<span class="text-capitalize">{{ item.emi_mode ?? '-' }}</span>
-		</template>
-		<template #item.status_label="{ item }">
-			<v-chip size="small" :color="statusColor(item.status)" variant="tonal">
-				{{ item.status_label ?? item.status ?? '-' }}
-			</v-chip>
-		</template>
-		<template #item.action="{ item }">
-			<v-btn variant="tonal" color="primary" size="x-small"
-				:to="{ name: 'emi.applications.detail', params: { id: item.id } }" icon>
-				<v-icon>mdi-eye</v-icon>
-			</v-btn>
-		</template>
-	</AppDataTable>
+	<div>
+		<!-- <AppPageHeader title="EMI Applications" subtitle="Manage EMI applications" /> -->
+		<AppDataTable :headers="headers" :items="items" :total="total" :loading="loading"
+			:items-per-page="options.itemsPerPage" @update:options="onOptions">
+			<template #item.user="{ item }">
+				<div class="d-flex align-center gap-2">
+					<v-avatar size="32">
+						<v-img :src="item.user?.avatar" alt="User" />
+					</v-avatar>
+					<span class="ml-3">{{ item.user?.name ?? '-' }}</span>
+				</div>
+			</template>
+			<template #item.product="{ item }">
+				<div class="d-flex align-center gap-2">
+					<v-avatar size="32" rounded>
+						<v-img :src="item.product?.thumb" alt="Product" />
+					</v-avatar>
+					<span class="ml-3">{{ item.product?.name ?? '-' }}</span>
+				</div>
+			</template>
+			<template #item.time="{ item }">
+				<span>{{ formatDateTime(item.time) }}</span>
+			</template>
+			<template #item.emi_per_month="{ item }">
+				<span>{{ formatNPR(item.emi_per_month) }}</span>
+			</template>
+			<template #item.emi_type="{ item }">
+				<div style="min-width: 150px" class="d-flex align-center">
+					<v-icon start class="mr-2" :color="getEmiIconColor(item.emi_type)"
+						:icon="getEmiTypeIcon(item.emi_type)" />
+					<span class="text-capitalize" :class="getEmiIconTextColor(item.emi_type)" style="font-weight: 500;">
+						{{ item.emi_type ? item.emi_type.split('_').join(' ') : 'Citizenship' }}
+					</span>
+				</div>
+			</template>
+			<template #item.emi_mode="{ item }">
+				<span class="text-capitalize">{{ item.emi_mode ?? '-' }}</span>
+			</template>
+			<template #item.status_label="{ item }">
+				<v-chip size="small" :color="statusColor(item.status)" variant="tonal">
+					{{ item.status_label ?? item.status ?? '-' }}
+				</v-chip>
+			</template>
+			<template #item.action="{ item }">
+				<v-btn variant="tonal" color="primary" size="x-small"
+					:to="{ name: 'emi.applications.detail', params: { id: item.id } }" icon>
+					<v-icon>mdi-eye</v-icon>
+				</v-btn>
+			</template>
+		</AppDataTable>
+	</div>
 </template>
 
 <script setup lang="ts">

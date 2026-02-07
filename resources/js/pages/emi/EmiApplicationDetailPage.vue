@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <v-container fluid class="px-0">
     <div class="d-flex align-center justify-space-between mb-4">
       <v-btn variant="text" @click="goBack">
         <v-icon start>mdi-arrow-left</v-icon>
