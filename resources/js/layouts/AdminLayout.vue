@@ -18,7 +18,10 @@
     <v-app-bar app flat class="admin-app-bar">
       <v-app-bar-nav-icon @click="drawer = !drawer" />
       <v-toolbar-title>
-        <h5>{{ pageTitle }}</h5>
+        <div>
+          <h5>{{ pageTitle }}</h5>
+          <div v-if="pageSubtitle" class="text-caption text-medium-emphasis">{{ pageSubtitle }}</div>
+        </div>
       </v-toolbar-title>
       <v-spacer />
       <v-btn variant="text" @click="logout">Logout</v-btn>
@@ -35,10 +38,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useAuthStore } from '../stores/auth.store';
 
 const drawer = ref(true);
 const router = useRouter();
 const route = useRoute();
+const authStore = useAuthStore();
 
 const titleByName: Record<string, string> = {
   dashboard: 'Dashboard',
@@ -68,8 +73,14 @@ const titleByName: Record<string, string> = {
 };
 
 const pageTitle = computed(() => {
-  const name = route.name ? String(route.name) : '';
-  return titleByName[name] ?? 'Admin';
+  return (route.meta.title as string) ?? 'Admin';
+});
+
+const pageSubtitle = computed(() => {
+  if (route.name === 'emi.applications.detail' && route.params.id) {
+    return `Application #${route.params.id}`;
+  }
+  return (route.meta.subtitle as string) ?? '';
 });
 
 const items = [
@@ -80,8 +91,8 @@ const items = [
   {
     group: 'EMI',
     links: [
-      { title: 'EMI Application', to: '/emi/applications', icon: 'mdi-cash' },
-      { title: 'EMI Users', to: '/emi/emi-users', icon: 'mdi-account-cash-outline' },
+      { title: 'EMI Application', to: '/emi-applications', icon: 'mdi-cash' },
+      { title: 'EMI Users', to: '/emi-users', icon: 'mdi-account-cash-outline' },
     ],
   },
   {
@@ -98,39 +109,39 @@ const items = [
     group: 'Blogs',
     links: [
       { title: 'All Blogs', to: '/blogs', icon: 'mdi-note-multiple-outline' },
-      { title: 'Create Blog', to: '/blogs/create', icon: 'mdi-note-plus-outline' },
-      { title: 'Categories', to: '/blogs/categories', icon: 'mdi-folder-outline' },
+      { title: 'Create Blog', to: '/blogs-create', icon: 'mdi-note-plus-outline' },
+      { title: 'Categories', to: '/blogs-categories', icon: 'mdi-folder-outline' },
     ],
   },
   {
     group: 'Catalog',
     links: [
-      { title: 'Products', to: '/catalog/products', icon: 'mdi-package-variant-closed' },
-      { title: 'Categories', to: '/catalog/categories', icon: 'mdi-shape-outline' },
-      { title: 'Brands', to: '/catalog/brands', icon: 'mdi-tag-outline' },
-      { title: 'Attributes', to: '/catalog/attributes', icon: 'mdi-tune-variant' },
+      { title: 'Products', to: '/catalog-products', icon: 'mdi-package-variant-closed' },
+      { title: 'Categories', to: '/catalog-categories', icon: 'mdi-shape-outline' },
+      { title: 'Brands', to: '/catalog-brands', icon: 'mdi-tag-outline' },
+      { title: 'Attributes', to: '/catalog-attributes', icon: 'mdi-tune-variant' },
     ],
   },
   {
     group: 'Marketing',
     links: [
-      { title: 'Banners', to: '/marketing/banners', icon: 'mdi-image-outline' },
-      { title: 'Campaigns', to: '/marketing/campaigns', icon: 'mdi-bullhorn-outline' },
+      { title: 'Banners', to: '/marketing-banners', icon: 'mdi-image-outline' },
+      { title: 'Campaigns', to: '/marketing-campaigns', icon: 'mdi-bullhorn-outline' },
     ],
   },
   {
     group: 'Settings',
     links: [
-      { title: 'FAQs Management', to: '/settings/faqs', icon: 'mdi-help-circle-outline' },
-      { title: 'Payment Methods', to: '/settings/payment-methods', icon: 'mdi-credit-card-outline' },
-      { title: 'User Management', to: '/settings/users', icon: 'mdi-account-group-outline' },
+      { title: 'FAQs Management', to: '/settings-faqs', icon: 'mdi-help-circle-outline' },
+      { title: 'Payment Methods', to: '/settings-payment-methods', icon: 'mdi-credit-card-outline' },
+      { title: 'User Management', to: '/settings-users', icon: 'mdi-account-group-outline' },
       { title: 'Settings', to: '/settings', icon: 'mdi-cog-outline' },
     ],
   },
 ];
 
-function logout() {
-  localStorage.removeItem('admin_token');
+async function logout() {
+  await authStore.logout();
   router.push('/login');
 }
 </script>

@@ -3,6 +3,10 @@ export type DataTableHeader = {
   key: string;
   sortable?: boolean;
   align?: 'start' | 'center' | 'end';
+  width?: string | number;
+  minWidth?: string | number;
+  headerProps?: Record<string, unknown>;
+  cellProps?: Record<string, unknown>;
 };
 
 export type DataTableOptions = {
