@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="px-0">
+  <v-container fluid class="pa-0">
     <div class="d-flex align-center justify-space-between mb-4">
       <v-btn variant="text" @click="goBack">
         <v-icon start>mdi-arrow-left</v-icon>
@@ -12,7 +12,7 @@
         <v-avatar size="64">
           <v-img :src="application.user.avatar" alt="User" />
         </v-avatar>
-        <div>
+        <div class="ml-4">
           <div class="text-subtitle-1 font-weight-semibold">{{ application.user.name }}</div>
           <div class="text-caption text-medium-emphasis">{{ application.user.email }}</div>
           <div class="text-caption text-medium-emphasis">{{ application.user.phone }}</div>

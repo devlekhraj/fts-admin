@@ -1,15 +1,22 @@
 <template>
     <v-app>
         <v-navigation-drawer v-model="drawer" app width="280">
-            <v-sheet class="drawer-header py-1">
-                <v-list-item title="Admin" subtitle="Control Panel" />
-                <v-divider class="my-2 border-0" />
+            <v-sheet class="drawer-header py-4">
+                <div class="d-flex flex-column align-center text-center">
+                    <v-avatar size="56" class="mb-2">
+                        <v-img :src="authStore.admin?.avatar ?? 'https://placehold.co/64'" alt="Admin" />
+                    </v-avatar>
+                    <div class="text-subtitle-2 font-weight-semibold">
+                        {{ authStore.admin?.name ?? 'Admin' }}
+                    </div>
+                    <div class="text-caption text-medium-emphasis">{{ authStore.admin?.email}}</div>
+                </div>
+                <v-divider class="my-3 border-0" />
             </v-sheet>
-
-            <v-list density="comfortable" class="pt-4">
+            <v-list density="comfortable" class="px-6">
                 <template v-for="group in items" :key="group.group">
-                    <v-list-subheader>{{ group.group }}</v-list-subheader>
-                    <v-list-item v-for="link in group.links" :key="link.to" :to="link.to" :title="link.title"
+                    <v-list-subheader class="mt-3" v-if="group && group.group">{{ group.group }}</v-list-subheader>
+                    <v-list-item v-for="link in group.links" class="py-2" :key="link.to" :to="link.to" :title="link.title"
                         :prepend-icon="link.icon" rounded link />
                 </template>
             </v-list>
@@ -86,7 +93,7 @@ const pageSubtitle = computed(() => {
 
 const items = [
     {
-        group: 'Welcome',
+        group: '',
         links: [{ title: 'Dashboard', to: '/dashboard', icon: 'mdi-view-dashboard-outline' }],
     },
     {
@@ -209,12 +216,12 @@ main.v-main {
 }
 
 .drawer-header {
-    position: sticky;
-    top: 0;
-    z-index: 1001;
+    // position: sticky;
+    // top: 0;
+    // z-index: 1001;
     background: linear-gradient(262deg, #f4faff 0%, #fafafa 100%) !important;
     padding: 0 10px;
-    border-bottom: 1px solid #f2f2f2 !important;
+    // border-bottom: 1px solid #f2f2f2 !important;
 }
 
 .v-toolbar__content {
