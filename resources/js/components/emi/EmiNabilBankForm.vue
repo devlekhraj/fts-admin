@@ -48,22 +48,22 @@
 			</v-col>
 
 			<v-col cols="12" md="6" class="py-1">
-				<v-text-field v-model="form.loan_amount" label="Amount of Nabil Installment Loan (Rs.)"
-					density="comfortable" variant="outlined" :rules="[rules.required]" :disabled="loading" />
-			</v-col>
-			<v-col cols="12" md="6" class="py-1">
-				<v-text-field v-model="form.amount_in_words" label="Amount in Words" density="comfortable"
-					variant="outlined" :disabled="loading" />
-			</v-col>
-			<v-col cols="12" md="6" class="py-1">
 				<v-select v-model="form.tenure" :items="emiTenureOptions" label="Installment tenure (Months)"
-					density="comfortable" variant="outlined" :rules="[rules.required]" :disabled="loading" />
+				density="comfortable" variant="outlined" :rules="[rules.required]" :disabled="loading" />
 			</v-col>
-
+			
 			<v-col cols="12" md="6" class="py-1">
 				<v-file-input v-model="form.signature_file" prepend-icon="" prepend-inner-icon="mdi-image" label="Signature of Cardholder" density="comfortable"
-					variant="outlined" accept="image/*" :disabled="loading" />
+				variant="outlined" accept="image/*" :disabled="loading" />
 				<v-img v-if="signaturePreview" :src="signaturePreview" max-height="140" class="mt-2" contain />
+			</v-col>
+			<v-col cols="12" md="3" class="py-1">
+				<v-text-field v-model="form.loan_amount" label="Installment Amount"
+					density="comfortable" variant="outlined" :rules="[rules.required]" :disabled="loading" />
+			</v-col>
+			<v-col cols="12" md="9" class="py-1">
+				<v-text-field v-model="form.amount_in_words" label="Amount in Words" density="comfortable"
+					variant="outlined" :disabled="loading" />
 			</v-col>
 
 			<v-col cols="12">

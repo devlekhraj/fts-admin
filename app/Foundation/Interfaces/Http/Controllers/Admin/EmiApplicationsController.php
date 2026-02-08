@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Foundation\Interfaces\Http\Controllers\Admin;
 
-use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
+use App\Foundation\Infrastructure\Persistence\Eloquent\Models\EmiRequestModel;
+use App\Foundation\Interfaces\Http\Requests\Admin\ApproveEmiApplicationRequest;
 use App\Foundation\Interfaces\Http\Requests\Admin\StoreEmiApplicationRequest;
 use App\Foundation\Interfaces\Http\Requests\Admin\UpdateEmiApplicationRequest;
-use App\Foundation\Interfaces\Http\Requests\Admin\ApproveEmiApplicationRequest;
-use Illuminate\Http\Request;
-use App\Foundation\Infrastructure\Persistence\Eloquent\Models\EmiRequestModel;
-use App\Foundation\Interfaces\Http\Resources\EmiApplicationResource;
 use App\Foundation\Interfaces\Http\Resources\EmiApplicationListResource;
+use App\Foundation\Interfaces\Http\Resources\EmiApplicationResource;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class EmiApplicationsController extends Controller
 {

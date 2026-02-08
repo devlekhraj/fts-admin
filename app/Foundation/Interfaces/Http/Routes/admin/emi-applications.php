@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Route;
 use App\Foundation\Interfaces\Http\Controllers\Admin\EmiApplicationsController;
+use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::get('emi-applications', [EmiApplicationsController::class, 'index']);

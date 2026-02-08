@@ -12,12 +12,33 @@
 		<v-divider></v-divider>
 
 		<v-card-text>
-			<v-tabs v-model="activeTab" density="comfortable">
-				<v-tab value="nabil">Nabil Bank</v-tab>
-				<v-tab value="siddhartha">Siddhartha Bank</v-tab>
-			</v-tabs>
+			<div class="d-flex flex-column">
+					<div class="text-subtitle-2 text-primary py-1">Preferred Bank</div>
+					<div class="text-caption text-medium-emphasis mb-2">
+						Select the bank where you want to generate the EMI application.
+					</div>
+					<div style="max-width: 400px;">
+						<v-select
+							v-model="activeBankCode"
+							:items="bankOptions"
+							item-title="name"
+							item-value="code"
+							label="Select Bank"
+							placeholder="Select a bank"
+							persistent-placeholder
+							variant="outlined"
+							density="comfortable"
+							:loading="banksLoading"
+						/>
+					</div>
+			</div>
 			<div class="mt-4">
-				<component :is="activeFormComponent" />
+				<component v-if="activeFormComponent" :is="activeFormComponent" />
+				<div v-else class="text-center text-medium-emphasis py-6">
+					<span>{{ emptyStatePrefix }}</span>
+					<span class="text-error font-weight-semibold">{{ selectedBankName }}</span>
+					<span>{{ emptyStateSuffix }}</span>
+				</div>
 			</div>
 		</v-card-text>
 
@@ -25,13 +46,56 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import EmiNabilBankForm from './EmiNabilBankForm.vue';
 import EmiSiddharthaBankForm from './EmiSiddharthaBankForm.vue';
+import { list as listEmiBanks } from '@/api/emi-banks.api';
 
-const activeTab = ref('nabil');
+type BankOption = { name: string; code: string };
+const bankOptions = ref<BankOption[]>([]);
+const banksLoading = ref(false);
+const activeBankCode = ref<string | null>(null);
 
 const activeFormComponent = computed(() => {
-	return activeTab.value === 'siddhartha' ? EmiSiddharthaBankForm : EmiNabilBankForm;
+	switch (activeBankCode.value?.toLocaleLowerCase()) {
+		case 'sbl':
+			return EmiSiddharthaBankForm;
+		case 'nabil':
+			return EmiNabilBankForm;
+		default:
+			return null;
+	}
 });
+
+const selectedBankName = computed(() => {
+	if (!activeBankCode.value) return '';
+	return (
+		bankOptions.value.find((bank) => bank.code === activeBankCode.value)?.name ??
+		activeBankCode.value
+	);
+});
+
+const emptyStatePrefix = computed(() => {
+	if (!activeBankCode.value) {
+		return 'Please choose a bank above to generate the application form.';
+	}
+	return 'The form for "';
+});
+
+const emptyStateSuffix = computed(() => {
+	if (!activeBankCode.value) return '';
+	return '" is not available yet.';
+});
+
+async function fetchBanks() {
+	banksLoading.value = true;
+	try {
+		const { data } = await listEmiBanks();
+		bankOptions.value = data?.data ?? [];
+	} finally {
+		banksLoading.value = false;
+	}
+}
+
+onMounted(fetchBanks);
 </script>
