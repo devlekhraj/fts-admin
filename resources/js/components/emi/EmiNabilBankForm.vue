@@ -1,5 +1,5 @@
 <template>
-	<v-form @submit.prevent>
+	<v-form ref="formRef" @submit.prevent="handleSubmit">
 		<v-row>
 			<v-col cols="12">
 				<div class="text-subtitle-2 text-primary">Cardholder Details</div>
@@ -77,7 +77,7 @@
 		</v-row>
 		<v-row>
 			<v-col cols="12" class="d-flex justify-space-around">
-				<v-btn color="primary" :loading="loading" @click="handleSubmit()">
+				<v-btn color="primary" :loading="loading" type="submit">
 					<v-icon>mdi-creation</v-icon>
 					Generate
 				</v-btn>
@@ -86,44 +86,56 @@
 	</v-form>
 </template>
 
-<script setup>
-import { ref } from 'vue'
-const emit = defineEmits(['submit'])
+<script setup lang="ts">
+import { reactive, ref, watch } from 'vue';
 
-const loading = ref(false)
+const formRef = ref();
+const loading = ref(false);
+const rules = {
+	required: (v: string) => Boolean(v) || 'Required',
+};
 
-const props = defineProps({
-	form: {
-		type: Object,
-		required: true,
-	},
-	application: {
-		type: Object,
-		required: true,
-	},
-	rules: {
-		type: Object,
-		required: true,
-	},
-	loading: {
-		type: Boolean,
-		required: true,
-	},
-	emiTenureOptions: {
-		type: Array,
-		required: true,
-	},
-	signaturePreview: {
-		type: String,
-		default: '',
-	},
-})
+const emiTenureOptions = ['3', '6', '9', '12', '18', '24'];
 
-function handleSubmit() {
-	console.log('Submitting Nabil Bank Form', props.form)
+const form = reactive({
+	cardholder_name: '',
+	card_number: '',
+	expiry_date: '',
+	mobile: '',
+	telephone: '',
+	item_name: '',
+	manufactured_by: '',
+	model_name: '',
+	serial_no: '',
+	loan_amount: '',
+	amount_in_words: '',
+	tenure: '',
+	signature_file: null as File | null,
+	merchant_name_address: '',
+});
 
-	console.log('Application:', props.application);
-	// emit('submit', { ...props.form })
+const signaturePreview = ref<string | null>(null);
+let signatureUrl: string | null = null;
+
+watch(
+	() => form.signature_file,
+	(file) => {
+		if (signatureUrl) {
+			URL.revokeObjectURL(signatureUrl);
+			signatureUrl = null;
+		}
+		if (file instanceof File) {
+			signatureUrl = URL.createObjectURL(file);
+			signaturePreview.value = signatureUrl;
+		} else {
+			signaturePreview.value = null;
+		}
+	},
+);
+
+async function handleSubmit() {
+	const { valid } = await formRef.value?.validate();
+	if (!valid) return;
+	// TODO: wire submit to API
 }
-
 </script>

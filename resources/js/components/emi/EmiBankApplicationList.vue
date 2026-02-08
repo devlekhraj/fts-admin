@@ -5,8 +5,8 @@
         <div>
           <h4>Generated Applications</h4>
         </div>
-        <v-btn color="primary">
-          <v-icon left small>mdi-file-plus</v-icon>
+        <v-btn color="primary" @click="modalGenerate()">
+          <v-icon left>mdi-file-plus</v-icon>
           Generate Now
         </v-btn>
       </div>
@@ -21,12 +21,10 @@
         </template>
         <template #item.action>
           <div class="d-flex justify-end gap-2">
-            <v-btn variant="tonal" color="primary" class="mr-4" size="x-small"
-              icon>
+            <v-btn variant="tonal" color="primary" class="mr-4" size="x-small" icon>
               <v-icon>mdi-eye</v-icon>
             </v-btn>
-            <v-btn variant="tonal" color="primary" size="x-small"
-              icon>
+            <v-btn variant="tonal" color="primary" size="x-small" icon>
               <v-icon>mdi-download</v-icon>
             </v-btn>
           </div>
@@ -38,8 +36,8 @@
 </template>
 
 <script setup lang="ts">
-
-
+import { useModalStore } from '@/stores/modal.store';
+import EmiApplicationForm from '@/components/emi/EmiApplicationForm.vue'
 import type { DataTableHeader } from 'vuetify';
 
 const headers: DataTableHeader[] = [
@@ -53,4 +51,22 @@ const items = [
   { bank: 'Nabil Bank', date: '--', emailSent: false, emailCount: 0 },
   { bank: 'Siddhartha Bank', date: '--', emailSent: true, emailCount: 1 },
 ];
+
+const props = defineProps<{ data: Record<string, any> }>();
+const modal = useModalStore();
+
+function modalGenerate() {
+  modal.open(
+    EmiApplicationForm,
+    { id: props.data?.id },
+    {
+      size: 'lg',
+      // onSaved: (payload) => {
+      //   console.log('saved from modal', {payload});
+      // },
+    },
+  );
+}
+
+
 </script>

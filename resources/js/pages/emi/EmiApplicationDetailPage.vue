@@ -67,6 +67,7 @@ const tabComponents = {
 
 type TabKey = keyof typeof tabComponents;
 const tab = ref<TabKey>('emi');
+  
 const tabs = [
   { value: 'emi', label: 'EMI Info', icon: 'mdi-cash' },
   { value: 'documents', label: 'Documents', icon: 'mdi-file-document-outline' },

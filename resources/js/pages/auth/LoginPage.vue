@@ -18,9 +18,10 @@
 							<v-text-field v-model="email" label="Email" type="email" :rules="[requiredRule]"
 								variant="outlined" prepend-inner-icon="mdi-email-outline" autocomplete="username"
 								class="mb-3" />
-							<v-text-field v-model="password" label="Password" type="password" :rules="[requiredRule]"
-								variant="outlined" prepend-inner-icon="mdi-lock-outline"
-								autocomplete="current-password" />
+							<v-text-field v-model="password" label="Password" :type="showPassword ? 'text' : 'password'"
+								:rules="[requiredRule]" variant="outlined" prepend-inner-icon="mdi-lock-outline"
+								:append-inner-icon="showPassword ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
+								@click:append-inner="showPassword = !showPassword" autocomplete="current-password" />
 							<v-btn type="submit" size="x-large" color="primary" class="mt-4" block :loading="loading">
 								Sign in
 							</v-btn>
@@ -42,6 +43,7 @@ const authStore = useAuthStore();
 
 const email = ref('');
 const password = ref('');
+const showPassword = ref(false);
 const loading = ref(false);
 const error = ref('');
 const form = ref();

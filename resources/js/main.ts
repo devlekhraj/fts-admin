@@ -3,6 +3,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import App from './app/App.vue';
 import router, { initAuth } from './app/router';
 import vuetify from './app/plugins/vuetify';
+import { vMaska } from 'maska/vue';
 
 const pinia = createPinia();
 setActivePinia(pinia);
@@ -13,4 +14,5 @@ app
   .use(pinia)
   .use(router)
   .use(vuetify)
+  .directive('maska', vMaska)
   .mount('#app');

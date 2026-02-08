@@ -1,5 +1,5 @@
 <template>
-	<v-form @submit.prevent>
+	<v-form ref="formRef" @submit.prevent="handleSubmit">
 		<v-row>
 			<v-col cols="12">
 				<div class="text-subtitle-2 text-primary">Cardholder Details</div>
@@ -97,7 +97,7 @@
 		</v-row>
 		<v-row>
 			<v-col cols="12" class="d-flex justify-space-around">
-				<v-btn color="primary" :loading="loading" @click="handleSubmit()">
+				<v-btn color="primary" :loading="loading" type="submit">
 					<v-icon>mdi-creation</v-icon>
 					Generate
 				</v-btn>
@@ -106,46 +106,79 @@
 	</v-form>
 </template>
 
-<script setup>
-import { ref } from 'vue'
-const loading = ref(false)
-const props = defineProps({
-	form: {
-		type: Object,
-		required: true,
+<script setup lang="ts">
+import { reactive, ref, watch } from 'vue';
+
+const formRef = ref();
+const loading = ref(false);
+const rules = {
+	required: (v: string) => Boolean(v) || 'Required',
+};
+
+const emiTenureOptions = ['3', '6', '9', '12', '18', '24'];
+
+const form = reactive({
+	cardholder_name: '',
+	address: '',
+	mobile: '',
+	email: '',
+	card_number: '',
+	expiry_date: '',
+	merchant_name_address: '',
+	item_name: '',
+	manufactured_by: '',
+	model_name: '',
+	serial_no: '',
+	emi_amount: '',
+	amount_in_words: '',
+	emi_tenure: '',
+	merchant_name: '',
+	requested_by: '',
+	requested_phone: '',
+	signature_file: null as File | null,
+	stamp_file: null as File | null,
+});
+
+const signaturePreview = ref<string | null>(null);
+const stampPreview = ref<string | null>(null);
+let signatureUrl: string | null = null;
+let stampUrl: string | null = null;
+
+watch(
+	() => form.signature_file,
+	(file) => {
+		if (signatureUrl) {
+			URL.revokeObjectURL(signatureUrl);
+			signatureUrl = null;
+		}
+		if (file instanceof File) {
+			signatureUrl = URL.createObjectURL(file);
+			signaturePreview.value = signatureUrl;
+		} else {
+			signaturePreview.value = null;
+		}
 	},
-	application: {
-		type: Object,
-		required: true,
+);
+
+watch(
+	() => form.stamp_file,
+	(file) => {
+		if (stampUrl) {
+			URL.revokeObjectURL(stampUrl);
+			stampUrl = null;
+		}
+		if (file instanceof File) {
+			stampUrl = URL.createObjectURL(file);
+			stampPreview.value = stampUrl;
+		} else {
+			stampPreview.value = null;
+		}
 	},
-	rules: {
-		type: Object,
-		required: true,
-	},
-	loading: {
-		type: Boolean,
-		required: true,
-	},
-	emiTenureOptions: {
-		type: Array,
-		required: true,
-	},
-	signaturePreview: {
-		type: String,
-		default: '',
-	},
-	stampPreview: {
-		type: String,
-		default: '',
-	},
-})
+);
 
 async function handleSubmit() {
-	console.log('Submitting Siddhartha Bank Form', props.form)
-	console.log('Application:', props.application);
-
-	// const resp = await axios.post(`/emi-applications/${props.application.id}/generate-pdf`, props.form);
-
-	// console.log({resp});
+	const { valid } = await formRef.value?.validate();
+	if (!valid) return;
+	// TODO: wire submit to API
 }
 </script>
