@@ -1,14 +1,14 @@
 <template>
   <v-container fluid>
     <v-card class="pa-4">
-      <div class="d-flex justify-end mb-3">
+      <!-- <div class="d-flex justify-end mb-3">
         <v-btn size="small" variant="tonal" @click="openModal">Open Modal</v-btn>
-      </div>
+      </div> -->
       <div>
         <v-row>
           <v-col cols="12" md="4">
             <div>
-              <v-table>
+              <v-table class="border rounded">
                 <tbody>
                   <tr>
                     <td>Request Code</td>
@@ -60,7 +60,7 @@
           </v-col>
           <v-col cols="12" md="8">
             <div>
-              <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Laboriosam, quidem.</p>
+              <GenerateApplicationForm />
             </div>
           </v-col>
         </v-row>
@@ -71,23 +71,24 @@
 
 <script setup lang="ts">
 import { formatDateTime, formatNPR } from '@/shared/formatters';
-import { useModalStore } from '@/stores/modal.store';
-import DemoTemp from '@/components/emi/DemoTemp.vue';
+// import { useModalStore } from '@/stores/modal.store';
+// import DemoTemp from '@/components/emi/DemoTemp.vue';
+import GenerateApplicationForm from '@/components/emi/EmiBankApplicationList.vue';
 
 const props = defineProps<{ data: Record<string, any> }>();
-const modal = useModalStore();
+// const modal = useModalStore();
 
-function openModal() {
-  modal.open(
-    DemoTemp,
-    { id: props.data?.id },
-    {
-      size: 'md',
-      // onSaved: (payload) => {
-      //   console.log('saved from modal', {payload});
-      // },
-    },
-  );
-}
+// function openModal() {
+//   modal.open(
+//     DemoTemp,
+//     { id: props.data?.id },
+//     {
+//       size: 'md',
+//       // onSaved: (payload) => {
+//       //   console.log('saved from modal', {payload});
+//       // },
+//     },
+//   );
+// }
 
 </script>

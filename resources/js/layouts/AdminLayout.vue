@@ -4,12 +4,14 @@
             <v-sheet class="drawer-header py-4">
                 <div class="d-flex flex-column align-center text-center">
                     <v-avatar size="56" class="mb-2">
-                        <v-img :src="authStore.admin?.avatar ?? 'https://placehold.co/64'" alt="Admin" />
+                        <v-img :src="typeof authStore.admin?.avatar === 'string' && authStore.admin?.avatar ? authStore.admin.avatar : 'https://placehold.co/64'" alt="Admin" />
                     </v-avatar>
                     <div class="text-subtitle-2 font-weight-semibold">
                         {{ authStore.admin?.name ?? 'Admin' }}
                     </div>
-                    <div class="text-caption text-medium-emphasis">{{ authStore.admin?.email}}</div>
+                    <div class="text-caption text-medium-emphasis">
+                        {{ authStore.admin?.email ?? 'admin@example.com' }}
+                    </div>
                 </div>
                 <v-divider class="my-3 border-0" />
             </v-sheet>
