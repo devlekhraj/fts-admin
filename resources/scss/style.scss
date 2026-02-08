@@ -45,7 +45,8 @@ body {
 }
 
 .v-navigation-drawer__content {
-    background-color: transparent !important;
+    // background-color: transparent !important;
+    background: linear-gradient(262deg, #f4faff 0%, #fafafa 100%) !important;
 }
 
 nav.v-navigation-drawer {

@@ -13,8 +13,19 @@
                 </div>
                 <v-divider class="my-3 border-0" />
             </v-sheet>
+            <div class="px-6 pb-2">
+                <v-text-field
+                    v-model="navSearch"
+                    density="compact"
+                    variant="outlined"
+                    placeholder="Search menu"
+                    prepend-inner-icon="mdi-magnify"
+                    hide-details
+                    clearable
+                />
+            </div>
             <v-list density="comfortable" class="px-6" id="side-nav-items">
-                <template v-for="group in items" :key="group.group">
+                <template v-for="group in filteredItems" :key="group.group">
                     <v-list-subheader class="mt-3" v-if="group && group.group">{{ group.group }}</v-list-subheader>
                     <v-list-item v-for="link in group.links" class="py-2" :key="link.to" :to="link.to" :title="link.title"
                         :prepend-icon="link.icon" rounded link />
@@ -96,6 +107,8 @@ const pageSubtitle = computed(() => {
     return (route.meta.subtitle as string) ?? '';
 });
 
+const navSearch = ref('');
+
 const items = [
     {
         group: '',
@@ -152,6 +165,24 @@ const items = [
         ],
     },
 ];
+
+const filteredItems = computed(() => {
+    const query = (navSearch.value ?? '').trim().toLowerCase();
+    if (!query) return items;
+
+    return items
+        .map((group) => {
+            const groupMatch = (group.group ?? '').toLowerCase().includes(query);
+            const links = group.links.filter((link) =>
+                link.title.toLowerCase().includes(query)
+            );
+            return {
+                ...group,
+                links: groupMatch ? group.links : links,
+            };
+        })
+        .filter((group) => group.links.length > 0);
+});
 
 async function logout() {
     await authStore.logout();
