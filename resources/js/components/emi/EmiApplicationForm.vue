@@ -33,7 +33,7 @@
 					</div>
 			</div>
 			<div class="mt-4">
-				<component v-if="activeFormComponent" :is="activeFormComponent" />
+				<component v-if="activeFormComponent" :is="activeFormComponent" :data="applicationData" />
 				<div v-else class="text-center text-medium-emphasis py-6">
 					<span>{{ emptyStatePrefix }}</span>
 					<span class="text-error font-weight-semibold">{{ selectedBankName }}</span>
@@ -46,10 +46,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch, withDefaults } from 'vue';
 import EmiNabilBankForm from './EmiNabilBankForm.vue';
 import EmiSiddharthaBankForm from './EmiSiddharthaBankForm.vue';
 import { list as listEmiBanks } from '@/api/emi-banks.api';
+import { get as getEmiApplication } from '@/api/emi-applications.api';
+
+const props = withDefaults(
+	defineProps<{ id?: string | number; data?: Record<string, any> | null }>(),
+	{ data: null },
+);
+
+const applicationData = ref<Record<string, any> | null>(props.data);
 
 type BankOption = { name: string; code: string };
 const bankOptions = ref<BankOption[]>([]);
@@ -97,5 +105,24 @@ async function fetchBanks() {
 	}
 }
 
-onMounted(fetchBanks);
+async function fetchApplication() {
+	if (!props.id || applicationData.value) return;
+	try {
+		const { data } = await getEmiApplication(String(props.id));
+		applicationData.value = data?.data ?? data ?? null;
+	} finally {
+	}
+}
+
+watch(
+	() => props.data,
+	(data) => {
+		if (data) applicationData.value = data;
+	},
+);
+
+onMounted(() => {
+	fetchBanks();
+	fetchApplication();
+});
 </script>

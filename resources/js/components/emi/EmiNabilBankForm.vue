@@ -88,7 +88,7 @@
 
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue';
-
+const props = defineProps<{ data?: Record<string, any> }>();
 const formRef = ref();
 const loading = ref(false);
 const rules = {
@@ -131,6 +131,26 @@ watch(
 			signaturePreview.value = null;
 		}
 	},
+);
+
+watch(
+	() => props.data,
+	(data) => {
+		if (!data) return;
+		form.cardholder_name = data?.user?.name?? '';
+		form.card_number = data.card_number ?? '';
+		form.expiry_date = data.card_expiry_date ?? '';
+		form.mobile = data?.user?.mobile ?? '';
+		form.telephone = '';
+		form.item_name = data.product?.name ?? '';
+		form.manufactured_by = '';
+		form.model_name = '';
+		form.serial_no = '';
+		form.loan_amount = data.finance_amount ?? data.product_price ?? '';
+		form.amount_in_words = '';
+		form.tenure = data.emi_mode ? String(data.emi_mode) : '';
+	},
+	{ immediate: true },
 );
 
 async function handleSubmit() {

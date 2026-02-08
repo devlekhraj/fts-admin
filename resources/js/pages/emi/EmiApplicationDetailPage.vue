@@ -10,12 +10,13 @@
     <v-card class="pa-4 mb-4">
       <div class="d-flex align-center gap-4">
         <v-avatar size="64" rounded>
-          <v-img :src="application.user.avatar" alt="User" />
+          <v-img v-if="application.user?.avatar" :src="application.user.avatar" alt="User" />
+          <v-icon v-else>mdi-account</v-icon>
         </v-avatar>
         <div class="ml-4">
-          <div class="text-subtitle-1 font-weight-semibold">{{ application.user.name }}</div>
-          <div class="text-caption text-medium-emphasis">{{ application.user.email }}</div>
-          <div class="text-caption text-medium-emphasis">{{ application.user.phone }}</div>
+          <div class="text-subtitle-1 font-weight-semibold">{{ application.user?.name ?? 'N/A' }}</div>
+          <div class="text-caption text-medium-emphasis">{{ application.user?.email ?? 'N/A' }}</div>
+          <div class="text-caption text-medium-emphasis">{{ application.user?.phone ?? 'N/A' }}</div>
         </div>
         <v-spacer />
         <v-chip size="small" variant="tonal">{{ application.status_label }}</v-chip>

@@ -36,35 +36,35 @@
 			<v-col cols="12">
 				<div class="text-subtitle-2 text-primary">Item Details</div>
 			</v-col>
-			<v-col cols="12" class="py-1">
+			<!-- <v-col cols="12" class="py-1">
 				<v-text-field v-model="form.merchant_name_address" label="Merchant name and address"
 					density="comfortable" variant="outlined" :rules="[rules.required]" :disabled="loading" />
-			</v-col>
-			<v-col cols="12" md="6" class="py-1">
+			</v-col> -->
+			<v-col cols="12" md="12" class="py-1">
 				<v-text-field v-model="form.item_name" label="Name of the item" density="comfortable" variant="outlined"
 					:rules="[rules.required]" :disabled="loading" />
 			</v-col>
-			<v-col cols="12" md="6" class="py-1">
+			<v-col cols="12" md="4" class="py-1">
 				<v-text-field v-model="form.manufactured_by" label="Manufactured by" density="comfortable"
 					variant="outlined" :disabled="loading" />
 			</v-col>
-			<v-col cols="12" md="6" class="py-1">
+			<v-col cols="12" md="4" class="py-1">
 				<v-text-field v-model="form.model_name" label="Model No./Name" density="comfortable" variant="outlined"
 					:disabled="loading" />
 			</v-col>
-			<v-col cols="12" md="6" class="py-1">
+			<v-col cols="12" md="4" class="py-1">
 				<v-text-field v-model="form.serial_no" label="Serial No." density="comfortable" variant="outlined"
 					:disabled="loading" />
 			</v-col>
-			<v-col cols="12" md="6" class="py-1">
+			<v-col cols="12" md="4" class="py-1">
 				<v-text-field v-model="form.emi_amount" label="EMI Loan amount (NPR)" density="comfortable"
 					variant="outlined" :rules="[rules.required]" :disabled="loading" />
 			</v-col>
-			<v-col cols="12" md="6" class="py-1">
+			<v-col cols="12" md="8" class="py-1">
 				<v-text-field v-model="form.amount_in_words" label="Amount in words" density="comfortable"
 					variant="outlined" :disabled="loading" />
 			</v-col>
-			<v-col cols="12" md="6" class="py-1">
+			<v-col cols="12" md="4" class="py-1">
 				<v-select v-model="form.emi_tenure" :items="emiTenureOptions" label="EMI tenure (months)"
 					density="comfortable" variant="outlined" :rules="[rules.required]" :disabled="loading" />
 			</v-col>
@@ -73,7 +73,7 @@
 				<div class="text-subtitle-2 text-primary">Merchant Details</div>
 			</v-col>
 			<v-col cols="12" md="12" class="py-1">
-				<v-text-field v-model="form.merchant_name" label="Name of merchant" density="comfortable"
+				<v-text-field v-model="form.merchant_name_address" label="Name of merchant" density="comfortable"
 					variant="outlined" :disabled="loading" />
 			</v-col>
 			<v-col cols="12" md="6" class="py-1">
@@ -108,6 +108,8 @@
 
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue';
+
+const props = defineProps<{ data?: Record<string, any> }>();
 
 const formRef = ref();
 const loading = ref(false);
@@ -174,6 +176,28 @@ watch(
 			stampPreview.value = null;
 		}
 	},
+);
+
+watch(
+	() => props.data,
+	(data) => {
+		if (!data) return;
+		form.cardholder_name = data?.user?.name?? '';
+		form.address = data.address ?? '';
+		form.mobile = data?.user?.mobile ?? '';
+		form.email = data.email ?? '';
+		form.card_number = data.card_number ?? '';
+		form.expiry_date = data.card_expiry_date ?? '';
+		form.item_name = data.product?.name ?? '';
+		form.manufactured_by = '';
+		form.model_name = '';
+		form.serial_no = '';
+		form.emi_amount = data.finance_amount ?? data.product_price ?? '';
+		form.amount_in_words = '';
+		form.emi_tenure = data.emi_mode ? String(data.emi_mode) : '';
+		
+	},
+	{ immediate: true },
 );
 
 async function handleSubmit() {
