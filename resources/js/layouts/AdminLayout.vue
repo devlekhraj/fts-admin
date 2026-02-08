@@ -13,7 +13,7 @@
                 </div>
                 <v-divider class="my-3 border-0" />
             </v-sheet>
-            <v-list density="comfortable" class="px-6">
+            <v-list density="comfortable" class="px-6" id="side-nav-items">
                 <template v-for="group in items" :key="group.group">
                     <v-list-subheader class="mt-3" v-if="group && group.group">{{ group.group }}</v-list-subheader>
                     <v-list-item v-for="link in group.links" class="py-2" :key="link.to" :to="link.to" :title="link.title"
@@ -31,7 +31,12 @@
                 </div>
             </v-toolbar-title>
             <v-spacer />
-            <v-btn variant="text" @click="logout">Logout</v-btn>
+            <div class="d-flex align-center gap-3">
+                <div class="text-caption text-medium-emphasis">Login at : 09:45 AM</div>
+                <v-btn icon size="small" class="ml-3" color="error" @click="logout" aria-label="Logout">
+                    <v-icon>mdi-logout</v-icon>
+                </v-btn>
+            </div>
         </v-app-bar>
         <!-- <v-divider></v-divider> -->
 
@@ -153,9 +158,9 @@ async function logout() {
     router.push('/login');
 }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
 main.v-main {
-    background-color: #f8fcfe;
+    background-color: #fff;
 }
 
 .custom-title {
@@ -210,22 +215,10 @@ main.v-main {
     font-weight: 500;
 }
 
-.v-list-item-title {
-    font-size: 0.875rem !important;
-    font-weight: 500 !important;
-}
 
 .drawer-header {
-    // position: sticky;
-    // top: 0;
-    // z-index: 1001;
     background: linear-gradient(262deg, #f4faff 0%, #fafafa 100%) !important;
     padding: 0 10px;
-    // border-bottom: 1px solid #f2f2f2 !important;
-}
-
-.v-toolbar__content {
-    // background-color: transparent !important;
 }
 
 .admin-app-bar {
@@ -234,7 +227,7 @@ main.v-main {
     left: 0;
     right: 0;
     z-index: 1000;
-    background: linear-gradient(262deg, #ecf6ff3b 0%, #f7f7f7 100%);
+    background-color: #fff;
 
 }
 

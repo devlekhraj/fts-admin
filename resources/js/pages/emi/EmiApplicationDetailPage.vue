@@ -9,7 +9,7 @@
 
     <v-card class="pa-4 mb-4">
       <div class="d-flex align-center gap-4">
-        <v-avatar size="64">
+        <v-avatar size="64" rounded>
           <v-img :src="application.user.avatar" alt="User" />
         </v-avatar>
         <div class="ml-4">
@@ -47,39 +47,36 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { get as getEmiApplication } from '@/api/emi-applications.api';
-import EmiInfoTab from '@/components/emi/EmiInfoTab.vue';
-import EmploymentInfoTab from '@/components/emi/EmploymentInfoTab.vue';
-import CitizenshipIdentityTab from '@/components/emi/CitizenshipIdentityTab.vue';
-import CardInfoTab from '@/components/emi/CardInfoTab.vue';
-import GuarantorInfoTab from '@/components/emi/GuarantorInfoTab.vue';
-import VehicleInfoTab from '@/components/emi/VehicleInfoTab.vue';
-import DocumentsTab from '@/components/emi/DocumentsTab.vue';
+import TabEmiInfo from '@/components/emi/TabEmiInfo.vue';
+import TabEmploymentInfo from '@/components/emi/TabEmploymentInfo.vue';
+import TabCardInfo from '@/components/emi/TabCardInfo.vue';
+import TabGuarantorInfo from '@/components/emi/TabGuarantorInfo.vue';
+import TabVehicleInfo from '@/components/emi/TabVehicleInfo.vue';
+import TabDocuments from '@/components/emi/TabDocuments.vue';
 
 const route = useRoute();
 const router = useRouter();
 const tabComponents = {
-  emi: EmiInfoTab,
-  employment: EmploymentInfoTab,
-  citizenship: CitizenshipIdentityTab,
-  card: CardInfoTab,
-  guarantor: GuarantorInfoTab,
-  vehicle: VehicleInfoTab,
-  documents: DocumentsTab,
+  emi: TabEmiInfo,
+  employment: TabEmploymentInfo,
+  card: TabCardInfo,
+  guarantor: TabGuarantorInfo,
+  vehicle: TabVehicleInfo,
+  documents: TabDocuments,
 } as const;
 
 type TabKey = keyof typeof tabComponents;
 const tab = ref<TabKey>('emi');
 const tabs = [
   { value: 'emi', label: 'EMI Info', icon: 'mdi-cash' },
-  { value: 'employment', label: 'Employment Info', icon: 'mdi-briefcase-outline' },
-  { value: 'citizenship', label: 'Citizenship & Identity', icon: 'mdi-card-account-details-outline' },
+  { value: 'documents', label: 'Documents', icon: 'mdi-file-document-outline' },
   { value: 'card', label: 'Card Info', icon: 'mdi-credit-card-outline' },
+  { value: 'employment', label: 'Employment Info', icon: 'mdi-briefcase-outline' },
   { value: 'guarantor', label: 'Guarantor Info', icon: 'mdi-account-tie-outline' },
   { value: 'vehicle', label: 'Vehicle Info', icon: 'mdi-motorbike' },
-  { value: 'documents', label: 'Documents', icon: 'mdi-file-document-outline' },
 ];
 
-const activeComponent = computed(() => tabComponents[tab.value] ?? EmiInfoTab);
+const activeComponent = computed(() => tabComponents[tab.value] ?? TabEmiInfo);
 
 const application = ref({
   id: route.params.id ?? 'DEMO-001',

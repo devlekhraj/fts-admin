@@ -8,7 +8,8 @@ const pinia = createPinia();
 setActivePinia(pinia);
 initAuth();
 
-createApp(App)
+const app = createApp(App);
+app
   .use(pinia)
   .use(router)
   .use(vuetify)
