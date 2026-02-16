@@ -47,4 +47,8 @@ class EmiRequestModel extends BaseModel
     {
         return $this->belongsTo(UserModel::class, 'user_id');
     }
+    public function bank(): BelongsTo
+    {
+        return $this->belongsTo(EmiBankModel::class, 'bank');
+    }
 }

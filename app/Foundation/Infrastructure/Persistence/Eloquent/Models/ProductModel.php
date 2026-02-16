@@ -10,4 +10,8 @@ class ProductModel extends BaseModel
 {
     protected $table = "products";
     // TODO: Define table, fillable, casts, relations.
+
+    public function brand(){
+        return $this->belongsTo(BrandModel::class,'brand_id');
+    }
 }

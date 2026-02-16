@@ -73,7 +73,7 @@ const authStore = useAuthStore();
 
 const titleByName: Record<string, string> = {
     dashboard: 'Dashboard',
-    'emi.applications': 'EMI Application',
+    'emi.requests': 'EMI Requests',
     'emi.users': 'EMI Users',
     'orders.list': 'All Orders',
     'orders.pre': 'Pre Orders',
@@ -103,8 +103,8 @@ const pageTitle = computed(() => {
 });
 
 const pageSubtitle = computed(() => {
-    if (route.name === 'emi.applications.detail' && route.params.id) {
-        return `Application #${route.params.id}`;
+    if (route.name === 'emi.requests.detail' && route.params.id) {
+        return `Request #${route.params.id}`;
     }
     return (route.meta.subtitle as string) ?? '';
 });
@@ -119,7 +119,8 @@ const items = [
     {
         group: 'EMI',
         links: [
-            { title: 'EMI Application', to: '/emi-applications', icon: 'mdi-cash' },
+            { title: 'EMI Requests', to: '/emi-requests', icon: 'mdi-cash' },
+            { title: 'EMI Banks', to: '/emi-banks', icon: 'mdi-bank' },
             { title: 'EMI Users', to: '/emi-users', icon: 'mdi-account-cash-outline' },
         ],
     },

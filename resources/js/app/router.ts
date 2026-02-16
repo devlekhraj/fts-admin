@@ -20,10 +20,11 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
     children: [
       { path: 'dashboard', name: 'dashboard', component: DashboardPage, meta: { title: 'Dashboard' } },
-      // emi applications
-      { path: 'emi-applications', name: 'emi.applications', component: () => import('@/pages/emi/EmiApplicationsListPage.vue'), meta: { title: 'EMI Applications' } },
-      { path: 'emi-applications/:id', name: 'emi.applications.detail', component: () => import('@/pages/emi/EmiApplicationDetailPage.vue'), meta: { title: 'EMI Application Detail' } },
+      // emi requests
+      { path: 'emi-requests', name: 'emi.requests', component: () => import('@/pages/emi/EmiRequestsListPage.vue'), meta: { title: 'EMI Requests' } },
+      { path: 'emi-requests/:id', name: 'emi.requests.detail', component: () => import('@/pages/emi/EmiRequestDetailPage.vue'), meta: { title: 'EMI Request Detail' } },
       { path: 'emi-users', name: 'emi.users', component: () => import('@/pages/emi/EmiUsersListPage.vue'), meta: { title: 'EMI Users' } },
+      { path: 'emi-banks', name: 'emi.banks', component: () => import('@/pages/emi/EmiBankListPage.vue'), meta: { title: 'EMI Banks' } },
       // blogs
       { path: 'blogs', name: 'blogs.list', component: () => import('@/pages/blogs/BlogsListPage.vue'), meta: { title: 'All Blogs' } },
       { path: 'blogs-create', name: 'blogs.create', component: () => import('@/pages/blogs/BlogCreatePage.vue'), meta: { title: 'Create Blog' } },

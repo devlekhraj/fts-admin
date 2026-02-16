@@ -13,6 +13,6 @@ require __DIR__ . '/admin/blog-categories.php';
 require __DIR__ . '/admin/campaigns.php';
 require __DIR__ . '/admin/banners.php';
 require __DIR__ . '/admin/rbac.php';
-require __DIR__ . '/admin/emi-applications.php';
+require __DIR__ . '/admin/emi-requests.php';
 require __DIR__ . '/admin/emi-banks.php';
 require __DIR__ . '/admin/emi-users.php';

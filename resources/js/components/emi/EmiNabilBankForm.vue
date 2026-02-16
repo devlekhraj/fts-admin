@@ -58,7 +58,7 @@
 				<v-img v-if="signaturePreview" :src="signaturePreview" max-height="140" class="mt-2" contain />
 			</v-col>
 			<v-col cols="12" md="3" class="py-1">
-				<v-text-field v-model="form.loan_amount" label="Installment Amount"
+				<v-text-field v-model="form.installment_amount" label="Installment Amount"
 					density="comfortable" variant="outlined" :rules="[rules.required]" :disabled="loading" />
 			</v-col>
 			<v-col cols="12" md="9" class="py-1">
@@ -88,9 +88,12 @@
 
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue';
+import { useModalStore } from '@/stores/modal.store';
+import { generateApplication } from '@/api/emi-requests.api';
 const props = defineProps<{ data?: Record<string, any> }>();
 const formRef = ref();
 const loading = ref(false);
+const modal = useModalStore();
 const rules = {
 	required: (v: string) => Boolean(v) || 'Required',
 };
@@ -98,6 +101,7 @@ const rules = {
 const emiTenureOptions = ['3', '6', '9', '12', '18', '24'];
 
 const form = reactive({
+	bank_code:'',
 	cardholder_name: '',
 	card_number: '',
 	expiry_date: '',
@@ -107,7 +111,7 @@ const form = reactive({
 	manufactured_by: '',
 	model_name: '',
 	serial_no: '',
-	loan_amount: '',
+	installment_amount: '',
 	amount_in_words: '',
 	tenure: '',
 	signature_file: null as File | null,
@@ -137,6 +141,7 @@ watch(
 	() => props.data,
 	(data) => {
 		if (!data) return;
+		form.bank_code = data.bank_code ?? '';
 		form.cardholder_name = data?.user?.name?? '';
 		form.card_number = data.card_number ?? '';
 		form.expiry_date = data.card_expiry_date ?? '';
@@ -146,7 +151,7 @@ watch(
 		form.manufactured_by = '';
 		form.model_name = '';
 		form.serial_no = '';
-		form.loan_amount = data.finance_amount ?? data.product_price ?? '';
+		form.installment_amount = data.finance_amount ?? data.product_price ?? '';
 		form.amount_in_words = '';
 		form.tenure = data.emi_mode ? String(data.emi_mode) : '';
 	},
@@ -156,6 +161,28 @@ watch(
 async function handleSubmit() {
 	const { valid } = await formRef.value?.validate();
 	if (!valid) return;
-	// TODO: wire submit to API
+	const requestId = String(props.data?.id ?? '');
+	if (!requestId) return;
+
+	loading.value = true;
+	try {
+		const payload = new FormData();
+		Object.entries(form).forEach(([key, value]) => {
+			if (value === null || value === undefined || value === '') return;
+			if (value instanceof File) {
+				payload.append(key, value);
+				return;
+			}
+			payload.append(key, String(value));
+		});
+
+		const { data } = await generateApplication(requestId, payload);
+		console.log(data?.message ?? 'Application generated');
+		console.log('Generated file path:', data?.path ?? '');
+		modal.onSaved?.(data);
+		modal.close();
+	} finally {
+		loading.value = false;
+	}
 }
 </script>

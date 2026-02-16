@@ -73,7 +73,7 @@
 				<div class="text-subtitle-2 text-primary">Merchant Details</div>
 			</v-col>
 			<v-col cols="12" md="12" class="py-1">
-				<v-text-field v-model="form.merchant_name_address" label="Name of merchant" density="comfortable"
+				<v-text-field v-model="form.merchant_name" label="Name of merchant" density="comfortable"
 					variant="outlined" :disabled="loading" />
 			</v-col>
 			<v-col cols="12" md="6" class="py-1">
@@ -108,11 +108,14 @@
 
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue';
+import { useModalStore } from '@/stores/modal.store';
+import { generateApplication } from '@/api/emi-requests.api';
 
 const props = defineProps<{ data?: Record<string, any> }>();
 
 const formRef = ref();
 const loading = ref(false);
+const modal = useModalStore();
 const rules = {
 	required: (v: string) => Boolean(v) || 'Required',
 };
@@ -120,13 +123,13 @@ const rules = {
 const emiTenureOptions = ['3', '6', '9', '12', '18', '24'];
 
 const form = reactive({
+	bank_code: '',
 	cardholder_name: '',
 	address: '',
 	mobile: '',
 	email: '',
 	card_number: '',
 	expiry_date: '',
-	merchant_name_address: '',
 	item_name: '',
 	manufactured_by: '',
 	model_name: '',
@@ -182,6 +185,7 @@ watch(
 	() => props.data,
 	(data) => {
 		if (!data) return;
+		form.bank_code = data.bank_code ?? '';
 		form.cardholder_name = data?.user?.name?? '';
 		form.address = data.address ?? '';
 		form.mobile = data?.user?.mobile ?? '';
@@ -203,6 +207,29 @@ watch(
 async function handleSubmit() {
 	const { valid } = await formRef.value?.validate();
 	if (!valid) return;
-	// TODO: wire submit to API
+	const requestId = String(props.data?.id ?? '');
+	if (!requestId) return;
+
+	loading.value = true;
+	try {
+		const payload = new FormData();
+		Object.entries(form).forEach(([key, value]) => {
+			if (value === null || value === undefined || value === '') return;
+			if (value instanceof File) {
+				payload.append(key, value);
+				return;
+			}
+			payload.append(key, String(value));
+		});
+
+		console.log('Payload for generating application:', Object.fromEntries(payload.entries()));
+		const { data } = await generateApplication(requestId, payload);
+		console.log(data?.message ?? 'Application generated');
+		console.log('Generated file path:', data?.path ?? '');
+		modal.onSaved?.(data);
+		modal.close();
+	} finally {
+		loading.value = false;
+	}
 }
 </script>

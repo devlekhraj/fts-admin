@@ -8,5 +8,6 @@ use App\Foundation\Shared\Infrastructure\Persistence\Eloquent\Models\BaseModel;
 
 class BrandModel extends BaseModel
 {
+    protected $table = "product_brands";
     // TODO: Define table, fillable, casts, relations.
 }

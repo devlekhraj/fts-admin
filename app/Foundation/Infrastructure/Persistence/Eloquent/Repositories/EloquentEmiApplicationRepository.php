@@ -31,3 +31,4 @@ class EloquentEmiApplicationRepository implements EmiApplicationRepository
         // TODO: Delete entity by ID using Eloquent.
     }
 }
+
