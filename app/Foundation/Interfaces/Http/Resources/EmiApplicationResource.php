@@ -16,7 +16,7 @@ class EmiApplicationResource extends JsonResource
             'id' => $this->id ?? null,
             'bank_name' => $this->emiBank?->name ?? $this->emiBank?->slug ?? null,
             'file_path' => $this->file_path ?? null,
-            'file_url' => $this->file_path ? Storage::disk('cdn')->url($this->file_path) : null,
+            'file_url' => $this->file_path ? Storage::url($this->file_path) : null,
             'status' => $this->status ?? null,
             'date' => $this->created_at?->diffForHumans(['short' => true]),
         ];
