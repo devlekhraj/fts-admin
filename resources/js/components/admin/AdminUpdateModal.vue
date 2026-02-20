@@ -33,10 +33,10 @@ type Admin = {
 const props = defineProps<{ admin: Admin }>();
 const emit = defineEmits<{ (e: 'close'): void; (e: 'saved', payload?: unknown): void }>();
 
-const activeTab = ref<'basic' | 'email' | 'password'>('password');
+const activeTab = ref<'basic' | 'email' | 'password'>('basic');
 const tabs = [
-	{ value: 'password' as const, label: 'Password', component: AdminUpdatePasswordTab },
 	{ value: 'basic' as const, label: 'Basic Info', component: AdminUpdateBasicTab },
+	{ value: 'password' as const, label: 'Password', component: AdminUpdatePasswordTab },
 	{ value: 'email' as const, label: 'Email', component: AdminUpdateEmailTab },
 ];
 

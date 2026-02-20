@@ -25,7 +25,7 @@
 							Send Code
 						</v-btn>
 					</v-col>
-					<v-col cols="12" class="d-flex justify-space-around pt-4">
+					<v-col cols="12" class="d-flex justify-space-around pt-8">
 						<v-btn color="primary" size="large" variant="tonal" :loading="loading" :disabled="loading" @click="onSubmit">
 							<v-icon start>mdi-content-save-outline</v-icon>
 							Update

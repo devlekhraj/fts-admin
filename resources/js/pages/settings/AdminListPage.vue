@@ -40,7 +40,12 @@
 				<v-avatar size="28" color="grey-lighten-3">
 					<v-icon size="18" color="grey-darken-1">mdi-account-circle</v-icon>
 				</v-avatar>
-				<span class="ml-2 text-capitalize">{{ item.name ?? '-' }}</span>
+				<div class="ml-2">
+					<div class="text-capitalize">{{ item.name ?? '-' }}</div>
+					<div class="text-medium-emphasis" style="font-size: 0.8rem;">
+						@{{ item.username ?? 'no.username' }}
+					</div>
+				</div>
 			</div>
 		</template>
 		<template #item.role="{ item }">
@@ -51,19 +56,7 @@
 			</v-chip>
 			<span v-else>-</span>
 		</template>
-		<template #item.username="{ item }">
-			<div class="d-flex align-center gap-2">
-				<template v-if="item.username">
-					<span class="text-medium-emphasis">{{ `@${item.username}` }}</span>
-					<v-btn icon variant="text" size="x-small" @click="copyUsername(item.username)">
-						<v-icon size="14">mdi-content-copy</v-icon>
-					</v-btn>
-				</template>
-				<template v-else>
-					<span class="text-medium-emphasis">@no.username</span>
-				</template>
-			</div>
-		</template>
+		
 		<template #item.action="{ item }">
 			<AdminActionButtons :admin="item" @saved="onAdminUpdated" @deleted="onAdminDeleted" />
 		</template>
@@ -100,7 +93,7 @@ type Admin = {
 
 const headers = [
 	{ title: 'Name', key: 'name', minWidth: '180', sortable: false },
-	{ title: 'Username', key: 'username', minWidth: '160', sortable: false },
+	// { title: 'Username', key: 'username', minWidth: '160', sortable: false },
 	{ title: 'Role', key: 'role', minWidth: '160', sortable: false },
 	{ title: 'Email', key: 'email', minWidth: '220', sortable: false },
 	{ title: 'Created', key: 'created_at', minWidth: '100', sortable: false },
