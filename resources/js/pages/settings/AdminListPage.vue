@@ -65,7 +65,7 @@
 			</div>
 		</template>
 		<template #item.action="{ item }">
-			<AdminActionButtons :admin="item" @saved="onAdminUpdated" />
+			<AdminActionButtons :admin="item" @saved="onAdminUpdated" @deleted="onAdminDeleted" />
 		</template>
 		<template #item.created_at="{ item }">
 			<span class="text-medium-emphasis" style="font-size: 0.8rem;">
@@ -175,6 +175,11 @@ function onAdminCreated() {
 }
 
 function onAdminUpdated() {
+	options.value.page = 1;
+	fetchAdmins();
+}
+
+function onAdminDeleted() {
 	options.value.page = 1;
 	fetchAdmins();
 }

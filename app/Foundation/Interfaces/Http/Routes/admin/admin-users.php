@@ -16,5 +16,6 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::put('admin-users/{id}/password', [AdminUserUpdateController::class, 'updatePassword'])->name('admin.users.update-password');
     Route::post('admin-users/{id}/email/verification-code', [AdminUserUpdateController::class, 'sendEmailVerificationCode'])->name('admin.users.email-send-code');
     Route::put('admin-users/{id}/email', [AdminUserUpdateController::class, 'updateEmail'])->name('admin.users.update-email');
-    
+    Route::delete('admin-users/{id}/delete', [AdminUserUpdateController::class, 'delete'])->name('admin.users.delete');
+
 });

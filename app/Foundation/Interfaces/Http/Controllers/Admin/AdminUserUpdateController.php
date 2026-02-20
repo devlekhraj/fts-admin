@@ -15,7 +15,7 @@ use App\Foundation\Interfaces\Http\Resources\AdminResource;
 use App\Foundation\Shared\Domain\Exceptions\FieldValidationException;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Http\Request;
 
 class AdminUserUpdateController extends Controller
 {
@@ -35,12 +35,11 @@ class AdminUserUpdateController extends Controller
                 roleId: (int) $data['role_id'],
             ));
 
-            $admin = AdminModel::query()->with('role')->find($id);
-
             return response()->json([
                 'message' => $result->message,
-                'data' => $admin ? new AdminResource($admin) : null,
+                'data' => $result,
             ]);
+
         } catch (FieldValidationException $e) {
             $message = $e->getMessage();
             $field = $e->field();
@@ -104,5 +103,28 @@ class AdminUserUpdateController extends Controller
             'message' => 'Not implemented',
             'id' => $id,
         ], 501);
+    }
+   
+    public function delete(Request $request, string $id): JsonResponse
+    {
+        try {
+            $admin = AdminModel::query()->find($id);
+            if (!$admin) {
+                return response()->json([
+                    'message' => 'Admin not found.',
+                ], 404);
+            }
+
+            $admin->delete();
+
+            return response()->json([
+                'message' => 'Admin deleted successfully.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to delete admin.',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

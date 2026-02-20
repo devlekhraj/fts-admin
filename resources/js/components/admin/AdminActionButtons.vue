@@ -8,6 +8,7 @@
 </template>
 
 <script setup lang="ts">
+import AdminDeleteModal from '@/components/admin/AdminDeleteModal.vue';
 import AdminUpdateModal from '@/components/admin/AdminUpdateModal.vue';
 import { openModal } from '@/shared/modal';
 
@@ -23,7 +24,7 @@ type Admin = {
 const props = defineProps<{ admin: Admin }>();
 const emit = defineEmits<{
 	(e: 'saved', payload?: unknown): void;
-	(e: 'delete', admin: Admin): void;
+	(e: 'deleted', payload?: unknown): void;
 }>();
 
 function onEdit() {
@@ -41,6 +42,16 @@ function onEdit() {
 }
 
 function onDelete() {
-	emit('delete', props.admin);
+	openModal(
+		AdminDeleteModal,
+		{ admin: props.admin },
+		{
+			title: 'Confirm Admin Deletion',
+			size: 'sm',
+			onSaved: (payload: unknown) => {
+				emit('deleted', payload);
+			},
+		},
+	);
 }
 </script>

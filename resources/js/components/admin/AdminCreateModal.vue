@@ -1,59 +1,65 @@
 <template>
-		<v-card-text class="py-6">
-			<v-alert v-if="error" type="error" variant="tonal" class="mb-4">
-				{{ error }}
-			</v-alert>
-			<v-form ref="formRef" @submit.prevent="onSubmit">
-				<v-row>
-					<v-col cols="12" md="12" class="pb-0">
-						<v-text-field v-model="form.name" label="Name" variant="outlined" density="comfortable"
-							:rules="[rules.required]" :error-messages="getErrorMessages('name')"
-							prepend-inner-icon="mdi-account" @update:model-value="clearFieldError('name')" />
-					</v-col>
-					<v-col cols="12" md="12" class="pb-0">
-						<v-text-field v-model="form.email" label="Email" type="email" variant="outlined"
-							density="comfortable" :rules="[rules.required, rules.email]"
-							:error-messages="getErrorMessages('email')" prepend-inner-icon="mdi-email-outline"
-							@update:model-value="clearFieldError('email')" />
-					</v-col>
-						<v-col cols="12" md="6" class="pb-0">
-							<v-text-field v-model="form.username" label="Username" variant="outlined" density="comfortable"
-								autocomplete="off" :rules="[rules.required, rules.noSpaces, rules.lowercase, rules.allowedChars, rules.dotPlacement]"
-								:error-messages="getErrorMessages('username')" prepend-inner-icon="mdi-account-circle-outline"
-								@update:model-value="onUsernameInput" />
-						</v-col>
-					<v-col cols="12" md="6" class="pb-0">
-						<v-autocomplete v-model="form.role_id" :items="roleOptions" label="Role" variant="outlined"
-							density="comfortable" clearable :rules="[rules.required]" :error-messages="getErrorMessages('role_id')"
-							prepend-inner-icon="mdi-shield-account-outline" @update:model-value="clearFieldError('role_id')" />
-					</v-col>
-					<v-col cols="12" md="6" class="pb-0">
-						<v-text-field v-model="form.password" label="Password" :type="showPassword ? 'text' : 'password'"
-							autocomplete="off" variant="outlined" density="comfortable" :rules="[rules.required]"
-							:error-messages="getErrorMessages('password')" prepend-inner-icon="mdi-lock-outline"
-							:append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-							@click:append-inner="showPassword = !showPassword" @update:model-value="clearFieldError('password')" />
-					</v-col>
-					<v-col cols="12" md="6" class="pb-0">
-						<v-text-field v-model="form.confirm_password" label="Confirm Password"
-							:type="showConfirmPassword ? 'text' : 'password'" autocomplete="off" variant="outlined"
-							density="comfortable" :rules="[rules.required, rules.passwordMatch]"
-							:error-messages="getErrorMessages('confirm_password')" prepend-inner-icon="mdi-lock-check-outline"
-							:append-inner-icon="showConfirmPassword ? 'mdi-eye-off' : 'mdi-eye'"
-							@click:append-inner="showConfirmPassword = !showConfirmPassword"
-							@update:model-value="clearFieldError('confirm_password')" />
-					</v-col>
-				</v-row>
+	<v-card-text class="py-6">
+		<v-alert v-if="error" type="error" variant="tonal" class="mb-4">
+			{{ error }}
+		</v-alert>
+		<v-form ref="formRef" @submit.prevent="onSubmit">
+			<v-row>
+				<v-col cols="12" md="12" class="pb-0">
+					<v-text-field v-model="form.name" label="Name" variant="outlined" density="comfortable"
+						:rules="[rules.required]" :error-messages="getErrorMessages('name')"
+						prepend-inner-icon="mdi-account" @update:model-value="clearFieldError('name')" />
+				</v-col>
+				<v-col cols="12" md="12" class="pb-0">
+					<v-text-field v-model="form.email" label="Email" type="email" variant="outlined"
+						density="comfortable" :rules="[rules.required, rules.email]"
+						:error-messages="getErrorMessages('email')" prepend-inner-icon="mdi-email-outline"
+						@update:model-value="clearFieldError('email')" />
+				</v-col>
+				<v-col cols="12" md="6" class="pb-0">
+					<v-text-field v-model="form.username" label="Username" variant="outlined" density="comfortable"
+						autocomplete="off"
+						:rules="[rules.required, rules.noSpaces, rules.lowercase, rules.allowedChars, rules.dotPlacement]"
+						:error-messages="getErrorMessages('username')" prepend-inner-icon="mdi-account-circle-outline"
+						@update:model-value="onUsernameInput" />
+				</v-col>
+				<v-col cols="12" md="6" class="pb-0">
+					<v-autocomplete v-model="form.role_id" :items="roleOptions" label="Role" variant="outlined"
+						density="comfortable" clearable :rules="[rules.required]"
+						:error-messages="getErrorMessages('role_id')" prepend-inner-icon="mdi-shield-account-outline"
+						@update:model-value="clearFieldError('role_id')" />
+				</v-col>
+				<v-col cols="12" md="6" class="pb-0">
+					<v-text-field v-model="form.password" label="Password" :type="showPassword ? 'text' : 'password'"
+						autocomplete="off" variant="outlined" density="comfortable" :rules="[rules.required]"
+						:error-messages="getErrorMessages('password')" prepend-inner-icon="mdi-lock-outline"
+						:append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+						@click:append-inner="showPassword = !showPassword"
+						@update:model-value="clearFieldError('password')" />
+				</v-col>
+				<v-col cols="12" md="6" class="pb-0">
+					<v-text-field v-model="form.confirm_password" label="Confirm Password"
+						:type="showConfirmPassword ? 'text' : 'password'" autocomplete="off" variant="outlined"
+						density="comfortable" :rules="[rules.required, rules.passwordMatch]"
+						:error-messages="getErrorMessages('confirm_password')"
+						prepend-inner-icon="mdi-lock-check-outline"
+						:append-inner-icon="showConfirmPassword ? 'mdi-eye-off' : 'mdi-eye'"
+						@click:append-inner="showConfirmPassword = !showConfirmPassword"
+						@update:model-value="clearFieldError('confirm_password')" />
+				</v-col>
+			</v-row>
 
 		</v-form>
 	</v-card-text>
 
 	<v-card-actions class="pb-4">
 		<div class="w-100 d-flex align-center justify-space-between px-4 pt-2">
-			<v-btn icon size="small" variant="tonal" title="Reset form" color="warning" :disabled="loading" @click="resetForm" aria-label="Reset form">
+			<v-btn icon size="small" variant="tonal" title="Reset form" color="warning" :disabled="loading"
+				@click="resetForm" aria-label="Reset form">
 				<v-icon>mdi-refresh</v-icon>
 			</v-btn>
-			<v-btn color="primary" variant="tonal" class="px-5" :loading="loading" :disabled="loading" @click="onSubmit">
+			<v-btn color="primary" variant="tonal" class="px-5" :loading="loading" :disabled="loading"
+				@click="onSubmit">
 				<v-icon start>mdi-content-save-outline</v-icon>
 				submit
 			</v-btn>
@@ -66,26 +72,28 @@ import { onMounted, ref } from 'vue';
 import { create as createAdmin } from '@/api/admins.api';
 import { getErrorMessage } from '@/shared/errors';
 import { list as listRoles } from '@/api/roles.api';
+import { useSnackbarStore } from '@/stores/snackbar.store';
 
 const emit = defineEmits<{ (e: 'close'): void; (e: 'saved', payload?: unknown): void }>();
 
 type RoleOption = { title: string; value: string | number };
 
-	const formRef = ref();
-	const roleOptions = ref<RoleOption[]>([]);
-	const error = ref('');
-	const form = ref({
-		name: '',
-		email: '',
-		username: '',
-		role_id: null as null | string | number,
-		password: '',
-		confirm_password: '',
-	});
-	const fieldErrors = ref<Record<string, string[]>>({});
+const formRef = ref();
+const roleOptions = ref<RoleOption[]>([]);
+const error = ref('');
+const form = ref({
+	name: '',
+	email: '',
+	username: '',
+	role_id: null as null | string | number,
+	password: '',
+	confirm_password: '',
+});
+const fieldErrors = ref<Record<string, string[]>>({});
 const loading = ref(false);
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
+const snackbar = useSnackbarStore();
 
 async function fetchRoles() {
 	const { data } = await listRoles();
@@ -98,123 +106,105 @@ async function fetchRoles() {
 		.filter((role: RoleOption) => role.title && role.value !== '');
 }
 
-		const rules = {
-			required: (value: unknown) => (value ? true : 'Required'),
-			email: (value: string) =>
-				!value || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? true : 'Invalid email',
-			noSpaces: (value: string) =>
-				!value || !/\s/.test(value) ? true : 'Username must not contain spaces',
-			lowercase: (value: string) =>
-				!value || value === value.toLowerCase() ? true : 'Username must be lowercase',
-			allowedChars: (value: string) =>
-				!value || /^[a-z0-9_.-]+$/.test(value)
-					? true
-					: 'Only letters, numbers, underscore, dash, and dot are allowed',
-			dotPlacement: (value: string) =>
-				!value || (!value.startsWith('.') && !value.endsWith('.'))
-					? true
-					: 'Dot cannot be the first or last character',
-			passwordMatch: () =>
-				form.value.password === form.value.confirm_password ? true : 'Passwords do not match',
-		};
+const rules = {
+	required: (value: unknown) => (value ? true : 'Required'),
+	email: (value: string) =>
+		!value || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? true : 'Invalid email',
+	noSpaces: (value: string) =>
+		!value || !/\s/.test(value) ? true : 'Username must not contain spaces',
+	lowercase: (value: string) =>
+		!value || value === value.toLowerCase() ? true : 'Username must be lowercase',
+	allowedChars: (value: string) =>
+		!value || /^[a-z0-9_.-]+$/.test(value)
+			? true
+			: 'Only letters, numbers, underscore, dash, and dot are allowed',
+	dotPlacement: (value: string) =>
+		!value || (!value.startsWith('.') && !value.endsWith('.'))
+			? true
+			: 'Dot cannot be the first or last character',
+	passwordMatch: () =>
+		form.value.password === form.value.confirm_password ? true : 'Passwords do not match',
+};
 
-		function onUsernameInput(value: string) {
-			if (typeof value === 'string') {
-				form.value.username = value.toLowerCase();
-			}
-			clearFieldError('username');
-		}
-
-	function getErrorMessages(field: string) {
-		return fieldErrors.value[field] ?? [];
+function onUsernameInput(value: string) {
+	if (typeof value === 'string') {
+		form.value.username = value.toLowerCase();
 	}
+	clearFieldError('username');
+}
 
-	function clearFieldError(field: string) {
-		if (!fieldErrors.value[field]) return;
-		const next = { ...fieldErrors.value };
-		delete next[field];
-		fieldErrors.value = next;
-	}
+function getErrorMessages(field: string) {
+	return fieldErrors.value[field] ?? [];
+}
 
-	function resetForm() {
-		form.value = {
-			name: '',
-			email: '',
-			username: '',
-			role_id: null,
-			password: '',
-			confirm_password: '',
-		};
-		error.value = '';
-		fieldErrors.value = {};
-		showPassword.value = false;
-		showConfirmPassword.value = false;
-		formRef.value?.resetValidation?.();
-	}
+function clearFieldError(field: string) {
+	if (!fieldErrors.value[field]) return;
+	const next = { ...fieldErrors.value };
+	delete next[field];
+	fieldErrors.value = next;
+}
 
-	async function onSubmit() {
-		error.value = '';
-		fieldErrors.value = {};
-		const result = await formRef.value?.validate?.();
-		if (result && result.valid === false) return;
-		if (!result && formRef.value?.validate) {
+function resetForm() {
+	form.value = {
+		name: '',
+		email: '',
+		username: '',
+		role_id: null,
+		password: '',
+		confirm_password: '',
+	};
+	error.value = '';
+	fieldErrors.value = {};
+	showPassword.value = false;
+	showConfirmPassword.value = false;
+	formRef.value?.resetValidation?.();
+}
+
+async function onSubmit() {
+	error.value = '';
+	fieldErrors.value = {};
+	const result = await formRef.value?.validate?.();
+	if (result && result.valid === false) return;
+	if (!result && formRef.value?.validate) {
 		const ok = await formRef.value.validate();
 		if (!ok) return;
 	}
 
 	loading.value = true;
-		try {
-			const payload = {
-				name: form.value.name,
-				email: form.value.email,
-				username: form.value.username,
-				role_id: form.value.role_id,
-				password: form.value.password,
-				confirm_password: form.value.confirm_password,
-			};
-			const { data } = await createAdmin(payload);
-			const created = data?.data?.created ?? data?.created ?? false;
-			const message = data?.data?.message ?? data?.message ?? '';
-			const field = data?.data?.field ?? data?.field ?? '';
-			if (!created) {
-				if (field) {
-					fieldErrors.value = { [field]: [message || 'Invalid value.'] };
-				} else {
-					const lowered = message.toLowerCase();
-					if (lowered.includes('email')) {
-						fieldErrors.value = { email: [message] };
-					} else if (lowered.includes('username')) {
-						fieldErrors.value = { username: [message] };
-					} else {
-						error.value = message || 'Failed to create admin.';
-					}
+	try {
+		const payload = {
+			name: form.value.name,
+			email: form.value.email,
+			username: form.value.username,
+			role_id: form.value.role_id,
+			password: form.value.password,
+			confirm_password: form.value.confirm_password,
+		};
+		const response = await createAdmin(payload);
+		snackbar.show({ message: response?.data?.message || 'Admin created successfully.', color: 'success' });
+		emit('saved', response.data ?? payload);
+		emit('close');
+	} catch (err) {
+		const response = (err as any)?.response;
+		const responseErrors = response?.data?.errors ?? null;
+		if (response?.status === 422 && responseErrors && typeof responseErrors === 'object') {
+			const next: Record<string, string[]> = {};
+			for (const [key, messages] of Object.entries(responseErrors)) {
+				if (Array.isArray(messages)) {
+					next[key] = messages.map((item) => String(item));
+				} else if (messages != null) {
+					next[key] = [String(messages)];
 				}
-				return;
 			}
-			emit('saved', data ?? payload);
-			emit('close');
-		} catch (err) {
-			const response = (err as any)?.response;
-			const responseErrors = response?.data?.errors ?? null;
-			if (response?.status === 422 && responseErrors && typeof responseErrors === 'object') {
-				const next: Record<string, string[]> = {};
-				for (const [key, messages] of Object.entries(responseErrors)) {
-					if (Array.isArray(messages)) {
-						next[key] = messages.map((item) => String(item));
-					} else if (messages != null) {
-						next[key] = [String(messages)];
-					}
-				}
-				fieldErrors.value = next;
-				return;
-			}
-			const message = getErrorMessage(err);
-			console.error('Failed to create admin:', message);
-			error.value = message;
-		} finally {
-			loading.value = false;
+			fieldErrors.value = next;
+			return;
 		}
+		const message = getErrorMessage(err);
+		error.value = message;
+	} finally {
+		loading.value = false;
 	}
+}
 
 onMounted(fetchRoles);
 </script>

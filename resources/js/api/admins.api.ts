@@ -51,3 +51,7 @@ export function updatePassword(payload: UpdateAdminPasswordPayload) {
         confirm_password: payload.confirm_password,
     });
 }
+
+export function deleteAdmin(id: string | number) {
+    return http.delete(`/admin/admin-users/${id}/delete`);
+}
