@@ -7,14 +7,12 @@
 					<v-col cols="12" md="3">
 						<v-text-field v-model="filters.query" density="compact" variant="outlined" label="Search"
 							placeholder="Search by name, email, or username" prepend-inner-icon="mdi-magnify"
-							hide-details clearable style="min-width: 200px"
-							@update:model-value="onQueryChange" />
+							hide-details clearable style="min-width: 200px" @update:model-value="onQueryChange" />
 					</v-col>
 					<v-col cols="12" md="3">
 						<v-autocomplete v-model="filters.role" :items="roleOptions" density="compact" variant="outlined"
 							label="Role" prepend-inner-icon="mdi-shield-account-outline" hide-details clearable
-							style="min-width: 200px"
-							@update:model-value="onRoleChange" />
+							style="min-width: 200px" @update:model-value="onRoleChange" />
 					</v-col>
 					<v-col cols="12" md="2" class="d-flex align-center">
 						<v-btn color="primary" variant="tonal" height="40" @click="onSearch">
@@ -46,7 +44,8 @@
 			</div>
 		</template>
 		<template #item.role="{ item }">
-			<v-chip v-if="item.role" size="small" variant="tonal" class="text-uppercase font-weight-bold" :color="roleColor(item.role)" label>
+			<v-chip v-if="item.role" size="small" variant="tonal" class="text-uppercase font-weight-bold"
+				:color="roleColor(item.role)" label>
 				<v-icon start size="14">{{ roleIcon(item.role) }}</v-icon>
 				{{ item.role }}
 			</v-chip>
@@ -61,21 +60,12 @@
 					</v-btn>
 				</template>
 				<template v-else>
-					<!-- <v-btn variant="text" size="small" color="primary" @click="onSetUsername(item)">
-						Set username
-					</v-btn> -->
 					<span class="text-medium-emphasis">@no.username</span>
 				</template>
 			</div>
 		</template>
 		<template #item.action="{ item }">
-			<v-btn variant="tonal" color="primary" size="x-small" icon @click="onEdit(item)">
-				<v-icon>mdi-cog</v-icon>
-			</v-btn>
-			<v-btn variant="tonal" class="ml-2" color="error" size="x-small" icon>
-				<v-icon>mdi-delete</v-icon>
-			</v-btn>
-
+			<AdminActionButtons :admin="item" @saved="onAdminUpdated" />
 		</template>
 		<template #item.created_at="{ item }">
 			<span class="text-medium-emphasis" style="font-size: 0.8rem;">
@@ -86,8 +76,9 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref } from 'vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
+import AdminActionButtons from '@/components/admin/AdminActionButtons.vue';
 import AdminCreateButton from '@/components/admin/AdminCreateButton.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
 import { list as listAdmins } from '@/api/admins.api';
@@ -105,7 +96,6 @@ type Admin = {
 	email?: string | null;
 	username?: string | null;
 	role_id?: number | string | null;
-	role?: string | null;
 };
 
 const headers = [
@@ -132,10 +122,6 @@ const filters = ref({
 const roleOptions = ref<Array<{ title: string; value: string | number }>>([]);
 const hasLoadedOnce = ref(false);
 
-function normalizeRole(admin: Admin): string | null {
-	return admin.role ?? null;
-}
-
 async function fetchAdmins() {
 	loading.value = true;
 	try {
@@ -149,7 +135,6 @@ async function fetchAdmins() {
 		const list = Array.isArray(data) ? data : data?.data ?? [];
 		items.value = list.map((admin: Admin) => ({
 			...admin,
-			role: normalizeRole(admin),
 		}));
 		total.value = data?.total ?? data?.meta?.total ?? list.length;
 	} finally {
@@ -177,17 +162,22 @@ function onQueryChange(value: string | null) {
 	}
 }
 
-	function onRoleChange(value: string | number | null) {
-		if (!value) {
-			options.value.page = 1;
-			fetchAdmins();
-		}
-	}
-
-	function onAdminCreated() {
+function onRoleChange(value: string | number | null) {
+	if (!value) {
 		options.value.page = 1;
 		fetchAdmins();
 	}
+}
+
+function onAdminCreated() {
+	options.value.page = 1;
+	fetchAdmins();
+}
+
+function onAdminUpdated() {
+	options.value.page = 1;
+	fetchAdmins();
+}
 
 async function fetchRoles() {
 	const { data } = await listRoles();
@@ -198,13 +188,9 @@ async function fetchRoles() {
 	})).filter((role: RoleOption) => role.title && role.value !== '');
 }
 
-	function onEdit(_admin: Admin) {
-		// TODO: wire edit action once route/page is defined.
-	}
-
-	function onSetUsername(_admin: Admin) {
-		// TODO: wire set-username flow once route/modal is defined.
-	}
+function onSetUsername(_admin: Admin) {
+	// TODO: wire set-username flow once route/modal is defined.
+}
 
 async function copyUsername(username: string) {
 	try {

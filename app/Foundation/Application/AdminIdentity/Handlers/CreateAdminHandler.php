@@ -7,13 +7,11 @@ namespace App\Foundation\Application\AdminIdentity\Handlers;
 
 
 use App\Foundation\Application\AdminIdentity\Commands\CreateAdminCommand;
-use App\Foundation\Application\AdminIdentity\DTO\CreateAdminResult;
 use App\Foundation\Domain\AdminIdentity\Entities\Admin;
-
-
 use App\Foundation\Domain\Rbac\ValueObjects\RoleId;
 use App\Foundation\Infrastructure\Persistence\Eloquent\Repositories\EloquentAdminRepository;
 use App\Foundation\Shared\Application\Contracts\PasswordHasher;
+use App\Foundation\Shared\Application\DTO\ActionResult;
 use App\Foundation\Shared\Domain\Exceptions\FieldValidationException;
 use App\Foundation\Shared\Domain\ValueObjects\Email;
 use App\Foundation\Shared\Domain\ValueObjects\PasswordHash;
@@ -26,7 +24,7 @@ final class CreateAdminHandler
         private readonly PasswordHasher $hasher,
     ) {}
 
-    public function handle(CreateAdminCommand $cmd): CreateAdminResult
+    public function handle(CreateAdminCommand $cmd): ActionResult
     {
         $email = new Email($cmd->email);
         $username = new Username($cmd->username);
@@ -51,6 +49,6 @@ final class CreateAdminHandler
 
         $this->adminRepository->save($admin);
 
-        return new CreateAdminResult(true, 'Admin created successfully.');
+        return new ActionResult(true, 'Admin created successfully.');
     }
 }
