@@ -29,7 +29,7 @@
             <v-list density="comfortable" class="px-6" id="side-nav-items">
                 <template v-for="group in filteredItems" :key="group.group">
                     <v-list-subheader class="mt-3" v-if="group && group.group">{{ group.group }}</v-list-subheader>
-                    <v-list-item v-for="link in group.links" class="py-2" :key="link.to" :to="link.to" :title="link.title"
+                    <v-list-item v-for="link in group.links" class="py-2" :key="link.to.name || link.title" :to="link.to" :title="link.title"
                         :prepend-icon="link.icon" rounded link />
                 </template>
             </v-list>
@@ -54,7 +54,7 @@
         <!-- <v-divider></v-divider> -->
 
         <v-main class="admin-main">
-            <v-container class="main-container-content py-6" fluid>
+            <v-container class="main-container-content py-4" fluid>
                 <RouterView />
             </v-container>
         </v-main>
@@ -94,7 +94,8 @@ const titleByName: Record<string, string> = {
     'campaigns.list': 'Campaigns',
     'faqs.list': 'FAQs Management',
     'paymentMethods.list': 'Payment Methods',
-    'users.list': 'User Management',
+    'admin.list': 'Admin Management',
+    'roles.manage': 'Role Management',
     settings: 'Settings',
 };
 
@@ -114,57 +115,58 @@ const navSearch = ref('');
 const items = [
     {
         group: '',
-        links: [{ title: 'Dashboard', to: '/dashboard', icon: 'mdi-view-dashboard-outline' }],
+        links: [{ title: 'Dashboard', to: { name: 'dashboard' }, icon: 'mdi-view-dashboard-outline' }],
     },
     {
         group: 'EMI',
         links: [
-            { title: 'EMI Requests', to: '/emi-requests', icon: 'mdi-cash' },
-            { title: 'EMI Banks', to: '/emi-banks', icon: 'mdi-bank' },
-            { title: 'EMI Users', to: '/emi-users', icon: 'mdi-account-cash-outline' },
+            { title: 'EMI Requests', to: { name: 'emi.requests' }, icon: 'mdi-cash' },
+            { title: 'EMI Banks', to: { name: 'emi.banks' }, icon: 'mdi-bank' },
+            { title: 'EMI Users', to: { name: 'emi.users' }, icon: 'mdi-account-cash-outline' },
         ],
     },
     {
         group: 'Orders',
         links: [
-            { title: 'All Orders', to: '/orders', icon: 'mdi-cart-outline' },
-            { title: 'Pre Orders', to: '/pre-orders', icon: 'mdi-cart-arrow-down' },
-            { title: 'Cart Items', to: '/cart-items', icon: 'mdi-cart-outline' },
-            { title: 'Wish Pot', to: '/wish-pot', icon: 'mdi-heart-outline' },
-            { title: 'Customers', to: '/customers', icon: 'mdi-account-outline' }
+            { title: 'All Orders', to: { name: 'orders.list' }, icon: 'mdi-cart-outline' },
+            { title: 'Pre Orders', to: { name: 'orders.pre' }, icon: 'mdi-cart-arrow-down' },
+            { title: 'Cart Items', to: { name: 'orders.cart' }, icon: 'mdi-cart-outline' },
+            { title: 'Wish Pot', to: { name: 'orders.wish' }, icon: 'mdi-heart-outline' },
+            { title: 'Customers', to: { name: 'customers.list' }, icon: 'mdi-account-outline' }
         ],
     },
     {
         group: 'Blogs',
         links: [
-            { title: 'All Blogs', to: '/blogs', icon: 'mdi-note-multiple-outline' },
-            { title: 'Create Blog', to: '/blogs-create', icon: 'mdi-note-plus-outline' },
-            { title: 'Categories', to: '/blogs-categories', icon: 'mdi-folder-outline' },
+            { title: 'All Blogs', to: { name: 'blogs.list' }, icon: 'mdi-note-multiple-outline' },
+            { title: 'Create Blog', to: { name: 'blogs.create' }, icon: 'mdi-note-plus-outline' },
+            { title: 'Categories', to: { name: 'blogCategories.list' }, icon: 'mdi-folder-outline' },
         ],
     },
     {
         group: 'Catalog',
         links: [
-            { title: 'Products', to: '/catalog-products', icon: 'mdi-package-variant-closed' },
-            { title: 'Categories', to: '/catalog-categories', icon: 'mdi-shape-outline' },
-            { title: 'Brands', to: '/catalog-brands', icon: 'mdi-tag-outline' },
-            { title: 'Attributes', to: '/catalog-attributes', icon: 'mdi-tune-variant' },
+            { title: 'Products', to: { name: 'products.list' }, icon: 'mdi-package-variant-closed' },
+            { title: 'Categories', to: { name: 'categories.list' }, icon: 'mdi-shape-outline' },
+            { title: 'Brands', to: { name: 'brands.list' }, icon: 'mdi-tag-outline' },
+            { title: 'Attributes', to: { name: 'attributes.list' }, icon: 'mdi-tune-variant' },
         ],
     },
     {
         group: 'Marketing',
         links: [
-            { title: 'Banners', to: '/marketing-banners', icon: 'mdi-image-outline' },
-            { title: 'Campaigns', to: '/marketing-campaigns', icon: 'mdi-bullhorn-outline' },
+            { title: 'Banners', to: { name: 'banners.list' }, icon: 'mdi-image-outline' },
+            { title: 'Campaigns', to: { name: 'campaigns.list' }, icon: 'mdi-bullhorn-outline' },
         ],
     },
     {
         group: 'Settings',
         links: [
-            { title: 'FAQs Management', to: '/settings-faqs', icon: 'mdi-help-circle-outline' },
-            { title: 'Payment Methods', to: '/settings-payment-methods', icon: 'mdi-credit-card-outline' },
-            { title: 'User Management', to: '/settings-users', icon: 'mdi-account-group-outline' },
-            { title: 'Settings', to: '/settings', icon: 'mdi-cog-outline' },
+            { title: 'FAQs Management', to: { name: 'faqs.list' }, icon: 'mdi-help-circle-outline' },
+            { title: 'Payment Methods', to: { name: 'paymentMethods.list' }, icon: 'mdi-credit-card-outline' },
+            { title: 'Admin Management', to: { name: 'admin.list' }, icon: 'mdi-account-group-outline' },
+            { title: 'Role Management', to: { name: 'roles.manage' }, icon: 'mdi-shield-account-outline' },
+            { title: 'Settings', to: { name: 'settings' }, icon: 'mdi-cog-outline' },
         ],
     },
 ];
@@ -262,6 +264,7 @@ main.v-main {
     right: 0;
     z-index: 1000;
     background-color: #fff;
+    border-bottom: 1px solid #f5f5f5;
 
 }
 

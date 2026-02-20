@@ -17,4 +17,6 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::post('emi-requests/{id}/generate-application', [EmiApplicationController::class, 'generateApplication'])->name('admin.emi-requests.generate-application');
     Route::get('emi-requests/{id}/application-list', [EmiApplicationsController::class, 'applicationList'])->name('admin.emi-requests.application-list');
     Route::post('emi-requests/{id}/application-pdf', [EmiApplicationsController::class, 'generatePdf']);
+
+    Route::post('emi-applications/{id}/approve', [EmiApplicationsController::class, 'approveApplication'])->name('admin.emi-applications.approve');
 });

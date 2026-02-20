@@ -1,11 +1,9 @@
 <template>
 	<v-card class="elevation-0">
 		<v-toolbar v-if="title || $slots.actions" flat>
-			<v-toolbar-title v-if="title">{{ title }}</v-toolbar-title>
-			<v-spacer />
-			<v-text-field v-if="searchable" v-model="searchModel" density="compact" variant="outlined" label="Search"
-				hide-details class="mr-4" style="max-width: 240px" />
-			<slot name="actions" />
+			<v-card class="w-100" flat>
+				<slot name="actions"></slot>
+			</v-card>
 		</v-toolbar>
 
 		<v-data-table-server :headers="normalizedHeaders" :items="items" :items-length="total" :loading="loading"

@@ -41,6 +41,8 @@ use App\Foundation\Infrastructure\Pdf\Bank\SiddarthaPdfGenerator;
 use App\Foundation\Infrastructure\Pdf\Registry\BankPdfGeneratorRegistry;
 use App\Foundation\Infrastructure\Pdf\Renderer\HtmlPassthroughPdfRenderer;
 use App\Foundation\Infrastructure\Pdf\Renderer\PdfRenderer;
+use App\Foundation\Infrastructure\Auth\Hashing\LaravelPasswordHasher;
+use App\Foundation\Shared\Application\Contracts\PasswordHasher;
 
 class BindingsServiceProvider extends ServiceProvider
 {
@@ -60,6 +62,7 @@ class BindingsServiceProvider extends ServiceProvider
         $this->app->bind(EmiRequestRepository::class, EloquentEmiRequestRepository::class);
         $this->app->bind(EmiApplicationRepository::class, EloquentEmiApplicationRepository::class);
         $this->app->bind(EmiUserRepository::class, EloquentEmiUserRepository::class);
+        $this->app->bind(PasswordHasher::class, LaravelPasswordHasher::class);
 
         $this->app->bind(PdfRenderer::class, HtmlPassthroughPdfRenderer::class);
 

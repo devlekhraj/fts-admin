@@ -5,6 +5,7 @@ declare(strict_types=1);
 // TODO: API route loader for Foundation modules.
 
 require __DIR__ . '/auth/admin.php';
+require __DIR__ . '/admin/admin-users.php';
 require __DIR__ . '/admin/products.php';
 require __DIR__ . '/admin/categories.php';
 require __DIR__ . '/admin/brands.php';

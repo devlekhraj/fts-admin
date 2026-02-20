@@ -19,3 +19,7 @@ export function generateApplication(id: string, payload?: FormData | Record<stri
 export function listApplications(id: string) {
   return http.get(`/admin/emi-requests/${id}/application-list`);
 }
+
+export function approveApplication(id: string | number, payload: Record<string, unknown>) {
+  return http.post(`/admin/emi-applications/${id}/approve`, payload);
+}

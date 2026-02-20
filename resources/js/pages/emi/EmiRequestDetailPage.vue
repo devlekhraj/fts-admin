@@ -10,7 +10,7 @@
 		<v-card class="pa-4 mb-4">
 			<div class="d-flex align-center gap-4">
 				<v-avatar size="64" rounded>
-					<v-img v-if="application.user?.avatar" :src="application.user.avatar" alt="User" />
+					<v-img v-if="application.user?.avatar" :src="application?.user?.avatar" alt="User" />
 					<v-img v-else src="https://placehold.co/64" alt="User" />
 					<!-- <v-icon v-else>mdi-account</v-icon> -->
 				</v-avatar>
@@ -20,7 +20,7 @@
 					<div class="text-caption text-medium-emphasis">{{ application.user?.phone ?? 'N/A' }}</div>
 				</div>
 				<v-spacer />
-				<v-chip size="small" variant="tonal">{{ application.status_label }}</v-chip>
+				<v-chip size="small" variant="tonal" :color="statusChipColor">{{ application.status }}</v-chip>
 			</div>
 		</v-card>
 
@@ -81,42 +81,35 @@ const tabs = [
 
 const activeComponent = computed(() => tabComponents[tab.value] ?? TabEmiInfo);
 
-const application = ref({
-	id: route.params.id ?? 'DEMO-001',
+interface ApplicationUser {
+	name?: string;
+	email?: string;
+	phone?: string;
+	avatar?: string;
+}
+
+interface Application {
+	user?: ApplicationUser;
+	status?: string;
+	// Add other properties as needed
+}
+
+const application = ref<Application>({
 	user: {
-		name: 'Sita Sharma',
-		email: 'sita@example.com',
-		phone: '+977 98XXXXXXX',
-		avatar: 'https://placehold.co/64',
+		name: '',
+		email: '',
+		phone: '',
+		avatar: '',
 	},
-	product: {
-		name: 'Samsung Galaxy S24',
-		sku: 'SGS24-128',
-		price: 'Rs. 120,000.00',
-		thumb: 'https://placehold.co/64',
-	},
-	emi_type: 'credit_card',
-	emi_mode: 'bank',
-	emi_per_month: 'Rs. 6,500.00',
-	down_payment: 'Rs. 15,000.00',
-	status_label: 'Processing',
-	occupation: 'Sales Executive',
-	length_of_employment: '3 years',
-	monthly_income: 'Rs. 45,000.00',
-	dob_ad: '1996-02-12',
-	dob_bs: '2052-10-30',
-	gender: 'Female',
-	citizenship: '123-45-6789',
-	card_holder_name: 'Sita Sharma',
-	card_number: '**** **** **** 1234',
-	card_expiry_date: '12/28',
-	vehicle: 'Honda Dio',
-	documents: {
-		citizenship: 'https://placehold.co/240x160',
-		salary: 'https://placehold.co/240x160',
-		bank: 'https://placehold.co/240x160',
-		photo: 'https://placehold.co/240x160',
-	},
+	status: '',
+});
+
+const statusChipColor = computed(() => {
+	const status = String(application.value.status ?? '').toLowerCase();
+	if (status === 'approved') return 'success';
+	if (status === 'pending') return 'warning';
+	if (status === 'processing') return 'info';
+	return 'secondary';
 });
 
 async function fetchDetail() {

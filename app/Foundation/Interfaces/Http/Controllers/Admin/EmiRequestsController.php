@@ -19,10 +19,39 @@ class EmiRequestsController extends Controller
     public function index(Request $request): JsonResponse
     {
         $perPage = (int) $request->query('per_page', 10);
-        $paginator = EmiRequestModel::query()
-            ->with(['product', 'user'])
-            ->orderByDesc('created_at')
-            ->paginate($perPage);
+        $search = trim((string) $request->query('search', ''));
+        $emiType = $request->query('emi_type');
+        $status = $request->query('status');
+
+        $query = EmiRequestModel::query()
+            ->with(['product', 'user']);
+
+        if ($search !== '') {
+            $query->where(function ($builder) use ($search) {
+                $builder->where('application_code', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('product', function ($productQuery) use ($search) {
+                        $productQuery->where('name', 'like', "%{$search}%");
+                    });
+
+                if (is_numeric($search)) {
+                    $builder->orWhere('id', (int) $search);
+                }
+            });
+        }
+
+        if ($emiType !== null && $emiType !== '') {
+            $query->where('emi_type', $emiType);
+        }
+
+        if ($status !== null && $status !== '') {
+            $query->where('status', (int) $status);
+        }
+
+        $paginator = $query->orderByDesc('created_at')->paginate($perPage);
 
         return response()->json([
             'data' => EmiRequestListResource::collection($paginator->items()),

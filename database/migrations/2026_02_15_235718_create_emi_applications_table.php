@@ -21,9 +21,11 @@ return new class extends Migration
                 ->constrained('emi_banks')
                 ->cascadeOnDelete();
             $table->json('application_data');
+            
             $table->text('file_path');
-            $table->enum('status', ['pending', 'approved'])
-                ->default('pending');
+
+            $table->enum('status', ['Pending', 'Processing','Approved','Finished','Cancelled'])
+                ->default('Pending');
 
             $table->timestamps();
         });

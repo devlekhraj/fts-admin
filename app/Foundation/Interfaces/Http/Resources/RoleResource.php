@@ -10,7 +10,20 @@ class RoleResource extends JsonResource
 {
     public function toArray($request): array
     {
-        // TODO: Shape response.
-        return [];
+        $data = [
+            'id' => $this->id,
+            'name' => $this->name ?? null,
+        ];
+
+        // Only include permissions for role detail responses.
+        $isDetail = (bool) $request->route('role')
+            || (bool) $request->route('id')
+            || ($request->route() && $request->route()->getName() === 'admin.rbac.roles.show');
+
+        if ($isDetail) {
+            $data['permissions'] = $this->permissions ?? [];
+        }
+
+        return $data;
     }
 }

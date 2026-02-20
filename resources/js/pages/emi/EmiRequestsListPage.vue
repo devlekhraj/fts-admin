@@ -1,8 +1,26 @@
 <template>
 	<div>
 		<!-- <AppPageHeader title="EMI Requests" subtitle="Manage EMI requests" /> -->
-		<AppDataTable :headers="headers" :items="items" :total="total" :loading="loading"
+		<AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :searchable="false"
 			:items-per-page="options.itemsPerPage" @update:options="onOptions">
+			<template #actions>
+				<v-container fluid>
+					<v-row>
+						<v-col cols="12" md="3">
+							<v-text-field v-model="filters.query" density="compact" variant="outlined" label="Search"
+								hide-details clearable style="min-width: 220px" />
+						</v-col>
+						<v-col cols="12" md="3">
+							<v-select v-model="filters.emiType" :items="emiTypeOptions" density="compact" variant="outlined"
+								label="EMI Type" hide-details clearable style="min-width: 200px" />
+						</v-col>
+						<v-col cols="12" md="3">
+							<v-select v-model="filters.status" :items="statusOptions" density="compact" variant="outlined"
+								label="Status" hide-details clearable style="min-width: 200px" />
+						</v-col>
+					</v-row>
+				</v-container>
+			</template>
 			<template #item.user="{ item }">
 				<div class="d-flex align-center gap-2">
 					<v-avatar size="32">
@@ -53,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
 import { list as listEmiRequests } from '@/api/emi-requests.api';
@@ -81,15 +99,40 @@ const options = ref<DataTableOptions>({
 	itemsPerPage: 15,
 	sortBy: [],
 });
+const filters = ref({
+	query: '',
+	emiType: null as null | string,
+	status: null as null | number,
+});
 const hasLoadedOnce = ref(false);
+
+const emiTypeOptions = [
+	{ title: 'Credit Card', value: 'credit_card' },
+	{ title: 'New Credit Card', value: 'new_credit_card' },
+	{ title: 'Citizenship', value: 'citizenship' },
+];
+
+const statusOptions = [
+	{ title: 'Pending', value: 0 },
+	{ title: 'Processing', value: 1 },
+	{ title: 'Approved', value: 2 },
+	{ title: 'Finished', value: 3 },
+	{ title: 'Cancelled', value: 4 },
+];
 
 async function fetchRequests() {
 	loading.value = true;
 	try {
-		const { data } = await listEmiRequests({
+		const params: Record<string, unknown> = {
 			page: options.value.page,
 			per_page: options.value.itemsPerPage,
-		});
+		};
+
+		if (filters.value.query) params.search = filters.value.query;
+		if (filters.value.emiType) params.emi_type = filters.value.emiType;
+		if (filters.value.status !== null) params.status = filters.value.status;
+
+		const { data } = await listEmiRequests(params);
 
 		const list = Array.isArray(data) ? data : data?.data ?? [];
 		items.value = list;
@@ -106,6 +149,15 @@ function onOptions(next: DataTableOptions) {
 	}
 	fetchRequests();
 }
+
+watch(
+	filters,
+	() => {
+		options.value.page = 1;
+		fetchRequests();
+	},
+	{ deep: true }
+);
 
 onMounted(() => {
 	if (!hasLoadedOnce.value) {

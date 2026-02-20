@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Foundation\Interfaces\Http\Resources;
 
+use App\Foundation\Infrastructure\Persistence\Eloquent\Models\EmiRequestModel;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class EmiRequestResource extends JsonResource
@@ -45,9 +46,10 @@ class EmiRequestResource extends JsonResource
                 'name' => $this->user->name ?? null,
                 'email' => $this->user->email ?? null,
                 'mobile' => $this->contact_number ?? null,
+                'avatar' => $this->user->avatar ?? null,
             ] : null,
             'product_price' => $this->product_price,
-            'status' => $this->status,
+            'status' => EmiRequestModel::getStatusLabels()[$this->status] ?? 'Unknown',
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'bank_statement' => $this->bank_statement,

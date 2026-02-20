@@ -9,4 +9,9 @@ use App\Foundation\Shared\Infrastructure\Persistence\Eloquent\Models\BaseModel;
 class RoleModel extends BaseModel
 {
     // TODO: Define table, fillable, casts, relations.
+    protected $table = 'roles';
+    
+    protected $casts = [
+    'permissions' => 'array',
+  ];
 }

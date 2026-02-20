@@ -50,7 +50,8 @@ const routes: RouteRecordRaw[] = [
       // settings
       { path: 'settings-faqs', name: 'faqs.list', component: () => import('@/pages/settings/FaqsListPage.vue'), meta: { title: 'FAQs Management' } },
       { path: 'settings-payment-methods', name: 'paymentMethods.list', component: () => import('@/pages/settings/PaymentMethodsListPage.vue'), meta: { title: 'Payment Methods' } },
-      { path: 'settings-users', name: 'users.list', component: () => import('@/pages/settings/UsersListPage.vue'), meta: { title: 'User Management' } },
+      { path: 'admin-list', name: 'admin.list', component: () => import('@/pages/settings/AdminListPage.vue'), meta: { title: 'Admin Management' } },
+      { path: 'role-management', name: 'roles.manage', component: () => import('@/pages/settings/RoleManagementPage.vue'), meta: { title: 'Role Management' } },
       { path: 'settings', name: 'settings', component: () => import('@/pages/settings/SettingsPage.vue'), meta: { title: 'Settings' } },
     ],
   },

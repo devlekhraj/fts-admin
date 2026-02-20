@@ -4,26 +4,33 @@ declare(strict_types=1);
 
 namespace App\Foundation\Infrastructure\Persistence\Eloquent\Models;
 
-use App\Foundation\Shared\Infrastructure\Persistence\Eloquent\Models\BaseModel;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AdminModel extends Authenticatable implements JWTSubject
 {
     protected $table = 'admins';
 
-    protected $keyType = 'string';
+    protected $keyType = 'int';
 
-    public $incrementing = false;
+    public $incrementing = true;
 
     protected $fillable = [
-        'id',
         'name',
         'email',
         'password',
+        'username',
+        'role_id',
     ];
 
     protected $hidden = ['password'];
+
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(RoleModel::class, 'role_id');
+    }
+
     public function getJWTIdentifier(): mixed
     {
         return $this->getKey();

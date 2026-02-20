@@ -18,7 +18,7 @@ export const useModalStore = defineStore('modal', {
 		props: {} as Record<string, unknown>,
 		title: '' as string,
 		size: 'md' as ModalSize,
-		persistent: false,
+		persistent: true,
 		onSaved: null as ((payload?: unknown) => void) | null,
 	}),
 	actions: {
@@ -27,17 +27,19 @@ export const useModalStore = defineStore('modal', {
 			this.props = props;
 			this.title = options.title ?? '';
 			this.size = options.size ?? 'md';
-			this.persistent = options.persistent ?? false;
+			this.persistent = options.persistent ?? true;
 			this.onSaved = options.onSaved ?? null;
 			this.isOpen = true;
 		},
 		close() {
 			this.isOpen = false;
+		},
+		reset() {
 			this.component = null;
 			this.props = {};
 			this.title = '';
 			this.size = 'md';
-			this.persistent = false;
+			this.persistent = true;
 			this.onSaved = null;
 		},
 	},
