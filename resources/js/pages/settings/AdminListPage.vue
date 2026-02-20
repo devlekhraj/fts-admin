@@ -54,10 +54,18 @@
 		</template>
 		<template #item.username="{ item }">
 			<div class="d-flex align-center gap-2">
-				<span>{{ item.username ?? '-' }}</span>
-				<v-btn v-if="item.username" icon variant="text" size="x-small" @click="copyUsername(item.username)">
-					<v-icon size="16">mdi-content-copy</v-icon>
-				</v-btn>
+				<template v-if="item.username">
+					<span class="text-medium-emphasis">{{ `@${item.username}` }}</span>
+					<v-btn icon variant="text" size="x-small" @click="copyUsername(item.username)">
+						<v-icon size="14">mdi-content-copy</v-icon>
+					</v-btn>
+				</template>
+				<template v-else>
+					<!-- <v-btn variant="text" size="small" color="primary" @click="onSetUsername(item)">
+						Set username
+					</v-btn> -->
+					<span class="text-medium-emphasis">@no.username</span>
+				</template>
 			</div>
 		</template>
 		<template #item.action="{ item }">
@@ -68,6 +76,11 @@
 				<v-icon>mdi-delete</v-icon>
 			</v-btn>
 
+		</template>
+		<template #item.created_at="{ item }">
+			<span class="text-medium-emphasis" style="font-size: 0.8rem;">
+				{{ item.created_at ?? '-' }}
+			</span>
 		</template>
 	</AppDataTable>
 </template>
@@ -96,11 +109,11 @@ type Admin = {
 };
 
 const headers = [
-	{ title: 'Name', key: 'name', minWidth: '180' },
-	{ title: 'Username', key: 'username', minWidth: '160' },
-	{ title: 'Role', key: 'role', minWidth: '160' },
-	{ title: 'Email', key: 'email', minWidth: '220' },
-	{ title: 'Created', key: 'created_at', minWidth: '100' },
+	{ title: 'Name', key: 'name', minWidth: '180', sortable: false },
+	{ title: 'Username', key: 'username', minWidth: '160', sortable: false },
+	{ title: 'Role', key: 'role', minWidth: '160', sortable: false },
+	{ title: 'Email', key: 'email', minWidth: '220', sortable: false },
+	{ title: 'Created', key: 'created_at', minWidth: '100', sortable: false },
 	{ title: 'Actions', key: 'action', sortable: false, minWidth: '100' },
 ];
 
@@ -185,9 +198,13 @@ async function fetchRoles() {
 	})).filter((role: RoleOption) => role.title && role.value !== '');
 }
 
-function onEdit(_admin: Admin) {
-	// TODO: wire edit action once route/page is defined.
-}
+	function onEdit(_admin: Admin) {
+		// TODO: wire edit action once route/page is defined.
+	}
+
+	function onSetUsername(_admin: Admin) {
+		// TODO: wire set-username flow once route/modal is defined.
+	}
 
 async function copyUsername(username: string) {
 	try {

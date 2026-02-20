@@ -1,0 +1,1 @@
+import{_ as e}from"./AppPageHeader.vue_vue_type_script_setup_true_lang-CmY41dXm.js";import{d as a,T as t,e as n}from"./main-H_HF8Td0.js";const i=a({__name:"RoleManagementPage",setup(o){return(s,r)=>(n(),t(e,{title:"Role Management",subtitle:"Manage roles and their permissions"}))}});export{i as default};

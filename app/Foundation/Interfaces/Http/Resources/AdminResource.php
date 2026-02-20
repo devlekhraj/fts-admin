@@ -16,7 +16,7 @@ class AdminResource extends JsonResource
             'email' => $this->email,
             'username' => $this->username ?? null,
             'role_id' => $this->role_id ?? null,
-            'created_at' => $this->created_at?->diffForHumans(['short' => true]),
+            'created_at' => $this->created_at?->format('M d, Y'),
             'role' => $this->role->name ?? null,
         ];
     }

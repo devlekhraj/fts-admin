@@ -16,11 +16,12 @@
 							:error-messages="getErrorMessages('email')" prepend-inner-icon="mdi-email-outline"
 							@update:model-value="clearFieldError('email')" />
 					</v-col>
-					<v-col cols="12" md="6" class="pb-0">
-						<v-text-field v-model="form.username" label="Username" variant="outlined" density="comfortable"
-							autocomplete="off" :rules="[rules.required]" :error-messages="getErrorMessages('username')"
-							prepend-inner-icon="mdi-account-circle-outline" @update:model-value="clearFieldError('username')" />
-					</v-col>
+						<v-col cols="12" md="6" class="pb-0">
+							<v-text-field v-model="form.username" label="Username" variant="outlined" density="comfortable"
+								autocomplete="off" :rules="[rules.required, rules.noSpaces, rules.lowercase, rules.allowedChars, rules.dotPlacement]"
+								:error-messages="getErrorMessages('username')" prepend-inner-icon="mdi-account-circle-outline"
+								@update:model-value="onUsernameInput" />
+						</v-col>
 					<v-col cols="12" md="6" class="pb-0">
 						<v-autocomplete v-model="form.role_id" :items="roleOptions" label="Role" variant="outlined"
 							density="comfortable" clearable :rules="[rules.required]" :error-messages="getErrorMessages('role_id')"
@@ -46,8 +47,12 @@
 
 		</v-form>
 	</v-card-text>
+
 	<v-card-actions class="pb-4">
-		<div class="w-100 text-center">
+		<div class="w-100 d-flex align-center justify-space-between px-4 pt-2">
+			<v-btn icon size="small" variant="tonal" title="Reset form" color="warning" :disabled="loading" @click="resetForm" aria-label="Reset form">
+				<v-icon>mdi-refresh</v-icon>
+			</v-btn>
 			<v-btn color="primary" variant="tonal" class="px-5" :loading="loading" :disabled="loading" @click="onSubmit">
 				<v-icon start>mdi-content-save-outline</v-icon>
 				submit
@@ -93,13 +98,32 @@ async function fetchRoles() {
 		.filter((role: RoleOption) => role.title && role.value !== '');
 }
 
-	const rules = {
-		required: (value: unknown) => (value ? true : 'Required'),
-		email: (value: string) =>
-			!value || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? true : 'Invalid email',
-		passwordMatch: () =>
-			form.value.password === form.value.confirm_password ? true : 'Passwords do not match',
-	};
+		const rules = {
+			required: (value: unknown) => (value ? true : 'Required'),
+			email: (value: string) =>
+				!value || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? true : 'Invalid email',
+			noSpaces: (value: string) =>
+				!value || !/\s/.test(value) ? true : 'Username must not contain spaces',
+			lowercase: (value: string) =>
+				!value || value === value.toLowerCase() ? true : 'Username must be lowercase',
+			allowedChars: (value: string) =>
+				!value || /^[a-z0-9_.-]+$/.test(value)
+					? true
+					: 'Only letters, numbers, underscore, dash, and dot are allowed',
+			dotPlacement: (value: string) =>
+				!value || (!value.startsWith('.') && !value.endsWith('.'))
+					? true
+					: 'Dot cannot be the first or last character',
+			passwordMatch: () =>
+				form.value.password === form.value.confirm_password ? true : 'Passwords do not match',
+		};
+
+		function onUsernameInput(value: string) {
+			if (typeof value === 'string') {
+				form.value.username = value.toLowerCase();
+			}
+			clearFieldError('username');
+		}
 
 	function getErrorMessages(field: string) {
 		return fieldErrors.value[field] ?? [];
@@ -110,6 +134,22 @@ async function fetchRoles() {
 		const next = { ...fieldErrors.value };
 		delete next[field];
 		fieldErrors.value = next;
+	}
+
+	function resetForm() {
+		form.value = {
+			name: '',
+			email: '',
+			username: '',
+			role_id: null,
+			password: '',
+			confirm_password: '',
+		};
+		error.value = '';
+		fieldErrors.value = {};
+		showPassword.value = false;
+		showConfirmPassword.value = false;
+		formRef.value?.resetValidation?.();
 	}
 
 	async function onSubmit() {
