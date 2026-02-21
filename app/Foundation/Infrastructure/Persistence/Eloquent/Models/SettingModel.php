@@ -6,12 +6,12 @@ namespace App\Foundation\Infrastructure\Persistence\Eloquent\Models;
 
 use App\Foundation\Shared\Infrastructure\Persistence\Eloquent\Models\BaseModel;
 
-class RoleModel extends BaseModel
+class SettingModel extends BaseModel
 {
     // TODO: Define table, fillable, casts, relations.
-    protected $table = 'roles';
+    protected $table = 'settings';
 
     protected $casts = [
-        'permissions' => 'array',
+        'settings' => 'array',
     ];
 }

@@ -17,3 +17,4 @@ require __DIR__ . '/admin/rbac.php';
 require __DIR__ . '/admin/emi-requests.php';
 require __DIR__ . '/admin/emi-banks.php';
 require __DIR__ . '/admin/emi-users.php';
+require __DIR__ . '/admin/route-settings.php';

@@ -13,6 +13,7 @@ class RoleResource extends JsonResource
         $data = [
             'id' => $this->id,
             'name' => $this->name ?? null,
+            'permissions' => $this->permissions ?? [],
         ];
 
         // Only include permissions for role detail responses.

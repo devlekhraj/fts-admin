@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Foundation\Interfaces\Http\Controllers\Admin;
 
-use Illuminate\Http\JsonResponse;
-use App\Http\Controllers\Controller;
 use App\Foundation\Infrastructure\Persistence\Eloquent\Models\RoleModel;
 use App\Foundation\Interfaces\Http\Resources\RoleResource;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 
 class RbacController extends Controller
 {
