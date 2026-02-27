@@ -64,7 +64,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useAuthStore } from '../stores/auth.store';
+import { useAuthStore } from '@/stores/auth.store';
 
 const drawer = ref(true);
 const router = useRouter();
@@ -86,12 +86,19 @@ const titleByName: Record<string, string> = {
     'categories.list': 'Categories',
     'brands.list': 'Brands',
     'attributes.list': 'Attributes',
+    'treks.regions': 'Regions',
+    'treks.list': 'Tour / Treks',
+    'treks.fixed.departure': 'Fixed Departure',
+    'treks.guide.profile': 'Guide Profile',
     'blogs.list': 'All Blogs',
     'blogs.create': 'Create Blog',
     'blogs.edit': 'Edit Blog',
     'blogCategories.list': 'Blog Categories',
     'banners.list': 'Banners',
     'campaigns.list': 'Campaigns',
+    'pages.list': 'Pages',
+    'inquiries.list': 'Inquiries',
+    'users.list': 'User Lists',
     'faqs.list': 'FAQs Management',
     'paymentMethods.list': 'Payment Methods',
     'admin.list': 'Admin Management',
@@ -114,58 +121,45 @@ const navSearch = ref('');
 
 const items = [
     {
-        group: '',
+        group: 'Welcome',
         links: [{ title: 'Dashboard', to: { name: 'dashboard' }, icon: 'mdi-view-dashboard-outline' }],
     },
     {
-        group: 'EMI',
+        group: 'Operations',
         links: [
-            { title: 'EMI Requests', to: { name: 'emi.requests' }, icon: 'mdi-cash' },
-            { title: 'EMI Banks', to: { name: 'emi.banks' }, icon: 'mdi-bank' },
-            { title: 'EMI Users', to: { name: 'emi.users' }, icon: 'mdi-account-cash-outline' },
+            { title: 'Inquiries', to: { name: 'inquiries.list' }, icon: 'mdi-message-text-outline' },
+            { title: 'User Lists', to: { name: 'users.list' }, icon: 'mdi-account-multiple-outline' },
         ],
     },
     {
-        group: 'Orders',
+        group: 'Catalog',
         links: [
-            { title: 'All Orders', to: { name: 'orders.list' }, icon: 'mdi-cart-outline' },
-            { title: 'Pre Orders', to: { name: 'orders.pre' }, icon: 'mdi-cart-arrow-down' },
-            { title: 'Cart Items', to: { name: 'orders.cart' }, icon: 'mdi-cart-outline' },
-            { title: 'Wish Pot', to: { name: 'orders.wish' }, icon: 'mdi-heart-outline' },
-            { title: 'Customers', to: { name: 'customers.list' }, icon: 'mdi-account-outline' }
+            { title: 'Regions', to: { name: 'treks.regions' }, icon: 'mdi-tag-multiple-outline' },
+            { title: 'Tour / Treks', to: { name: 'treks.list' }, icon: 'mdi-briefcase-variant' },
+            { title: 'Fixed Departure', to: { name: 'treks.fixed.departure' }, icon: 'mdi-calendar-check' },
+            { title: 'Guide Profile', to: { name: 'treks.guide.profile' }, icon: 'mdi-account-cowboy-hat-outline' },
         ],
     },
     {
         group: 'Blogs',
         links: [
             { title: 'All Blogs', to: { name: 'blogs.list' }, icon: 'mdi-note-multiple-outline' },
-            { title: 'Create Blog', to: { name: 'blogs.create' }, icon: 'mdi-note-plus-outline' },
             { title: 'Categories', to: { name: 'blogCategories.list' }, icon: 'mdi-folder-outline' },
         ],
     },
     {
-        group: 'Catalog',
-        links: [
-            { title: 'Products', to: { name: 'products.list' }, icon: 'mdi-package-variant-closed' },
-            { title: 'Categories', to: { name: 'categories.list' }, icon: 'mdi-shape-outline' },
-            { title: 'Brands', to: { name: 'brands.list' }, icon: 'mdi-tag-outline' },
-            { title: 'Attributes', to: { name: 'attributes.list' }, icon: 'mdi-tune-variant' },
-        ],
-    },
-    {
-        group: 'Marketing',
+        group: 'Page Setup',
         links: [
             { title: 'Banners', to: { name: 'banners.list' }, icon: 'mdi-image-outline' },
-            { title: 'Campaigns', to: { name: 'campaigns.list' }, icon: 'mdi-bullhorn-outline' },
+            { title: 'Pages', to: { name: 'pages.list' }, icon: 'mdi-file-document-outline' },
         ],
     },
     {
         group: 'Settings',
         links: [
-            { title: 'FAQs Management', to: { name: 'faqs.list' }, icon: 'mdi-help-circle-outline' },
-            { title: 'Payment Methods', to: { name: 'paymentMethods.list' }, icon: 'mdi-credit-card-outline' },
-            { title: 'Admin Management', to: { name: 'admin.list' }, icon: 'mdi-account-group-outline' },
-            { title: 'Role Management', to: { name: 'roles.manage' }, icon: 'mdi-shield-account-outline' },
+            { title: 'Admins', to: { name: 'admin.list' }, icon: 'mdi-account-group-outline' },
+            { title: 'Roles', to: { name: 'roles.manage' }, icon: 'mdi-shield-account-outline' },
+            { title: 'FAQs', to: { name: 'faqs.list' }, icon: 'mdi-help-circle-outline' },
             { title: 'Settings', to: { name: 'settings' }, icon: 'mdi-cog-outline' },
         ],
     },
