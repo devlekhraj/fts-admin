@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+ 
 
 const props = defineProps<{
   modelValue?: string
@@ -15,6 +16,7 @@ const value = computed({
   get: () => props.modelValue ?? '',
   set: (v: string) => emit('update:modelValue', v),
 })
+
 </script>
 
 <template>

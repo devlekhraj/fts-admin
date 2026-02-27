@@ -23,6 +23,7 @@ import {
     HorizontalRule,
     Blockquote
 } from 'vuetify-pro-tiptap'
+import RawHtml from '@/app/plugins/extensions/rawHtml'
 
 import 'vuetify-pro-tiptap/style.css'
 
@@ -55,6 +56,7 @@ export const vuetifyProTipTap = createVuetifyProTipTap({
     Link,
     Code,
     CodeBlock,
+    RawHtml,
     Blockquote,
     HorizontalRule,
     Image.configure({
