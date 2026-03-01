@@ -10,13 +10,14 @@ class AdminResource extends JsonResource
 {
     public function toArray($request): array
     {
+        $avatar = is_string($this->avatar) ? trim($this->avatar) : null;
+
         return [
             'id' => $this->id,
-            'name' => $this->fname."".($this->lname ? " ".$this->lname : ""),
+            'avatar_url' => $avatar !== '' && $avatar !== null ? $avatar : $this->avatar_url,
+            'name' => $this->name,
             'email' => $this->email,
-            'username' => $this->username ?? null,
-            'role_id' => $this->role_id ?? null,
-            'created_at' => $this->created_at?->format('M d, Y'),
+            'username' => $this->username ?? 'username',
             'role' => $this->role->name ?? null,
         ];
     }

@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Route;
 use App\Foundation\Interfaces\Http\Controllers\Admin\BrandsController;
+use App\Foundation\Interfaces\Http\Controllers\Admin\Product\ProductBrandController;
+use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
-    Route::get('brands', [BrandsController::class, 'index']);
+    Route::get('brands', [ProductBrandController::class, 'brandList']);
     Route::get('brands/{id}', [BrandsController::class, 'show']);
     Route::post('brands', [BrandsController::class, 'store']);
     Route::put('brands/{id}', [BrandsController::class, 'update']);

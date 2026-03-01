@@ -1,0 +1,10 @@
+/* Form field specific styles go here. */
+.v-text-field.v-input--density-comfortable {
+    .v-field__input,
+    input {
+        font-size: 14px !important;
+    }
+}
+.v-label {
+    font-size: 14px;
+}

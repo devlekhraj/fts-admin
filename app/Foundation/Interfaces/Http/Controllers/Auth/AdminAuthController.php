@@ -6,6 +6,7 @@ namespace App\Foundation\Interfaces\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Foundation\Interfaces\Http\Requests\Auth\AdminLoginRequest;
+use App\Foundation\Interfaces\Http\Resources\AdminResource;
 use Illuminate\Http\JsonResponse;
 
 class AdminAuthController extends Controller
@@ -25,7 +26,20 @@ class AdminAuthController extends Controller
 
     public function me(): JsonResponse
     {
-        return response()->json(auth('admin_api')->user());
+        $admin = auth('admin_api')->user();
+
+        if (!$admin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthenticated',
+                'data' => null,
+            ], 401);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => new AdminResource($admin),
+        ]);
     }
 
     public function logout(): JsonResponse

@@ -7,7 +7,7 @@
 		</v-toolbar>
 
 		<v-data-table-server :headers="normalizedHeaders" :items="items" :items-length="total" :loading="loading"
-			:search="searchModel" :items-per-page="itemsPerPage"
+			:search="searchModel" :page="page" :items-per-page="itemsPerPage"
 			@update:options="(opts) => $emit('update:options', opts)">
 			<template v-for="(_, name) in $slots" v-slot:[name]="slotProps">
 				<slot :name="name" v-bind="slotProps" />
@@ -25,6 +25,7 @@ type Props = {
 	headers: DataTableHeader[];
 	items: unknown[];
 	total: number;
+	page?: number;
 	loading?: boolean;
 	search?: string;
 	searchable?: boolean;
@@ -32,6 +33,7 @@ type Props = {
 };
 
 const props = withDefaults(defineProps<Props>(), {
+	page: 1,
 	loading: false,
 	search: '',
 	searchable: true,

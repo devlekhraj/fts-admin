@@ -18,3 +18,5 @@ require __DIR__ . '/admin/emi-requests.php';
 require __DIR__ . '/admin/emi-banks.php';
 require __DIR__ . '/admin/emi-users.php';
 require __DIR__ . '/admin/route-settings.php';
+require __DIR__ . '/admin/route_customers.php';
+require __DIR__ . '/admin/route_product_categories.php';

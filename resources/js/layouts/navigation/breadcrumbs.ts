@@ -1,0 +1,41 @@
+export type BreadcrumbRouteConfig = {
+    title: string;
+    parent?: string;
+};
+
+export const breadcrumbRouteConfig: Record<string, BreadcrumbRouteConfig> = {
+    'admin.dashboard': { title: 'Dashboard' },
+    'admin.emi.requests': { title: 'EMI Requests' },
+    'admin.emi.requests.detail': { title: 'EMI Request Detail', parent: 'admin.emi.requests' },
+    'admin.emi.users': { title: 'EMI Users' },
+    'admin.orders.list': { title: 'All Orders' },
+    'admin.orders.pre': { title: 'Pre Orders' },
+    'admin.orders.cart': { title: 'Cart Items' },
+    'admin.orders.wish': { title: 'Wish Pot' },
+    'admin.customers.list': { title: 'Customers' },
+    'admin.product.list': { title: 'Products' },
+    'admin.product.reviews': { title: 'Product Reviews', parent: 'admin.product.list' },
+    'admin.product.create': { title: 'Create Product', parent: 'admin.product.list' },
+    'admin.product.edit': { title: 'Edit Product', parent: 'admin.product.list' },
+    'admin.product.categories': { title: 'Categories' },
+    'admin.product.brands': { title: 'Brands' },
+    'admin.product.attributes': { title: 'Attributes' },
+    'admin.treks.regions': { title: 'Regions' },
+    'admin.treks.list': { title: 'Tour / Treks' },
+    'admin.treks.fixed.departure': { title: 'Fixed Departure' },
+    'admin.treks.guide.profile': { title: 'Guide Profile' },
+    'admin.blogs.list': { title: 'All Blogs' },
+    'admin.blogs.create': { title: 'Create Blog', parent: 'admin.blogs.list' },
+    'admin.blogs.edit': { title: 'Edit Blog', parent: 'admin.blogs.list' },
+    'admin.blogCategories.list': { title: 'Blog Categories' },
+    'admin.banners.list': { title: 'Banners' },
+    'admin.campaigns.list': { title: 'Campaigns' },
+    'admin.pages.list': { title: 'Pages' },
+    'admin.inquiries.list': { title: 'Inquiries' },
+    'admin.users.list': { title: 'User Lists' },
+    'admin.faqs.list': { title: 'FAQs Management' },
+    'admin.paymentMethods.list': { title: 'Payment Methods' },
+    'admin.list': { title: 'Admin Management' },
+    'admin.roles.manage': { title: 'Role Management' },
+    'admin.settings': { title: 'Settings' },
+};

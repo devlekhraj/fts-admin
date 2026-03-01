@@ -38,7 +38,8 @@
 		<template #item.name="{ item }">
 			<div class="d-flex align-center gap-2">
 				<v-avatar size="28" color="grey-lighten-3">
-					<v-icon size="18" color="grey-darken-1">mdi-account-circle</v-icon>
+					<v-img v-if="item.avatar_url" :src="item.avatar_url" :alt="item.name ?? 'Admin'" cover />
+					<v-icon v-else size="18" color="grey-darken-1">mdi-account-circle</v-icon>
 				</v-avatar>
 				<div class="ml-2">
 					<div class="text-capitalize">{{ item.name ?? '-' }}</div>
@@ -49,12 +50,15 @@
 			</div>
 		</template>
 		<template #item.role="{ item }">
-			<v-chip v-if="item.role" size="small" variant="tonal" class="text-uppercase font-weight-bold"
+			<!-- <v-chip v-if="item.role" size="small" variant="tonal" class="text-uppercase"
 				:color="roleColor(item.role)" label>
-				<v-icon start size="14">{{ roleIcon(item.role) }}</v-icon>
+				
 				{{ item.role }}
-			</v-chip>
-			<span v-else>-</span>
+			</v-chip> -->
+			<!-- <span v-else>-</span> -->
+			 <v-chip class="small" variant="tonal" size="small" label :color="item.role ? roleColor(item.role) : 'grey-lighten-2'">
+				 {{ item.role ?? '-' }}
+			 </v-chip>
 		</template>
 		
 		<template #item.action="{ item }">
@@ -86,6 +90,7 @@ interface RoleOption {
 type Admin = {
 	id?: number | string;
 	name?: string | null;
+	avatar_url?: string | null;
 	email?: string | null;
 	username?: string | null;
 	role_id?: number | string | null;

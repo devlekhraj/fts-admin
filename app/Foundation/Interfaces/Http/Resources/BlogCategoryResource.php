@@ -10,7 +10,18 @@ class BlogCategoryResource extends JsonResource
 {
     public function toArray($request): array
     {
-        // TODO: Shape response.
-        return [];
+        $defaultFile = null;
+        if ($this->relationLoaded('defaultFile')) {
+            $defaultFile = $this->defaultFile->first();
+        }
+
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'slug' => $this->slug,
+            'thumb' => $defaultFile?->url,
+            'created_at' => $this->created_at,
+            'status' => (bool) $this->status,
+        ];
     }
 }

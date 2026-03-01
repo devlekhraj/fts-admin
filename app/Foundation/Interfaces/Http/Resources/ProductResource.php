@@ -10,7 +10,18 @@ class ProductResource extends JsonResource
 {
     public function toArray($request): array
     {
-        // TODO: Shape response.
-        return [];
+        $defaultFile = null;
+        if ($this->relationLoaded('defaultFile')) {
+            $defaultFile = $this->defaultFile->first();
+        }
+
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'slug' => $this->slug,
+            'status' => (bool) $this->status,
+            'emi_enabled' => (bool) $this->emi_enabled,
+            'thumb' => $defaultFile?->url,
+        ];
     }
 }

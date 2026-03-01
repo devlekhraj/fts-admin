@@ -26,9 +26,26 @@ class AdminModel extends Authenticatable implements JWTSubject
 
     protected $hidden = ['password'];
 
+    protected $appends = ['avatar_url'];
+
     public function role(): BelongsTo
     {
         return $this->belongsTo(RoleModel::class, 'role_id');
+    }
+
+    public function getAvatarUrlAttribute(): string
+    {
+        $avatar = $this->avatar;
+
+        if (!is_string($avatar) || trim($avatar) === '') {
+            return asset('images/avatar.png');
+        }
+
+        if (filter_var($avatar, FILTER_VALIDATE_URL)) {
+            return $avatar;
+        }
+
+        return asset(ltrim($avatar, '/'));
     }
 
     public function getJWTIdentifier(): mixed
