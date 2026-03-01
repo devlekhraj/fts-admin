@@ -9,41 +9,25 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 
-class CopyMediaToFilesCommand extends Command
+class CopyBannerImageToFilesCommand extends Command
 {
     private const DEFAULT_MODEL_TYPES = [
-        // 'Jed\\Ecommerce\\App\\ProductBrand',
-        // 'Jed\\Ecommerce\\App\\ProductCategory',
-        // 'Jed\\Ecommerce\\App\\Product',
-        // "Jed\\Blogs\\App\\BlogCategory",
-        // "Jed\\Blogs\\App\\Blog",
         "Jed\\Banners\\App\\BannerImage",
     ];
 
     private const MODEL_TYPE_TABLE_MAP = [
-        'Jed\\Ecommerce\\App\\ProductBrand' => 'product_brands',
-        'Jed\\Ecommerce\\App\\ProductCategory' => 'product_categories',
-        'Jed\\Ecommerce\\App\\Product' => 'products',
-        'Jed\\Blogs\\App\\BlogCategory' => 'blog_categories',
-        'Jed\\Blogs\\App\\Blog' => 'blogs',
         'Jed\\Banners\\App\\BannerImage' => 'banners',
     ];
 
     private const MODEL_TYPE_FOLDER_MAP = [
-        'Jed\\Ecommerce\\App\\ProductBrand' => 'brands',
-        'Jed\\Ecommerce\\App\\ProductCategory' => 'product-category',
-        'Jed\\Ecommerce\\App\\Product' => 'products',
-        'Jed\\Blogs\\App\\BlogCategory' => 'blog-category',
-        'Jed\\Blogs\\App\\Blog' => 'blogs',
         'Jed\\Banners\\App\\BannerImage' => 'banners',
     ];
 
-    protected $signature = 'media:copy-to-files
+    protected $signature = 'media:copy-banner-images-to-files
         {--chunk=500 : Chunk size for processing}
-        {--model-type=* : Only copy media rows for provided model_type values}
         {--dry-run : Show what would be copied without writing data}';
 
-    protected $description = 'Copy records from media table to files table';
+    protected $description = 'Copy BannerImage records from media table to files table';
 
     public function handle(): int
     {
@@ -61,12 +45,13 @@ class CopyMediaToFilesCommand extends Command
             $this->error('Table "file_usages" does not exist.');
             return self::FAILURE;
         }
+        if (!Schema::hasTable('banner_images')) {
+            $this->error('Table "banner_images" does not exist.');
+            return self::FAILURE;
+        }
 
         $chunkSize = max(1, (int) $this->option('chunk'));
-        $modelTypes = $this->option('model-type');
-        if (!is_array($modelTypes) || empty($modelTypes)) {
-            $modelTypes = self::DEFAULT_MODEL_TYPES;
-        }
+        $modelTypes = self::DEFAULT_MODEL_TYPES;
         $dryRun = (bool) $this->option('dry-run');
         $cdnRoot = trim((string) (config('filesystems.disks.cdn.root') ?? env('CDN_ROOT', '')));
         if ($cdnRoot === '') {
@@ -119,6 +104,7 @@ class CopyMediaToFilesCommand extends Command
         $copied = 0;
         $missing = 0;
         $usageCreatedOrUpdated = 0;
+        $missingBannerImageMapping = 0;
 
         $baseQuery->chunkById($chunkSize, function ($rows) use (
             &$processed,
@@ -127,15 +113,45 @@ class CopyMediaToFilesCommand extends Command
             &$copied,
             &$missing,
             &$usageCreatedOrUpdated,
+            &$missingBannerImageMapping,
             $dryRun,
             $cdnRoot
         ): void {
             $fileNames = [];
             $mediaByFileName = [];
+            $bannerImageIds = [];
             foreach ($rows as $row) {
                 $fileName = $this->makeFileName($row);
                 $fileNames[] = $fileName;
                 $mediaByFileName[$fileName] = $row;
+                $bannerImageId = (int) ($row->model_id ?? 0);
+                if ($bannerImageId > 0) {
+                    $bannerImageIds[] = $bannerImageId;
+                }
+            }
+            $bannerImageIds = array_values(array_unique($bannerImageIds));
+
+            $bannerUsageMap = [];
+            $bannerImageMetaMap = [];
+            if (!empty($bannerImageIds)) {
+                $bannerImages = DB::table('banner_images')
+                    ->select(['id', 'banner_id', 'link', 'start_date', 'end_date'])
+                    ->whereIn('id', $bannerImageIds)
+                    ->get();
+
+                foreach ($bannerImages as $bannerImage) {
+                    $bannerImageId = (int) ($bannerImage->id ?? 0);
+                    if ($bannerImageId <= 0) {
+                        continue;
+                    }
+
+                    $bannerUsageMap[$bannerImageId] = (int) ($bannerImage->banner_id ?? 0);
+                    $bannerImageMetaMap[$bannerImageId] = [
+                        'link' => $bannerImage->link ?? null,
+                        'start_date' => $bannerImage->start_date ?? null,
+                        'end_date' => $bannerImage->end_date ?? null,
+                    ];
+                }
             }
 
             $existingFiles = DB::table('files')
@@ -232,10 +248,17 @@ class CopyMediaToFilesCommand extends Command
                         continue;
                     }
 
-                    $usageId = (int) ($media->model_id ?? 0);
+                    $bannerImageId = (int) ($media->model_id ?? 0);
+                    $usageId = (int) ($bannerUsageMap[$bannerImageId] ?? 0);
                     if ($usageId <= 0) {
+                        $missingBannerImageMapping++;
                         continue;
                     }
+                    $bannerImageMeta = $bannerImageMetaMap[$bannerImageId] ?? [
+                        'link' => null,
+                        'start_date' => null,
+                        'end_date' => null,
+                    ];
 
                     $usageUpserts[] = [
                         'file_id' => (int) $file->id,
@@ -244,6 +267,9 @@ class CopyMediaToFilesCommand extends Command
                         'title' => is_string($media->name ?? null) ? trim((string) $media->name) : null,
                         'alt_text' => is_string($media->name ?? null) ? trim((string) $media->name) : null,
                         'meta' => json_encode([
+                            'link' => $bannerImageMeta['link'],
+                            'end_date' => $bannerImageMeta['end_date'],
+                            'start_date' => $bannerImageMeta['start_date'],
                             'collection_name' => $media->collection_name,
                         ], JSON_UNESCAPED_UNICODE),
                         'created_at' => $media->created_at ?? now(),
@@ -275,14 +301,15 @@ class CopyMediaToFilesCommand extends Command
 
         $this->newLine();
         $this->info(sprintf(
-            '%s complete. Processed: %d, Created: %d, Updated: %d, Copied: %d, Missing: %d, File usages upserted: %d',
+            '%s complete. Processed: %d, Created: %d, Updated: %d, Copied: %d, Missing: %d, File usages upserted: %d, Missing banner_images->banner_id mappings: %d',
             $dryRun ? 'Dry run' : 'Copy',
             $processed,
             $created,
             $updated,
             $copied,
             $missing,
-            $usageCreatedOrUpdated
+            $usageCreatedOrUpdated,
+            $missingBannerImageMapping
         ));
 
         return self::SUCCESS;
