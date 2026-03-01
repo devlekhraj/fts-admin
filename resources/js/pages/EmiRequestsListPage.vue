@@ -62,7 +62,7 @@
 			</template>
 			<template #item.action="{ item }">
 				<v-btn variant="tonal" color="primary" size="x-small"
-					:to="{ name: 'emi.requests.detail', params: { id: item.id } }" icon>
+					:to="{ name: 'admin.emi.requests.detail', params: { id: item.id } }" icon>
 					<v-icon>mdi-eye</v-icon>
 				</v-btn>
 			</template>

@@ -3,13 +3,13 @@
 		<v-row align="center" justify="center">
 			<v-col cols="12" sm="8" md="5" lg="4">
 				<v-card class="pa-6">
-          <div class="d-flex justify-center mb-4">
-            <div class="text-center">
-              <v-icon size="64" color="primary">mdi-shield-account</v-icon>
-              <div class="text-subtitle-1 font-weight-semibold mt-2">Fatafat Admin</div>
-              <div class="text-caption text-medium-emphasis">Sign in to continue</div>
-            </div>
-          </div>
+					<div class="d-flex justify-center mb-4">
+						<div class="text-center">
+							<v-icon size="64" color="primary">mdi-shield-account</v-icon>
+							<div class="text-subtitle-1 font-weight-semibold mt-2">Fatafat Admin</div>
+							<div class="text-caption text-medium-emphasis">Sign in to continue</div>
+						</div>
+					</div>
 					<v-card-text>
 						<v-alert v-if="error" type="error" variant="tonal" class="mb-4">
 							{{ error }}
@@ -50,18 +50,37 @@ const form = ref();
 
 const requiredRule = (value: string) => Boolean(value) || 'Required';
 
+function resolveLoginError(caughtError: unknown): string {
+	if (typeof caughtError === 'object' && caughtError !== null) {
+		const message = (caughtError as {
+			response?: { data?: { message?: unknown } };
+		}).response?.data?.message;
+
+		if (typeof message === 'string' && message.trim()) {
+			return message;
+		}
+	}
+
+	if (caughtError instanceof Error && caughtError.message) {
+		return caughtError.message;
+	}
+
+	return 'Login failed';
+}
+
 async function onSubmit() {
+	if (loading.value) return;
+
 	error.value = '';
 	const { valid } = await form.value?.validate();
 	if (!valid) return;
 
 	loading.value = true;
 	try {
-		await authStore.login(email.value, password.value);
-		await authStore.fetchMe();
-		await router.push('/dashboard');
-	} catch (err: any) {
-		error.value = err?.response?.data?.message ?? 'Login failed';
+		await authStore.signIn(email.value, password.value);
+		await router.push({ name: 'admin.dashboard' });
+	} catch (caughtError: unknown) {
+		error.value = resolveLoginError(caughtError);
 	} finally {
 		loading.value = false;
 	}

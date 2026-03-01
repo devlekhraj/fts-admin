@@ -1,11 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+
+:root {
+    --v-font-family: 'Poppins', sans-serif;
+}
 
 html,
 body {
     height: 100%;
-    font-family: 'DM Sans', 'Poppins', sans-serif !important;
-    // font-family: 'Poppins', sans-serif !important;
+    font-family: 'Poppins', sans-serif !important;
 }
 
 body {
@@ -24,7 +26,7 @@ body {
 .text-h4,
 .text-h5,
 .text-h6 {
-    font-family: 'DM Sans', 'Poppins', sans-serif !important;
+    font-family: 'Poppins', sans-serif !important;
 }
 
 .v-navigation-drawer {
@@ -60,4 +62,17 @@ nav.v-navigation-drawer {
 
 main.v-main {
     background-color: #f8fcfe;
+}
+
+.v-list-subheader__text {
+    font-size: small !important;
+
+    &:not(:first-child) {
+        margin-top: 20px;
+    }
+}
+
+.v-navigation-drawer #side-nav-items .v-list-item-title {
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
 }

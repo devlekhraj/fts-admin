@@ -19,7 +19,7 @@ export async function login(email: string, password: string): Promise<LoginRespo
   return data;
 }
 
-export async function me(): Promise<AdminProfile> {
+export async function profile(): Promise<AdminProfile> {
   const { data } = await http.get<AdminProfile>('/auth/admin/me');
   return data;
 }

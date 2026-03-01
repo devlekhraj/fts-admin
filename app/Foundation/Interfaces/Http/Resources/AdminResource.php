@@ -12,7 +12,7 @@ class AdminResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
+            'name' => $this->fname."".($this->lname ? " ".$this->lname : ""),
             'email' => $this->email,
             'username' => $this->username ?? null,
             'role_id' => $this->role_id ?? null,

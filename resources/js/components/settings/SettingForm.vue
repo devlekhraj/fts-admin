@@ -60,7 +60,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { defineAsyncComponent, ref } from 'vue';
+
+const RichText = defineAsyncComponent(() => import('@/components/RichText.vue'));
 
 const emit = defineEmits<{ (e: 'close'): void; (e: 'saved', payload?: unknown): void }>();
 

@@ -6,11 +6,11 @@ export function applyGuards(router: Router) {
     const token = localStorage.getItem('admin_token');
 
     if (requiresAuth && !token) {
-      return { name: 'login' };
+      return { name: 'admin.login' };
     }
 
-    if (to.name === 'login' && token) {
-      return { name: 'dashboard' };
+    if (to.name === 'admin.login' && token) {
+      return { name: 'admin.dashboard' };
     }
 
     return true;
