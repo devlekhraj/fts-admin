@@ -32,9 +32,43 @@ export type BlogListResponse = {
   total?: number;
 };
 
+export type BlogFileItem = {
+  id: number | string;
+  url?: string | null;
+  title?: string | null;
+  alt_text?: string | null;
+  meta?: Record<string, unknown> | null;
+  file_size?: number | null;
+  size?: number | null;
+  height?: number | null;
+  width?: number | null;
+};
+
+export type BlogDetailResponse = BlogListItem & {
+  short_desc?: string | null;
+  content?: string | null;
+  meta_title?: string | null;
+  meta_keywords?: string | null;
+  meta_description?: string | null;
+  updated_at?: string | null;
+  category_id?: number | string | null;
+  default_file?: Record<string, unknown> | null;
+  files?: BlogFileItem[];
+  [key: string]: unknown;
+};
+
 export async function listBlogs(params?: ListBlogsParams): Promise<BlogListResponse> {
   const response = await http.get('/admin/blogs', { params });
   return response as unknown as BlogListResponse;
+}
+
+export async function getBlogDetail(id: number | string): Promise<BlogDetailResponse> {
+  const response = await http.get(`/admin/blogs/${id}`);
+  const wrapped = response as { data?: unknown };
+  if (wrapped && typeof wrapped === 'object' && 'data' in wrapped && wrapped.data) {
+    return wrapped.data as BlogDetailResponse;
+  }
+  return response as unknown as BlogDetailResponse;
 }
 
 export function list(params?: ListBlogsParams) {

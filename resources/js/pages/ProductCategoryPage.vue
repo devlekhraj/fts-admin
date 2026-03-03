@@ -53,6 +53,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
@@ -96,6 +97,7 @@ const options = ref<DataTableOptions>({
   sortBy: [],
 });
 const hasLoadedOnce = ref(false);
+const router = useRouter();
 
 function onExport(type: ExportType) {
   // TODO: replace with real export API/download logic.
@@ -103,8 +105,7 @@ function onExport(type: ExportType) {
 }
 
 function onView(category: ProductCategory) {
-  // TODO: replace with view detail route/modal action.
-  console.log('View category:', category.id);
+  router.push({ name: 'admin.product.categories.detail', params: { id: category.id } });
 }
 
 function onDelete(category: ProductCategory) {

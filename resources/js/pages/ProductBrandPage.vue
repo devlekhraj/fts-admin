@@ -66,6 +66,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
@@ -73,6 +74,7 @@ import { listBrands, type ProductBrandListItem } from '@/api/products.api';
 import { formatLongDate } from '@/shared/utils';
 
 type ProductBrand = {
+  id: number | string;
   name: string;
   logo: string;
   slug: string;
@@ -107,6 +109,7 @@ const options = ref<DataTableOptions>({
   sortBy: [],
 });
 const hasLoadedOnce = ref(false);
+const router = useRouter();
 
 function onExport(type: ExportType) {
   // TODO: replace with real export API/download logic.
@@ -114,8 +117,7 @@ function onExport(type: ExportType) {
 }
 
 function onView(brand: ProductBrand) {
-  // TODO: replace with view detail route/modal action.
-  console.log('View brand:', brand.slug);
+  router.push({ name: 'admin.product.brands.detail', params: { id: brand.id } });
 }
 
 function onDelete(brand: ProductBrand) {
@@ -133,10 +135,11 @@ async function fetchBrands() {
 
     const list = Array.isArray(response) ? response : response?.data ?? [];
     items.value = list.map((brand: ProductBrandListItem) => ({
+      id: brand.id,
       name: brand.name ?? '-',
       logo: typeof brand.logo === 'string' ? brand.logo : '',
       slug: brand.slug ?? '-',
-      status: brand.status,
+      status: Boolean(brand.status),
       total_products: Number(brand.total_products ?? 0),
       created_at: brand.created_at ?? '',
     }));

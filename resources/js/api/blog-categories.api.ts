@@ -33,9 +33,42 @@ export type BlogCategoryListPaginatedResponse = {
 
 export type BlogCategoryListResponse = BlogCategoryListItem[] | BlogCategoryListPaginatedResponse;
 
+export type BlogCategoryFileItem = {
+  id: number | string;
+  url?: string | null;
+  title?: string | null;
+  alt_text?: string | null;
+  meta?: Record<string, unknown> | null;
+  file_size?: number | null;
+  size?: number | null;
+  height?: number | null;
+  width?: number | null;
+};
+
+export type BlogCategoryDetailResponse = BlogCategoryListItem & {
+  short_desc?: string | null;
+  content?: string | null;
+  meta_title?: string | null;
+  meta_keywords?: string | null;
+  meta_description?: string | null;
+  deleted_at?: string | null;
+  updated_at?: string | null;
+  default_file?: Record<string, unknown> | null;
+  files?: BlogCategoryFileItem[];
+};
+
 export async function listBlogCategories(params?: ListBlogCategoriesParams): Promise<BlogCategoryListResponse> {
   const response = await http.get('/admin/blog-categories', { params });
   return response as unknown as BlogCategoryListResponse;
+}
+
+export async function getBlogCategoryDetail(id: number | string): Promise<BlogCategoryDetailResponse> {
+  const response = await http.get(`/admin/blog-categories/${id}`);
+  const wrapped = response as { data?: unknown };
+  if (wrapped && typeof wrapped === 'object' && 'data' in wrapped && wrapped.data) {
+    return wrapped.data as BlogCategoryDetailResponse;
+  }
+  return response as unknown as BlogCategoryDetailResponse;
 }
 
 export function list(params?: ListBlogCategoriesParams) {

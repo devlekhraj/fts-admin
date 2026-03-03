@@ -1,1 +1,0 @@
-function n(t){if(typeof t!="string"||!t)return null;const e=new Date(t);return Number.isNaN(e.getTime())?null:new Intl.DateTimeFormat("en-US",{month:"short",day:"numeric",year:"numeric"}).format(e)}function r(t){if(typeof t!="string"||!t)return"-";const e=t.replace(/\D/g,"");return e.length===10?`(${e.slice(0,3)}) ${e.slice(3,6)}-${e.slice(6)}`:t}export{r as a,n as f};

@@ -12,6 +12,9 @@ class FileModel extends BaseModel
     protected $table = 'files';
 
     protected $appends = ['url'];
+    protected $casts = [
+        'meta' => 'array',
+    ];
 
     public function getUrlAttribute(): ?string
     {

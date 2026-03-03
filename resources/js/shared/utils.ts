@@ -21,3 +21,17 @@ export function formatPhoneNumber(value: unknown): string {
 
   return value;
 }
+
+export function underscoreToSpace(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  return String(value).replaceAll('_', ' ');
+}
+
+export function formatBytes(value: number | null | undefined): string {
+  const size = Number(value ?? 0);
+  if (!Number.isFinite(size) || size <= 0) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const index = Math.min(Math.floor(Math.log(size) / Math.log(1024)), units.length - 1);
+  const amount = size / 1024 ** index;
+  return `${amount.toFixed(index === 0 ? 0 : 2)} ${units[index]}`;
+}

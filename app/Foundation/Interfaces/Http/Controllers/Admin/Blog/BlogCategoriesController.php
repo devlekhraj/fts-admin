@@ -58,9 +58,16 @@ class BlogCategoriesController extends Controller
         ]);
     }
 
-    public function show(string $id): JsonResponse
+    public function categoryShow(string $id)
     {
-        return response()->json(['id' => $id]);
+        $category = BlogCategoryModel::query()
+            ->with(['defaultFile','files'])
+            ->findOrFail($id);
+
+        return Response([
+            "data" => (new BlogCategoryResource($category)),
+            "success" => true,
+        ],200);
     }
 
     public function store(): JsonResponse

@@ -31,6 +31,31 @@ export type ProductCategoryListResponse = {
   total?: number;
 };
 
+export type ProductCategoryFileItem = {
+  id: number | string;
+  url?: string | null;
+  title?: string | null;
+  alt_text?: string | null;
+  meta?: Record<string, unknown> | null;
+  file_size?: number | null;
+  size?: number | null;
+  height?: number | null;
+  width?: number | null;
+};
+
+export type ProductCategoryDetailResponse = ProductCategoryListItem & {
+  short_desc?: string | null;
+  content?: string | null;
+  description?: string | null;
+  meta_title?: string | null;
+  meta_keywords?: string | null;
+  meta_description?: string | null;
+  updated_at?: string | null;
+  default_file?: Record<string, unknown> | null;
+  files?: ProductCategoryFileItem[];
+  [key: string]: unknown;
+};
+
 export async function listProductCategories(
   params?: ListProductCategoriesParams,
 ): Promise<ProductCategoryListResponse> {
@@ -38,7 +63,15 @@ export async function listProductCategories(
   return response as unknown as ProductCategoryListResponse;
 }
 
-export async function getProductCategory(id: number | string): Promise<ProductCategoryListItem> {
+export async function getProductCategory(id: number | string): Promise<ProductCategoryDetailResponse> {
   const response = await http.get(`/admin/product-categories/${id}`);
-  return response as unknown as ProductCategoryListItem;
+  const wrapped = response as { data?: unknown };
+  if (wrapped && typeof wrapped === 'object' && 'data' in wrapped && wrapped.data) {
+    return wrapped.data as ProductCategoryDetailResponse;
+  }
+  return response as unknown as ProductCategoryDetailResponse;
+}
+
+export function updateProductCategory(id: string, payload: Record<string, unknown>) {
+  return http.put(`/admin/product-categories/${id}`, payload);
 }

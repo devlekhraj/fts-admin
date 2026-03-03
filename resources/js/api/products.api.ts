@@ -47,6 +47,7 @@ export type ListBrandsParams = {
 };
 
 export type ProductBrandListItem = {
+  id: number | string;
   name?: string | null;
   logo?: string | null;
   slug?: string | null;
@@ -71,9 +72,47 @@ export type ProductBrandListResponse = {
   total?: number;
 };
 
+export type ProductBrandFileItem = {
+  id: number | string;
+  url?: string | null;
+  title?: string | null;
+  alt_text?: string | null;
+  meta?: Record<string, unknown> | null;
+  file_size?: number | null;
+  size?: number | null;
+  height?: number | null;
+  width?: number | null;
+};
+
+export type ProductBrandDetailResponse = ProductBrandListItem & {
+  short_desc?: string | null;
+  content?: string | null;
+  description?: string | null;
+  meta_title?: string | null;
+  meta_keywords?: string | null;
+  meta_description?: string | null;
+  updated_at?: string | null;
+  default_file?: Record<string, unknown> | null;
+  files?: ProductBrandFileItem[];
+  [key: string]: unknown;
+};
+
 export async function listBrands(params?: ListBrandsParams): Promise<ProductBrandListResponse> {
   const response = await http.get('/admin/brands', { params });
   return response as unknown as ProductBrandListResponse;
+}
+
+export async function getBrandDetail(id: number | string): Promise<ProductBrandDetailResponse> {
+  const response = await http.get(`/admin/brands/${id}`);
+  const wrapped = response as { data?: unknown };
+  if (wrapped && typeof wrapped === 'object' && 'data' in wrapped && wrapped.data) {
+    return wrapped.data as ProductBrandDetailResponse;
+  }
+  return response as unknown as ProductBrandDetailResponse;
+}
+
+export function updateBrand(id: string, payload: Record<string, unknown>) {
+  return http.put(`/admin/brands/${id}`, payload);
 }
 
 export function create(payload: Record<string, unknown>) {

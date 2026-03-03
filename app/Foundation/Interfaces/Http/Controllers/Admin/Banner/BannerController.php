@@ -62,7 +62,12 @@ class BannerController extends Controller
 
     public function show(string $id): JsonResponse
     {
-        return response()->json(['id' => $id]);
+        $banner = BannerModel::query()
+            ->with(['defaultFile', 'files'])
+            ->withCount(['files as total_images'])
+            ->findOrFail($id);
+
+        return response()->json((new BannerResource($banner))->resolve());
     }
 
     public function store(): JsonResponse

@@ -57,4 +57,32 @@ class ProductBrandController extends Controller
             ],
         ]);
     }
+
+    public function brandShow(string $id): JsonResponse
+    {
+        $brand = ProductBrandModel::query()
+            ->with(['defaultFile', 'files'])
+            ->withCount('products')
+            ->findOrFail($id);
+
+        return response()->json([
+            'data' => (new ProductBrandResource($brand)),
+            'success' => true,
+        ], 200);
+    }
+
+    public function store(): JsonResponse
+    {
+        return response()->json([], 201);
+    }
+
+    public function update(string $id): JsonResponse
+    {
+        return response()->json(['id' => $id]);
+    }
+
+    public function destroy(string $id): JsonResponse
+    {
+        return response()->json(null, 204);
+    }
 }

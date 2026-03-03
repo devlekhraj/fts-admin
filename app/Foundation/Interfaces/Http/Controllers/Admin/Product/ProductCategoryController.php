@@ -57,12 +57,20 @@ class ProductCategoryController extends Controller
         ]);
     }
 
-    public function show(int $id): JsonResponse
+    public function categoryShow(int $id): JsonResponse
     {
         $category = ProductCategoryModel::query()
-            ->with('defaultFile')
+            ->with(['defaultFile', 'files'])
             ->findOrFail($id);
 
-        return response()->json(new ProductCategoryResource($category));
+        return response()->json([
+            'data' => (new ProductCategoryResource($category)),
+            'success' => true,
+        ], 200);
+    }
+
+    public function update(string $id): JsonResponse
+    {
+        return response()->json(['id' => $id]);
     }
 }

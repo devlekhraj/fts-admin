@@ -28,8 +28,10 @@ const routes: RouteRecordRaw[] = [
       // blogs
       { path: 'blogs', name: 'admin.blogs.list', component: () => import('@/pages/BlogPage.vue'), meta: { title: 'All Blogs' } },
       { path: 'blogs-create', name: 'admin.blogs.create', component: () => import('@/pages/BlogCreatePage.vue'), meta: { title: 'Create Blog' } },
+      { path: 'blogs/:id', name: 'admin.blogs.detail', component: () => import('@/pages/BlogDetailPage.vue'), meta: { title: 'Blog Detail' } },
       { path: 'blogs/:id/edit', name: 'admin.blogs.edit', component: () => import('@/pages/BlogEditPage.vue'), meta: { title: 'Edit Blog' } },
       { path: 'blog-categories', name: 'admin.blogCategories.list', component: () => import('@/pages/BlogCategoryPage.vue'), meta: { title: 'Blog Categories' } },
+      { path: 'blog-categories/:id', name: 'admin.blogCategories.detail', component: () => import('@/pages/BlogCategoryDetailPage.vue'), meta: { title: 'Blog Category Detail' } },
       // orders
       { path: 'orders', name: 'admin.orders.list', component: () => import('@/pages/OrdersListPage.vue'), meta: { title: 'All Orders' } },
       { path: 'pre-orders', name: 'admin.orders.pre', component: () => import('@/pages/PreOrdersListPage.vue'), meta: { title: 'Pre Orders' } },
@@ -43,16 +45,22 @@ const routes: RouteRecordRaw[] = [
       { path: 'product-create', name: 'admin.product.create', component: () => import('@/pages/ProductCreatePage.vue'), meta: { title: 'Create Product' } },
       { path: 'product/:id/edit', name: 'admin.product.edit', component: () => import('@/pages/ProductEditPage.vue'), meta: { title: 'Edit Product' } },
       { path: 'product-categories', name: 'admin.product.categories', component: () => import('@/pages/ProductCategoryPage.vue'), meta: { title: 'Categories' } },
+      { path: 'product-categories/:id', name: 'admin.product.categories.detail', component: () => import('@/pages/ProductCategoryDetailPage.vue'), meta: { title: 'Category Detail' } },
       { path: 'product-brands', name: 'admin.product.brands', component: () => import('@/pages/ProductBrandPage.vue'), meta: { title: 'Brands' } },
+      { path: 'product-brands/:id', name: 'admin.product.brands.detail', component: () => import('@/pages/ProductBrandDetailPage.vue'), meta: { title: 'Brand Detail' } },
       { path: 'product-attributes', name: 'admin.product.attributes', component: () => import('@/pages/ProductAttributePage.vue'), meta: { title: 'Attributes' } },
       
       { path: 'treks-regions', name: 'admin.treks.regions', component: () => import('@/pages/TreksRegionsPage.vue'), meta: { title: 'Regions' } },
       { path: 'treks-list', name: 'admin.treks.list', component: () => import('@/pages/TreksListPage.vue'), meta: { title: 'Tour / Treks' } },
       { path: 'treks-fixed-departure', name: 'admin.treks.fixed.departure', component: () => import('@/pages/TreksFixedDeparturePage.vue'), meta: { title: 'Fixed Departure' } },
       { path: 'treks-guide-profile', name: 'admin.treks.guide.profile', component: () => import('@/pages/TreksGuideProfilePage.vue'), meta: { title: 'Guide Profile' } },
+      
       // marketing
-      { path: 'marketing-banners', name: 'admin.banners.list', component: () => import('@/pages/BannersListPage.vue'), meta: { title: 'Banners' } },
+      { path: 'marketing-banners', name: 'admin.banners.list', component: () => import('@/pages/BannerPage.vue'), meta: { title: 'Banners' } },
+      { path: 'marketing-banners/:id', name: 'admin.banners.detail', component: () => import('@/pages/BannerDetailPage.vue'), meta: { title: 'Banner Detail' } },
       { path: 'marketing-campaigns', name: 'admin.campaigns.list', component: () => import('@/pages/CampaignsListPage.vue'), meta: { title: 'Campaigns' } },
+      
+      
       { path: 'pages', name: 'admin.pages.list', component: () => import('@/pages/PagesListPage.vue'), meta: { title: 'Pages' } },
       { path: 'inquiries', name: 'admin.inquiries.list', component: () => import('@/pages/InquiriesListPage.vue'), meta: { title: 'Inquiries' } },
       { path: 'user-lists', name: 'admin.users.list', component: () => import('@/pages/UserListsPage.vue'), meta: { title: 'User Lists' } },

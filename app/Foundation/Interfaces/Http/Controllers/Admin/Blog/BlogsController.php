@@ -60,7 +60,14 @@ class BlogsController extends Controller
 
     public function blogShow(string $id): JsonResponse
     {
-        return response()->json(['id' => $id]);
+        $blog = BlogModel::query()
+            ->with(['defaultFile', 'files', 'category'])
+            ->findOrFail($id);
+
+        return response()->json([
+            'data' => (new BlogResource($blog)),
+            'success' => true,
+        ], 200);
     }
 
     public function blogStore(): JsonResponse

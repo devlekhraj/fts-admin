@@ -69,6 +69,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
@@ -110,6 +111,7 @@ const options = ref<DataTableOptions>({
   sortBy: [],
 });
 const hasLoadedOnce = ref(false);
+const router = useRouter();
 
 const CATEGORY_COLORS: Record<string, string> = {
   news: 'primary',
@@ -124,8 +126,7 @@ function onExport(type: ExportType) {
 }
 
 function onView(blog: Blog) {
-  // TODO: replace with view/edit route action.
-  console.log('View blog:', blog.slug);
+  router.push({ name: 'admin.blogs.detail', params: { id: blog.id } });
 }
 
 function onDelete(blog: Blog) {
