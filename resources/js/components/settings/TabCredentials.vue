@@ -8,7 +8,7 @@
 					<v-text-field v-model="form.smtp.mail_host" density="comfortable" variant="outlined" />
 				</div>
 				<div>
-					<div class="text-body-2 text-medium-emphasis mb-1">Mail Port</div>
+					<div class="text-body-2 text-medium-emphasis mb-1">Mail Port adsfas</div>
 					<v-text-field v-model="form.smtp.mail_port" density="comfortable" variant="outlined" />
 				</div>
 				<div>
