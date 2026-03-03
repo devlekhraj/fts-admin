@@ -11,16 +11,15 @@ class BannerModel extends BaseModel
 {
     protected $table = 'banners';
 
-
     protected $casts = [
         'status' => 'boolean',
     ];
 
-     public function bannerImages(){
+    public function bannerImages()
+    {
         return $this->hasMany(BannerImageModel::class, 'banner_id');
     }
-    
-    
+
     public function files(): BelongsToMany
     {
         return $this->belongsToMany(FileModel::class, 'file_usages', 'usage_id', 'file_id')
@@ -37,6 +36,4 @@ class BannerModel extends BaseModel
             ->orderByPivot('id', 'desc')
             ->limit(1);
     }
-
-   
 }

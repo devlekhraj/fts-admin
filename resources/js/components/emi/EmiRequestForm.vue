@@ -115,8 +115,8 @@ async function fetchBanks() {
 async function fetchRequest() {
 	if (!props.id || applicationData.value) return;
 	try {
-		const { data } = await getEmiRequest(String(props.id));
-		applicationData.value = data?.data ?? data ?? null;
+		const detail = await getEmiRequest(String(props.id));
+		applicationData.value = detail ?? null;
 	} finally {
 	}
 }

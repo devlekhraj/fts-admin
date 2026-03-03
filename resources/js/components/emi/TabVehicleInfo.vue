@@ -1,15 +1,14 @@
 <template>
-  <v-container fluid>
+  <v-container class="pt-0" fluid>
     <v-row>
       <v-col cols="12" lg="6" offset-lg="3">
-        <v-card class="pa-4">
-          <v-table>
-            <thead>
-              <tr>
-                <th>Field</th>
-                <th class="text-right">Value</th>
-              </tr>
-            </thead>
+        <div>
+          <div class="pt-10">
+            <div class="text-h6 mb-1">Vehicle Info</div>
+            <div class="text-body-2 text-medium-emphasis mb-4">Vehicle and financing details for this EMI request.</div>
+          </div>
+          <v-table density="comfortable">
+           
             <tbody>
               <tr>
                 <td>Vehicle</td>
@@ -33,7 +32,7 @@
               </tr>
             </tbody>
           </v-table>
-        </v-card>
+        </div>
       </v-col>
     </v-row>
   </v-container>

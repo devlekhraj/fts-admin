@@ -1,30 +1,6 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-// import axios from '@/axios.config'
-import {
-    BaseKit,
-    Bold,
-    Color,
-    TextAlign,
-    Heading,
-    Highlight,
-    History,
-    Image,
-    Italic,
-    Link,
-    Strike,
-    Table,
-    Underline,
-    Video,
-    BulletList,
-    OrderedList,
-    VuetifyTiptap,
-    Code,
-    CodeBlock,
-    HorizontalRule,
-    Blockquote
-} from 'vuetify-pro-tiptap'
-import 'vuetify-pro-tiptap/style.css'
+import { computed, onMounted, ref, shallowRef, watch } from 'vue'
+import { http } from '@/api/http'
 
 const props = withDefaults(defineProps<{
     modelValue: string
@@ -36,6 +12,10 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits(['update:modelValue'])
 
 const content = ref(props.modelValue)
+const editorReady = ref(false)
+const editorError = ref<string | null>(null)
+const editorComponent = shallowRef<any>(null)
+const extensions = ref<any[]>([])
 
 watch(content, (val) => emit('update:modelValue', val))
 watch(() => props.modelValue, (val) => {
@@ -55,57 +35,94 @@ const numericMinHeight = computed(() => {
     return Number.isFinite(parsed) ? parsed : 400
 })
 
-const extensions = [
-    BaseKit.configure({
-        placeholder: {
-            placeholder: 'Type here...'
-        }
-    }),
-    Bold,
-    BulletList,
-    OrderedList,
-    Italic,
-    Underline,
-    Strike,
-    Color,
-    Highlight,
-    Heading,
-    Link,
-    Code,
-    CodeBlock,
-    Blockquote,
-    HorizontalRule,
-    Image.configure({
-        inline: false,
-        allowBase64: false,
-        upload(file) {
-            const formData = new FormData();
-            formData.append('image', file);
+onMounted(async () => {
+    try {
+        const mod = await import('vuetify-pro-tiptap')
+        await import('vuetify-pro-tiptap/style.css')
 
-            return axios.post('/admin/gallery-upload', formData)
-                .then(response => {
-                    console.log(response.url);
-                    if (response && response.url) {
-                        return response.url; // must return URL string here!
-                    }
-                    return Promise.reject('Upload failed');
-                })
-                .catch(err => {
-                    console.error('Upload error:', err);
-                    return Promise.reject(err);
-                });
-        }
-    }),
+        const {
+            BaseKit,
+            Bold,
+            Color,
+            TextAlign,
+            Heading,
+            Highlight,
+            History,
+            Image,
+            Italic,
+            Link,
+            Strike,
+            Table,
+            Underline,
+            Video,
+            BulletList,
+            OrderedList,
+            VuetifyTiptap,
+            Code,
+            HorizontalRule,
+            Blockquote,
+        } = mod
 
-    Video,
-    Table,
-    History,
-    TextAlign,
+        extensions.value = [
+            BaseKit.configure({
+                placeholder: {
+                    placeholder: 'Type here...'
+                }
+            }),
+            Bold,
+            BulletList,
+            OrderedList,
+            Italic,
+            Underline,
+            Strike,
+            Color,
+            Highlight,
+            Heading,
+            Link,
+            Code,
+            Blockquote,
+            HorizontalRule,
+            Image.configure({
+                inline: false,
+                allowBase64: false,
+                upload(file: File) {
+                    const formData = new FormData()
+                    formData.append('image', file)
+                    return http.post('/admin/gallery-upload', formData).then((response: any) => {
+                        const payload = response?.data ?? response
+                        if (payload?.url) return payload.url
+                        return Promise.reject('Upload failed')
+                    })
+                }
+            }),
+            Table,
+            History,
+            TextAlign,
+        ]
 
-]
+        editorComponent.value = VuetifyTiptap
+        editorReady.value = true
+    } catch {
+        editorError.value = 'Failed to load editor'
+    }
+})
 </script>
 
 <template>
-    <VuetifyTiptap v-model="content" :min-height="numericMinHeight" class="p-4" :style="{ minHeight: cssMinHeight }"
-        :placeholder="'Type here...'" :toolbar="true" :toolbar-position="'top'" :extensions="extensions" />
+    <component
+        :is="editorComponent"
+        v-if="editorReady && editorComponent"
+        v-model="content"
+        :min-height="numericMinHeight"
+        class="p-4"
+        :style="{ minHeight: cssMinHeight }"
+        :placeholder="'Type here...'"
+        :toolbar="true"
+        :toolbar-position="'top'"
+        :extensions="extensions"
+    />
+    <v-alert v-else-if="editorError" type="error" variant="tonal" density="comfortable">
+        {{ editorError }}
+    </v-alert>
+    <v-skeleton-loader v-else type="article, actions" />
 </template>

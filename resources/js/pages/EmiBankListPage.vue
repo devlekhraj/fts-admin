@@ -86,14 +86,14 @@ const hasLoadedOnce = ref(false);
 async function fetchRequests() {
     loading.value = true;
     try {
-        const { data } = await listEmiRequests({
+        const response = await listEmiRequests({
             page: options.value.page,
             per_page: options.value.itemsPerPage,
         });
 
-        const list = Array.isArray(data) ? data : data?.data ?? [];
+        const list = Array.isArray(response?.data) ? response.data : [];
         items.value = list;
-        total.value = data?.total ?? data?.meta?.total ?? list.length;
+        total.value = Number(response?.total ?? response?.meta?.total ?? list.length);
     } finally {
         loading.value = false;
     }

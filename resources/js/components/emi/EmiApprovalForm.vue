@@ -101,8 +101,8 @@ async function handleSubmit() {
 
     loading.value = true;
     try {
-        const { data: response } = await approveApplication(payload.application_id, payload);
-        emit('saved', response ?? payload);
+        const response = await approveApplication(payload.application_id, payload);
+		emit('saved', response ?? payload);
         emit('close');
     } catch (error) {
         console.error('Failed to approve application:', error);

@@ -9,7 +9,6 @@ use App\Foundation\Interfaces\Http\Requests\Admin\ApproveEmiRequestRequest;
 use App\Foundation\Interfaces\Http\Requests\Admin\StoreEmiRequestRequest;
 use App\Foundation\Interfaces\Http\Requests\Admin\UpdateEmiRequestRequest;
 use App\Foundation\Interfaces\Http\Resources\EmiRequestListResource;
-use App\Foundation\Interfaces\Http\Resources\EmiRequestResource;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -24,7 +23,7 @@ class EmiRequestsController extends Controller
         $status = $request->query('status');
 
         $query = EmiRequestModel::query()
-            ->with(['product', 'user']);
+            ->with(['product.defaultFile', 'user']);
 
         if ($search !== '') {
             $query->where(function ($builder) use ($search) {
@@ -63,9 +62,11 @@ class EmiRequestsController extends Controller
 
     public function show(string $id): JsonResponse
     {
-        $record = EmiRequestModel::query()->findOrFail($id);
+        $record = EmiRequestModel::query()
+            ->with(['product.defaultFile', 'user'])
+            ->findOrFail($id);
 
-        return response()->json(new EmiRequestResource($record));
+        return response()->json(new EmiRequestListResource($record));
     }
 
     public function store(StoreEmiRequestRequest $request): JsonResponse

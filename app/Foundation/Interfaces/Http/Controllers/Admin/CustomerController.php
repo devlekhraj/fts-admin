@@ -7,14 +7,17 @@ namespace App\Foundation\Interfaces\Http\Controllers\Admin;
 use App\Foundation\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use App\Foundation\Interfaces\Http\Resources\CustomerResource;
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class CustomerController extends Controller
 {
-    public function adminList(Request $request): JsonResponse
+    public function customerList(Request $request): JsonResponse
     {
-        $query = UserModel::query()
+        $query = $this->withCountColumns(UserModel::query())
             ->orderByDesc('created_at');
 
         if ($search = $request->query('search')) {
@@ -55,5 +58,47 @@ class CustomerController extends Controller
                 'to' => $paginator->lastItem(),
             ],
         ]);
+    }
+
+    public function customerDetail(string $id): JsonResponse
+    {
+        $customer = $this->withCountColumns(
+            UserModel::query()->with('shippingAddress')
+        )
+            ->findOrFail($id);
+
+        return response()->json([
+            'data' => (new CustomerResource($customer)),
+            'success' => true,
+        ], 200);
+    }
+
+    private function withCountColumns(Builder $query): Builder
+    {
+        $query->select('users.*');
+
+        if (Schema::hasTable('orders')) {
+            $query->selectSub(
+                DB::table('orders')
+                    ->selectRaw('COUNT(*)')
+                    ->whereColumn('orders.user_id', 'users.id'),
+                'total_order'
+            );
+        } else {
+            $query->selectRaw('0 as total_order');
+        }
+
+        if (Schema::hasTable('emi_requests')) {
+            $query->selectSub(
+                DB::table('emi_requests')
+                    ->selectRaw('COUNT(*)')
+                    ->whereColumn('emi_requests.user_id', 'users.id'),
+                'total_emi'
+            );
+        } else {
+            $query->selectRaw('0 as total_emi');
+        }
+
+        return $query;
     }
 }

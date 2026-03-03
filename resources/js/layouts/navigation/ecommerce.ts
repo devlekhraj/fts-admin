@@ -10,6 +10,7 @@ export const ecommerceNav: NavGroup[] = [
         links: [
             { title: 'Orders', to: { name: 'admin.orders.list' }, icon: 'mdi-cart-outline' },
             { title: 'Customers', to: { name: 'admin.customers.list' }, icon: 'mdi-account-group-outline' },
+            { title: 'EMI Requests', to: { name: 'admin.emi.requests' }, icon: 'mdi-cash-multiple' },
         ],
     },
     {

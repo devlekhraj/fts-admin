@@ -50,6 +50,9 @@
         {{ item.emi_enabled ? 'Enabled' : 'Disabled' }}
       </v-chip>
     </template>
+    <template #item.created_at="{ item }">
+      <span>{{ formatLongDate(item.created_at) ?? '-' }}</span>
+    </template>
     <template #item.action="{ item }">
       <div class="d-flex align-center ga-1">
         <v-btn icon size="x-small" variant="tonal" color="primary" @click="onView(item)">
@@ -65,10 +68,12 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
 import { listProducts, type ProductListItem } from '@/api/products.api';
+import { formatLongDate } from '@/shared/utils';
 
 type Product = {
   id: number | string;
@@ -76,6 +81,7 @@ type Product = {
   slug: string;
   status: boolean;
   emi_enabled: boolean;
+  created_at: string;
   thumb: string;
 };
 
@@ -92,6 +98,7 @@ const headers = [
   { title: 'Slug', key: 'slug', sortable: false, minWidth: '220' },
   { title: 'Status', key: 'status', sortable: false, minWidth: '140' },
   { title: 'EMI', key: 'emi_enabled', sortable: false, minWidth: '140' },
+  { title: 'Created', key: 'created_at', sortable: false, minWidth: '170' },
   { title: 'Actions', key: 'action', sortable: false, minWidth: '120' },
 ];
 
@@ -104,6 +111,7 @@ const options = ref<DataTableOptions>({
   sortBy: [],
 });
 const hasLoadedOnce = ref(false);
+const router = useRouter();
 
 function onExport(type: ExportType) {
   // TODO: replace with real export API/download logic.
@@ -111,8 +119,7 @@ function onExport(type: ExportType) {
 }
 
 function onView(product: Product) {
-  // TODO: replace with view detail route/modal action.
-  console.log('View product:', product.slug);
+  router.push({ name: 'admin.product.detail', params: { id: product.id } });
 }
 
 function onDelete(product: Product) {
@@ -135,6 +142,7 @@ async function fetchProducts() {
       slug: product.slug ?? '-',
       status: Boolean(product.status),
       emi_enabled: Boolean(product.emi_enabled),
+      created_at: typeof product.created_at === 'string' ? product.created_at : '',
       thumb: typeof product.thumb === 'string' ? product.thumb : '',
     }));
     total.value = Number(response?.total ?? response?.meta?.total ?? list.length);

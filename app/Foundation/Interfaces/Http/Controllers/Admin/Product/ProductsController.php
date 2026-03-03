@@ -60,8 +60,14 @@ class ProductsController extends Controller
 
     public function show(string $id): JsonResponse
     {
-        // TODO: Show single product.
-        return response()->json(['id' => $id]);
+        $product = ProductModel::query()
+            ->with(['defaultFile', 'files'])
+            ->findOrFail($id);
+
+        return response()->json([
+            'data' => (new ProductResource($product)),
+            'success' => true,
+        ], 200);
     }
 
     public function store(): JsonResponse

@@ -3,10 +3,10 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "vite build",
-        "dev": "vite",
-        "admin:dev": "vite",
-        "admin:build": "vite build",
+        "build": "vite build --mode production",
+        "dev": "vite --mode development",
+        "admin:dev": "vite --mode development",
+        "admin:build": "vite build --mode production",
         "admin:preview": "vite preview --port 4174"
     },
     "devDependencies": {

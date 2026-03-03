@@ -7,7 +7,9 @@ use App\Foundation\Interfaces\Http\Controllers\Admin\CustomerController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
-    Route::get('customer-list', [CustomerController::class, 'adminList'])->name('admin.customer-list');
+    Route::get('customer-list', [CustomerController::class, 'customerList'])->name('admin.customers.list');
+    Route::get('customers/{id}', [CustomerController::class, 'customerDetail'])->name('admin.customers.detail');
+
     Route::post('customer-save', [CustomerController::class, 'saveCustomer'])->name('admin.customer-create');
 
     // update routes

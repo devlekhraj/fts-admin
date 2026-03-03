@@ -16,6 +16,7 @@ export type ProductListItem = {
   slug?: string | null;
   status: boolean;
   emi_enabled: boolean;
+  created_at?: string | null;
   thumb?: string | null;
   [key: string]: unknown;
 };
@@ -35,9 +36,43 @@ export type ProductListResponse = {
   total?: number;
 };
 
+export type ProductFileItem = {
+  id: number | string;
+  url?: string | null;
+  title?: string | null;
+  alt_text?: string | null;
+  meta?: Record<string, unknown> | null;
+  file_size?: number | null;
+  size?: number | null;
+  height?: number | null;
+  width?: number | null;
+};
+
+export type ProductDetailResponse = ProductListItem & {
+  short_desc?: string | null;
+  content?: string | null;
+  description?: string | null;
+  meta_title?: string | null;
+  meta_keywords?: string | null;
+  meta_description?: string | null;
+  updated_at?: string | null;
+  default_file?: Record<string, unknown> | null;
+  files?: ProductFileItem[];
+  [key: string]: unknown;
+};
+
 export async function listProducts(params?: ListProductsParams): Promise<ProductListResponse> {
   const response = await http.get('/admin/products', { params });
   return response as unknown as ProductListResponse;
+}
+
+export async function getProductDetail(id: number | string): Promise<ProductDetailResponse> {
+  const response = await http.get(`/admin/products/${id}`);
+  const wrapped = response as { data?: unknown };
+  if (wrapped && typeof wrapped === 'object' && 'data' in wrapped && wrapped.data) {
+    return wrapped.data as ProductDetailResponse;
+  }
+  return response as unknown as ProductDetailResponse;
 }
 
 export type ListBrandsParams = {

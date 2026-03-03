@@ -1,46 +1,58 @@
 <template>
-	<v-card elevation="0" class="pa-4">
-		<div class="info-card">
-			<div class="d-flex align-center justify-space-between mb-2">
+	<v-container class="pt-0" fluid>
+		<v-row>
+			<v-col cols="12" lg="8" offset-lg="2">
 				<div>
-					<h4>Generated Requests</h4>
+					<div class="pt-10">
+						<div class="d-flex align-center justify-space-between flex-wrap ga-3 mb-4">
+							<div>
+								<div class="text-h6 mb-1">Application</div>
+								<div class="text-body-2 text-medium-emphasis">Generated bank applications and approval status.</div>
+							</div>
+							<v-btn
+								v-if="String(props.data?.status ?? '').toLowerCase() !== 'approved'"
+								color="primary"
+								variant="flat"
+								prepend-icon="mdi-file-plus"
+								@click="modalGenerate()">
+								Generate Application
+							</v-btn>
+						</div>
+					</div>
+					<div>
+						<v-data-table :headers="headers" :items="items" density="comfortable" class="elevation-0"
+							:loading="loading">
+							<template #item.status="{ item }">
+								<div class="">
+									<v-chip class="text-capitalize"
+										:color="(item.status.toLowerCase()) === 'approved' ? 'success' : 'warning'"
+										text-color="white" size="small">
+										{{ item.status ?? '--' }}
+									</v-chip>
+								</div>
+							</template>
+							<template #item.action="{ item }">
+								<div class="d-flex justify-end gap-2">
+									<v-btn variant="tonal" color="primary" class="mr-4" size="x-small" icon
+										:disabled="!item.path" @click="openFile(item.path)">
+										<v-icon>mdi-eye</v-icon>
+									</v-btn>
+									<v-btn variant="tonal" color="primary" class="mr-4" size="x-small" icon
+										:disabled="!item.path" @click="handleApprove(item)">
+										<v-icon>mdi-email-arrow-right</v-icon>
+									</v-btn>
+									<v-btn variant="tonal" color="primary" size="x-small" icon :disabled="!item.path"
+										@click="downloadFile(item.path)">
+										<v-icon>mdi-download</v-icon>
+									</v-btn>
+								</div>
+							</template>
+						</v-data-table>
+					</div>
 				</div>
-				<v-btn color="primary" @click="modalGenerate()" v-if="props.data?.status.toLowerCase() !== 'approved'">
-					<v-icon left>mdi-file-plus</v-icon>
-					Generate Now
-				</v-btn>
-			</div>
-			<v-divider class="my-2" />
-			<v-data-table :headers="headers" :items="items" density="comfortable" class="elevation-0"
-				:loading="loading">
-				<template #item.status="{ item }">
-					<div class="">
-						<v-chip class="text-capitalize" :color="(item.status.toLowerCase()) === 'approved' ? 'success' : 'warning'"
-							text-color="white" size="small">
-							{{ item.status ?? '--' }}
-						</v-chip>
-					</div>
-				</template>
-				<template #item.action="{ item }">
-					<div class="d-flex justify-end gap-2">
-						<v-btn variant="tonal" color="primary" class="mr-4" size="x-small" icon :disabled="!item.path"
-							@click="openFile(item.path)">
-							<v-icon>mdi-eye</v-icon>
-						</v-btn>
-						<v-btn variant="tonal" color="primary" class="mr-4" size="x-small" icon :disabled="!item.path"
-							@click="handleApprove(item)">
-							<v-icon>mdi-email-arrow-right</v-icon>
-						</v-btn>
-						<v-btn variant="tonal" color="primary" size="x-small" icon :disabled="!item.path"
-							@click="downloadFile(item.path)">
-							<v-icon>mdi-download</v-icon>
-						</v-btn>
-					</div>
-				</template>
-			</v-data-table>
-		</div>
-
-	</v-card>
+			</v-col>
+		</v-row>
+	</v-container>
 </template>
 
 <script setup lang="ts">
@@ -78,8 +90,8 @@ async function fetchApplications() {
 	if (!requestId) return;
 	loading.value = true;
 	try {
-		const { data } = await listApplications(requestId);
-		records.value = data?.data ?? [];
+		const response = await listApplications(requestId);
+		records.value = Array.isArray(response?.data) ? response.data : [];
 	} finally {
 		loading.value = false;
 	}
@@ -113,7 +125,7 @@ interface EmiApplicationItem {
 
 function handleApprove(item: EmiApplicationItem): void {
 
-	console.log('Approving application:', {item});
+	console.log('Approving application:', { item });
 
 	modal.open(
 		EmiApprovalForm,

@@ -176,10 +176,10 @@ async function handleSubmit() {
 			payload.append(key, String(value));
 		});
 
-		const { data } = await generateApplication(requestId, payload);
-		console.log(data?.message ?? 'Application generated');
-		console.log('Generated file path:', data?.path ?? '');
-		modal.onSaved?.(data);
+		const response = await generateApplication(requestId, payload);
+		console.log(response?.message ?? 'Application generated');
+		console.log('Generated file path:', response?.path ?? '');
+		modal.onSaved?.(response);
 		modal.close();
 	} finally {
 		loading.value = false;

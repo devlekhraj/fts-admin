@@ -16,13 +16,14 @@
 						</v-alert>
 						<v-form ref="form" @submit.prevent="onSubmit">
 							<v-text-field v-model="email" label="Email" type="email" :rules="[requiredRule]"
-								variant="outlined" prepend-inner-icon="mdi-email-outline" autocomplete="username"
-								class="mb-3" />
+								density="comfortable" variant="outlined" prepend-inner-icon="mdi-email-outline"
+								autocomplete="username" class="mb-3" />
 							<v-text-field v-model="password" label="Password" :type="showPassword ? 'text' : 'password'"
-								:rules="[requiredRule]" variant="outlined" prepend-inner-icon="mdi-lock-outline"
+								density="comfortable" :rules="[requiredRule]" variant="outlined"
+								prepend-inner-icon="mdi-lock-outline"
 								:append-inner-icon="showPassword ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
 								@click:append-inner="showPassword = !showPassword" autocomplete="current-password" />
-							<v-btn type="submit" size="x-large" color="primary" class="mt-4" block :loading="loading">
+							<v-btn type="submit" size="large" variant="flat" color="primary" class="mt-4" block :loading="loading">
 								Sign in
 							</v-btn>
 						</v-form>

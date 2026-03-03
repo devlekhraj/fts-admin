@@ -32,11 +32,26 @@
         <template #item.created_at="{ item }">
             <span>{{ item.created_at ?? '-' }}</span>
         </template>
+        <template #item.total_order="{ item }">
+            <span>{{ Number(item.total_order ?? 0) > 0 ? `${Number(item.total_order ?? 0)} Orders` : '-' }}</span>
+        </template>
+        <template #item.total_emi="{ item }">
+            <span>{{ Number(item.total_emi ?? 0) > 0 ? `${Number(item.total_emi ?? 0)} Requests` : '-' }}</span>
+        </template>
+        <template #item.action="{ item }">
+            <div class="d-flex align-center ga-1">
+                <v-btn icon size="x-small" variant="tonal" color="primary"
+                    @click="router.push({ name: 'admin.customers.detail', params: { id: item.id } })">
+                    <v-icon size="16">mdi-eye</v-icon>
+                </v-btn>
+            </div>
+        </template>
     </AppDataTable>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
@@ -49,6 +64,8 @@ type Customer = {
     avatar_url?: string | null;
     email?: string | null;
     mobile?: string | null;
+    total_order?: number;
+    total_emi?: number;
     email_verified_at?: string | null;
     created_at?: string | null;
 };
@@ -65,7 +82,10 @@ const headers = [
     { title: 'Name', key: 'name', sortable: false, minWidth: '180' },
     { title: 'Email', key: 'email', sortable: false, minWidth: '220' },
     { title: 'Mobile', key: 'mobile', sortable: false, minWidth: '220' },
-    { title: 'Created', key: 'created_at', sortable: false, minWidth: '140' },
+    { title: 'Orders', key: 'total_order', sortable: false, minWidth: '130' },
+    { title: 'EMI', key: 'total_emi', sortable: false, minWidth: '120' },
+    { title: 'Since', key: 'created_at', sortable: false, minWidth: '140' },
+    { title: 'Actions', key: 'action', sortable: false, minWidth: '100' },
 ];
 
 const items = ref<Customer[]>([]);
@@ -77,6 +97,7 @@ const options = ref<DataTableOptions>({
     sortBy: [],
 });
 const hasLoadedOnce = ref(false);
+const router = useRouter();
 
 function onExport(type: ExportType) {
     // TODO: replace with real export API/download logic.
@@ -100,6 +121,8 @@ async function fetchCustomers() {
             mobile: formatPhoneNumber(customer.contact_number
                 ?? customer.mobile
                 ?? '-'),
+            total_order: Number(customer.total_order ?? 0),
+            total_emi: Number(customer.total_emi ?? 0),
             email_verified_at: customer.email_verified_at ?? null,
             created_at: formatLongDate(customer.created_at),
         }));

@@ -21,7 +21,7 @@ const routes: RouteRecordRaw[] = [
     children: [
       { path: 'dashboard', name: 'admin.dashboard', component: DashboardPage, meta: { title: 'Dashboard' } },
       // emi requests
-      { path: 'emi-requests', name: 'admin.emi.requests', component: () => import('@/pages/EmiRequestsListPage.vue'), meta: { title: 'EMI Requests' } },
+      { path: 'emi-requests', name: 'admin.emi.requests', component: () => import('@/pages/EmiRequestPage.vue'), meta: { title: 'EMI Requests' } },
       { path: 'emi-requests/:id', name: 'admin.emi.requests.detail', component: () => import('@/pages/EmiRequestDetailPage.vue'), meta: { title: 'EMI Request Detail' } },
       { path: 'emi-users', name: 'admin.emi.users', component: () => import('@/pages/EmiUsersListPage.vue'), meta: { title: 'EMI Users' } },
       { path: 'emi-banks', name: 'admin.emi.banks', component: () => import('@/pages/EmiBankListPage.vue'), meta: { title: 'EMI Banks' } },
@@ -33,16 +33,19 @@ const routes: RouteRecordRaw[] = [
       { path: 'blog-categories', name: 'admin.blogCategories.list', component: () => import('@/pages/BlogCategoryPage.vue'), meta: { title: 'Blog Categories' } },
       { path: 'blog-categories/:id', name: 'admin.blogCategories.detail', component: () => import('@/pages/BlogCategoryDetailPage.vue'), meta: { title: 'Blog Category Detail' } },
       // orders
-      { path: 'orders', name: 'admin.orders.list', component: () => import('@/pages/OrdersListPage.vue'), meta: { title: 'All Orders' } },
+      { path: 'orders', name: 'admin.orders.list', component: () => import('@/pages/OrderPage.vue'), meta: { title: 'All Orders' } },
+      { path: 'orders/:id', name: 'admin.orders.detail', component: () => import('@/pages/OrderDetailPage.vue'), meta: { title: 'Order Detail' } },
       { path: 'pre-orders', name: 'admin.orders.pre', component: () => import('@/pages/PreOrdersListPage.vue'), meta: { title: 'Pre Orders' } },
       { path: 'cart-items', name: 'admin.orders.cart', component: () => import('@/pages/CartItemsListPage.vue'), meta: { title: 'Cart Items' } },
       { path: 'wish-pot', name: 'admin.orders.wish', component: () => import('@/pages/WishPotListPage.vue'), meta: { title: 'Wish Pot' } },
       // customers
       { path: 'customers', name: 'admin.customers.list', component: () => import('@/pages/CustomerPage.vue'), meta: { title: 'Customers' } },
+      { path: 'customers/:id', name: 'admin.customers.detail', component: () => import('@/pages/CustomerDetailPage.vue'), meta: { title: 'Customer Detail' } },
       // catalog
       { path: 'product-list', name: 'admin.product.list', component: () => import('@/pages/ProductPage.vue'), meta: { title: 'Products' } },
       { path: 'product-reviews', name: 'admin.product.reviews', component: () => import('@/pages/ProductReviewsPage.vue'), meta: { title: 'Product Reviews' } },
       { path: 'product-create', name: 'admin.product.create', component: () => import('@/pages/ProductCreatePage.vue'), meta: { title: 'Create Product' } },
+      { path: 'product/:id', name: 'admin.product.detail', component: () => import('@/pages/ProductDetailPage.vue'), meta: { title: 'Product Detail' } },
       { path: 'product/:id/edit', name: 'admin.product.edit', component: () => import('@/pages/ProductEditPage.vue'), meta: { title: 'Edit Product' } },
       { path: 'product-categories', name: 'admin.product.categories', component: () => import('@/pages/ProductCategoryPage.vue'), meta: { title: 'Categories' } },
       { path: 'product-categories/:id', name: 'admin.product.categories.detail', component: () => import('@/pages/ProductCategoryDetailPage.vue'), meta: { title: 'Category Detail' } },
@@ -66,8 +69,9 @@ const routes: RouteRecordRaw[] = [
       { path: 'user-lists', name: 'admin.users.list', component: () => import('@/pages/UserListsPage.vue'), meta: { title: 'User Lists' } },
       // settings
       { path: 'settings-faqs', name: 'admin.faqs.list', component: () => import('@/pages/FaqsListPage.vue'), meta: { title: 'FAQs Management' } },
-      { path: 'settings-payment-methods', name: 'admin.paymentMethods.list', component: () => import('@/pages/PaymentMethodsListPage.vue'), meta: { title: 'Payment Methods' } },
-      { path: 'admin-list', name: 'admin.list', component: () => import('@/pages/AdminListPage.vue'), meta: { title: 'Admin Management' } },
+      { path: 'payment-methods', name: 'admin.paymentMethods.list', component: () => import('@/pages/PaymentMethodPage.vue'), meta: { title: 'Payment Methods' } },
+      { path: 'payment-methods/:id', name: 'admin.paymentMethods.detail', component: () => import('@/pages/PaymentMethodDetailPage.vue'), meta: { title: 'Payment Method Detail' } },
+      { path: 'admin-list', name: 'admin.list', component: () => import('@/pages/AdminPage.vue'), meta: { title: 'Admin Management' } },
       { path: 'role-management', name: 'admin.roles.manage', component: () => import('@/pages/RoleManagementPage.vue'), meta: { title: 'Role Management' } },
       { path: 'settings', name: 'admin.settings', component: () => import('@/pages/SettingsPage.vue'), meta: { title: 'Settings' } },
     ],

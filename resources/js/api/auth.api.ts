@@ -14,14 +14,22 @@ export interface LoginResponse {
   admin?: AdminProfile;
 }
 
+function unwrap<T>(response: unknown): T {
+  const payload = response as { data?: unknown };
+  if (payload && typeof payload === 'object' && 'data' in payload && payload.data) {
+    return payload.data as T;
+  }
+  return response as T;
+}
+
 export async function login(email: string, password: string): Promise<LoginResponse> {
-  const { data } = await http.post<LoginResponse>('/auth/admin/login', { email, password });
-  return data;
+  const response = await http.post<LoginResponse>('/auth/admin/login', { email, password });
+  return unwrap<LoginResponse>(response);
 }
 
 export async function profile(): Promise<AdminProfile> {
-  const { data } = await http.get<AdminProfile>('/auth/admin/me');
-  return data;
+  const response = await http.get<AdminProfile>('/auth/admin/me');
+  return unwrap<AdminProfile>(response);
 }
 
 export async function logout(): Promise<void> {
@@ -29,6 +37,6 @@ export async function logout(): Promise<void> {
 }
 
 export async function refresh(): Promise<LoginResponse> {
-  const { data } = await http.post<LoginResponse>('/auth/admin/refresh');
-  return data;
+  const response = await http.post<LoginResponse>('/auth/admin/refresh');
+  return unwrap<LoginResponse>(response);
 }

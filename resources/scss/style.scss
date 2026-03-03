@@ -1,6 +1,6 @@
+@use './datatable';
+@use './form';
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-@import './datatable';
-@import './form';
 
 :root {
     --v-font-family: 'Poppins', sans-serif;
@@ -77,4 +77,14 @@ main.v-main {
 .v-navigation-drawer #side-nav-items .v-list-item-title {
     font-size: 0.8rem !important;
     font-weight: 500 !important;
+}
+
+.v-slide-group__content {
+    .v-btn--size-default {
+        --v-btn-height: 36px;
+    }
+
+    .v-btn--size-default {
+        --v-btn-size: 0.8rem
+    }
 }

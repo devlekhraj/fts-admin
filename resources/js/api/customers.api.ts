@@ -22,6 +22,8 @@ export type CustomersListItem = {
     mobile?: string | null;
     contact_number?: string | null;
     avatar_url?: string | null;
+    total_order?: number | null;
+    total_emi?: number | null;
     email_verified_at?: string | null;
     created_at?: string | null;
     [key: string]: unknown;
@@ -33,7 +35,21 @@ export type CustomersListResponse = {
     total?: number;
 };
 
+export type CustomerDetailResponse = CustomersListItem & {
+    updated_at?: string | null;
+    [key: string]: unknown;
+};
+
 export async function list(params?: ListCustomersParams): Promise<CustomersListResponse> {
     const response = await http.get('/admin/customer-list', { params });
     return response as CustomersListResponse;
+}
+
+export async function getCustomerDetail(id: number | string): Promise<CustomerDetailResponse> {
+    const response = await http.get(`/admin/customers/${id}`);
+    const wrapped = response as { data?: unknown };
+    if (wrapped && typeof wrapped === 'object' && 'data' in wrapped && wrapped.data) {
+        return wrapped.data as CustomerDetailResponse;
+    }
+    return response as unknown as CustomerDetailResponse;
 }
