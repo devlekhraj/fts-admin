@@ -1,1 +1,0 @@
-import{E as o}from"./main-C57OMNc1.js";async function r(t){return await o.get("/admin/blog-categories",{params:t})}async function s(t){const e=await o.get(`/admin/blog-categories/${t}`),a=e;return a&&typeof a=="object"&&"data"in a&&a.data?a.data:e}function i(t,e){return o.put(`/admin/blog-categories/${t}`,e)}export{s as g,r as l,i as u};

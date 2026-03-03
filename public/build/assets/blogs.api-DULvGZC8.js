@@ -1,0 +1,1 @@
+import{E as s}from"./main-BGhICjCX.js";async function o(t){return await s.get("/admin/blogs",{params:t})}async function r(t){const a=await s.get(`/admin/blogs/${t}`),n=a;return n&&typeof n=="object"&&"data"in n&&n.data?n.data:a}function i(t,a){return s.put(`/admin/blogs/${t}`,a)}export{r as g,o as l,i as u};
