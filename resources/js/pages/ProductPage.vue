@@ -50,6 +50,11 @@
         {{ item.emi_enabled ? 'Enabled' : 'Disabled' }}
       </v-chip>
     </template>
+    <template #item.variants_count="{ item }">
+      <span>
+        {{ Number(item.variants_count ?? 0) === 0 ? '-' : `${Number(item.variants_count ?? 0)} variants` }}
+      </span>
+    </template>
     <template #item.created_at="{ item }">
       <span>{{ formatLongDate(item.created_at) ?? '-' }}</span>
     </template>
@@ -81,6 +86,7 @@ type Product = {
   slug: string;
   status: boolean;
   emi_enabled: boolean;
+  variants_count: number;
   created_at: string;
   thumb: string;
 };
@@ -96,6 +102,7 @@ const exportOptions: Array<{ type: ExportType; title: string; icon: string }> = 
 const headers = [
   { title: 'Name', key: 'name', sortable: false, minWidth: '260' },
   { title: 'Slug', key: 'slug', sortable: false, minWidth: '220' },
+  { title: 'Variants', key: 'variants_count', sortable: false, minWidth: '120' },
   { title: 'Status', key: 'status', sortable: false, minWidth: '140' },
   { title: 'EMI', key: 'emi_enabled', sortable: false, minWidth: '140' },
   { title: 'Created', key: 'created_at', sortable: false, minWidth: '170' },
@@ -142,6 +149,7 @@ async function fetchProducts() {
       slug: product.slug ?? '-',
       status: Boolean(product.status),
       emi_enabled: Boolean(product.emi_enabled),
+      variants_count: Number(product.variants_count ?? 0),
       created_at: typeof product.created_at === 'string' ? product.created_at : '',
       thumb: typeof product.thumb === 'string' ? product.thumb : '',
     }));

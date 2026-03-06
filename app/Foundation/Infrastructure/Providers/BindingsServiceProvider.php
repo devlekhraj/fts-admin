@@ -42,6 +42,10 @@ use App\Foundation\Infrastructure\Pdf\Registry\BankPdfGeneratorRegistry;
 use App\Foundation\Infrastructure\Pdf\Renderer\HtmlPassthroughPdfRenderer;
 use App\Foundation\Infrastructure\Pdf\Renderer\PdfRenderer;
 use App\Foundation\Infrastructure\Auth\Hashing\LaravelPasswordHasher;
+use App\Foundation\Infrastructure\Files\Images\WebpImageConverter;
+use App\Foundation\Infrastructure\Files\Uploads\FatafatCdnFileUploadService;
+use App\Foundation\Shared\Application\Contracts\FileUploadService;
+use App\Foundation\Shared\Application\Contracts\ImageConverter;
 use App\Foundation\Shared\Application\Contracts\PasswordHasher;
 
 class BindingsServiceProvider extends ServiceProvider
@@ -63,6 +67,8 @@ class BindingsServiceProvider extends ServiceProvider
         $this->app->bind(EmiApplicationRepository::class, EloquentEmiApplicationRepository::class);
         $this->app->bind(EmiUserRepository::class, EloquentEmiUserRepository::class);
         $this->app->bind(PasswordHasher::class, LaravelPasswordHasher::class);
+        $this->app->bind(ImageConverter::class, WebpImageConverter::class);
+        $this->app->bind(FileUploadService::class, FatafatCdnFileUploadService::class);
 
         $this->app->bind(PdfRenderer::class, HtmlPassthroughPdfRenderer::class);
 

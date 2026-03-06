@@ -16,6 +16,7 @@ export type ProductListItem = {
   slug?: string | null;
   status: boolean;
   emi_enabled: boolean;
+  variants_count?: number | null;
   created_at?: string | null;
   thumb?: string | null;
   [key: string]: unknown;
@@ -48,6 +49,17 @@ export type ProductFileItem = {
   width?: number | null;
 };
 
+export type ProductVariantItem = {
+  id: number | string;
+  product_id?: number | string | null;
+  quantity?: number | null;
+  price?: number | null;
+  attributes?: Record<string, unknown> | null;
+  images?: ProductFileItem[];
+  created_at?: string | null;
+  updated_at?: string | null;
+};
+
 export type ProductDetailResponse = ProductListItem & {
   short_desc?: string | null;
   content?: string | null;
@@ -58,6 +70,7 @@ export type ProductDetailResponse = ProductListItem & {
   updated_at?: string | null;
   default_file?: Record<string, unknown> | null;
   files?: ProductFileItem[];
+  variants?: ProductVariantItem[];
   [key: string]: unknown;
 };
 

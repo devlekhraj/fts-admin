@@ -73,6 +73,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'payment-methods/:id', name: 'admin.paymentMethods.detail', component: () => import('@/pages/PaymentMethodDetailPage.vue'), meta: { title: 'Payment Method Detail' } },
       { path: 'admin-list', name: 'admin.list', component: () => import('@/pages/AdminPage.vue'), meta: { title: 'Admin Management' } },
       { path: 'role-management', name: 'admin.roles.manage', component: () => import('@/pages/RoleManagementPage.vue'), meta: { title: 'Role Management' } },
+      { path: 'files', name: 'admin.files.list', component: () => import('@/pages/FilesPage.vue'), meta: { title: 'Files' } },
       { path: 'settings', name: 'admin.settings', component: () => import('@/pages/SettingsPage.vue'), meta: { title: 'Settings' } },
     ],
   },

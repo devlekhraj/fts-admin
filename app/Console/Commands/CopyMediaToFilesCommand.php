@@ -4,20 +4,21 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Foundation\Shared\Application\Contracts\ImageConverter;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 
 class CopyMediaToFilesCommand extends Command
 {
     private const DEFAULT_MODEL_TYPES = [
+        // "Jed\\Blogs\\App\\BlogCategory",
+        // "Jed\\Blogs\\App\\Blog",
         // 'Jed\\Ecommerce\\App\\ProductBrand',
         // 'Jed\\Ecommerce\\App\\ProductCategory',
         // 'Jed\\Ecommerce\\App\\Product',
-        // "Jed\\Blogs\\App\\BlogCategory",
-        // "Jed\\Blogs\\App\\Blog",
-        "Jed\\Banners\\App\\BannerImage",
     ];
 
     private const MODEL_TYPE_TABLE_MAP = [
@@ -26,7 +27,7 @@ class CopyMediaToFilesCommand extends Command
         'Jed\\Ecommerce\\App\\Product' => 'products',
         'Jed\\Blogs\\App\\BlogCategory' => 'blog_categories',
         'Jed\\Blogs\\App\\Blog' => 'blogs',
-        'Jed\\Banners\\App\\BannerImage' => 'banners',
+
     ];
 
     private const MODEL_TYPE_FOLDER_MAP = [
@@ -35,7 +36,6 @@ class CopyMediaToFilesCommand extends Command
         'Jed\\Ecommerce\\App\\Product' => 'products',
         'Jed\\Blogs\\App\\BlogCategory' => 'blog-category',
         'Jed\\Blogs\\App\\Blog' => 'blogs',
-        'Jed\\Banners\\App\\BannerImage' => 'banners',
     ];
 
     protected $signature = 'media:copy-to-files
@@ -45,32 +45,42 @@ class CopyMediaToFilesCommand extends Command
 
     protected $description = 'Copy records from media table to files table';
 
+    public function __construct(
+        private readonly ImageConverter $imageConverter
+    ) {
+        parent::__construct();
+    }
+
     public function handle(): int
     {
-        if (!Schema::hasTable('media')) {
+        if (! Schema::hasTable('media')) {
             $this->error('Table "media" does not exist.');
+
             return self::FAILURE;
         }
 
-        if (!Schema::hasTable('files')) {
+        if (! Schema::hasTable('files')) {
             $this->error('Table "files" does not exist.');
+
             return self::FAILURE;
         }
 
-        if (!Schema::hasTable('file_usages')) {
+        if (! Schema::hasTable('file_usages')) {
             $this->error('Table "file_usages" does not exist.');
+
             return self::FAILURE;
         }
 
         $chunkSize = max(1, (int) $this->option('chunk'));
         $modelTypes = $this->option('model-type');
-        if (!is_array($modelTypes) || empty($modelTypes)) {
+        if (! is_array($modelTypes) || empty($modelTypes)) {
             $modelTypes = self::DEFAULT_MODEL_TYPES;
         }
         $dryRun = (bool) $this->option('dry-run');
         $cdnRoot = trim((string) (config('filesystems.disks.cdn.root') ?? env('CDN_ROOT', '')));
         if ($cdnRoot === '') {
             $this->error('CDN root is not configured. Set filesystems.disks.cdn.root (or CDN_ROOT in .env).');
+
             return self::FAILURE;
         }
         $cdnRoot = rtrim($cdnRoot, DIRECTORY_SEPARATOR);
@@ -102,6 +112,7 @@ class CopyMediaToFilesCommand extends Command
         $total = (clone $baseQuery)->count();
         if ($total === 0) {
             $this->info('No records found in media table.');
+
             return self::SUCCESS;
         }
 
@@ -133,7 +144,10 @@ class CopyMediaToFilesCommand extends Command
             $fileNames = [];
             $mediaByFileName = [];
             foreach ($rows as $row) {
-                $fileName = $this->makeFileName($row);
+                $sourceFileName = $this->makeSourceFileName($row);
+                $sourcePath = $this->makeSourcePath((int) $row->id, $sourceFileName);
+                $convertToWebp = $this->shouldConvertToWebp($sourcePath, (string) ($row->mime_type ?? ''));
+                $fileName = $this->makeFileName($row, $convertToWebp);
                 $fileNames[] = $fileName;
                 $mediaByFileName[$fileName] = $row;
             }
@@ -146,9 +160,10 @@ class CopyMediaToFilesCommand extends Command
 
             $upserts = [];
             foreach ($rows as $row) {
-                $fileName = $this->makeFileName($row);
                 $sourceFileName = $this->makeSourceFileName($row);
                 $sourcePath = $this->makeSourcePath((int) $row->id, $sourceFileName);
+                $convertToWebp = $this->shouldConvertToWebp($sourcePath, (string) ($row->mime_type ?? ''));
+                $fileName = $this->makeFileName($row, $convertToWebp);
                 $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
                 $dimensions = $this->extractDimensions($row->custom_properties, $sourcePath);
                 $targetFolder = $this->resolveTargetFolder((string) $row->model_type);
@@ -158,14 +173,12 @@ class CopyMediaToFilesCommand extends Command
                     $key = is_string($existingFile->key ?? null) && trim((string) $existingFile->key) !== ''
                         ? trim((string) $existingFile->key)
                         : $this->makeKey();
-                    $filePath = is_string($existingFile->file_path ?? null) && trim((string) $existingFile->file_path) !== ''
-                        ? trim((string) $existingFile->file_path)
-                        : $targetFolder.'/'.$key.'/'.$fileName;
+                    $filePath = $this->makeFilePath($targetFolder, $key, $fileName);
                 } else {
                     $key = $this->makeKey();
-                    $filePath = $targetFolder.'/'.$key.'/'.$fileName;
+                    $filePath = $this->makeFilePath($targetFolder, $key, $fileName);
 
-                    if ($this->copyToTargetDirectory($sourcePath, $key, $fileName, $cdnRoot, $targetFolder, $dryRun)) {
+                    if ($this->copyToTargetDirectory($sourcePath, $key, $fileName, $cdnRoot, $targetFolder, $dryRun, $convertToWebp)) {
                         $copied++;
                     } else {
                         $missing++;
@@ -173,6 +186,7 @@ class CopyMediaToFilesCommand extends Command
                 }
 
                 $metaPayload = [
+                    'directory' => $targetFolder,
                     // 'media_id' => $row->id,
                     // 'model_type' => $this->resolveModelType((string) $row->model_type),
                     // 'model_id' => $row->model_id,
@@ -191,7 +205,7 @@ class CopyMediaToFilesCommand extends Command
                     'file_path' => $filePath,
                     'extension' => $extension,
                     'seq_no' => $row->order_column,
-                    'mime_type' => $row->mime_type,
+                    'mime_type' => $this->resolveTargetMimeType((string) ($row->mime_type ?? ''), $convertToWebp),
                     'file_size' => (float) ($row->size ?? 0),
                     'height' => (float) $dimensions['height'],
                     'width' => (float) $dimensions['width'],
@@ -201,11 +215,12 @@ class CopyMediaToFilesCommand extends Command
                 ];
             }
 
-            if (!$dryRun && !empty($upserts)) {
+            if (! $dryRun && ! empty($upserts)) {
                 DB::table('files')->upsert(
                     $upserts,
                     ['file_name'],
                     [
+                        'key',
                         'file_path',
                         'extension',
                         'seq_no',
@@ -228,7 +243,7 @@ class CopyMediaToFilesCommand extends Command
                 foreach ($fileNames as $fileName) {
                     $file = $filesByName->get($fileName);
                     $media = $mediaByFileName[$fileName] ?? null;
-                    if (!$file || !$media) {
+                    if (! $file || ! $media) {
                         continue;
                     }
 
@@ -237,21 +252,25 @@ class CopyMediaToFilesCommand extends Command
                         continue;
                     }
 
+                    $usageMeta = $this->decodeJson($media->custom_properties);
                     $usageUpserts[] = [
                         'file_id' => (int) $file->id,
                         'usage_type' => $this->resolveModelType((string) $media->model_type),
                         'usage_id' => $usageId,
                         'title' => is_string($media->name ?? null) ? trim((string) $media->name) : null,
                         'alt_text' => is_string($media->name ?? null) ? trim((string) $media->name) : null,
-                        'meta' => json_encode([
-                            'collection_name' => $media->collection_name,
-                        ], JSON_UNESCAPED_UNICODE),
+                        'meta' => json_encode(
+                            is_array($usageMeta)
+                                ? $usageMeta
+                                : [],
+                            JSON_UNESCAPED_UNICODE
+                        ),
                         'created_at' => $media->created_at ?? now(),
                         'updated_at' => $media->updated_at ?? now(),
                     ];
                 }
 
-                if (!empty($usageUpserts)) {
+                if (! empty($usageUpserts)) {
                     DB::table('file_usages')->upsert(
                         $usageUpserts,
                         ['file_id', 'usage_type', 'usage_id'],
@@ -293,14 +312,59 @@ class CopyMediaToFilesCommand extends Command
         return bin2hex(random_bytes(16));
     }
 
-    private function makeFileName(object $row): string
+    private function makeFileName(object $row, bool $convertToWebp): string
     {
         $fileName = is_string($row->file_name ?? null) ? trim((string) $row->file_name) : '';
+        $fileName = $this->sanitizeTargetFileName($fileName);
+
+        if ($convertToWebp) {
+            if ($fileName === '') {
+                $fileName = 'media-'.$row->id;
+            }
+
+            $nameWithoutExtension = $this->normalizeWebpBaseName($fileName);
+            if (trim($nameWithoutExtension) === '') {
+                $nameWithoutExtension = 'media-'.$row->id;
+            }
+
+            return strtolower(trim($nameWithoutExtension).'.webp');
+        }
+
         if ($fileName !== '') {
             return strtolower($fileName);
         }
 
         return strtolower('media-'.$row->id);
+    }
+
+    private function sanitizeTargetFileName(string $fileName): string
+    {
+        $fileName = trim($fileName);
+        if ($fileName === '') {
+            return '';
+        }
+
+        $baseName = pathinfo($fileName, PATHINFO_FILENAME);
+        $extension = pathinfo($fileName, PATHINFO_EXTENSION);
+        $baseName = is_string($baseName) ? trim($baseName) : '';
+        $extension = is_string($extension) ? trim($extension) : '';
+
+        $baseName = $this->stripIconCharacters($baseName);
+        $baseName = str_replace('_', '-', $baseName);
+        $baseName = preg_replace('/[\s\/\\\\]+/', '-', $baseName) ?? $baseName;
+        $baseName = preg_replace('/[^\p{L}\p{N}-]+/u', '', $baseName) ?? $baseName;
+        $baseName = preg_replace('/-+/', '-', $baseName) ?? $baseName;
+        $baseName = trim($baseName, '-');
+
+        if ($baseName === '') {
+            return '';
+        }
+
+        if ($extension === '') {
+            return $baseName;
+        }
+
+        return $baseName.'.'.$extension;
     }
 
     private function makeSourceFileName(object $row): string
@@ -349,7 +413,7 @@ class CopyMediaToFilesCommand extends Command
             return $value;
         }
 
-        if (!is_string($value) || trim($value) === '') {
+        if (! is_string($value) || trim($value) === '') {
             return null;
         }
 
@@ -370,6 +434,11 @@ class CopyMediaToFilesCommand extends Command
         return public_path('media/'.$mediaId.'/'.$sourceFileName);
     }
 
+    private function makeFilePath(string $targetFolder, string $key, string $targetFileName): string
+    {
+        return trim($targetFolder, '/').'/'.trim($key, '/').'/'.ltrim($targetFileName, '/');
+    }
+
     private function resolveTargetFolder(string $modelType): string
     {
         return self::MODEL_TYPE_FOLDER_MAP[$modelType] ?? 'misc';
@@ -381,12 +450,13 @@ class CopyMediaToFilesCommand extends Command
         string $targetFileName,
         string $cdnRoot,
         string $targetFolder,
-        bool $dryRun
+        bool $dryRun,
+        bool $convertToWebp
     ): bool {
-        $targetDirectory = $cdnRoot.DIRECTORY_SEPARATOR.$targetFolder.DIRECTORY_SEPARATOR.$key;
+        $targetDirectory = $cdnRoot.DIRECTORY_SEPARATOR.trim($targetFolder, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.trim($key, DIRECTORY_SEPARATOR);
         $targetPath = $targetDirectory.DIRECTORY_SEPARATOR.$targetFileName;
 
-        if (!File::exists($sourcePath)) {
+        if (! File::exists($sourcePath)) {
             return false;
         }
 
@@ -394,8 +464,229 @@ class CopyMediaToFilesCommand extends Command
             return true;
         }
 
+        if ($convertToWebp) {
+            if (! $this->convertToWebpUsingService($sourcePath, $targetPath)) {
+                return false;
+            }
+
+            return true;
+        }
+
         File::ensureDirectoryExists($targetDirectory);
         File::copy($sourcePath, $targetPath);
-        return true;
+
+        return File::exists($targetPath);
+    }
+
+    private function resolveTargetMimeType(string $sourceMimeType, bool $convertToWebp): string
+    {
+        if ($convertToWebp && str_starts_with(strtolower(trim($sourceMimeType)), 'image/')) {
+            return 'image/webp';
+        }
+
+        return $sourceMimeType;
+    }
+
+    private function convertToWebpUsingService(string $sourcePath, string $targetPathOnDisk): bool
+    {
+        if (! File::exists($sourcePath)) {
+            return false;
+        }
+
+        $tempDiskName = 'local';
+        $tempDisk = Storage::disk($tempDiskName);
+        $tempSourcePathOnDisk = '';
+        $tempTargetPathOnDisk = '';
+
+        try {
+            $tempSourcePathOnDisk = '_tmp/webp-source/'.bin2hex(random_bytes(16)).'-'.basename($sourcePath);
+            $tempTargetPathOnDisk = '_tmp/webp-target/'.bin2hex(random_bytes(16)).'.webp';
+            $sourceBytes = File::get($sourcePath);
+            if (! is_string($sourceBytes) || $sourceBytes === '') {
+                return false;
+            }
+
+            if (! $tempDisk->put($tempSourcePathOnDisk, $sourceBytes)) {
+                return false;
+            }
+
+            $this->imageConverter->toWebp($tempDiskName, $tempSourcePathOnDisk, $tempTargetPathOnDisk, 85);
+
+            if (! $tempDisk->exists($tempTargetPathOnDisk)) {
+                return false;
+            }
+
+            $webpBytes = $tempDisk->get($tempTargetPathOnDisk);
+            if (! is_string($webpBytes) || $webpBytes === '') {
+                return false;
+            }
+
+            $targetDirectory = dirname($targetPathOnDisk);
+            if (! is_string($targetDirectory) || $targetDirectory === '') {
+                return false;
+            }
+
+            File::ensureDirectoryExists($targetDirectory);
+            File::put($targetPathOnDisk, $webpBytes);
+
+            return File::exists($targetPathOnDisk);
+        } catch (\Throwable) {
+            return false;
+        } finally {
+            if ($tempSourcePathOnDisk !== '') {
+                $this->deleteTemporarySourceFile($tempDisk, $tempSourcePathOnDisk);
+            }
+            if ($tempTargetPathOnDisk !== '') {
+                $this->deleteTemporarySourceFile($tempDisk, $tempTargetPathOnDisk);
+            }
+        }
+    }
+
+    private function deleteTemporarySourceFile(object $cdnDisk, string $tempSourcePathOnDisk): void
+    {
+        try {
+            $cdnDisk->delete($tempSourcePathOnDisk);
+        } catch (\Throwable) {
+            // Best effort fallback for local-capable disks.
+        }
+
+        try {
+            if (! $cdnDisk->exists($tempSourcePathOnDisk)) {
+                return;
+            }
+        } catch (\Throwable) {
+            return;
+        }
+
+        try {
+            if (method_exists($cdnDisk, 'path')) {
+                $absolutePath = $cdnDisk->path($tempSourcePathOnDisk);
+                if (is_string($absolutePath) && $absolutePath !== '' && File::exists($absolutePath)) {
+                    File::delete($absolutePath);
+                }
+            }
+        } catch (\Throwable) {
+            // Ignore fallback cleanup failures.
+        }
+
+        try {
+            $directory = dirname($tempSourcePathOnDisk);
+            if ($directory !== '.' && $directory !== DIRECTORY_SEPARATOR) {
+                $cdnDisk->deleteDirectory($directory);
+            }
+        } catch (\Throwable) {
+            // Ignore empty directory cleanup failures.
+        }
+    }
+
+    private function shouldConvertToWebp(string $sourcePath, string $sourceMimeType): bool
+    {
+        if (! str_starts_with(strtolower(trim($sourceMimeType)), 'image/')) {
+            return false;
+        }
+
+        if (! File::exists($sourcePath)) {
+            return false;
+        }
+
+        if (! function_exists('imagewebp') || ! function_exists('exif_imagetype')) {
+            return false;
+        }
+
+        if (! $this->hasEnoughMemoryForWebpConversion($sourcePath)) {
+            return false;
+        }
+
+        $imageType = @exif_imagetype($sourcePath);
+        if (! is_int($imageType)) {
+            return false;
+        }
+
+        return match ($imageType) {
+            IMAGETYPE_JPEG => function_exists('imagecreatefromjpeg'),
+            IMAGETYPE_PNG => function_exists('imagecreatefrompng'),
+            IMAGETYPE_GIF => function_exists('imagecreatefromgif'),
+            IMAGETYPE_WEBP => false,
+            IMAGETYPE_BMP => function_exists('imagecreatefrombmp'),
+            default => false,
+        };
+    }
+
+    private function hasEnoughMemoryForWebpConversion(string $sourcePath): bool
+    {
+        $limitBytes = $this->memoryLimitBytes();
+        if ($limitBytes <= 0) {
+            return true;
+        }
+
+        $imageInfo = @getimagesize($sourcePath);
+        if (! is_array($imageInfo) || ! isset($imageInfo[0], $imageInfo[1])) {
+            return true;
+        }
+
+        $width = (int) $imageInfo[0];
+        $height = (int) $imageInfo[1];
+        if ($width <= 0 || $height <= 0) {
+            return true;
+        }
+
+        $currentUsage = memory_get_usage(true);
+        $rgbaBytes = (float) $width * (float) $height * 4.0;
+        $estimatedExtraBytes = (int) ceil(($rgbaBytes * 2.2) + 8_388_608);
+
+        return ($currentUsage + $estimatedExtraBytes) <= $limitBytes;
+    }
+
+    private function memoryLimitBytes(): int
+    {
+        $rawLimit = ini_get('memory_limit');
+        if (! is_string($rawLimit)) {
+            return 0;
+        }
+
+        $value = strtolower(trim($rawLimit));
+        if ($value === '' || $value === '-1') {
+            return 0;
+        }
+
+        if (! preg_match('/^(\d+(?:\.\d+)?)([gmk])?$/', $value, $matches)) {
+            return 0;
+        }
+
+        $number = (float) $matches[1];
+        $unit = $matches[2] ?? '';
+
+        return match ($unit) {
+            'g' => (int) round($number * 1024 * 1024 * 1024),
+            'm' => (int) round($number * 1024 * 1024),
+            'k' => (int) round($number * 1024),
+            default => (int) round($number),
+        };
+    }
+
+    private function normalizeWebpBaseName(string $fileName): string
+    {
+        $baseName = pathinfo($fileName, PATHINFO_FILENAME);
+        if (! is_string($baseName)) {
+            return '';
+        }
+
+        $current = trim($baseName);
+        $pattern = '/\.(?:jpe?g|png|gif|bmp|webp|svg)$/i';
+
+        while ($current !== '' && preg_match($pattern, $current) === 1) {
+            $current = (string) preg_replace($pattern, '', $current);
+            $current = trim($current);
+        }
+
+        return $current;
+    }
+
+    private function stripIconCharacters(string $value): string
+    {
+        $cleaned = preg_replace('/[\x{FE0E}\x{FE0F}\x{200D}\x{20E3}]/u', '', $value) ?? $value;
+        $cleaned = preg_replace('/[\p{Extended_Pictographic}\p{So}]/u', '', $cleaned) ?? $cleaned;
+
+        return trim($cleaned);
     }
 }

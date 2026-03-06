@@ -22,3 +22,4 @@ require __DIR__ . '/admin/route_customers.php';
 require __DIR__ . '/admin/route_product_categories.php';
 require __DIR__ . '/admin/route_payment_methods.php';
 require __DIR__ . '/admin/route_orders.php';
+require __DIR__ . '/admin/route_file.php';

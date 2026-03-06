@@ -46,5 +46,6 @@ export const breadcrumbRouteConfig: Record<string, BreadcrumbRouteConfig> = {
     'admin.paymentMethods.detail': { title: 'Payment Method Detail', parent: 'admin.paymentMethods.list' },
     'admin.list': { title: 'Admin Management' },
     'admin.roles.manage': { title: 'Role Management' },
+    'admin.files.list': { title: 'Files' },
     'admin.settings': { title: 'Settings' },
 };

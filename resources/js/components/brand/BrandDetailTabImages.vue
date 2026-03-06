@@ -1,5 +1,15 @@
 <template>
   <div class="pa-6">
+    <div class="d-flex align-center justify-space-between mb-4">
+      <div class="text-body-2 text-medium-emphasis">
+        Total images: {{ brandFiles.length }}
+      </div>
+      <v-btn color="primary" variant="tonal" @click="onAddImage">
+        <v-icon start size="16">mdi-image-plus</v-icon>
+        Add Image
+      </v-btn>
+    </div>
+
     <v-table v-if="brandFiles.length" density="comfortable">
       <thead>
         <tr>
@@ -59,6 +69,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { type ProductBrandDetailResponse } from '@/api/products.api';
+import ImageUploadModel from '@/components/media/ImageUploadModel.vue';
+import { openModal } from '@/shared/modal';
 import { formatBytes } from '@/shared/utils';
 
 const props = defineProps<{
@@ -66,6 +78,20 @@ const props = defineProps<{
 }>();
 
 const brandFiles = computed(() => props.item?.files ?? []);
+
+function onAddImage() {
+  openModal(
+    ImageUploadModel,
+    {
+      usage_type: 'brand',
+      usage_id: props.item?.id ?? null,
+    },
+    {
+      title: 'Add Brand Image',
+      size: 'lg',
+    },
+  );
+}
 </script>
 
 <style scoped>

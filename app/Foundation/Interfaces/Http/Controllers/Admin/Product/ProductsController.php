@@ -16,6 +16,7 @@ class ProductsController extends Controller
     {
         $query = ProductModel::query()
             ->with('defaultFile')
+            ->withCount('variants')
             ->orderByDesc('created_at');
 
         if ($search = $request->query('search')) {
@@ -61,7 +62,7 @@ class ProductsController extends Controller
     public function show(string $id): JsonResponse
     {
         $product = ProductModel::query()
-            ->with(['defaultFile', 'files'])
+            ->with(['defaultFile', 'files', 'variants.files'])
             ->findOrFail($id);
 
         return response()->json([

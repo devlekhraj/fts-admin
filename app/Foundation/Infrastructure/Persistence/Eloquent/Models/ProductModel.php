@@ -7,10 +7,11 @@ namespace App\Foundation\Infrastructure\Persistence\Eloquent\Models;
 use App\Foundation\Shared\Infrastructure\Persistence\Eloquent\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProductModel extends BaseModel
 {
-    protected $table = "products";
+    protected $table = 'products';
 
     protected $casts = [
         'status' => 'boolean',
@@ -20,6 +21,10 @@ class ProductModel extends BaseModel
     public function brand(): BelongsTo
     {
         return $this->belongsTo(ProductBrandModel::class, 'brand_id');
+    }
+    public function variants(): HasMany
+    {
+        return $this->hasMany(ProductVariantModel::class, 'product_id');
     }
 
     public function files(): BelongsToMany
@@ -34,7 +39,7 @@ class ProductModel extends BaseModel
     {
         return $this->belongsToMany(FileModel::class, 'file_usages', 'usage_id', 'file_id')
             ->wherePivot('usage_type', 'products')
-            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(file_usages.meta, '$.collection_name')) = ?", ['default'])
+            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(file_usages.meta, '$.collection_name')) = ?", ['is_default'])
             ->withPivot(['usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
             ->orderByPivot('id', 'asc')
             ->limit(1);

@@ -22,6 +22,8 @@ return new class extends Migration
             $table->float('file_size')->nullable();
             $table->float('height')->nullable();
             $table->float('width')->nullable();
+            $table->string('disk')->default('fatafat_cdn')->nullable();
+            $table->string('content_hash', 64)->nullable()->index();
             $table->json('meta')->nullable(); // For any additional metadata like exif, etc.
             $table->timestamps();
         });

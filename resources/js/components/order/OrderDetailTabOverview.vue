@@ -14,7 +14,7 @@
           <div>
             <div class="text-caption text-medium-emphasis">Warranty Serial</div>
             <div class="warranty-row">
-              <div class="warranty-code">{{ warrantySerial }}</div>
+              <div class="warranty-code text-success">{{ warrantySerial }}</div>
               <v-btn size="x-small" color="primary" :icon="'mdi-content-copy'" variant="tonal"></v-btn>
             </div>
           </div>
@@ -148,8 +148,8 @@ const warrantySerial = ref('WS-2026-ORD5012-01');
 
 
 .warranty-code {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 0.9rem;
+  font-weight: 600;
   letter-spacing: 0.02em;
 }
 

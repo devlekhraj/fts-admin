@@ -5,16 +5,22 @@ declare(strict_types=1);
 namespace App\Foundation\Infrastructure\Persistence\Eloquent\Models;
 
 use App\Foundation\Shared\Infrastructure\Persistence\Eloquent\Models\BaseModel;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FileModel extends BaseModel
 {
     protected $table = 'files';
-
+    protected $guarded = [];
+    
     protected $appends = ['url'];
     protected $casts = [
         'meta' => 'array',
     ];
+
+    public function usages(): HasMany
+    {
+        return $this->hasMany(FileUsageModel::class, 'file_id');
+    }
 
     public function getUrlAttribute(): ?string
     {
@@ -28,6 +34,13 @@ class FileModel extends BaseModel
             return $path;
         }
 
-        return Storage::disk('cdn')->url(ltrim($path, '/'));
+        $baseUrl = trim((string) config('filesystems.disks.fatafat_cdn.url', ''), '/');
+        $relativePath = ltrim($path, '/');
+
+        if ($baseUrl === '') {
+            return '/'.$relativePath;
+        }
+
+        return $baseUrl.'/'.$relativePath;
     }
 }
