@@ -16,6 +16,7 @@ class ProductModel extends BaseModel
     protected $casts = [
         'status' => 'boolean',
         'emi_enabled' => 'boolean',
+        'attributes' =>'array'
     ];
 
     public function brand(): BelongsTo
@@ -43,5 +44,9 @@ class ProductModel extends BaseModel
             ->withPivot(['usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
             ->orderByPivot('id', 'asc')
             ->limit(1);
+    }
+
+    public function attribute() : BelongsTo{
+        return $this->belongsTo(AttributeClassModel::class,'attribute_class_id');
     }
 }

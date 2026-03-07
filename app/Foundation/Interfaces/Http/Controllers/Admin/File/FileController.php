@@ -4,7 +4,14 @@ declare(strict_types=1);
 
 namespace App\Foundation\Interfaces\Http\Controllers\Admin\File;
 
+use App\Foundation\Application\File\Commands\AssignExistingFileCommand;
+use App\Foundation\Application\File\Commands\AssignFileUsageCommand;
+use App\Foundation\Application\File\Commands\AssignUploadedFileCommand;
+use App\Foundation\Application\File\Handlers\AssignExistingFileHandler;
+use App\Foundation\Application\File\Handlers\AssignFileUsageHandler;
+use App\Foundation\Application\File\Handlers\AssignUploadedFileHandler;
 use App\Foundation\Infrastructure\Persistence\Eloquent\Models\FileModel;
+use App\Foundation\Interfaces\Http\Requests\Admin\StoreFileAssignRequest;
 use App\Foundation\Shared\Application\Contracts\FileUploadService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
@@ -14,7 +21,10 @@ use Throwable;
 class FileController extends Controller
 {
     public function __construct(
-        private readonly FileUploadService $fileUploadService
+        private readonly FileUploadService $fileUploadService,
+        private readonly AssignExistingFileHandler $assignExistingFileHandler,
+        private readonly AssignUploadedFileHandler $assignUploadedFileHandler,
+        private readonly AssignFileUsageHandler $assignFileUsageHandler,
     ) {}
 
     public function fileUpload(Request $request): JsonResponse
@@ -54,6 +64,70 @@ class FileController extends Controller
             'already_exists' => $alreadyExists,
             'file' => $result['file_data'] ?? null,
         ], $alreadyExists ? 200 : 201);
+    }
+
+    public function fileAssign(StoreFileAssignRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
+
+        $source = (string) $validated['source'];
+        if ($source === 'upload' && ! $request->file('file')) {
+            return response()->json([
+                'message' => 'File is required for upload source.',
+            ], 422);
+        }
+
+        try {
+            $sourceResult = $source === 'existing'
+                ? $this->assignExistingFileHandler->handle(new AssignExistingFileCommand(
+                    imageId: (int) $validated['image_id'],
+                ))
+                : $this->assignUploadedFileHandler->handle(new AssignUploadedFileCommand(
+                    file: $request->file('file'),
+                    directory: isset($validated['directory']) ? (string) $validated['directory'] : null,
+                ));
+        } catch (Throwable $exception) {
+            if ($source === 'existing' && $exception->getMessage() === 'Selected image not found.') {
+                return response()->json([
+                    'message' => 'Selected image not found.',
+                ], 404);
+            }
+
+            $response = [
+                'message' => 'Failed to process file assignment.',
+            ];
+
+            if ((bool) config('app.debug', false)) {
+                $response['error'] = $exception->getMessage();
+            }
+
+            return response()->json($response, 500);
+        }
+
+        $fileId = (int) ($sourceResult['file_id'] ?? 0);
+        $fileData = is_array($sourceResult['file_data'] ?? null) ? $sourceResult['file_data'] : null;
+
+        $usageType = trim((string) $validated['usage_type']);
+        $usageId = (int) $validated['usage_id'];
+        $altText = trim((string) $validated['alt_text']);
+        $usageResult = $this->assignFileUsageHandler->handle(new AssignFileUsageCommand(
+            fileId: $fileId,
+            usageType: $usageType,
+            usageId: $usageId,
+            altText: $altText,
+            caption: isset($validated['caption']) ? (string) $validated['caption'] : null,
+            description: isset($validated['description']) ? (string) $validated['description'] : null,
+        ));
+        $usage = $usageResult['usage'] ?? null;
+
+        return response()->json([
+            'message' => 'File assigned successfully.',
+            'data' => [
+                'source' => $source,
+                'file' => $fileData,
+                'usage' => $usage,
+            ],
+        ], 201);
     }
 
     public function fileList(Request $request): JsonResponse

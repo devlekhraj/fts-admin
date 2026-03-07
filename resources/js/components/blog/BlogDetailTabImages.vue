@@ -83,8 +83,9 @@ function onAddImage() {
   openModal(
     ImageUploadModel,
     {
-      usage_type: 'blog',
+      usage_type: 'blogs',
       usage_id: props.item?.id ?? null,
+      directory:'blogs',
     },
     {
       title: 'Add Blog Image',

@@ -11,10 +11,17 @@
   <v-card class="pa-6">
     <div class="banner-top-grid">
       <div class="banner-thumb-cell">
-        <v-avatar size="112" rounded="lg" color="grey-lighten-3">
-          <v-img v-if="bannerDetail?.thumb" :src="bannerDetail.thumb" cover />
+        <div class="banner-thumb-rect rounded">
+          <v-img
+            v-if="bannerDetail?.thumb"
+            :src="bannerDetail.thumb"
+            contain
+            width="180"
+            height="112"
+            class="banner-thumb-image"
+          />
           <v-icon v-else size="32" color="grey-darken-1">mdi-image-outline</v-icon>
-        </v-avatar>
+        </div>
       </div>
       <div>
         <!-- <div class="text-overline text-medium-emphasis">Banner Name</div> -->
@@ -114,9 +121,25 @@ onMounted(fetchBannerDetail);
   justify-content: center;
 }
 
+.banner-thumb-rect {
+  width: 180px;
+  height: 112px;
+  /* border-radius: 12px; */
+  background: rgb(var(--v-theme-surface-variant));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.banner-thumb-image {
+  width: 100%;
+  height: 100%;
+}
+
 @media (min-width: 960px) {
   .banner-top-grid {
-    grid-template-columns: 128px minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr);
     gap: 20px;
   }
 

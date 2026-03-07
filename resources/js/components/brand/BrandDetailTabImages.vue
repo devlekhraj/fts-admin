@@ -83,8 +83,9 @@ function onAddImage() {
   openModal(
     ImageUploadModel,
     {
-      usage_type: 'brand',
+      usage_type: 'product_brands',
       usage_id: props.item?.id ?? null,
+      directory:'brands'
     },
     {
       title: 'Add Brand Image',

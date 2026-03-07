@@ -52,6 +52,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'product-brands', name: 'admin.product.brands', component: () => import('@/pages/ProductBrandPage.vue'), meta: { title: 'Brands' } },
       { path: 'product-brands/:id', name: 'admin.product.brands.detail', component: () => import('@/pages/ProductBrandDetailPage.vue'), meta: { title: 'Brand Detail' } },
       { path: 'product-attributes', name: 'admin.product.attributes', component: () => import('@/pages/ProductAttributePage.vue'), meta: { title: 'Attributes' } },
+      { path: 'product-attributes/:id', name: 'admin.product.attributes.detail', component: () => import('@/pages/ProductAttributeDetailPage.vue'), meta: { title: 'Attribute Detail' } },
       
       { path: 'treks-regions', name: 'admin.treks.regions', component: () => import('@/pages/TreksRegionsPage.vue'), meta: { title: 'Regions' } },
       { path: 'treks-list', name: 'admin.treks.list', component: () => import('@/pages/TreksListPage.vue'), meta: { title: 'Tour / Treks' } },

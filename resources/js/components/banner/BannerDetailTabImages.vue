@@ -108,8 +108,9 @@ function onAddImage() {
   openModal(
     ImageUploadModel,
     {
-      usage_type: 'banner',
+      usage_type: 'banners',
       usage_id: props.item?.id ?? null,
+      directory: 'banners',
     },
     {
       title: 'Add Banner Image',

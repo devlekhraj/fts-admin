@@ -7,9 +7,11 @@ namespace App\Foundation\Infrastructure\Persistence\Eloquent\Models;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AdminModel extends Authenticatable implements JWTSubject
 {
+    use SoftDeletes;
     protected $table = 'admins';
 
     protected $keyType = 'int';

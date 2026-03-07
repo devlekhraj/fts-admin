@@ -3,29 +3,15 @@
     <v-col cols="12" md="6" class="d-flex">
       <v-card class="h-100 w-100">
         <v-card-text class="border rounded h-100 d-flex flex-column">
-          <input
-            ref="uploadInputRef"
-            type="file"
-            accept="image/*"
-            class="d-none"
-            @change="onNativeFileChange" />
+          <input ref="uploadInputRef" type="file" accept="image/*" class="d-none" @change="onNativeFileChange" />
 
-          <div
-            class="upload-dropzone"
-            :class="{
-              'upload-dropzone--active': isDragOver,
-              'upload-dropzone--filled': !!uploadImageInfo,
-            }"
-            @click="triggerFilePicker"
-            @dragenter.prevent="isDragOver = true"
-            @dragover.prevent="isDragOver = true"
-            @dragleave.prevent="isDragOver = false"
-            @drop.prevent="onDropFile">
+          <div class="upload-dropzone" :class="{
+            'upload-dropzone--active': isDragOver,
+            'upload-dropzone--filled': !!uploadImageInfo,
+          }" @click="triggerFilePicker" @dragenter.prevent="isDragOver = true" @dragover.prevent="isDragOver = true"
+            @dragleave.prevent="isDragOver = false" @drop.prevent="onDropFile">
             <template v-if="uploadImageInfo?.previewUrl">
-              <v-img
-                :src="uploadImageInfo.previewUrl"
-                contain
-                class="upload-dropzone-preview" />
+              <v-img :src="uploadImageInfo.previewUrl" contain class="upload-dropzone-preview" />
             </template>
             <template v-else>
               <div class="upload-dropzone-title">{{ dropzoneTitle }}</div>
@@ -56,32 +42,14 @@
       <v-card class="h-100 w-100">
         <v-card-text class="rounded h-100">
           <div class="text-subtitle-2 mb-3">{{ seoTitle }}</div>
-          <v-textarea
-            v-model="altTextModel"
-            label="Alt Text"
-            variant="outlined"
-            density="comfortable"
-            auto-grow
-            rows="2"/>
-          <v-textarea
-            v-model="captionModel"
-            label="Caption"
-            variant="outlined"
-            density="comfortable"
-            auto-grow
-            rows="2"
-            
+          <div class="text-caption text-medium-emphasis mb-1">Image Alt Text</div>
+          <v-textarea v-model="altTextModel" variant="outlined" density="comfortable" auto-grow rows="2" maxlength="80" :rules="altTextRules" required />
+          <div class="text-caption text-medium-emphasis mb-1 mt-2">Image Caption</div>
+          <v-textarea v-model="captionModel" variant="outlined" density="comfortable" auto-grow maxlength="130" rows="2"
             class="mt-2" />
-          <v-textarea
-            v-model="descriptionModel"
-            label="Description"
-            variant="outlined"
-            density="comfortable"
-            auto-grow
-            rows="5"
-            hide-details
-            
-            class="mt-2" />
+          <div class="text-caption text-medium-emphasis mb-1 mt-2">Image Description</div>
+          <v-textarea v-model="descriptionModel" variant="outlined" density="comfortable" auto-grow maxlength="200" rows="5"
+            hide-details class="mt-2" />
         </v-card-text>
       </v-card>
     </v-col>
@@ -151,6 +119,11 @@ const descriptionModel = computed({
   get: () => props.seo.description,
   set: (value: string) => emit('update:seo', { ...props.seo, description: value }),
 });
+
+const altTextRules = [
+  (value: string) => (String(value ?? '').trim() !== '' ? true : 'Alt Text is required.'),
+  (value: string) => (String(value ?? '').length <= 200 ? true : 'Alt Text cannot exceed 200 characters.'),
+];
 
 watch(
   () => props.file,

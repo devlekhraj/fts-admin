@@ -1,5 +1,28 @@
 import { http } from './http';
 
+export type AdminListItem = {
+    id: number | string;
+    avatar_url: string | null;
+    name: string | null;
+    email: string | null;
+    username: string | null;
+    role: string | null;
+    role_id: number | string | null;
+    created_at?: string | null;
+};
+
+export type AdminListResponse = {
+    data: AdminListItem[];
+    meta?: {
+        current_page?: number;
+        per_page?: number;
+        total?: number;
+        last_page?: number;
+        from?: number | null;
+        to?: number | null;
+    };
+};
+
 export type ListAdminsParams = {
     page?: number;
     per_page?: number;
@@ -8,7 +31,7 @@ export type ListAdminsParams = {
 };
 
 export function list(params?: ListAdminsParams) {
-    return http.get('/admin/admin-list', { params });
+    return http.get<AdminListResponse, AdminListResponse>('/admin/admin-list', { params });
 }
 
 export type CreateAdminPayload = {

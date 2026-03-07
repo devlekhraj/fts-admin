@@ -83,8 +83,9 @@ function onAddImage() {
   openModal(
     ImageUploadModel,
     {
-      usage_type: 'blog_category',
+      usage_type: 'blog_categories',
       usage_id: props.item?.id ?? null,
+      directory: 'blog-category',
     },
     {
       title: 'Add Blog Category Image',
@@ -113,10 +114,7 @@ function onAddImage() {
 }
 
 .empty-images-state {
-  min-height: 220px;
-  border: 1px dashed rgb(var(--v-theme-outline-variant));
   border-radius: 12px;
-  background: rgb(var(--v-theme-surface-variant));
   display: flex;
   flex-direction: column;
   align-items: center;

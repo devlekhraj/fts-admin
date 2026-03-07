@@ -34,7 +34,8 @@
       <v-icon start>mdi-close</v-icon>
       Cancel
     </v-btn> -->
-    <v-btn color="primary" variant="tonal" class="px-4" :disabled="!canSubmit" @click="onSubmit">
+    <v-btn color="primary" variant="tonal" class="px-4" :disabled="!canSubmit || submitting" :loading="submitting"
+      @click="onSubmit">
       <v-icon start>{{ activeTab === 'existing' ? 'mdi-image-check-outline' : 'mdi-cloud-upload-outline' }}</v-icon>
       {{ activeTab === 'existing' ? 'Use Existing Image' : 'Upload Image' }}
     </v-btn>
@@ -43,12 +44,15 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { fileAssign, type FileAssignPayload } from '@/api/files.api';
 import ImageExistingTabContent from '@/components/media/ImageExistingTabContent.vue';
 import ImageUploadTabContent from '@/components/media/ImageUploadTabContent.vue';
+import { useSnackbarStore } from '@/stores/snackbar.store';
 
 const props = defineProps<{
   usage_type?: string | null;
   usage_id?: number | string | null;
+  directory?: string | null;
 }>();
 
 const emit = defineEmits<{
@@ -58,9 +62,12 @@ const emit = defineEmits<{
 
 const usageType = props.usage_type ?? null;
 const usageId = props.usage_id ?? null;
+const directory = props.directory ?? null;
+const snackbar = useSnackbarStore();
 const activeTab = ref<'existing' | 'upload'>('existing');
 const selectedExistingImageId = ref<number | string | null>(null);
 const uploadFile = ref<File | null>(null);
+const submitting = ref(false);
 const existingSeo = ref({
   alt_text: '',
   caption: '',
@@ -72,23 +79,45 @@ const uploadSeo = ref({
   description: '',
 });
 
+function hasAltText(value: string | null | undefined): boolean {
+  return String(value ?? '').trim() !== '';
+}
+
 const canSubmit = computed(() => {
   if (activeTab.value === 'existing') {
-    return selectedExistingImageId.value !== null;
+    return selectedExistingImageId.value !== null && hasAltText(existingSeo.value.alt_text);
   }
-  return uploadFile.value !== null;
+  return uploadFile.value !== null && hasAltText(uploadSeo.value.alt_text);
 });
 
-function onSubmit() {
+async function onSubmit() {
   const seoState = activeTab.value === 'existing' ? existingSeo.value : uploadSeo.value;
-  const payload =
+  const altText = String(seoState.alt_text ?? '').trim();
+
+  if (!usageType || usageId === null || usageId === undefined || String(usageId).trim() === '') {
+    snackbar.show({ message: 'Usage type and usage id are required.', color: 'error' });
+    return;
+  }
+
+  if (activeTab.value === 'existing') {
+    if (selectedExistingImageId.value === null || !hasAltText(altText)) {
+      snackbar.show({ message: 'Please select an image and provide alt text.', color: 'error' });
+      return;
+    }
+  } else if (uploadFile.value === null || !hasAltText(altText)) {
+    snackbar.show({ message: 'Please upload an image and provide alt text.', color: 'error' });
+    return;
+  }
+
+  const payload: FileAssignPayload =
     activeTab.value === 'existing'
       ? {
         usage_type: usageType,
         usage_id: usageId,
-        source: 'existing',
+        directory,
+        source: 'existing' as const,
         image_id: selectedExistingImageId.value,
-        alt_text: seoState.alt_text,
+        alt_text: altText,
         // meta: {
         caption: seoState.caption,
         description: seoState.description,
@@ -97,16 +126,30 @@ function onSubmit() {
       : {
         usage_type: usageType,
         usage_id: usageId,
-        source: 'upload',
+        directory,
+        source: 'upload' as const,
         file: uploadFile.value,
-        alt_text: seoState.alt_text,
+        alt_text: altText,
         // meta: {
         caption: seoState.caption,
         description: seoState.description,
         // },
       };
-  console.log({ payload });
-  // emit('saved', payload);
-  // emit('close');
+  // console.log({payload});
+  try {
+    submitting.value = true;
+    const response = await fileAssign(payload);
+    snackbar.show({ message: response?.message || 'Image assigned successfully.', color: 'success' });
+    emit('saved', response?.data ?? response);
+    emit('close');
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.message ||
+      error?.message ||
+      'Failed to assign image.';
+    snackbar.show({ message, color: 'error' });
+  } finally {
+    submitting.value = false;
+  }
 }
 </script>

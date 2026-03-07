@@ -55,6 +55,50 @@ export function fileUpload(payload: FormData) {
   return http.post('/admin/file-upload', payload);
 }
 
+export type FileAssignPayload = {
+  usage_type: string;
+  usage_id: number | string;
+  source: 'existing' | 'upload';
+  image_id?: number | string | null;
+  file?: File | null;
+  alt_text: string;
+  caption?: string | null;
+  description?: string | null;
+  directory?: string | null;
+};
+
+export type FileAssignResponse = {
+  message: string;
+  data?: {
+    source?: 'existing' | 'upload';
+    file?: FileListItem | null;
+    usage?: Record<string, unknown> | null;
+  };
+};
+
+export function fileAssign(payload: FileAssignPayload) {
+  const formData = new FormData();
+  formData.append('usage_type', String(payload.usage_type));
+  formData.append('usage_id', String(payload.usage_id));
+  formData.append('source', payload.source);
+  formData.append('alt_text', String(payload.alt_text ?? ''));
+  formData.append('caption', String(payload.caption ?? ''));
+  formData.append('description', String(payload.description ?? ''));
+  if (payload.directory) {
+    formData.append('directory', String(payload.directory));
+  }
+
+  if (payload.source === 'existing' && payload.image_id !== null && payload.image_id !== undefined) {
+    formData.append('image_id', String(payload.image_id));
+  }
+
+  if (payload.source === 'upload' && payload.file) {
+    formData.append('file', payload.file);
+  }
+
+  return http.post<FileAssignResponse, FileAssignResponse>('/admin/file-assign', formData);
+}
+
 export async function listFiles(params?: ListFilesParams): Promise<FileListResponse> {
   const response = await http.get('/admin/file-list', { params });
   return response as unknown as FileListResponse;

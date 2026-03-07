@@ -83,8 +83,9 @@ function onAddImage() {
   openModal(
     ImageUploadModel,
     {
-      usage_type: 'product_category',
+      usage_type: 'product_categories',
       usage_id: props.item?.id ?? null,
+      directory:'product-category'
     },
     {
       title: 'Add Product Category Image',

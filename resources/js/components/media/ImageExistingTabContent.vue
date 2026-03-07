@@ -103,7 +103,7 @@
 
     <v-col cols="12" md="6">
       <v-card class="mb-4">
-        <v-card-text class="border rounded">
+        <v-card-text class="border rounded d-flex align-center justify-space-around" style="min-height: 200px;">
           <template v-if="selectedImageInfo">
             <div>
               <div class="selected-image-preview">
@@ -118,10 +118,10 @@
                 </div>
               </div>
               <div class="text-caption text-medium-emphasis mt-2 selected-image-info">
-                <div>Name: {{ selectedImageInfo.name }}</div>
-                <div>Size: {{ selectedImageInfo.size }}</div>
-                <div>Dimension: {{ selectedImageInfo.dimension }}</div>
-                <!-- <div>Extension: {{ selectedImageInfo.extension }}</div> -->
+                <div>{{ selectedImageInfo.name }}</div>
+                <div class="selected-image-meta-inline">
+                  <span>Size: {{ selectedImageInfo.size }} |  Dimention: {{ selectedImageInfo.dimension }}</span>
+                </div>
               </div>
             </div>
           </template>
@@ -133,26 +133,28 @@
       </v-card>
 
       <div class="text-subtitle-2 mb-3">{{ seoTitle }}</div>
+      <div class="text-caption text-medium-emphasis mb-1">Image Alt Text</div>
       <v-textarea
         v-model="altTextModel"
-        label="Alt Text"
         variant="outlined"
         density="comfortable"
         auto-grow
         rows="2"
+        :rules="altTextRules"
+        required
         />
+      <div class="text-caption text-medium-emphasis mb-1 mt-2">Image Caption</div>
       <v-textarea
         v-model="captionModel"
-        label="Caption"
         variant="outlined"
         density="comfortable"
         auto-grow
         rows="2"
         
         class="mt-2" />
+      <div class="text-caption text-medium-emphasis mb-1 mt-2">Image Description</div>
       <v-textarea
         v-model="descriptionModel"
-        label="Description"
         variant="outlined"
         density="comfortable"
         auto-grow
@@ -166,7 +168,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue';
 import { listFiles } from '@/api/files.api';
-import { dashToSpace, formatBytes } from '@/shared/utils';
+import { dashToSpace } from '@/shared/utils';
 
 type ExistingImage = {
   id: number | string;
@@ -226,15 +228,16 @@ const selectedImage = computed(() =>
 const selectedImageInfo = computed(() => {
   if (!selectedImage.value) return null;
   const image = selectedImage.value;
+  const bytes = Number(image.file_size ?? image.size ?? 0);
+  const kb = Number.isFinite(bytes) ? Math.max(0, bytes) / 1024 : 0;
   return {
     previewUrl: image.url ?? '',
     name: image.file_name || `Image #${image.id}`,
-    size: formatBytes(image.file_size ?? image.size ?? 0),
+    size: `${kb.toFixed(2).replace(/\.?0+$/, '')} KB`,
     dimension:
       Number(image.width ?? 0) > 0 && Number(image.height ?? 0) > 0
-        ? `${Number(image.width)} x ${Number(image.height)}`
+        ? `${Number(image.width)} x ${Number(image.height)} px`
         : '-',
-    extension: getFileExtension(image.url ?? image.title ?? ''),
   };
 });
 
@@ -253,15 +256,9 @@ const descriptionModel = computed({
   set: (value: string) => emit('update:seo', { ...props.seo, description: value }),
 });
 
-function getFileExtension(value: string): string {
-  const cleaned = String(value ?? '').trim();
-  if (!cleaned) return '-';
-  const withoutQuery = cleaned.split('?')[0].split('#')[0];
-  const filename = withoutQuery.split('/').pop() ?? withoutQuery;
-  const lastDotIndex = filename.lastIndexOf('.');
-  if (lastDotIndex <= 0 || lastDotIndex === filename.length - 1) return '-';
-  return filename.slice(lastDotIndex + 1).toUpperCase();
-}
+const altTextRules = [
+  (value: string) => (String(value ?? '').trim() !== '' ? true : 'Alt Text is required.'),
+];
 
 async function fetchImages(page = 1, append = false) {
   if (append) {
@@ -390,6 +387,13 @@ function onTagClick(tag: string | null) {
 
 .selected-image-info {
   min-width: 0;
+}
+
+.selected-image-meta-inline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .image-list-scroll {

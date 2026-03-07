@@ -217,20 +217,7 @@ final class FatafatCdnFileUploadService implements FileUploadService
         if (! $existing) {
             return null;
         }
-
-        // $filePath = trim((string) ($existing->file_path ?? ''), '/');
-
         return [
-            // 'key' => (string) ($existing->key ?? ''),
-            // 'file_name' => (string) ($existing->file_name ?? ''),
-            // 'file_path' => $filePath,
-            // 'extension' => (string) ($existing->extension ?? 'webp'),
-            // 'mime_type' => (string) ($existing->mime_type ?? 'image/webp'),
-            // 'file_size' => (float) ($existing->file_size ?? 0),
-            // 'height' => isset($existing->height) ? (float) $existing->height : null,
-            // 'width' => isset($existing->width) ? (float) $existing->width : null,
-            // 'meta' => $existing->meta ?? null,
-            // 'url' => $this->buildUrl($filePath),
             'file_data' => $this->normalizeFileData($existing->toArray()),
             'already_exists' => true,
         ];

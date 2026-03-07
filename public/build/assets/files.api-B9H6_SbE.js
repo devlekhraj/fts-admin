@@ -1,1 +1,0 @@
-import{E as t}from"./main-CKaxstH6.js";function n(s){return t.post("/admin/file-upload",s)}async function a(s){return await t.get("/admin/file-list",{params:s})}async function o(s){return await t.get("/admin/file-list-with-usages",{params:s})}export{o as a,n as f,a as l};

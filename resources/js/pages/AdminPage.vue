@@ -66,7 +66,7 @@
 		</template>
 		<template #item.created_at="{ item }">
 			<span class="text-medium-emphasis" style="font-size: 0.8rem;">
-				{{ item.created_at ?? '-' }}
+				{{ item.created_at ? formatLongDate(item.created_at) :  '-' }}
 			</span>
 		</template>
 	</AppDataTable>
@@ -78,8 +78,9 @@ import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import AdminActionButtons from '@/components/admin/AdminActionButtons.vue';
 import AdminCreateButton from '@/components/admin/AdminCreateButton.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
-import { list as listAdmins } from '@/api/admins.api';
+import { list as listAdmins, type AdminListItem, type AdminListResponse } from '@/api/admins.api';
 import { list as listRoles } from '@/api/roles.api';
+import { formatLongDate } from '@/shared/utils';
 
 // RoleOption interface
 interface RoleOption {
@@ -93,7 +94,9 @@ type Admin = {
 	avatar_url?: string | null;
 	email?: string | null;
 	username?: string | null;
+	role?: string | null;
 	role_id?: number | string | null;
+	created_at?: string | null;
 };
 
 const headers = [
@@ -123,18 +126,25 @@ const hasLoadedOnce = ref(false);
 async function fetchAdmins() {
 	loading.value = true;
 	try {
-		const response = await listAdmins({
+		const response: AdminListResponse = await listAdmins({
 			page: options.value.page,
 			per_page: options.value.itemsPerPage,
 			search: filters.value.query || undefined,
 			role_id: filters.value.role ?? undefined,
 		});
 
-		const list = Array.isArray(response) ? response : response?.data ?? [];
-		items.value = list.map((admin: Admin) => ({
-			...admin,
+		const list = Array.isArray(response?.data) ? response.data : [];
+		items.value = list.map((admin: AdminListItem) => ({
+			id: admin.id,
+			avatar_url: admin.avatar_url ?? null,
+			name: admin.name ?? null,
+			email: admin.email ?? null,
+			username: admin.username ?? null,
+			role: admin.role ?? null,
+			role_id: admin.role_id ?? null,
+			created_at: admin.created_at ?? null,
 		}));
-		total.value = Number(response?.total ?? response?.meta?.total ?? list.length);
+		total.value = Number(response?.meta?.total ?? list.length);
 		if (response?.meta?.current_page) {
 			options.value.page = Number(response.meta.current_page);
 		}

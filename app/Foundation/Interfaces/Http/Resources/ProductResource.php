@@ -45,6 +45,7 @@ class ProductResource extends JsonResource
         $data = $this->resource->toArray();
         $files = [];
         $variants = [];
+        $attribute = null;
 
         if ($this->relationLoaded('files')) {
             $files = $this->files->map(static function ($file) {
@@ -112,12 +113,35 @@ class ProductResource extends JsonResource
             })->values()->all();
         }
 
+        if ($this->relationLoaded('attribute') && $this->attribute) {
+            $attributeItems = [];
+            if ($this->attribute->relationLoaded('attributes')) {
+                $attributeItems = $this->attribute->attributes->map(static function ($item): array {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->name,
+                        'type' => $item->type,
+                        'values' => is_array($item->values) ? $item->values : [],
+                        'use_for_variant' => (bool) $item->use_for_variant,
+                        'use_in_filter' => (bool) $item->use_in_filter,
+                    ];
+                })->values()->all();
+            }
+
+            $attribute = [
+                'id' => $this->attribute->id,
+                'name' => $this->attribute->name,
+                'attributes' => $attributeItems,
+            ];
+        }
+
         $data['thumb'] = $defaultFile?->url;
         $data['status'] = (bool) ($data['status'] ?? $this->status);
         $data['emi_enabled'] = (bool) ($data['emi_enabled'] ?? $this->emi_enabled);
         $data['default_file'] = $defaultFile?->toArray();
         $data['files'] = $files;
         $data['variants'] = $variants;
+        $data['attribute'] = $attribute;
 
         return $data;
     }
