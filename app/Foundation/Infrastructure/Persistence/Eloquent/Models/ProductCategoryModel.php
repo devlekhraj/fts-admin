@@ -37,9 +37,11 @@ class ProductCategoryModel extends BaseModel
     {
         return $this->belongsToMany(FileModel::class, 'file_usages', 'usage_id', 'file_id')
             ->wherePivot('usage_type', 'product_categories')
-            ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(file_usages.meta, '$.collection_name')) = ?", ['default'])
+            ->where(static function ($query) {
+                $query->whereRaw("JSON_EXTRACT(file_usages.meta, '$.is_default') = true")
+                    ->orWhereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(file_usages.meta, '$.is_default'))) = 'true'");
+            })
             ->withPivot(['usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
-            ->orderByPivot('id', 'asc')
-            ->limit(1);
+            ->orderByPivot('id', 'asc');
     }
 }

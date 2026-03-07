@@ -32,8 +32,8 @@ class BannerModel extends BaseModel
     {
         return $this->belongsToMany(FileModel::class, 'file_usages', 'usage_id', 'file_id')
             ->whereIn('file_usages.usage_type', ['banners', 'banner'])
+            ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(file_usages.meta, '$.collection_name'))) = 'default'")
             ->withPivot(['usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
-            ->orderByPivot('id', 'desc')
-            ->limit(1);
+            ->orderByPivot('id', 'desc');
     }
 }
