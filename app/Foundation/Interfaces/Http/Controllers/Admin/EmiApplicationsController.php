@@ -97,9 +97,9 @@ final class EmiApplicationsController extends Controller
         return response()->json([
             'message' => 'EMI application PDF generated successfully.',
             'path' => $relativePath,
-            'file_url' => Storage::disk(self::STORAGE_DISK)->url($relativePath),
+            'file_url' => $this->buildDiskUrl($relativePath),
             'signature_path' => $signaturePath,
-            'signature_url' => $signaturePath ? Storage::disk(self::STORAGE_DISK)->url($signaturePath) : null,
+            'signature_url' => $signaturePath ? $this->buildDiskUrl($signaturePath) : null,
         ]);
     }
 
@@ -204,5 +204,11 @@ final class EmiApplicationsController extends Controller
         return array_values(array_filter($emails, static function (string $email): bool {
             return (bool) filter_var($email, FILTER_VALIDATE_EMAIL);
         }));
+    }
+
+    private function buildDiskUrl(string $relativePath): string
+    {
+        $baseUrl = trim((string) config('filesystems.disks.'.self::STORAGE_DISK.'.url', ''), '/');
+        return $baseUrl !== '' ? $baseUrl.'/'.ltrim($relativePath, '/') : '/'.ltrim($relativePath, '/');
     }
 }
