@@ -1,9 +1,13 @@
 <template>
   <v-container fluid>
     <v-row>
-      <v-col cols="12" lg="6" offset-lg="3">
+      <v-col cols="12" lg="8" offset-lg="2">
         <v-card class="pa-4">
-          <v-table>
+          <div class="pt-10">
+            <div class="text-h6 mb-1">Credit Card Info</div>
+            <div class="text-body-2 text-medium-emphasis mb-4">Credit card and bank account details for this EMI request.</div>
+          </div>
+          <v-table density="comfortable" class="border rounded">
             <thead>
               <tr>
                 <th>Field</th>

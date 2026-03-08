@@ -1,36 +1,29 @@
 <template>
-    <v-card flat>
-        <v-card-title class="d-flex justify-space-between align-center py-1">
-            <span class="font-semibold">Bank Request Form</span>
-            <v-spacer></v-spacer>
-            <v-btn icon="mdi-close" size="small" color="error" class="cursor-pointer" variant="text" aria-label="Close"
-                @click="$emit('close')">
-                <v-icon>mdi-close</v-icon>
-            </v-btn>
-        </v-card-title>
-
-        <v-divider></v-divider>
-
         <v-card-text>
-            <v-row>
-                <v-col cols="12">
-                    <v-text-field v-model="subject" label="Subject" variant="outlined" density="comfortable" />
-                </v-col>
-                <v-col cols="12" md="12">
-                    <v-text-field v-model="to" label="To" variant="outlined" density="comfortable" />
-                </v-col>
-                <v-col cols="12" md="12">
-                    <v-text-field v-model="cc" label="CC" variant="outlined" density="comfortable" />
-                </v-col>
-                <v-col cols="12" md="12">
-                    <v-text-field v-model="bcc" label="BCC" variant="outlined" density="comfortable" />
-                </v-col>
+            <div class="d-flex flex-column ga-2">
+                <div class="mb-0">
+                    <AppFieldLabel label="Subject" />
+                    <v-text-field v-model="subject" variant="outlined" density="comfortable" />
+                </div>
+                <div class="mb-0">
+                    <AppFieldLabel label="To" />
+                    <v-text-field v-model="to" variant="outlined" density="comfortable" />
+                </div>
+                <div class="mb-0">
+                    <AppFieldLabel label="CC" />
+                    <v-text-field v-model="cc" variant="outlined" density="comfortable" />
+                </div>
+                <div class="mb-0">
+                    <AppFieldLabel label="BCC" />
+                    <v-text-field v-model="bcc" variant="outlined" density="comfortable" />
+                </div>
 
-                <v-col cols="12">
-                    <v-text-field v-model="attachmentFileName" label="Attachment File Name" variant="outlined"
+                <div>
+                    <AppFieldLabel label="Attachment File Name" />
+                    <v-text-field v-model="attachmentFileName" variant="outlined"
                         density="comfortable" readonly />
-                </v-col>
-            </v-row>
+                </div>
+            </div>
         </v-card-text>
         <!-- <v-divider></v-divider> -->
         <v-card-actions class="d-flex justify-space-around">
@@ -42,12 +35,12 @@
             </div>
         </v-card-actions>
 
-    </v-card>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { approveApplication } from '@/api/emi-requests.api';
+import AppFieldLabel from '@/components/shared/AppFieldLabel.vue';
 
 const props = withDefaults(
     defineProps<{ id?: string | number; data?: Record<string, any> | null; application?: Record<string, any> | null }>(),

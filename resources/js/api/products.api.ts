@@ -171,6 +171,29 @@ export function update(id: string, payload: Record<string, unknown>) {
   return http.put(`/admin/products/${id}`, payload);
 }
 
+export type CreateProductVariantResponse = {
+  message?: string;
+  data?: ProductVariantItem;
+  success?: boolean;
+};
+
+export async function createVariant(
+  productId: string | number,
+  payload: Record<string, unknown>,
+): Promise<CreateProductVariantResponse> {
+  const response = await http.post(`/admin/products/${productId}/variants`, payload);
+  return response as unknown as CreateProductVariantResponse;
+}
+
+export async function updateVariant(
+  productId: string | number,
+  itemId: string | number,
+  payload: Record<string, unknown>,
+): Promise<CreateProductVariantResponse> {
+  const response = await http.put(`/admin/products/${productId}/variants/${itemId}`, payload);
+  return response as unknown as CreateProductVariantResponse;
+}
+
 export function remove(id: string) {
   return http.delete(`/admin/products/${id}`);
 }

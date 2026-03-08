@@ -10,9 +10,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class ProductVariantModel extends BaseModel
 {
-    protected $table = "product_variants";
+    protected $table = 'product_variants';
 
-     protected $casts = [
+    protected $fillable = [
+        'product_id', 'price', 'quantity', 'attributes',
+    ];
+
+    protected $casts = [
         'attributes' => 'array',
     ];
 

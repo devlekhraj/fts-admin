@@ -1,15 +1,4 @@
 <template>
-	<v-card flat>
-		<v-card-title class="d-flex justify-space-between align-center py-1">
-			<span class="font-semibold">Bank Request Form</span>
-			<v-spacer></v-spacer>
-			<v-btn icon="mdi-close" size="small" color="error" class="cursor-pointer" variant="text" aria-label="Close"
-				@click="$emit('close')">
-				<v-icon>mdi-close</v-icon>
-			</v-btn>
-		</v-card-title>
-
-		<v-divider></v-divider>
 
 		<v-card-text>
 			<div class="d-flex flex-column">
@@ -41,8 +30,6 @@
 				</div>
 			</div>
 		</v-card-text>
-
-	</v-card>
 </template>
 
 <script setup lang="ts">
@@ -105,8 +92,15 @@ const emptyStateSuffix = computed(() => {
 async function fetchBanks() {
 	banksLoading.value = true;
 	try {
-		const { data } = await listEmiBanks();
-		bankOptions.value = data?.data ?? [];
+		const response = await listEmiBanks();
+		bankOptions.value = Array.isArray(response?.data)
+			? response.data
+				.map((item) => ({
+					name: String(item?.name ?? '').trim(),
+					code: String(item?.code ?? '').trim(),
+				}))
+				.filter((item) => item.name.length > 0 && item.code.length > 0)
+			: [];
 	} finally {
 		banksLoading.value = false;
 	}

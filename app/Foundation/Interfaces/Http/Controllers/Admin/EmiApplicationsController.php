@@ -21,6 +21,8 @@ use Throwable;
 
 final class EmiApplicationsController extends Controller
 {
+    private const STORAGE_DISK = 'fatafat_cdn';
+
     public function __construct(
         private readonly GenerateEmiApplicationPdfHandler $handler,
     ) {}
@@ -28,6 +30,7 @@ final class EmiApplicationsController extends Controller
     public function generatePdf(GenerateEmiApplicationPdfRequest $request, string $id): JsonResponse
     {
         $pdf = $this->handler->handle(new GenerateEmiApplicationPdfCommand($id));
+        $emiRequestId = (int) ($pdf->emiRequestId ?? $id);
 
         $uniqueSuffix = (string) random_int(100000, 999999);
         $filename = $pdf->filename;
@@ -36,8 +39,8 @@ final class EmiApplicationsController extends Controller
         $uniqueFilename = $extension !== ''
             ? $nameWithoutExtension . '-' . $uniqueSuffix . '.' . $extension
             : $filename . '-' . $uniqueSuffix;
-        $relativePath = 'applications/' . $uniqueFilename;
-        Storage::disk('cdn')->put($relativePath, $pdf->bytes);
+        $relativePath = "emi-requests/{$emiRequestId}/applications/{$uniqueFilename}";
+        Storage::disk(self::STORAGE_DISK)->put($relativePath, $pdf->bytes);
 
         if ($pdf->emiBankId === null) {
             return response()->json([
@@ -63,12 +66,11 @@ final class EmiApplicationsController extends Controller
         if ($request->hasFile('signature_file')) {
             $signature = $request->file('signature_file');
             $signatureName = 'signature-' . (string) Str::uuid() . '.' . $signature->getClientOriginalExtension();
-            $signaturePath = 'applications/signatures/' . $signatureName;
-            Storage::disk('cdn')->put($signaturePath, $signature->get());
+            $signaturePath = "emi/applications/{$emiRequestId}/signatures/{$signatureName}";
+            Storage::disk(self::STORAGE_DISK)->put($signaturePath, $signature->get());
             $applicationData['signature_file_path'] = $signaturePath;
         }
 
-        $emiRequestId = (int) ($pdf->emiRequestId ?? $id);
         $requestBankCode = (string) ($request->input('bank_code') ?? $request->input('bank') ?? '');
         $bankId = $pdf->emiBankId;
         if ($requestBankCode !== '') {
@@ -84,19 +86,20 @@ final class EmiApplicationsController extends Controller
         }
 
         $application = new EmiApplicationModel();
-        $application->application_id = (string) Str::uuid();
         $application->emi_request_id = $emiRequestId;
         $application->emi_bank_id = $bankId;
 
         $application->application_data = $applicationData;
         $application->file_path = $relativePath;
-        $application->status = $application->status ?? 'pending';
+        $application->status = $application->status ?? 'generated';
         $application->save();
 
         return response()->json([
             'message' => 'EMI application PDF generated successfully.',
-            'path' => Storage::disk('cdn')->path($relativePath),
+            'path' => $relativePath,
+            'file_url' => Storage::disk(self::STORAGE_DISK)->url($relativePath),
             'signature_path' => $signaturePath,
+            'signature_url' => $signaturePath ? Storage::disk(self::STORAGE_DISK)->url($signaturePath) : null,
         ]);
     }
 
@@ -125,24 +128,26 @@ final class EmiApplicationsController extends Controller
             'file_name' => ['nullable', 'string', 'max:255'],
         ]);
 
+        
         $applicationId = (int) ($validated['application_id'] ?? $id);
         $application = EmiApplicationModel::query()->findOrFail($applicationId);
 
+        // dd($application);
         $to = $this->parseEmailList((string) $validated['to']);
         if (empty($to)) {
             return response()->json([
                 'message' => 'A valid "to" email address is required.',
             ], 422);
         }
-
         $cc = $this->parseEmailList((string) ($validated['cc'] ?? ''));
         $bcc = $this->parseEmailList((string) ($validated['bcc'] ?? ''));
-
+        
         $filePath = (string) ($application->file_path ?? '');
         $fileName = (string) ($validated['file_name'] ?? '');
         if ($fileName === '') {
             $fileName = basename($filePath);
         }
+        // dd($filePath);
 
         try {
             Mail::send([], [], function ($message) use ($validated, $to, $cc, $bcc, $filePath, $fileName): void {
@@ -159,8 +164,9 @@ final class EmiApplicationsController extends Controller
                     $message->bcc($bcc);
                 }
 
-                if ($filePath !== '' && Storage::disk('cdn')->exists($filePath)) {
-                    $content = Storage::disk('cdn')->get($filePath);
+                if ($filePath !== '' && Storage::disk(self::STORAGE_DISK)->exists($filePath)) {
+                    $content = Storage::disk(self::STORAGE_DISK)->get($filePath);
+
                     $message->attachData($content, $fileName !== '' ? $fileName : 'emi-application.pdf', [
                         'mime' => 'application/pdf',
                     ]);
@@ -173,7 +179,7 @@ final class EmiApplicationsController extends Controller
             ], 500);
         }
 
-        $application->status = 'Approved';
+        $application->status = 'approved';
         $application->save();
 
         $requestId = (int) ($validated['request_id'] ?? $application->emi_request_id ?? 0);

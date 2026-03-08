@@ -9,6 +9,7 @@ use App\Foundation\Interfaces\Http\Resources\ProductResource;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class ProductsController extends Controller
 {
@@ -77,10 +78,59 @@ class ProductsController extends Controller
         return response()->json([], 201);
     }
 
-    public function update(string $id): JsonResponse
+    public function update(Request $request, string $id): JsonResponse
     {
-        // TODO: Update product.
-        return response()->json(['id' => $id]);
+        $product = ProductModel::query()->findOrFail($id);
+        $payload = $request->all();
+
+        $tableColumns = array_flip(Schema::getColumnListing($product->getTable()));
+
+        if (array_key_exists('attributes', $payload)) {
+            $attributes = $payload['attributes'];
+
+            $product->attributes = is_array($attributes) ? $attributes : null;
+
+            if (is_array($attributes) && array_key_exists('attribute_class_id', $attributes)) {
+                $attributeClassId = $attributes['attribute_class_id'];
+                $product->attribute_class_id = ($attributeClassId === null || $attributeClassId === '')
+                    ? null
+                    : (int) $attributeClassId;
+            }
+        }
+
+        foreach ($payload as $key => $value) {
+            if ($key === 'attributes') {
+                continue;
+            }
+
+            if (!array_key_exists($key, $tableColumns)) {
+                continue;
+            }
+
+            if (in_array($key, ['status', 'emi_enabled'], true)) {
+                $product->{$key} = filter_var($value, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE) ?? false;
+                continue;
+            }
+
+            if ($key === 'attribute_class_id') {
+                $product->attribute_class_id = ($value === null || $value === '') ? null : (int) $value;
+                continue;
+            }
+
+            $product->{$key} = $value;
+        }
+
+        $product->save();
+
+        return response()->json([
+            'message' => 'Product updated successfully.',
+            'data' => [
+                'id' => $product->id,
+                'attributes' => $product->attributes,
+                'attribute_class_id' => $product->attribute_class_id,
+            ],
+            'success' => true,
+        ], 200);
     }
 
     public function destroy(string $id): JsonResponse

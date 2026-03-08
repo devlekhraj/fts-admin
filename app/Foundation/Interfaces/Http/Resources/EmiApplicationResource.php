@@ -13,12 +13,13 @@ class EmiApplicationResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id ?? null,
+            'id' => $this->id,
+            'application_id' => $this->application_id,
             'bank_name' => $this->emiBank?->name ?? $this->emiBank?->slug ?? null,
             'file_path' => $this->file_path ?? null,
-            'file_url' => $this->file_path ? Storage::disk('cdn')->url($this->file_path) : null,
+            'file_url' => $this->file_path ? Storage::disk('fatafat_cdn')->url($this->file_path) : null,
             'status' => $this->status ?? null,
-            'date' => $this->created_at?->diffForHumans(['short' => true]),
+            'created_at' => $this->created_at
         ];
     }
 }

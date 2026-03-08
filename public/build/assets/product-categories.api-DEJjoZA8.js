@@ -1,1 +1,0 @@
-import{E as r}from"./main-DfFDjLEm.js";async function n(t){return await r.get("/admin/product-categories",{params:t})}async function s(t){const e=await r.get(`/admin/product-categories/${t}`),a=e;return a&&typeof a=="object"&&"data"in a&&a.data?a.data:e}function c(t,e){return r.put(`/admin/product-categories/${t}`,e)}export{s as g,n as l,c as u};

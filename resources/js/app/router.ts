@@ -62,7 +62,7 @@ const routes: RouteRecordRaw[] = [
       // marketing
       { path: 'marketing-banners', name: 'admin.banners.list', component: () => import('@/pages/BannerPage.vue'), meta: { title: 'Banners' } },
       { path: 'marketing-banners/:id', name: 'admin.banners.detail', component: () => import('@/pages/BannerDetailPage.vue'), meta: { title: 'Banner Detail' } },
-      { path: 'marketing-campaigns', name: 'admin.campaigns.list', component: () => import('@/pages/CampaignsListPage.vue'), meta: { title: 'Campaigns' } },
+      { path: 'marketing-campaign', alias: ['marketing-campaigns'], name: 'admin.campaigns.list', component: () => import('@/pages/CampaignPage.vue'), meta: { title: 'Campaigns' } },
       
       
       { path: 'pages', name: 'admin.pages.list', component: () => import('@/pages/PagesListPage.vue'), meta: { title: 'Pages' } },

@@ -6,7 +6,7 @@
           <div class="text-h6 mb-1">Documents</div>
           <div class="text-body-2 text-medium-emphasis mb-4">Attached EMI request documents.</div>
         </div>
-        <v-data-table :headers="headers" :items="items" density="comfortable" class="elevation-0">
+        <v-data-table :headers="headers" :items="items" density="comfortable" class="elevation-0 border rounded">
           <template #item.action="{ item }">
             <div class="d-flex align-center ga-2">
               <v-btn variant="tonal" color="primary" size="x-small" icon :disabled="!item.url" @click="onView(item.url)">

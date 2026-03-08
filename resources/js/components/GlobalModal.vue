@@ -7,9 +7,9 @@
     @after-leave="modal.reset()"
   >
     <v-card>
-      <v-card-title class="d-flex align-center justify-space-between py-0">
+      <v-card-title class="d-flex align-center justify-space-between py-1">
         <span style="font-size:medium;">{{ modal.title }}</span>
-        <v-btn icon  variant="text" color="error" @click="modal.close()">
+        <v-btn icon size="small" variant="text" color="error" @click="modal.close()">
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-card-title>

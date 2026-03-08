@@ -73,9 +73,10 @@ export type EmiRequestDetailResponse = {
 
 export type EmiApplicationListItem = {
   id: number | string;
+  application_id: string,
   bank_name?: string | null;
   status?: string | null;
-  date?: string | null;
+  created_at?: string | null;
   file_url?: string | null;
   file_path?: string | null;
   [key: string]: unknown;
@@ -124,6 +125,9 @@ export async function generateApplication(
 
 export async function listApplications(id: string): Promise<EmiApplicationListResponse> {
   const response = await http.get(`/admin/emi-requests/${id}/application-list`);
+  if (Array.isArray(response)) {
+    return { data: response as EmiApplicationListItem[] };
+  }
   const wrapped = response as { data?: unknown };
   if (wrapped && typeof wrapped === 'object' && 'data' in wrapped && Array.isArray(wrapped.data)) {
     return { data: wrapped.data as EmiApplicationListItem[] };
