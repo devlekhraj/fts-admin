@@ -1,0 +1,1 @@
+import{d as t,q as a,c as s,t as o}from"./main-PyUK2Oxs.js";const n={class:"text-caption text-medium-emphasis mb-1"},l=t({__name:"AppFieldLabel",props:{label:{}},setup(e){return(c,p)=>(a(),s("div",n,o(e.label),1))}});export{l as _};

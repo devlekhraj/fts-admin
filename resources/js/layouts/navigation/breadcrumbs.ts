@@ -47,5 +47,6 @@ export const breadcrumbRouteConfig: Record<string, BreadcrumbRouteConfig> = {
     'admin.list': { title: 'Admin Management' },
     'admin.roles.manage': { title: 'Role Management' },
     'admin.files.list': { title: 'Files' },
+    'admin.developer': { title: 'Developer' },
     'admin.settings': { title: 'Settings' },
 };

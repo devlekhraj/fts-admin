@@ -1,0 +1,1 @@
+import{E as n}from"./main-PyUK2Oxs.js";async function o(e){return await n.get("/admin/payment-methods",{params:e})}async function r(e){const a=await n.get(`/admin/payment-methods/${e}/details`),t=a;return t&&typeof t=="object"&&"data"in t&&t.data?t.data:a}export{r as g,o as l};

@@ -23,4 +23,5 @@ require __DIR__ . '/admin/route_product_categories.php';
 require __DIR__ . '/admin/route_payment_methods.php';
 require __DIR__ . '/admin/route_orders.php';
 require __DIR__ . '/admin/route_file.php';
+require __DIR__ . '/admin/route_developer.php';
 require __DIR__ . '/admin/route_product_attributes.php';

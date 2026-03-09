@@ -44,6 +44,7 @@ export const ecommerceNav: NavGroup[] = [
             { title: 'Roles', to: { name: 'admin.roles.manage' }, icon: 'mdi-shield-account-outline' },
             { title: 'Payment Methods', to: { name: 'admin.paymentMethods.list' }, icon: 'mdi-credit-card-outline' },
             { title: 'Files', to: { name: 'admin.files.list' }, icon: 'mdi-image-multiple-outline' },
+            { title: 'Developer', to: { name: 'admin.developer' }, icon: 'mdi-code-tags' },
             { title: 'Settings', to: { name: 'admin.settings' }, icon: 'mdi-cog-outline' },
         ],
     },

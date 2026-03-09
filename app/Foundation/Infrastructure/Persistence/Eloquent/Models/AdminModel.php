@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Foundation\Infrastructure\Persistence\Eloquent\Models;
 
-use Tymon\JWTAuth\Contracts\JWTSubject;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class AdminModel extends Authenticatable implements JWTSubject
 {
     use SoftDeletes;
+
     protected $table = 'admins';
 
     protected $keyType = 'int';
@@ -39,7 +40,7 @@ class AdminModel extends Authenticatable implements JWTSubject
     {
         $avatar = $this->avatar;
 
-        if (!is_string($avatar) || trim($avatar) === '') {
+        if (! is_string($avatar) || trim($avatar) === '') {
             return asset('images/avatar.png');
         }
 
