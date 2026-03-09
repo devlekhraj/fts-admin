@@ -1,5 +1,6 @@
 <template>
     <div class="pa-6">
+
         <div class="d-flex align-center justify-space-between mb-4">
             <div>
                 <!-- <div class="text-h6">Banner Images</div> -->
@@ -18,13 +19,14 @@
                 <tr>
                     <th>Image</th>
                     <th>Details</th>
-                    <th>Specs</th>
-                    <th>Meta Info</th>
+                    <th>Status</th>
+                    <th>Banner Date</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-for="file in bannerFiles" :key="String(file.id)">
+
                     <td class="py-3">
                         <div class="table-image-preview rounded">
                             <v-img v-if="file.url" :src="file.url" cover :title="file.url || undefined" />
@@ -34,45 +36,44 @@
                         </div>
                     </td>
                     <td class="py-3 details-col">
-                        <div class="text-body-2 font-weight-medium">{{ file.title || `File #${file.id}` }}</div>
+                        <div class="text-body-2" style="font-size: 0.8rem;">{{ file.alt_text || `File #${file.file_id ?? file.id}` }}</div>
                         <div class="d-flex align-center ga-2">
-                            <div class="text-caption text-medium-emphasis">{{ getDisplayLink(file.meta, file.url) }}
+                            <div class="text-caption text-medium-emphasis">Redirect: {{ String(file.meta?.link ?? '').trim() || 'Not available' }}
                             </div>
-                            <v-btn v-if="getDisplayLink(file.meta, file.url) !== '-'"
-                                :href="getDisplayLink(file.meta, file.url)" target="_blank" rel="noopener noreferrer"
+                            <v-btn v-if="String(file.meta?.link ?? '').trim()"
+                                :href="String(file.meta?.link ?? '').trim()" target="_blank" rel="noopener noreferrer"
                                 icon size="x-small" variant="tonal" color="primary">
                                 <v-icon size="14">mdi-open-in-new</v-icon>
                             </v-btn>
                         </div>
-                    </td>
-                    <td class="py-3 specs-col">
-                        <div class="text-caption"><strong>Width:</strong> {{ Number(file.width ?? 0) }} px</div>
-                        <div class="text-caption"><strong>Height:</strong> {{ Number(file.height ?? 0) }} px</div>
-                        <div class="text-caption"><strong>Size:</strong> {{ formatBytes(file.file_size ?? file.size) }}
+                        <div class="text-caption text-medium-emphasis mt-2">
+                            {{ formatBytes(file.file_size ?? file.size) }} | {{ Number(file.width ?? 0) }} x {{
+                            Number(file.height ?? 0) }} px
                         </div>
+
                     </td>
+
+                    <td class="py-3">
+                        <v-chip size="small" label variant="tonal"
+                            :color="file.meta?.is_active === true ? 'success' : 'warning'">
+                            {{ file.meta?.is_active === true ? 'Active' : 'Inactive' }}
+                        </v-chip>
+                    </td>
+
                     <td class="py-3 meta-col">
-                        <template v-if="file.meta && Object.keys(file.meta).length">
-                            <div v-for="(value, key) in file.meta" :key="String(key)" v-show="String(key) !== 'link'"
-                                class="text-caption">
-                                <strong class="text-capitalize">{{ underscoreToSpace(key) }}:</strong> {{
-                                formatMetaValue(key, value) }}
-                            </div>
-                        </template>
-                        <span v-else class="text-caption text-medium-emphasis">-</span>
+                        <div class="text-caption">
+                            <strong>Start Date:</strong> {{ formatLongDate(file.meta?.start_date) ?? '-' }}
+                        </div>
+                        <div class="text-caption">
+                            <strong>End Date:</strong> {{ formatLongDate(file.meta?.end_date) ?? '-' }}
+                        </div>
                     </td>
                     <td class="py-3">
                         <div class="d-flex align-center ga-1">
-                            <v-btn v-if="file.url" :href="file.url" target="_blank" rel="noopener noreferrer" icon
-                                size="x-small" variant="tonal" color="primary">
-                                <v-icon size="16">mdi-eye</v-icon>
+                            <v-btn size="small" variant="tonal" color="primary" @click="onEditFile(file)">
+                                <v-icon size="16">mdi-cog</v-icon> Edit Banner
                             </v-btn>
-                            <v-btn v-else icon size="x-small" variant="tonal" color="primary" disabled>
-                                <v-icon size="16">mdi-eye</v-icon>
-                            </v-btn>
-                            <v-btn icon size="x-small" variant="tonal" color="error" @click="onDeleteFile(file.id)">
-                                <v-icon size="16">mdi-delete</v-icon>
-                            </v-btn>
+                           
                         </div>
                     </td>
                 </tr>
@@ -89,32 +90,55 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { BannerDetailResponse } from '@/api/banners.api';
+import { deleteFileUsage } from '@/api/files.api';
+import BannerImageEditModel from '@/components/banner/BannerImageEditModel.vue';
 import ImageUploadModel from '@/components/media/ImageUploadModel.vue';
 import { openModal } from '@/shared/modal';
-import { formatBytes, formatMetaValue, getDisplayLink, underscoreToSpace } from '@/shared/utils';
+import { formatBytes, formatLongDate } from '@/shared/utils';
+import { useSnackbarStore } from '@/stores/snackbar.store';
 
 const props = defineProps<{
     item: BannerDetailResponse | null;
 }>();
+const emit = defineEmits<{
+    (e: 'changed'): void;
+}>();
 
 const bannerFiles = computed(() => props.item?.files ?? []);
+const snackbar = useSnackbarStore();
 
-function onDeleteFile(fileId: number | string) {
-    // TODO: replace with delete confirmation + API call.
-    console.log('Delete banner file:', fileId);
+function onEditFile(file: NonNullable<BannerDetailResponse['files']>[number]) {
+    // console.log({file});
+    openModal(
+        BannerImageEditModel,
+        {
+            file,
+        },
+        {
+            title: 'Edit Banner Image',
+            size: 'md',
+            onSaved: () => {
+                emit('changed');
+            },
+        },
+    );
 }
 
+
 function onAddImage() {
-  openModal(
-    ImageUploadModel,
-    {
-      usage_type: 'banners',
-      usage_id: props.item?.id ?? null,
-      directory: 'banners',
-    },
-    {
-      title: 'Add Banner Image',
-      size: 'lg',
+    openModal(
+        ImageUploadModel,
+        {
+            usage_type: 'banners',
+            usage_id: props.item?.id ?? null,
+            directory: 'banners',
+        },
+        {
+            title: 'Add Banner Image',
+            size: 'lg',
+            onSaved: () => {
+                emit('changed');
+            },
         },
     );
 }

@@ -43,6 +43,7 @@ export type BannerDetailResponse = {
   thumb?: string | null;
   files?: Array<{
     id: number | string;
+    file_id?: number | string | null;
     url?: string | null;
     title?: string | null;
     alt_text?: string | null;

@@ -23,17 +23,19 @@ class BannerModel extends BaseModel
     public function files(): BelongsToMany
     {
         return $this->belongsToMany(FileModel::class, 'file_usages', 'usage_id', 'file_id')
-            ->whereIn('file_usages.usage_type', ['banners', 'banner'])
-            ->withPivot(['usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
+            ->using(FileUsageModel::class)
+            ->whereIn('file_usages.usage_type', ['banners'])
+            ->withPivot(['id', 'usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
             ->withTimestamps();
     }
 
     public function defaultFile(): BelongsToMany
     {
         return $this->belongsToMany(FileModel::class, 'file_usages', 'usage_id', 'file_id')
-            ->whereIn('file_usages.usage_type', ['banners', 'banner'])
+            ->using(FileUsageModel::class)
+            ->whereIn('file_usages.usage_type', ['banners'])
             ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(file_usages.meta, '$.collection_name'))) = 'default'")
-            ->withPivot(['usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
+            ->withPivot(['id', 'usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
             ->orderByPivot('id', 'desc');
     }
 }

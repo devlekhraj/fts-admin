@@ -99,6 +99,25 @@ export function fileAssign(payload: FileAssignPayload) {
   return http.post<FileAssignResponse, FileAssignResponse>('/admin/file-assign', formData);
 }
 
+export type UpdateFileUsagePayload = {
+  usage_type?: string;
+  usage_id?: number | string;
+  alt_text: string;
+  link?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  seq_no?: number | null;
+  is_active?: boolean;
+};
+
+export function updateFileUsage(fileUsageId: number | string, payload: UpdateFileUsagePayload) {
+  return http.put(`/admin/file-usage/${fileUsageId}`, payload);
+}
+
+export function deleteFileUsage(fileUsageId: number | string) {
+  return http.delete(`/admin/file-usage/${fileUsageId}`);
+}
+
 export async function listFiles(params?: ListFilesParams): Promise<FileListResponse> {
   const response = await http.get('/admin/file-list', { params });
   return response as unknown as FileListResponse;

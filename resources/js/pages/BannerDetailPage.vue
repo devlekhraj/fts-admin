@@ -55,7 +55,7 @@
     <v-divider />
     <v-window v-model="activeTab">
       <v-window-item v-for="tab in tabItems" :key="tab.value" :value="tab.value">
-        <component :is="tab.component" :item="bannerDetail" />
+        <component :is="tab.component" :item="bannerDetail" @changed="fetchBannerDetail" />
       </v-window-item>
     </v-window>
   </v-card>

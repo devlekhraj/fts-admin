@@ -15,20 +15,36 @@ class BannerResource extends JsonResource
             $defaultFile = $this->defaultFile->first();
         }
 
+        if ($request->route()?->getName() === 'admin.banners.show') {
+            return $this->showResponse($defaultFile);
+        }
+
+        return $this->listResponse($defaultFile);
+    }
+
+    private function listResponse($defaultFile): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'slug' => $this->slug,
+            'status' => (bool) $this->status,
+            'created_at' => $this->created_at,
+            'total_images' => (int) ($this->total_images ?? 0),
+            'thumb' => $defaultFile?->url,
+        ];
+    }
+
+    private function showResponse($defaultFile): array
+    {
         $files = [];
         if ($this->relationLoaded('files')) {
             $files = $this->files->map(static function ($file) {
-                $meta = $file->pivot?->meta;
-                if (is_string($meta)) {
-                    $decoded = json_decode($meta, true);
-                    $meta = json_last_error() === JSON_ERROR_NONE && is_array($decoded) ? $decoded : [];
-                }
-                if (!is_array($meta)) {
-                    $meta = [];
-                }
+                $meta = is_array($file->pivot?->meta) ? $file->pivot?->meta : [];
 
                 return [
-                    'id' => $file->id,
+                    'id' => $file->pivot?->id,
+                    'file_id' => $file->id,
                     'url' => $file->url,
                     'title' => $file->pivot?->title,
                     'alt_text' => $file->pivot?->alt_text,
@@ -49,7 +65,7 @@ class BannerResource extends JsonResource
             'created_at' => $this->created_at,
             'total_images' => (int) ($this->total_images ?? 0),
             'thumb' => $defaultFile?->url,
-            'files' => $this->when($this->relationLoaded('files'), $files),
+            'files' => $files,
         ];
     }
 }
