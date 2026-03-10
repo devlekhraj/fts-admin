@@ -16,6 +16,8 @@ class ProductModel extends BaseModel
     protected $casts = [
         'status' => 'boolean',
         'emi_enabled' => 'boolean',
+        'pre_order' => 'boolean',
+        'is_featured' => 'boolean',
         'attributes' =>'array'
     ];
 
