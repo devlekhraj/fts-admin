@@ -44,12 +44,6 @@
           <div class="text-subtitle-2 mb-3">{{ seoTitle }}</div>
           <div class="text-caption text-medium-emphasis mb-1">Image Alt Text</div>
           <v-textarea v-model="altTextModel" variant="outlined" density="comfortable" auto-grow rows="2" maxlength="80" :rules="altTextRules" required />
-          <div class="text-caption text-medium-emphasis mb-1 mt-2">Image Caption</div>
-          <v-textarea v-model="captionModel" variant="outlined" density="comfortable" auto-grow maxlength="130" rows="2"
-            class="mt-2" />
-          <div class="text-caption text-medium-emphasis mb-1 mt-2">Image Description</div>
-          <v-textarea v-model="descriptionModel" variant="outlined" density="comfortable" auto-grow maxlength="200" rows="5"
-            hide-details class="mt-2" />
         </v-card-text>
       </v-card>
     </v-col>
@@ -62,8 +56,6 @@ import { formatBytes } from '@/shared/utils';
 
 type SeoState = {
   alt_text: string;
-  caption: string;
-  description: string;
 };
 
 const props = withDefaults(defineProps<{
@@ -108,16 +100,6 @@ const uploadImageInfo = computed(() => {
 const altTextModel = computed({
   get: () => props.seo.alt_text,
   set: (value: string) => emit('update:seo', { ...props.seo, alt_text: value }),
-});
-
-const captionModel = computed({
-  get: () => props.seo.caption,
-  set: (value: string) => emit('update:seo', { ...props.seo, caption: value }),
-});
-
-const descriptionModel = computed({
-  get: () => props.seo.description,
-  set: (value: string) => emit('update:seo', { ...props.seo, description: value }),
 });
 
 const altTextRules = [

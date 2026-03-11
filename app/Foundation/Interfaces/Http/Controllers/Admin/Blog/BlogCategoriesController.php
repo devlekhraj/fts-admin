@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Foundation\Interfaces\Http\Controllers\Admin\Blog;
 
 use App\Foundation\Infrastructure\Persistence\Eloquent\Models\BlogCategoryModel;
+use App\Foundation\Interfaces\Http\Requests\Admin\UpdateBlogCategoryRequest;
 use App\Foundation\Interfaces\Http\Resources\BlogCategoryResource;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
@@ -75,9 +76,20 @@ class BlogCategoriesController extends Controller
         return response()->json([], 201);
     }
 
-    public function update(string $id): JsonResponse
+    public function update(UpdateBlogCategoryRequest $request, string $id): JsonResponse
     {
-        return response()->json(['id' => $id]);
+        $category = BlogCategoryModel::query()->findOrFail($id);
+        $validated = $request->validated();
+
+        $category->title = trim((string) $validated['title']);
+        $category->slug = trim((string) $validated['slug']);
+        $category->status = (bool) $validated['status'];
+        $category->save();
+
+        return response()->json([
+            'message' => 'Blog category updated successfully.',
+            'data' => new BlogCategoryResource($category),
+        ]);
     }
 
     public function destroy(string $id): JsonResponse

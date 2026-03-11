@@ -90,7 +90,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { BannerDetailResponse } from '@/api/banners.api';
-import { deleteFileUsage } from '@/api/files.api';
 import BannerImageEditModel from '@/components/banner/BannerImageEditModel.vue';
 import ImageUploadModel from '@/components/media/ImageUploadModel.vue';
 import { openModal } from '@/shared/modal';

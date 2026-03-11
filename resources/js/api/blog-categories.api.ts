@@ -36,13 +36,12 @@ export type BlogCategoryListResponse = BlogCategoryListItem[] | BlogCategoryList
 export type BlogCategoryFileItem = {
   id: number | string;
   url?: string | null;
-  title?: string | null;
   alt_text?: string | null;
-  meta?: Record<string, unknown> | null;
-  file_size?: number | null;
-  size?: number | null;
-  height?: number | null;
-  width?: number | null;
+  meta?: {
+    is_active: boolean;
+    is_default: boolean;
+  } | null;
+  size_info?: string | null;
 };
 
 export type BlogCategoryDetailResponse = BlogCategoryListItem & {
@@ -55,6 +54,12 @@ export type BlogCategoryDetailResponse = BlogCategoryListItem & {
   updated_at?: string | null;
   default_file?: Record<string, unknown> | null;
   files?: BlogCategoryFileItem[];
+};
+
+export type UpdateBlogCategoryImagePayload = {
+  alt_text: string;
+  is_default?: boolean;
+  is_active?: boolean;
 };
 
 export async function listBlogCategories(params?: ListBlogCategoriesParams): Promise<BlogCategoryListResponse> {
@@ -85,4 +90,16 @@ export function update(id: string, payload: Record<string, unknown>) {
 
 export function remove(id: string) {
   return http.delete(`/admin/blog-categories/${id}`);
+}
+
+export function updateBlogCategoryImage(
+  categoryId: number | string,
+  fileUsageId: number | string,
+  payload: UpdateBlogCategoryImagePayload,
+) {
+  return http.put(`/admin/blog-categories/${categoryId}/images/${fileUsageId}`, payload);
+}
+
+export function deleteBlogCategoryImage(categoryId: number | string, fileUsageId: number | string) {
+  return http.delete(`/admin/blog-categories/${categoryId}/images/${fileUsageId}`);
 }

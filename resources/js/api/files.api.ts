@@ -107,6 +107,7 @@ export type UpdateFileUsagePayload = {
   start_date?: string | null;
   end_date?: string | null;
   seq_no?: number | null;
+  is_default?: boolean;
   is_active?: boolean;
 };
 

@@ -1,21 +1,36 @@
 <template>
   <div class="pa-6">
     <v-row>
-      <v-col cols="12" lg="8" offset-lg="2">
-        <div class="d-flex justify-end mb-4">
-          <v-btn color="primary" :loading="saving" @click="onUpdate">Update</v-btn>
+      <v-col cols="12" lg="6" offset-lg="3">
+        <div class="pt-10">
+          <app-field-label label="Title" />
+          <v-text-field v-model="form.title" variant="outlined" density="comfortable" />
         </div>
 
-        <v-text-field v-model="form.title" label="Title" variant="outlined" density="comfortable" />
-        <v-text-field v-model="form.slug" label="Slug" variant="outlined" density="comfortable" class="mt-3" />
-        <v-text-field
-          v-model="form.status"
-          label="Status"
-          hint="Use 1 for active, 0 for inactive"
-          persistent-hint
-          variant="outlined"
-          density="comfortable"
-          class="mt-3" />
+        <div>
+          <app-field-label label="Slug" />
+          <v-text-field v-model="form.slug" variant="outlined" density="comfortable" />
+        </div>
+
+        <div>
+          <app-field-label label="Status" />
+          <div style="max-width: 200px;">
+            <v-select
+              v-model="form.status"
+              :items="statusOptions"
+              item-title="label"
+              item-value="value"
+              variant="outlined"
+              density="comfortable" />
+          </div>
+        </div>
+
+        <div class="d-flex justify-space-around mb-4">
+          <v-btn color="primary" variant="flat" :loading="saving" @click="onUpdate">
+            <v-icon start size="16">mdi-content-save-outline</v-icon>
+            Update
+          </v-btn>
+        </div>
       </v-col>
     </v-row>
   </div>
@@ -24,6 +39,8 @@
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue';
 import { updateProductCategory, type ProductCategoryDetailResponse } from '@/api/product-categories.api';
+import AppFieldLabel from '@/components/shared/AppFieldLabel.vue';
+import { useSnackbarStore } from '@/stores/snackbar.store';
 
 const props = defineProps<{
   item: ProductCategoryDetailResponse | null;
@@ -33,12 +50,17 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'updated'): void;
 }>();
+const statusOptions = [
+  { label: 'Active', value: '1' },
+  { label: 'Inactive', value: '0' },
+];
 
 const form = reactive({
   title: '',
   slug: '',
   status: '0',
 });
+const snackbar = useSnackbarStore();
 const saving = ref(false);
 
 watch(
@@ -62,6 +84,7 @@ async function onUpdate() {
       slug: form.slug.trim(),
       status: Number(form.status) === 1,
     });
+    snackbar.show({ message: 'Product category updated successfully.', color: 'success' });
     emit('updated');
   } finally {
     saving.value = false;

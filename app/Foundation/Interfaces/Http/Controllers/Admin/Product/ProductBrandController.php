@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Foundation\Interfaces\Http\Controllers\Admin\Product;
 
 use App\Foundation\Infrastructure\Persistence\Eloquent\Models\ProductBrandModel;
+use App\Foundation\Interfaces\Http\Requests\Admin\UpdateBrandRequest;
 use App\Foundation\Interfaces\Http\Resources\ProductBrandResource;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
@@ -76,9 +77,20 @@ class ProductBrandController extends Controller
         return response()->json([], 201);
     }
 
-    public function update(string $id): JsonResponse
+    public function update(UpdateBrandRequest $request, string $id): JsonResponse
     {
-        return response()->json(['id' => $id]);
+        $brand = ProductBrandModel::query()->findOrFail($id);
+        $validated = $request->validated();
+
+        $brand->name = trim((string) $validated['name']);
+        $brand->slug = trim((string) $validated['slug']);
+        $brand->status = (bool) $validated['status'];
+        $brand->save();
+
+        return response()->json([
+            'message' => 'Brand updated successfully.',
+            'data' => new ProductBrandResource($brand),
+        ]);
     }
 
     public function destroy(string $id): JsonResponse

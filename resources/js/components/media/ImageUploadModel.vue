@@ -70,13 +70,9 @@ const uploadFile = ref<File | null>(null);
 const submitting = ref(false);
 const existingSeo = ref({
   alt_text: '',
-  caption: '',
-  description: '',
 });
 const uploadSeo = ref({
   alt_text: '',
-  caption: '',
-  description: '',
 });
 
 function hasAltText(value: string | null | undefined): boolean {
@@ -118,10 +114,6 @@ async function onSubmit() {
         source: 'existing' as const,
         image_id: selectedExistingImageId.value,
         alt_text: altText,
-        // meta: {
-        caption: seoState.caption,
-        description: seoState.description,
-        // },
       }
       : {
         usage_type: usageType,
@@ -130,10 +122,6 @@ async function onSubmit() {
         source: 'upload' as const,
         file: uploadFile.value,
         alt_text: altText,
-        // meta: {
-        caption: seoState.caption,
-        description: seoState.description,
-        // },
       };
   // console.log({payload});
   try {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Foundation\Interfaces\Http\Controllers\Admin\Product;
 
 use App\Foundation\Infrastructure\Persistence\Eloquent\Models\ProductCategoryModel;
+use App\Foundation\Interfaces\Http\Requests\Admin\UpdateProductCategoryRequest;
 use App\Foundation\Interfaces\Http\Resources\ProductCategoryResource;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
@@ -69,8 +70,19 @@ class ProductCategoryController extends Controller
         ], 200);
     }
 
-    public function update(string $id): JsonResponse
+    public function update(UpdateProductCategoryRequest $request, string $id): JsonResponse
     {
-        return response()->json(['id' => $id]);
+        $category = ProductCategoryModel::query()->findOrFail($id);
+        $validated = $request->validated();
+
+        $category->title = trim((string) $validated['title']);
+        $category->slug = trim((string) $validated['slug']);
+        $category->status = (bool) $validated['status'];
+        $category->save();
+
+        return response()->json([
+            'message' => 'Product category updated successfully.',
+            'data' => new ProductCategoryResource($category),
+        ]);
     }
 }

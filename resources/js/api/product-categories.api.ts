@@ -34,13 +34,11 @@ export type ProductCategoryListResponse = {
 export type ProductCategoryFileItem = {
   id: number | string;
   url?: string | null;
-  title?: string | null;
   alt_text?: string | null;
-  meta?: Record<string, unknown> | null;
-  file_size?: number | null;
-  size?: number | null;
-  height?: number | null;
-  width?: number | null;
+  meta?: {
+    is_default: boolean;
+  } | null;
+  size_info?: string | null;
 };
 
 export type ProductCategoryDetailResponse = ProductCategoryListItem & {
@@ -54,6 +52,11 @@ export type ProductCategoryDetailResponse = ProductCategoryListItem & {
   default_file?: Record<string, unknown> | null;
   files?: ProductCategoryFileItem[];
   [key: string]: unknown;
+};
+
+export type UpdateProductCategoryImagePayload = {
+  alt_text: string;
+  is_default?: boolean;
 };
 
 export async function listProductCategories(
@@ -74,4 +77,16 @@ export async function getProductCategory(id: number | string): Promise<ProductCa
 
 export function updateProductCategory(id: string, payload: Record<string, unknown>) {
   return http.put(`/admin/product-categories/${id}`, payload);
+}
+
+export function updateProductCategoryImage(
+  categoryId: number | string,
+  fileUsageId: number | string,
+  payload: UpdateProductCategoryImagePayload,
+) {
+  return http.put(`/admin/product-categories/${categoryId}/images/${fileUsageId}`, payload);
+}
+
+export function deleteProductCategoryImage(categoryId: number | string, fileUsageId: number | string) {
+  return http.delete(`/admin/product-categories/${categoryId}/images/${fileUsageId}`);
 }

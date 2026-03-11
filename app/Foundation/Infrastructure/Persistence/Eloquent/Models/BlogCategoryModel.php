@@ -26,7 +26,7 @@ class BlogCategoryModel extends BaseModel
     {
         return $this->belongsToMany(FileModel::class, 'file_usages', 'usage_id', 'file_id')
             ->wherePivot('usage_type', 'blog_categories')
-            ->withPivot(['usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
+            ->withPivot(['id', 'usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
             ->withTimestamps();
     }
 
@@ -38,7 +38,7 @@ class BlogCategoryModel extends BaseModel
                 $query->whereRaw("JSON_EXTRACT(file_usages.meta, '$.is_default') = true")
                     ->orWhereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(file_usages.meta, '$.is_default'))) = 'true'");
             })
-            ->withPivot(['usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
+            ->withPivot(['id', 'usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
             ->orderByPivot('id', 'asc');
     }
 }

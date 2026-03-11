@@ -35,13 +35,11 @@ export type BlogListResponse = {
 export type BlogFileItem = {
   id: number | string;
   url?: string | null;
-  title?: string | null;
   alt_text?: string | null;
-  meta?: Record<string, unknown> | null;
-  file_size?: number | null;
-  size?: number | null;
-  height?: number | null;
-  width?: number | null;
+  meta?: {
+    is_default: boolean;
+  } | null;
+  size_info?: string | null;
 };
 
 export type BlogDetailResponse = BlogListItem & {
@@ -55,6 +53,11 @@ export type BlogDetailResponse = BlogListItem & {
   default_file?: Record<string, unknown> | null;
   files?: BlogFileItem[];
   [key: string]: unknown;
+};
+
+export type UpdateBlogImagePayload = {
+  alt_text: string;
+  is_default?: boolean;
 };
 
 export async function listBlogs(params?: ListBlogsParams): Promise<BlogListResponse> {
@@ -85,4 +88,16 @@ export function update(id: string, payload: Record<string, unknown>) {
 
 export function remove(id: string) {
   return http.delete(`/admin/blogs/${id}`);
+}
+
+export function updateBlogImage(
+  blogId: number | string,
+  fileUsageId: number | string,
+  payload: UpdateBlogImagePayload,
+) {
+  return http.put(`/admin/blogs/${blogId}/images/${fileUsageId}`, payload);
+}
+
+export function deleteBlogImage(blogId: number | string, fileUsageId: number | string) {
+  return http.delete(`/admin/blogs/${blogId}/images/${fileUsageId}`);
 }

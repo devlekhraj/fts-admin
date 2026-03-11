@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Foundation\Interfaces\Http\Resources;
 
+use App\Foundation\Shared\Support\Formatters\ByteSizeFormatter;
+use App\Foundation\Shared\Support\Formatters\FileDimensionFormatter;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class BlogResource extends JsonResource
@@ -52,20 +54,22 @@ class BlogResource extends JsonResource
                     $decoded = json_decode($meta, true);
                     $meta = json_last_error() === JSON_ERROR_NONE && is_array($decoded) ? $decoded : [];
                 }
-                if (!is_array($meta)) {
+                if (! is_array($meta)) {
                     $meta = [];
                 }
+                $meta = [
+                    'is_default' => in_array($meta['is_default'] ?? false, [true, 1, '1', 'true'], true),
+                ];
+
+                $fileSize = ByteSizeFormatter::format($file->file_size ?? null);
+                $fileDimension = FileDimensionFormatter::format($file->width ?? null, $file->height ?? null);
 
                 return [
-                    'id' => $file->id,
+                    'id' => $file->pivot?->id,
                     'url' => $file->url,
-                    'title' => $file->pivot?->title,
                     'alt_text' => $file->pivot?->alt_text,
                     'meta' => $meta,
-                    'file_size' => is_numeric($file->file_size ?? null) ? (float) $file->file_size : null,
-                    'size' => is_numeric($file->file_size ?? null) ? (float) $file->file_size : null,
-                    'height' => is_numeric($file->height ?? null) ? (float) $file->height : null,
-                    'width' => is_numeric($file->width ?? null) ? (float) $file->width : null,
+                    'size_info' => "{$fileSize} | {$fileDimension}",
                 ];
             })->values()->all();
         }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Foundation\Interfaces\Http\Controllers\Admin\Blog;
 
 use App\Foundation\Infrastructure\Persistence\Eloquent\Models\BlogModel;
+use App\Foundation\Interfaces\Http\Requests\Admin\UpdateBlogPostRequest;
 use App\Foundation\Interfaces\Http\Resources\BlogResource;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
@@ -75,9 +76,21 @@ class BlogsController extends Controller
         return response()->json([], 201);
     }
 
-    public function blogUpdate(string $id): JsonResponse
+    public function blogUpdate(UpdateBlogPostRequest $request, string $id): JsonResponse
     {
-        return response()->json(['id' => $id]);
+        $blog = BlogModel::query()->findOrFail($id);
+        $validated = $request->validated();
+
+        $blog->title = trim((string) $validated['title']);
+        $blog->slug = trim((string) $validated['slug']);
+        $blog->author = isset($validated['author']) ? trim((string) $validated['author']) : null;
+        $blog->status = (bool) $validated['status'];
+        $blog->save();
+
+        return response()->json([
+            'message' => 'Blog updated successfully.',
+            'data' => new BlogResource($blog),
+        ]);
     }
 
     public function blogDestroy(string $id): JsonResponse
