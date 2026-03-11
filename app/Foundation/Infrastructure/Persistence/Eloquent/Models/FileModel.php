@@ -11,7 +11,7 @@ class FileModel extends BaseModel
 {
     protected $table = 'files';
     protected $guarded = [];
-    
+
     protected $appends = ['url'];
     protected $casts = [
         'meta' => 'array',
@@ -38,9 +38,9 @@ class FileModel extends BaseModel
         $relativePath = ltrim($path, '/');
 
         if ($baseUrl === '') {
-            return '/'.$relativePath;
+            return '/' . $relativePath;
         }
 
-        return $baseUrl.'/'.$relativePath;
+        return $baseUrl . '/' . $relativePath;
     }
 }

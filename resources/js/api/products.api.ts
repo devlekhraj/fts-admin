@@ -40,13 +40,11 @@ export type ProductListResponse = {
 export type ProductFileItem = {
   id: number | string;
   url?: string | null;
-  title?: string | null;
   alt_text?: string | null;
-  meta?: Record<string, unknown> | null;
-  file_size?: number | null;
-  size?: number | null;
-  height?: number | null;
-  width?: number | null;
+  meta?: {
+    is_default: boolean;
+  } | null;
+  size_info?: string | null;
 };
 
 export type ProductVariantItem = {
@@ -148,6 +146,11 @@ export type UpdateBrandImagePayload = {
   is_default?: boolean;
 };
 
+export type UpdateProductImagePayload = {
+  alt_text: string;
+  is_default?: boolean;
+};
+
 export async function listBrands(params?: ListBrandsParams): Promise<ProductBrandListResponse> {
   const response = await http.get('/admin/brands', { params });
   return response as unknown as ProductBrandListResponse;
@@ -176,6 +179,18 @@ export function updateBrandImage(
 
 export function deleteBrandImage(brandId: number | string, fileUsageId: number | string) {
   return http.delete(`/admin/brands/${brandId}/images/${fileUsageId}`);
+}
+
+export function updateProductImage(
+  productId: number | string,
+  fileUsageId: number | string,
+  payload: UpdateProductImagePayload,
+) {
+  return http.put(`/admin/products/${productId}/images/${fileUsageId}`, payload);
+}
+
+export function deleteProductImage(productId: number | string, fileUsageId: number | string) {
+  return http.delete(`/admin/products/${productId}/images/${fileUsageId}`);
 }
 
 export function create(payload: Record<string, unknown>) {

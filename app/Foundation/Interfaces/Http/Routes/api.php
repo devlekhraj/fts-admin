@@ -6,7 +6,6 @@ declare(strict_types=1);
 
 require __DIR__ . '/auth/admin.php';
 require __DIR__ . '/admin/admin-users.php';
-require __DIR__ . '/admin/products.php';
 require __DIR__ . '/admin/categories.php';
 require __DIR__ . '/admin/brands.php';
 require __DIR__ . '/admin/blogs.php';
@@ -19,6 +18,7 @@ require __DIR__ . '/admin/emi-banks.php';
 require __DIR__ . '/admin/emi-users.php';
 require __DIR__ . '/admin/route_settings.php';
 require __DIR__ . '/admin/route_customers.php';
+require __DIR__ . '/admin/route_products.php';
 require __DIR__ . '/admin/route_product_categories.php';
 require __DIR__ . '/admin/route_payment_methods.php';
 require __DIR__ . '/admin/route_orders.php';

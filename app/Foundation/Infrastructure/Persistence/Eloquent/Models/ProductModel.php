@@ -18,7 +18,7 @@ class ProductModel extends BaseModel
         'emi_enabled' => 'boolean',
         'pre_order' => 'boolean',
         'is_featured' => 'boolean',
-        'attributes' =>'array'
+        'attributes' => 'array'
     ];
 
     public function brand(): BelongsTo
@@ -34,7 +34,7 @@ class ProductModel extends BaseModel
     {
         return $this->belongsToMany(FileModel::class, 'file_usages', 'usage_id', 'file_id')
             ->wherePivot('usage_type', 'products')
-            ->withPivot(['usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
+             ->withPivot(['id', 'usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
             ->withTimestamps();
     }
 
@@ -43,12 +43,14 @@ class ProductModel extends BaseModel
         return $this->belongsToMany(FileModel::class, 'file_usages', 'usage_id', 'file_id')
             ->wherePivot('usage_type', 'products')
             ->whereRaw("JSON_EXTRACT(file_usages.meta, '$.is_default') = true")
-            ->withPivot(['usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
-            ->orderByPivot('id', 'asc')
-            ->limit(1);
+             ->withPivot(['id', 'usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
+              ->orderByPivot('id', 'asc');
     }
 
-    public function attribute() : BelongsTo{
-        return $this->belongsTo(AttributeClassModel::class,'attribute_class_id');
+
+
+    public function attribute(): BelongsTo
+    {
+        return $this->belongsTo(AttributeClassModel::class, 'attribute_class_id');
     }
 }

@@ -15,7 +15,7 @@
 				<tr>
 					<th>Image</th>
 					<th>Details</th>
-					<th>Specs</th>
+					<th>Primary Image</th>
 					<th>Action</th>
 				</tr>
 			</thead>
@@ -30,23 +30,23 @@
 						</div>
 					</td>
 					<td class="py-3 details-col">
-						<div class="text-body-2 font-weight-medium">{{ file.title || `File #${file.id}` }}</div>
+						<div class="text-body-2 font-weight-medium">File #{{ file.id }}</div>
 						<div class="text-caption text-medium-emphasis">{{ file.alt_text || '-' }}</div>
-					</td>
-					<td class="py-3 specs-col">
-						<div class="text-caption"><strong>Width:</strong> {{ Number(file.width ?? 0) }} px</div>
-						<div class="text-caption"><strong>Height:</strong> {{ Number(file.height ?? 0) }} px</div>
-						<div class="text-caption"><strong>Size:</strong> {{ formatBytes(file.file_size ?? file.size) }}
+						<div class="text-caption text-medium-emphasis mt-1">
+							{{ String(file.size_info ?? '').trim() || '-' }}
 						</div>
 					</td>
 					<td class="py-3">
-						<v-btn v-if="file.url" :href="String(file.url)" target="_blank" rel="noopener noreferrer" icon
-							size="x-small" variant="tonal" color="primary">
-							<v-icon size="16">mdi-eye</v-icon>
-						</v-btn>
-						<v-btn v-else icon size="x-small" variant="tonal" color="primary" disabled>
-							<v-icon size="16">mdi-eye</v-icon>
-						</v-btn>
+						<v-chip size="small" label variant="tonal" :color="file.meta?.is_default ? 'primary' : 'default'">
+							{{ file.meta?.is_default ? 'Yes' : 'No' }}
+						</v-chip>
+					</td>
+					<td class="py-3">
+						<div class="d-flex align-center ga-1">
+							<v-btn size="small" variant="tonal" color="primary" @click="onEditFile(file)">
+								<v-icon size="16">mdi-cog</v-icon> Edit Image
+							</v-btn>
+						</div>
 					</td>
 				</tr>
 			</tbody>
@@ -64,14 +64,35 @@
 import { computed } from 'vue';
 import { type ProductDetailResponse } from '@/api/products.api';
 import ImageUploadModel from '@/components/media/ImageUploadModel.vue';
+import ProductImageEditModal from '@/components/product/ProductImageEditModal.vue';
 import { openModal } from '@/shared/modal';
-import { formatBytes } from '@/shared/utils';
 
 const props = defineProps<{
 	item: ProductDetailResponse | null;
 }>();
 
+const emit = defineEmits<{
+	(e: 'updated'): void;
+}>();
+
 const productFiles = computed(() => props.item?.files ?? []);
+
+function onEditFile(file: any) {
+	openModal(
+		ProductImageEditModal,
+		{
+			productId: props.item?.id ?? null,
+			file,
+		},
+		{
+			title: 'Edit Product Image',
+			size: 'md',
+			onSaved: () => {
+				emit('updated');
+			},
+		},
+	);
+}
 
 function onAddImage() {
 	openModal(
@@ -84,6 +105,9 @@ function onAddImage() {
 		{
 			title: 'Add Product Image',
 			size: 'lg',
+			onSaved: () => {
+				emit('updated');
+			},
 		},
 	);
 }
@@ -95,10 +119,6 @@ function onAddImage() {
 	height: 78px;
 	background: rgb(var(--v-theme-surface-variant));
 	overflow: hidden;
-}
-
-.specs-col {
-	min-width: 190px;
 }
 
 .details-col {

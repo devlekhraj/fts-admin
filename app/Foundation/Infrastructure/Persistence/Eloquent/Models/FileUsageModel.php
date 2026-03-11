@@ -19,4 +19,9 @@ class FileUsageModel extends Pivot
     {
         return $this->belongsTo(FileModel::class, 'file_id');
     }
+
+    public function usable()
+    {
+        return $this->morphTo();
+    }
 }

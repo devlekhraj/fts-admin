@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use App\Foundation\Interfaces\Http\Controllers\Admin\Product\ProductsController;
 use App\Foundation\Interfaces\Http\Controllers\Admin\Product\ProductVariantController;
+use App\Foundation\Interfaces\Http\Controllers\Admin\Product\ProductImageController;
 
 
 // TODO: Protect with admin auth + permission middleware.
@@ -16,5 +17,7 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::post('products/{id}/variants', [ProductVariantController::class, 'store'])->name('admin.products.variants.store');
     Route::put('products/{id}/variants/{item_id}', [ProductVariantController::class, 'update'])->name('admin.products.variants.update');
     Route::put('products/{id}', [ProductsController::class, 'update'])->name('admin.products.update');
+    Route::put('products/{id}/images/{fileUsageId}', [ProductImageController::class, 'update'])->name('admin.products.images.update');
+    Route::delete('products/{id}/images/{fileUsageId}', [ProductImageController::class, 'delete'])->name('admin.products.images.delete');
     Route::delete('products/{id}', [ProductsController::class, 'destroy'])->name('admin.products.destroy');
 });
