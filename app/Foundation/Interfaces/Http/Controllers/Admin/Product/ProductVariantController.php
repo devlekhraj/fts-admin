@@ -17,8 +17,8 @@ use Illuminate\Http\JsonResponse;
 class ProductVariantController extends Controller
 {
     public function __construct(
-        private readonly CreateProductVariantHandler $createProductVariantHandler,
-        private readonly UpdateProductVariantHandler $updateProductVariantHandler,
+        private CreateProductVariantHandler $createProductVariantHandler,
+        private UpdateProductVariantHandler $updateProductVariantHandler,
     ) {}
 
     public function store(StoreProductVariantRequest $request, string $id): JsonResponse

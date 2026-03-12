@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('emi_bank_id')->constrained('emi_banks');
             $table->string('file_path');
             $table->json('application_data');
-            $table->enum('status',['generated','approved','rejected','cancelled'])->default('generated');
+            $table->enum('status', ['generated', 'approved', 'rejected', 'cancelled'])->default('generated');
             $table->index('status');
             $table->timestamps();
         });

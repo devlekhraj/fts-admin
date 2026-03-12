@@ -193,6 +193,21 @@ export function deleteProductImage(productId: number | string, fileUsageId: numb
   return http.delete(`/admin/products/${productId}/images/${fileUsageId}`);
 }
 
+export function updateVariantImage(
+  variantId: number | string,
+  fileUsageId: number | string,
+  payload: UpdateProductImagePayload,
+) {
+  return http.put(`/admin/product-variants/${variantId}/images/${fileUsageId}`, payload);
+}
+
+export function deleteVariantImage(
+  variantId: number | string, 
+  fileUsageId: number | string
+) {
+  return http.delete(`/admin/product-variants/${variantId}/images/${fileUsageId}`);
+}
+
 export function create(payload: Record<string, unknown>) {
   return http.post('/admin/products', payload);
 }

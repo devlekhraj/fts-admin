@@ -29,7 +29,7 @@ return new class extends Migration
 
             $table->unique(['file_id', 'usage_type', 'usage_id']);
             $table->index(['usage_type', 'usage_id']);
-            
+
         });
     }
 

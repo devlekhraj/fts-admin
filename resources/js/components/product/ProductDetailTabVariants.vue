@@ -10,7 +10,11 @@
             </v-btn>
         </div>
 
-        <v-table v-if="variants.length" density="comfortable" class="border rounded">
+        <v-table
+            v-if="variants.length"
+            density="comfortable"
+            class="border rounded"
+        >
             <thead>
                 <tr>
                     <th>Variant</th>
@@ -27,15 +31,30 @@
                         <td class="py-3 variant-col">
                             <div class="d-flex align-center ga-3">
                                 <div class="variant-thumb rounded">
-                                    <v-img v-if="getVariantPreview(variant)" :src="getVariantPreview(variant)!" cover />
-                                    <div v-else class="d-flex align-center justify-center h-100">
-                                        <v-icon size="18" color="grey-darken-1">mdi-image-outline</v-icon>
+                                    <v-img
+                                        v-if="getVariantPreview(variant)"
+                                        :src="getVariantPreview(variant)!"
+                                        cover
+                                    />
+                                    <div
+                                        v-else
+                                        class="d-flex align-center justify-center h-100"
+                                    >
+                                        <v-icon size="18" color="grey-darken-1"
+                                            >mdi-image-outline</v-icon
+                                        >
                                     </div>
                                 </div>
                                 <div>
-                                    <div class="text-body-2 font-weight-medium">Variant #{{ variant.id }}</div>
-                                    <div class="text-caption text-medium-emphasis">
-                                        {{ formatAttributes(variant.attributes) }}
+                                    <div class="text-body-2 font-weight-medium">
+                                        Variant #{{ variant.id }}
+                                    </div>
+                                    <div
+                                        class="text-caption text-medium-emphasis"
+                                    >
+                                        {{
+                                            formatAttributes(variant.attributes)
+                                        }}
                                     </div>
                                 </div>
                             </div>
@@ -44,154 +63,167 @@
                             <div class="text-caption">{{ formatAttributes(variant.attributes) }}</div>
                         </td> -->
                         <td class="py-3">
-                            <v-chip size="small" label variant="tonal"
-                                :color="Number(variant.quantity ?? 0) > 0 ? 'primary' : undefined">
-                                {{ Number(variant.quantity ?? 0) === 0 ? 'Unavailable' : `${Number(variant.quantity ?? 0)} Available` }}
+                            <v-chip
+                                size="small"
+                                label
+                                variant="tonal"
+                                :color="
+                                    Number(variant.quantity ?? 0) > 0
+                                        ? 'primary'
+                                        : undefined
+                                "
+                            >
+                                {{
+                                    Number(variant.quantity ?? 0) === 0
+                                        ? "Unavailable"
+                                        : `${Number(
+                                              variant.quantity ?? 0,
+                                          )} Available`
+                                }}
                             </v-chip>
                         </td>
                         <td class="py-3">
-                            <div class="text-body-2">{{ formatNPR(variant.price) }}</div>
+                            <div class="text-body-2">
+                                {{ formatNPR(variant.price) }}
+                            </div>
                         </td>
                         <td class="py-3">
-                            <v-chip size="small" label variant="tonal" color="info" class="variant-images-chip"
-                                @click="toggleExpanded(variant)">
+                            <v-chip
+                                size="small"
+                                label
+                                variant="tonal"
+                                color="info"
+                                class="variant-images-chip"
+                                @click="toggleExpanded(variant)"
+                            >
                                 {{ getVariantImageCount(variant) }} images
-                                <v-icon end size="14">{{ isExpanded(variant) ? 'mdi-chevron-up' : 'mdi-chevron-down'
-                                    }}</v-icon>
+                                <v-icon end size="14">{{
+                                    isExpanded(variant)
+                                        ? "mdi-chevron-up"
+                                        : "mdi-chevron-down"
+                                }}</v-icon>
                             </v-chip>
                         </td>
                         <td class="py-3">
                             <div class="d-flex align-center ga-2">
-                                <v-btn size="small" variant="tonal" color="primary" @click="onEditVariant(variant)">
-                                    <v-icon size="16">mdi-square-edit-outline</v-icon> Edit
+                                <v-btn
+                                    size="small"
+                                    variant="tonal"
+                                    color="primary"
+                                    @click="onEditVariant(variant)"
+                                >
+                                    <v-icon size="16"
+                                        >mdi-square-edit-outline</v-icon
+                                    >
+                                    Edit
                                 </v-btn>
-                                <v-btn size="small" variant="tonal" color="error" @click="onDeleteVariant(variant)">
-                                    <v-icon size="16">mdi-trash-can-outline</v-icon> Delete
+                                <v-btn
+                                    size="small"
+                                    variant="tonal"
+                                    color="error"
+                                    @click="onDeleteVariant(variant)"
+                                >
+                                    <v-icon size="16"
+                                        >mdi-trash-can-outline</v-icon
+                                    >
+                                    Delete
                                 </v-btn>
-                                <v-btn size="small" variant="tonal" color="primary" @click="toggleExpanded(variant)">
-                                    <v-icon size="14">{{ isExpanded(variant) ? 'mdi-chevron-up' : 'mdi-chevron-down'
-                                        }}</v-icon> &nbsp; Expand
+                                <v-btn
+                                    size="small"
+                                    variant="tonal"
+                                    color="primary"
+                                    @click="toggleExpanded(variant)"
+                                >
+                                    <v-icon size="14">{{
+                                        isExpanded(variant)
+                                            ? "mdi-chevron-up"
+                                            : "mdi-chevron-down"
+                                    }}</v-icon>
+                                    &nbsp; Expand
                                 </v-btn>
                             </div>
                         </td>
                     </tr>
                     <tr v-if="isExpanded(variant)">
                         <td colspan="6" class="variant-expanded-cell">
-                            <div class="container">
-                                <v-row>
-                                    <v-col cols="12" lg="8" offset-lg="2">
-                                        <div class="py-14">
-                                            <div class="mb-4">
+                            <ProductVariantImagesTable :variant="variant" @updated="$emit('updated')" />
+                        </td>
+                    </tr>
+                </template>
+            </tbody>
+        </v-table>
 
-                                                <div>
-                                                    <v-btn variant="flat" color="primary" @click="onAddImage(variant)">
-                                                        <v-icon>mdi-image-plus</v-icon> &nbsp;Add Image</v-btn>
-                                                </div>
-                                            </div>
-                                            <v-table v-if="getVariantImageCount(variant)" density="compact"
-                                                class="variant-images-table border rounded">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Image</th>
-                                                        <th>Description</th>
-                                                        <th>Action</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr v-for="image in variant.images" :key="String(image.id)">
-                                                        <td class="py-2 image-col">
-                                                            <div class="variant-image-thumb rounded">
-                                                                <v-img v-if="image.url" :src="String(image.url)" contain />
-                                                                <div v-else class="d-flex align-center justify-center h-100">
-                                                                    <v-icon size="16" color="grey-darken-1">mdi-image-off-outline</v-icon>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td class="py-2">
-                                                            <div class="text-caption text-truncate">
-                                                                {{ image.title || `Image #${image.id}` }}
-                                                            </div>
-                                                            <div class="text-caption text-medium-emphasis">
-                                                                {{ image.alt_text || '-' }}
-                                                            </div>
-                                                            <div class="text-caption text-medium-emphasis mt-2">
-                                                                {{ formatBytes(image.file_size ?? image.size) }} | {{ Number(image.width ?? 0) }} x
-                                                                {{ Number(image.height ?? 0) }}
-                                                            </div>
-                                                        </td>
-                                                        <td class="py-2 action-col">
-                                                            <v-btn v-if="image.url" :href="String(image.url)" target="_blank" rel="noopener noreferrer"
-                                                                size="small" variant="tonal" color="primary">
-                                                                <v-icon start size="16">mdi-pencil-outline</v-icon>
-                                                                Edit image
-                                                            </v-btn>
-                                                            <v-btn v-else size="small" variant="tonal" color="primary" disabled>
-                                                                <v-icon start size="16">mdi-pencil-outline</v-icon>
-                                                                Edit image
-                                                            </v-btn>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </v-table>
-                                            <div v-else class="text-caption text-medium-emphasis">No images for this variant.</div>
-                                        </div>
-                                        </v-col>
-                                        </v-row>
-                                        </div>
-                                        </td>
-                                        </tr>
-                                    </template>
-                            </tbody>
-                            </v-table>
-
-<div v-else class="empty-variants-state">
-    <v-icon size="42" color="grey-darken-1">mdi-shape-outline</v-icon>
-    <div class="text-subtitle-1 font-weight-medium mt-2">No variants found</div>
-    <div class="text-body-2 text-medium-emphasis">No variant rows are available for this product.</div>
-</div>
-</div>
+        <div v-else class="empty-variants-state">
+            <v-icon size="42" color="grey-darken-1">mdi-shape-outline</v-icon>
+            <div class="text-subtitle-1 font-weight-medium mt-2">
+                No variants found
+            </div>
+            <div class="text-body-2 text-medium-emphasis">
+                No variant rows are available for this product.
+            </div>
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import { formatNPR } from '@/shared/formatters';
-import { type ProductDetailResponse, type ProductFileItem, type ProductVariantItem } from '@/api/products.api';
-import { formatBytes } from '@/shared/utils';
-import ImageUploadModel from '@/components/media/ImageUploadModel.vue';
-import ProductVariantFormModal from '@/components/product/ProductVariantFormModal.vue';
-import { openModal } from '@/shared/modal';
+import { computed, ref } from "vue";
+import { formatNPR } from "@/shared/formatters";
+import {
+    type ProductDetailResponse,
+    type ProductFileItem,
+    type ProductVariantItem,
+} from "@/api/products.api";
+import ProductVariantFormModal from "@/components/product/ProductVariantFormModal.vue";
+import ProductVariantImagesTable from "@/components/product/ProductVariantImagesTable.vue";
+import { openModal } from "@/shared/modal";
 
 const props = defineProps<{
     item: ProductDetailResponse | null;
     productId: string | number;
 }>();
 const emit = defineEmits<{
-    (e: 'view-variant', variant: ProductVariantItem): void;
-    (e: 'delete-variant', variant: ProductVariantItem): void;
-    (e: 'updated'): void;
+    (e: "view-variant", variant: ProductVariantItem): void;
+    (e: "delete-variant", variant: ProductVariantItem): void;
+    (e: "updated"): void;
 }>();
 
 const variants = computed<ProductVariantItem[]>(() => {
-    return Array.isArray(props.item?.variants) ? props.item.variants : [];
+    const itemVariants = props.item?.variants;
+    return Array.isArray(itemVariants) ? itemVariants : [];
 });
 const productAssignedAttributes = computed<Record<string, string>>(() => {
     const raw = props.item?.attributes;
-    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
 
-    const productAttributes = (raw as Record<string, unknown>).product_attributes;
-    if (!productAttributes || typeof productAttributes !== 'object' || Array.isArray(productAttributes)) return {};
+    const productAttributes = (raw as Record<string, unknown>)
+        .product_attributes;
+    if (
+        !productAttributes ||
+        typeof productAttributes !== "object" ||
+        Array.isArray(productAttributes)
+    )
+        return {};
 
     const mapped: Record<string, string> = {};
-    Object.entries(productAttributes as Record<string, unknown>).forEach(([key, value]) => {
-        const name = String(key ?? '').trim();
-        if (!name) return;
-        mapped[name] = String(value ?? '').trim();
-    });
+    Object.entries(productAttributes as Record<string, unknown>).forEach(
+        ([key, value]) => {
+            const name = String(key ?? "").trim();
+            if (!name) return;
+            mapped[name] = String(value ?? "").trim();
+        },
+    );
     return mapped;
 });
-const variantEnabledAttributes = computed<Array<{ name: string; type: string; values: string[]; assigned_value: string }>>(() => {
+const variantEnabledAttributes = computed<
+    Array<{
+        name: string;
+        type: string;
+        values: string[];
+        assigned_value: string;
+    }>
+>(() => {
     const raw = props.item?.attribute;
-    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return [];
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return [];
 
     const attributes = (raw as Record<string, unknown>).attributes;
     if (!Array.isArray(attributes)) return [];
@@ -203,16 +235,22 @@ const variantEnabledAttributes = computed<Array<{ name: string; type: string; va
         })
         .map((row) => {
             const entry = row as Record<string, unknown>;
-            const name = String(entry.name ?? '').trim();
+            const name = String(entry.name ?? "").trim();
             const values = Array.isArray(entry.values)
-                ? entry.values.map((value) => String(value ?? '').trim()).filter((value) => value.length > 0)
+                ? entry.values
+                      .map((value) => String(value ?? "").trim())
+                      .filter((value) => value.length > 0)
                 : [];
 
             return {
                 name,
-                type: String(entry.type ?? '').trim().toLowerCase(),
+                type: String(entry.type ?? "")
+                    .trim()
+                    .toLowerCase(),
                 values,
-                assigned_value: name ? String(productAssignedAttributes.value[name] ?? '').trim() : '',
+                assigned_value: name
+                    ? String(productAssignedAttributes.value[name] ?? "").trim()
+                    : "",
             };
         })
         .filter((entry) => entry.name.length > 0);
@@ -239,28 +277,37 @@ function toggleExpanded(variant: ProductVariantItem) {
 }
 
 function getVariantPreview(variant: ProductVariantItem): string {
-    if (!Array.isArray(variant.images) || !variant.images.length) return '';
-    const withUrl = variant.images.find((image: ProductFileItem) => String(image.url ?? '').trim().length > 0);
-    return String(withUrl?.url ?? '').trim();
+    if (!Array.isArray(variant.images) || !variant.images.length) return "";
+    const withUrl = variant.images.find(
+        (image: ProductFileItem) => String(image.url ?? "").trim().length > 0,
+    );
+    return String(withUrl?.url ?? "").trim();
 }
 
-function formatAttributes(attributes: ProductVariantItem['attributes']): string {
-    if (!attributes || typeof attributes !== 'object' || Array.isArray(attributes)) return '-';
+function formatAttributes(
+    attributes: ProductVariantItem["attributes"],
+): string {
+    if (
+        !attributes ||
+        typeof attributes !== "object" ||
+        Array.isArray(attributes)
+    )
+        return "-";
 
     const parts = Object.entries(attributes)
         .filter(([key]) => String(key).trim().length > 0)
         .map(([key, value]) => `${key}: ${formatAttributeValue(value)}`);
 
-    return parts.length ? parts.join(' | ') : '-';
+    return parts.length ? parts.join(" | ") : "-";
 }
 
 function formatAttributeValue(value: unknown): string {
-    if (value === null || value === undefined || value === '') return '-';
-    if (typeof value === 'object') {
+    if (value === null || value === undefined || value === "") return "-";
+    if (typeof value === "object") {
         try {
             return JSON.stringify(value);
         } catch {
-            return '[Object]';
+            return "[Object]";
         }
     }
     return String(value);
@@ -271,15 +318,15 @@ function onEditVariant(variant: ProductVariantItem) {
         ProductVariantFormModal,
         {
             productId: props.productId,
-            mode: 'edit',
+            mode: "edit",
             variant,
             variantAttributes: variantEnabledAttributes.value,
         },
         {
             title: `Edit Variant #${variant.id}`,
-            size: 'lg',
+            size: "lg",
             onSaved: () => {
-                emit('updated');
+                emit("updated");
             },
         },
     );
@@ -290,38 +337,22 @@ function onAddVariant() {
         ProductVariantFormModal,
         {
             productId: props.productId,
-            mode: 'create',
+            mode: "create",
             variantAttributes: variantEnabledAttributes.value,
         },
         {
-            title: 'Add Variant',
-            size: 'lg',
+            title: "Add Variant",
+            size: "lg",
             onSaved: () => {
-                emit('updated');
+                emit("updated");
             },
         },
     );
 }
 
 function onDeleteVariant(variant: ProductVariantItem) {
-    emit('delete-variant', variant);
+    emit("delete-variant", variant);
 }
-
-function onAddImage(item: any) {
-    openModal(
-        ImageUploadModel,
-        {
-            usage_type: 'product_variants',
-            usage_id: item?.id ?? null,
-            directory: 'products'
-        },
-        {
-            title: 'Add Product Image',
-            size: 'lg',
-        },
-    );
-}
-
 </script>
 
 <style scoped>
@@ -346,27 +377,6 @@ function onAddImage(item: any) {
 
 .variant-expanded-cell {
     padding: 14px 16px;
-}
-
-.variant-images-table {
-    background: rgb(var(--v-theme-surface));
-    border: 1px solid rgb(var(--v-theme-outline-variant));
-    border-radius: 8px;
-}
-
-.variant-image-thumb {
-    width: 120px;
-    height: 72px;
-    background: rgb(var(--v-theme-surface));
-    overflow: hidden;
-}
-
-.image-col {
-    width: 150px;
-}
-
-.action-col {
-    width: 170px;
 }
 
 .empty-variants-state {
