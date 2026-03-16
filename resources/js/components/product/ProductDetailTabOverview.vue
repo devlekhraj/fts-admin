@@ -2,15 +2,45 @@
   <div class="pa-6">
     <v-row>
       <v-col cols="12" lg="8" offset-lg="2">
-        <div class="d-flex justify-end mb-4">
-          <v-btn color="primary" :loading="saving" @click="onUpdate">Update</v-btn>
+
+
+        <div>
+          <app-field-label label="Name" />
+          <v-textarea v-model="form.name" variant="outlined" density="comfortable" auto-grow rows="2" />
         </div>
 
-        <v-textarea v-model="form.name" label="Name" variant="outlined" density="comfortable" auto-grow rows="2" />
-        <v-text-field v-model="form.slug" label="Slug" variant="outlined" density="comfortable" class="mt-3" />
-        <div class="d-flex align-center flex-wrap ga-10 mt-3">
-          <v-switch v-model="form.status" label="Status" color="primary" inset hide-details />
-          <v-switch v-model="form.emi_enabled" label="EMI Enabled" color="primary" inset hide-details />
+        <div>
+          <app-field-label label="Slug" />
+          <v-text-field v-model="form.slug" variant="outlined" density="comfortable" />
+        </div>
+
+        <div>
+          <app-field-label label="SKU" />
+          <v-text-field v-model="form.sku" variant="outlined" density="comfortable" />
+        </div>
+
+        <div>
+          <v-row>
+            <v-col cols="12" md="3">
+              <app-field-label label="Status" />
+              <v-select v-model="form.status" :items="statusOptions" item-title="label" item-value="value"
+                variant="outlined" density="comfortable" />
+            </v-col>
+
+            <v-col cols="12" md="3">
+              <app-field-label label="EMI Enabled" />
+              <v-select v-model="form.emi_enabled" :items="emiOptions" item-title="label" item-value="value"
+                variant="outlined" density="comfortable" />
+            </v-col>
+          </v-row>
+        </div>
+        <div>
+          <div class="d-flex justify-center mt-4">
+            <v-btn color="primary" :loading="saving" @click="onUpdate" variant="flat">
+              <v-icon start size="16">mdi-content-save-outline</v-icon>
+              Update
+            </v-btn>
+          </div>
         </div>
       </v-col>
     </v-row>
@@ -20,6 +50,7 @@
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue';
 import { update as updateProduct, type ProductDetailResponse } from '@/api/products.api';
+import AppFieldLabel from '@/components/shared/AppFieldLabel.vue';
 
 const props = defineProps<{
   item: ProductDetailResponse | null;
@@ -33,18 +64,28 @@ const emit = defineEmits<{
 const form = reactive({
   name: '',
   slug: '',
-  status: false,
-  emi_enabled: false,
+  sku: '',
+  status: '0',
+  emi_enabled: '0',
 });
+const statusOptions = [
+  { label: 'Active', value: '1' },
+  { label: 'Inactive', value: '0' },
+];
+const emiOptions = [
+  { label: 'Enabled', value: '1' },
+  { label: 'Disabled', value: '0' },
+];
 const saving = ref(false);
 
 watch(
   () => props.item,
   (item) => {
-    form.name = item?.name ? String(item.name) : '';
-    form.slug = item?.slug ? String(item.slug) : '';
-    form.status = Boolean(item?.status);
-    form.emi_enabled = Boolean(item?.emi_enabled);
+    form.name = item?.overview?.name ? String(item.overview.name) : '';
+    form.slug = item?.overview?.slug ? String(item.overview.slug) : '';
+    form.sku = item?.overview?.sku ? String(item.overview.sku) : '';
+    form.status = item?.overview?.status ? '1' : '0';
+    form.emi_enabled = item?.overview?.emi_enabled ? '1' : '0';
   },
   { immediate: true },
 );
@@ -58,8 +99,9 @@ async function onUpdate() {
     await updateProduct(id, {
       name: form.name.trim(),
       slug: form.slug.trim(),
-      status: form.status,
-      emi_enabled: form.emi_enabled,
+      sku: form.sku.trim(),
+      status: Number(form.status) === 1,
+      emi_enabled: Number(form.emi_enabled) === 1,
     });
     emit('updated');
   } finally {

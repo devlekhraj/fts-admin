@@ -1,7 +1,7 @@
 <template>
   <div class="pa-6">
     <v-row>
-      <v-col cols="12" lg="8" offset-lg="2">
+      <v-col cols="12" lg="6" offset-lg="3">
         <div class="d-flex justify-end mb-4">
           <v-btn color="primary" :loading="saving" @click="onUpdate">Update</v-btn>
         </div>
@@ -57,9 +57,9 @@ const saving = ref(false);
 watch(
   () => props.item,
   (item) => {
-    form.meta_title = item?.meta_title ? String(item.meta_title) : '';
-    form.meta_keywords = item?.meta_keywords ? String(item.meta_keywords) : '';
-    form.meta_description = item?.meta_description ? String(item.meta_description) : '';
+    form.meta_title = item?.meta?.meta_title ? String(item.meta.meta_title) : '';
+    form.meta_keywords = item?.meta?.meta_keywords ? String(item.meta.meta_keywords) : '';
+    form.meta_description = item?.meta?.meta_description ? String(item.meta.meta_description) : '';
   },
   { immediate: true },
 );

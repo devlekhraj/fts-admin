@@ -1,140 +1,44 @@
 <template>
-	<div class="pa-6">
-		<div class="d-flex align-center justify-space-between mb-4">
-			<div class="text-body-2 text-medium-emphasis">
-				Total images: {{ productFiles.length }}
-			</div>
-			<v-btn color="primary" variant="tonal" @click="onAddImage">
-				<v-icon start size="16">mdi-image-plus</v-icon>
-				Add Image
-			</v-btn>
-		</div>
-
-		<v-table v-if="productFiles.length" density="comfortable">
-			<thead>
-				<tr>
-					<th>Image</th>
-					<th>Details</th>
-					<th>Primary Image</th>
-					<th>Action</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr v-for="file in productFiles" :key="String(file.id)">
-					<td class="py-3">
-						<div class="table-image-preview rounded">
-							<v-img v-if="file.url" :src="String(file.url)" cover :title="String(file.url)" />
-							<div v-else class="d-flex align-center justify-center h-100">
-								<v-icon size="22" color="grey-darken-1">mdi-image-outline</v-icon>
-							</div>
-						</div>
-					</td>
-					<td class="py-3 details-col">
-						<div class="text-body-2 font-weight-medium">File #{{ file.id }}</div>
-						<div class="text-caption text-medium-emphasis">{{ file.alt_text || '-' }}</div>
-						<div class="text-caption text-medium-emphasis mt-1">
-							{{ String(file.size_info ?? '').trim() || '-' }}
-						</div>
-					</td>
-					<td class="py-3">
-						<v-chip size="small" label variant="tonal" :color="file.meta?.is_default ? 'primary' : 'default'">
-							{{ file.meta?.is_default ? 'Yes' : 'No' }}
-						</v-chip>
-					</td>
-					<td class="py-3">
-						<div class="d-flex align-center ga-1">
-							<v-btn size="small" variant="tonal" color="primary" @click="onEditFile(file)">
-								<v-icon size="16">mdi-cog</v-icon> Edit Image
-							</v-btn>
-						</div>
-					</td>
-				</tr>
-			</tbody>
-		</v-table>
-
-		<div v-else class="empty-images-state">
-			<v-icon size="42" color="grey-darken-1">mdi-image-off-outline</v-icon>
-			<div class="text-subtitle-1 font-weight-medium mt-2">No images found</div>
-			<div class="text-body-2 text-medium-emphasis">No files attached to this product.</div>
-		</div>
-	</div>
+  <BaseDetailTabImages
+    :files="productFiles"
+    usage-type="products"
+    :usage-id="productId"
+    directory="products"
+    :edit-modal="ProductImageEditModal"
+    :edit-modal-props="(file) => ({ productId, file })"
+    edit-modal-title="Edit Product Image"
+    empty-state-message="No images attached to this product."
+    show-file-id
+    @updated="emit('updated')"
+  >
+    <template #headers>
+      <th>Primary Image</th>
+    </template>
+    <template #rows="{ file }">
+      <td class="py-3">
+        <v-chip size="small" label variant="tonal" :color="file.meta?.is_default ? 'primary' : 'default'">
+          {{ file.meta?.is_default ? 'Yes' : 'No' }}
+        </v-chip>
+      </td>
+    </template>
+  </BaseDetailTabImages>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
 import { type ProductDetailResponse } from '@/api/products.api';
-import ImageUploadModel from '@/components/media/ImageUploadModel.vue';
+import BaseDetailTabImages from '@/components/media/BaseDetailTabImages.vue';
 import ProductImageEditModal from '@/components/product/ProductImageEditModal.vue';
-import { openModal } from '@/shared/modal';
 
 const props = defineProps<{
-	item: ProductDetailResponse | null;
+  item: ProductDetailResponse | null;
+  productId: string | number;
 }>();
 
 const emit = defineEmits<{
-	(e: 'updated'): void;
+  (e: 'updated'): void;
 }>();
 
-const productFiles = computed(() => props.item?.files ?? []);
-
-function onEditFile(file: any) {
-	openModal(
-		ProductImageEditModal,
-		{
-			productId: props.item?.id ?? null,
-			file,
-		},
-		{
-			title: 'Edit Product Image',
-			size: 'md',
-			onSaved: () => {
-				emit('updated');
-			},
-		},
-	);
-}
-
-function onAddImage() {
-	openModal(
-		ImageUploadModel,
-		{
-			usage_type: 'products',
-			usage_id: props.item?.id ?? null,
-			directory: 'products'
-		},
-		{
-			title: 'Add Product Image',
-			size: 'lg',
-			onSaved: () => {
-				emit('updated');
-			},
-		},
-	);
-}
+const productId = computed(() => props.productId ?? null);
+const productFiles = computed(() => props.item?.images ?? []);
 </script>
-
-<style scoped>
-.table-image-preview {
-	width: 140px;
-	height: 78px;
-	background: rgb(var(--v-theme-surface-variant));
-	overflow: hidden;
-}
-
-.details-col {
-	min-width: 320px;
-	max-width: 420px;
-	word-break: break-word;
-}
-
-.empty-images-state {
-	min-height: 220px;
-	border-radius: 12px;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	text-align: center;
-	padding: 24px;
-}
-</style>

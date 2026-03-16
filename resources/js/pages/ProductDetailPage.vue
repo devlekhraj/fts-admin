@@ -12,12 +12,12 @@
     <div class="product-top-grid">
       <div class="product-thumb-cell">
         <v-avatar size="112" rounded="lg" color="grey-lighten-3">
-          <v-img v-if="productDetail?.thumb" :src="String(productDetail.thumb)" cover />
+          <v-img v-if="productDetail?.overview?.thumb" :src="String(productDetail.overview.thumb)" cover />
           <v-icon v-else size="32" color="grey-darken-1">mdi-image-outline</v-icon>
         </v-avatar>
       </div>
       <div>
-        <div class="text-h6">{{ productDetail?.name || '-' }}</div>
+        <div class="text-h6">{{ productDetail?.overview?.name || '-' }}</div>
 
         <div class="d-flex align-center ga-2 mt-2">
           <span class="text-body-2 text-medium-emphasis">{{ productUrl || '-' }}</span>
@@ -35,12 +35,12 @@
         </div>
 
         <div class="d-flex align-center ga-2 mt-3">
-          <v-chip size="small" label variant="tonal" :color="productDetail?.status ? 'primary' : 'warning'">
-            {{ productDetail?.status ? 'Active' : 'Inactive' }}
+          <v-chip size="small" label variant="tonal" :color="productDetail?.overview?.status ? 'primary' : 'warning'">
+            {{ productDetail?.overview?.status ? 'Active' : 'Inactive' }}
           </v-chip>
-          <v-chip size="small" label variant="tonal" :color="productDetail?.emi_enabled ? 'success' : 'grey'">
-            <v-icon start size="14">{{ productDetail?.emi_enabled ? 'mdi-check-circle' : 'mdi-close-circle' }}</v-icon>
-            {{ productDetail?.emi_enabled ? 'EMI Enabled' : 'EMI Disabled' }}
+          <v-chip size="small" label variant="tonal" :color="productDetail?.overview?.emi_enabled ? 'success' : 'grey'">
+            <v-icon start size="14">{{ productDetail?.overview?.emi_enabled ? 'mdi-check-circle' : 'mdi-close-circle' }}</v-icon>
+            {{ productDetail?.overview?.emi_enabled ? 'EMI Enabled' : 'EMI Disabled' }}
           </v-chip>
         </div>
       </div>
@@ -76,6 +76,7 @@ import { useRoute, useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import { getProductDetail, type ProductDetailResponse } from '@/api/products.api';
 import ProductDetailTabAttributes from '@/components/product/ProductDetailTabAttributes.vue';
+import ProductDetailTabDescription from '@/components/product/ProductDetailTabDescription.vue';
 import ProductDetailTabFreeGift from '@/components/product/ProductDetailTabFreeGift.vue';
 import ProductDetailTabImages from '@/components/product/ProductDetailTabImages.vue';
 import ProductDetailTabOverview from '@/components/product/ProductDetailTabOverview.vue';
@@ -89,6 +90,7 @@ const router = useRouter();
 const activeTab = ref('overview');
 const tabItems = [
   { value: 'overview', label: 'Overview', icon: 'mdi-view-dashboard-outline', component: ProductDetailTabOverview },
+  { value: 'description', label: 'Description', icon: 'mdi-text-box-outline', component: ProductDetailTabDescription },
   { value: 'price_stock', label: 'Price & Stock', icon: 'mdi-cash-multiple', component: ProductDetailTabPriceStock },
   { value: 'attributes', label: 'Attributes', icon: 'mdi-tune-variant', component: ProductDetailTabAttributes },
   { value: 'variants', label: 'Variants', icon: 'mdi-shape-outline', component: ProductDetailTabVariants },
@@ -104,7 +106,7 @@ const productDetail = ref<ProductDetailResponse | null>(null);
 const siteOrigin = typeof window !== 'undefined' ? window.location.origin : '';
 
 const productUrl = computed(() => {
-  const slug = String(productDetail.value?.slug ?? '').trim();
+  const slug = String(productDetail.value?.overview?.slug ?? '').trim();
   if (!slug) return '';
   if (/^https?:\/\//i.test(slug)) return slug;
   const normalized = slug.startsWith('/') ? slug : `/${slug}`;

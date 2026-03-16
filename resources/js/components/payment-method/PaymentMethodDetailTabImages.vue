@@ -1,80 +1,57 @@
 <template>
-  <div class="pa-6">
-    <div class="d-flex align-center justify-space-between mb-4">
-      <div class="text-body-2 text-medium-emphasis">
-        Total images: {{ imageItems.length }}
-      </div>
-    </div>
-
-    <v-table v-if="imageItems.length" density="comfortable">
-      <thead>
-        <tr>
-          <th>Image</th>
-          <th>Details</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="item in imageItems" :key="item.key">
-          <td class="py-3">
-            <div class="table-image-preview rounded">
-              <v-img v-if="item.url" :src="item.url" cover />
-              <div v-else class="d-flex align-center justify-center h-100">
-                <v-icon size="22" color="grey-darken-1">mdi-image-outline</v-icon>
-              </div>
-            </div>
-          </td>
-          <td class="py-3 details-col">
-            <div class="text-body-2 font-weight-medium">{{ item.label }}</div>
-            <div class="text-caption text-medium-emphasis">{{ item.url || '-' }}</div>
-          </td>
-        </tr>
-      </tbody>
-    </v-table>
-
-    <div v-else class="empty-images-state">
-      <v-icon size="42" color="grey-darken-1">mdi-image-off-outline</v-icon>
-      <div class="text-subtitle-1 font-weight-medium mt-2">No images found</div>
-      <div class="text-body-2 text-medium-emphasis">No logo image available.</div>
-    </div>
-  </div>
+  <BaseDetailTabImages
+    :files="imageItems"
+    usage-type="payment_methods"
+    :usage-id="item?.id ?? null"
+    :edit-modal="null"
+    empty-state-message="No logo image available."
+    @updated="emit('updated')"
+  >
+    <template #headers>
+      <th>Primary Image</th>
+    </template>
+    <template #details="{ file }">
+      <div class="text-body-2 font-weight-medium">{{ file.label }}</div>
+      <div class="text-caption text-medium-emphasis">{{ file.url || '-' }}</div>
+    </template>
+    <template #rows="{ file }">
+      <td class="py-3">
+        <v-chip
+          size="small"
+          label
+          variant="tonal"
+          :color="file.meta?.is_default ? 'primary' : 'default'">
+          {{ file.meta?.is_default ? 'Yes' : 'No' }}
+        </v-chip>
+      </td>
+    </template>
+  </BaseDetailTabImages>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { PaymentMethodDetailResponse } from '@/api/payment-methods.api';
+import BaseDetailTabImages from '@/components/media/BaseDetailTabImages.vue';
 
 const props = defineProps<{
   item: PaymentMethodDetailResponse | null;
 }>();
 
+const emit = defineEmits<{
+  (e: 'updated'): void;
+}>();
+
 const imageItems = computed(() => {
   const logoUrl = typeof props.item?.logo_url === 'string' ? props.item.logo_url : '';
   if (!logoUrl) return [];
-  return [{ key: 'logo', label: 'Logo', url: logoUrl }];
+  return [
+    {
+      id: 'logo',
+      key: 'logo',
+      label: 'Logo',
+      url: logoUrl,
+      meta: { is_default: true },
+    },
+  ];
 });
 </script>
-
-<style scoped>
-.table-image-preview {
-  width: 140px;
-  height: 78px;
-  background: rgb(var(--v-theme-surface-variant));
-  overflow: hidden;
-}
-
-.details-col {
-  min-width: 400px;
-  max-width: 400px;
-  word-break: break-word;
-}
-
-.empty-images-state {
-  min-height: 220px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 24px;
-}
-</style>

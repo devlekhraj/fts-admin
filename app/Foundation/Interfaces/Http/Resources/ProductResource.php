@@ -45,12 +45,13 @@ class ProductResource extends JsonResource
     private function showResponse($defaultFile): array
     {
         $data = $this->resource->toArray();
-        $files = [];
+        $images = [];
         $variants = [];
         $attribute = null;
+        $brand = null;
 
         if ($this->relationLoaded('files')) {
-            $files = $this->files->map(static function ($file) {
+            $images = $this->files->map(static function ($file) {
                 $meta = $file->pivot?->meta;
                 if (is_string($meta)) {
                     $decoded = json_decode($meta, true);
@@ -75,6 +76,15 @@ class ProductResource extends JsonResource
                     'size_info' => "{$fileSize} | {$fileDimension}",
                 ];
             })->values()->all();
+        }
+
+        if ($this->relationLoaded('brand') && $this->brand) {
+            $brand = [
+                'id' => $this->brand->id,
+                'name' => $this->brand->name,
+                'slug' => $this->brand->slug,
+                'thumb' => $this->brand->logo,
+            ];
         }
 
         if ($this->relationLoaded('variants')) {
@@ -143,14 +153,40 @@ class ProductResource extends JsonResource
             ];
         }
 
-        $data['thumb'] = $defaultFile?->url;
-        $data['status'] = (bool) ($data['status'] ?? $this->status);
-        $data['emi_enabled'] = (bool) ($data['emi_enabled'] ?? $this->emi_enabled);
-        $data['default_file'] = $defaultFile?->toArray();
-        $data['files'] = $files;
-        $data['variants'] = $variants;
-        $data['attribute'] = $attribute;
-
-        return $data;
+        return [
+            'overview' =>[
+                "name" => $this->name,
+                "slug" => $this->slug,
+                'thumb' => $defaultFile?->url,
+                'status' => (bool) ($data['status'] ?? $this->status),
+                'emi_enabled' => (bool) ($data['emi_enabled'] ?? $this->emi_enabled),
+                'sku' => $this->sku,
+            ],
+            'brand' => $brand,
+            'meta' => [
+                'meta_title' => $data['meta_title'] ?? null,
+                'meta_description' => $data['meta_description'] ?? null,
+                'meta_keywords' => $data['meta_keywords'] ?? null,
+            ],
+            'description' => [
+                'description' => $data['description'] ?? null,
+                'short_desc' => $data['short_desc'] ?? null,
+                'highlights' => $data['highlights'] ?? null,
+                'warranty_description' => $data['warranty_description'] ?? null,
+            ],
+            'pre_order' => [
+                'availability' => (bool) ($data['pre_order'] ?? $this->pre_order),
+                'price' => is_numeric($data['pre_order_price'] ?? null) ? (float) $data['pre_order_price'] : null,
+            ],
+            'price' => [
+                'current_price' => is_numeric($data['price'] ?? null) ? (float) $data['price'] : null,
+                'compare_price' => is_numeric($data['original_price'] ?? null) ? (float) $data['original_price'] : null,
+                'quantity' => is_numeric($data['quantity'] ?? null) ? (int) $data['quantity'] : null,
+            ],
+            'images' => $images,
+            'variants' => $variants,
+            'attributes' => $this->attributes,
+            'schema_jsonld' => $this->custom_code,
+        ];
     }
 }

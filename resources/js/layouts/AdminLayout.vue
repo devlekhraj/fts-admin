@@ -23,8 +23,9 @@
                 </div>
             </v-sheet>
             <div class="px-6 pb-2">
-                <v-text-field v-model="navSearch" color="primary" class="nav-search-field" density="compact" variant="outlined"
-                    placeholder="Search menu" prepend-inner-icon="mdi-magnify" hide-details clearable />
+                <v-text-field v-model="navSearch" color="primary" class="nav-search-field" density="compact"
+                    variant="outlined" placeholder="Search menu" prepend-inner-icon="mdi-magnify" hide-details
+                    clearable />
             </div>
             <v-list density="comfortable" class="px-6" id="side-nav-items">
                 <template v-for="group in filteredItems" :key="group.group">
@@ -57,10 +58,11 @@
                     <div class="d-flex flex-column">
                         <div class="d-flex align-center ga-1 text-body-2 font-weight-medium">
                             <span>{{ adminDisplayName }}</span>
-                            <v-btn icon size="x-small" color="error" :loading="isLoggingOut" variant="text" @click="logout">
+                            <v-btn icon size="x-small" color="error" :loading="isLoggingOut" variant="text"
+                                @click="logout">
                                 <v-icon>mdi-logout</v-icon>
                             </v-btn>
-                            
+
                         </div>
                     </div>
                 </div>
@@ -229,7 +231,13 @@ main.v-main {
 
 
 .drawer-header {
-    background: linear-gradient(262deg, #f4faff 0%, #fafafa 100%) !important;
+    background:
+        repeating-linear-gradient(45deg,
+            rgba(0, 0, 0, 0.03),
+            rgba(0, 0, 0, 0.03) 2px,
+            transparent 2px,
+            transparent 10px),
+        linear-gradient(262deg, #f4faff 0%, #fafafa 100%);
     padding: 0 10px;
 }
 

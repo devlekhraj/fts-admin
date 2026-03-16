@@ -58,17 +58,63 @@ export type ProductVariantItem = {
   updated_at?: string | null;
 };
 
-export type ProductDetailResponse = ProductListItem & {
-  short_desc?: string | null;
-  content?: string | null;
-  description?: string | null;
+export type ProductDetailOverview = {
+  name?: string | null;
+  slug?: string | null;
+  thumb?: string | null;
+  status?: boolean;
+  emi_enabled?: boolean;
+  sku?: string | null;
+};
+
+export type ProductDetailBrand = {
+  id?: number | string | null;
+  name?: string | null;
+  slug?: string | null;
+  thumb?: string | null;
+};
+
+export type ProductDetailMeta = {
   meta_title?: string | null;
-  meta_keywords?: string | null;
   meta_description?: string | null;
-  updated_at?: string | null;
-  default_file?: Record<string, unknown> | null;
-  files?: ProductFileItem[];
+  meta_keywords?: string | null;
+};
+
+export type ProductDetailDescription = {
+  description?: string | null;
+  short_desc?: string | null;
+  highlights?: string | null;
+  warranty_description?: string | null;
+};
+
+export type ProductDetailPreOrder = {
+  availability?: boolean;
+  price?: number | null;
+};
+
+export type ProductDetailPrice = {
+  current_price?: number | null;
+  compare_price?: number | null;
+  quantity?: number | null;
+};
+
+export type ProductDetailAttributes = {
+  attribute_class_id?: number | string | null;
+  product_attributes?: Record<string, unknown> | null;
+  [key: string]: unknown;
+};
+
+export type ProductDetailResponse = {
+  overview?: ProductDetailOverview | null;
+  brand?: ProductDetailBrand | null;
+  meta?: ProductDetailMeta | null;
+  description?: ProductDetailDescription | null;
+  pre_order?: ProductDetailPreOrder | null;
+  price?: ProductDetailPrice | null;
+  images?: ProductFileItem[];
   variants?: ProductVariantItem[];
+  attributes?: ProductDetailAttributes | null;
+  schema_jsonld?: string | null;
   [key: string]: unknown;
 };
 

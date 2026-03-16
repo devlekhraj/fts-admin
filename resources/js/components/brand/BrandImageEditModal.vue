@@ -37,8 +37,16 @@
         </v-col>
 
         <v-col cols="12" md="12" class="py-0">
-          <app-field-label label="Make Primary" />
-          <v-switch v-model="form.is_default" color="primary" inset density="comfortable" />
+          <app-field-label label="Make Primary Image" />
+          <v-select
+            v-model="form.is_default"
+            :items="[
+              { title: 'Yes', value: true },
+              { title: 'No', value: false },
+            ]"
+            variant="outlined"
+            density="comfortable"
+            style="max-width: 200px" />
         </v-col>
       </v-row>
     </v-form>
@@ -46,11 +54,13 @@
 
   <v-divider />
 
-  <v-card-actions class="pb-4 px-6 d-flex justify-space-between">
-    <v-btn color="error" variant="tonal" :loading="deleting" :disabled="updating || deleting" @click="onDelete">
+  <v-card-actions class="pb-4 px-6">
+    <v-btn v-if="!form.is_default" color="error" variant="tonal" :loading="deleting" :disabled="updating || deleting" @click="onDelete">
       <v-icon start size="16">mdi-delete</v-icon>
       Delete Image
     </v-btn>
+
+    <v-spacer />
 
     <v-btn color="primary" variant="tonal" :loading="updating" :disabled="updating || deleting" @click="onUpdate">
       <v-icon start size="16">mdi-content-save-outline</v-icon>

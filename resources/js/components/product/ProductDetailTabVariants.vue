@@ -222,10 +222,17 @@ const variantEnabledAttributes = computed<
         assigned_value: string;
     }>
 >(() => {
-    const raw = props.item?.attribute;
-    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return [];
+    const source =
+        props.item?.attribute && typeof props.item.attribute === "object" && !Array.isArray(props.item.attribute)
+            ? (props.item.attribute as Record<string, unknown>)
+            : props.item?.attributes &&
+                typeof props.item.attributes === "object" &&
+                !Array.isArray(props.item.attributes)
+              ? (props.item.attributes as Record<string, unknown>)
+              : null;
+    if (!source) return [];
 
-    const attributes = (raw as Record<string, unknown>).attributes;
+    const attributes = source.attributes;
     if (!Array.isArray(attributes)) return [];
 
     return attributes
