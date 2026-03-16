@@ -46,6 +46,7 @@ final class UpdateFileUsageHandler
         DB::table('file_usages')
             ->where('id', (int) $usage->id)
             ->update([
+                'title' => $command->title !== '' ? $command->title : null,
                 'alt_text' => $command->altText,
                 'meta' => json_encode($meta, JSON_UNESCAPED_UNICODE),
                 'updated_at' => now(),

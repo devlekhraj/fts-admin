@@ -1,40 +1,65 @@
 <template>
   <div class="pa-6">
     <v-row>
-      <v-col cols="12" lg="6" offset-lg="3">
-        <div class="mt-10">
-          <app-field-label label="Title" />
-          <v-textarea rows="2" auto-grow maxlength="200" v-model="form.title" variant="outlined" density="comfortable" />
+     <v-col cols="12" lg="8" offset-lg="2">
+        <div class="d-flex align-center justify-space-between mb-6">
+          <div>
+            <div class="text-h6">Blog Detail</div>
+            <div class="text-body-2 text-medium-emphasis">Update blog details.</div>
+          </div>
+          <div>
+            <v-btn color="primary" variant="flat" :loading="saving" @click="onUpdate">
+              <v-icon start size="16">mdi-content-save-outline</v-icon>
+              Update
+            </v-btn>
+          </div>
         </div>
-
-        <div>
-          <app-field-label label="Slug" />
-          <v-text-field v-model="form.slug" variant="outlined" density="comfortable" />
-        </div>
-
-        <v-row>
-          <v-col cols="12" md="8">
-            <app-field-label label="Author" />
-            <v-text-field v-model="form.author" variant="outlined" density="comfortable" />
-          </v-col>
-          <v-col cols="12" md="4">
-            <app-field-label label="Status" />
-            <v-select
-              v-model="form.status"
-              :items="statusOptions"
-              item-title="label"
-              item-value="value"
+        <v-form ref="overviewFormRef">
+          <div class="mt-4">
+            <app-field-label label="Title" />
+            <v-textarea
+              v-model="form.title"
               variant="outlined"
-              density="comfortable" />
-          </v-col>
-        </v-row>
+              density="comfortable"
+              rows="2"
+              auto-grow
+              maxlength="200"
+              :rules="[v => !!v || 'Title is required']"
+            />
+          </div>
 
-        <div class="d-flex justify-center mt-2">
-          <v-btn color="primary" variant="flat" :loading="saving" @click="onUpdate">
-            <v-icon start size="16">mdi-content-save-outline</v-icon>
-            Update
-          </v-btn>
-        </div>
+          <div class="mb-4">
+            <app-field-label label="Slug" />
+            <v-text-field
+              v-model="form.slug"
+              variant="outlined"
+              density="comfortable"
+              :rules="[v => !!v || 'Slug is required']"
+            />
+          </div>
+
+          <v-row>
+            <v-col cols="12" md="8">
+              <app-field-label label="Author" />
+              <v-text-field
+                v-model="form.author"
+                variant="outlined"
+                density="comfortable"
+              />
+            </v-col>
+            <v-col cols="12" md="4">
+              <app-field-label label="Status" />
+              <v-select
+                v-model="form.status"
+                :items="statusOptions"
+                item-title="label"
+                item-value="value"
+                variant="outlined"
+                density="comfortable"
+              />
+            </v-col>
+          </v-row>
+        </v-form>
       </v-col>
     </v-row>
   </div>
@@ -55,6 +80,7 @@ const emit = defineEmits<{
   (e: 'updated'): void;
 }>();
 
+const overviewFormRef = ref();
 const form = reactive({
   title: '',
   slug: '',
@@ -83,6 +109,9 @@ async function onUpdate() {
   const id = String(props.blogId ?? '').trim();
   if (!id) return;
 
+  const { valid } = await overviewFormRef.value?.validate();
+  if (!valid) return;
+
   saving.value = true;
   try {
     await updateBlog(id, {
@@ -91,8 +120,18 @@ async function onUpdate() {
       author: form.author.trim(),
       status: Number(form.status) === 1,
     });
-    snackbar.show({ message: 'Blog updated successfully.', color: 'success' });
+    
+    snackbar.show({
+      message: 'Blog overview updated successfully',
+      color: 'success',
+    });
+    
     emit('updated');
+  } catch (error: any) {
+    snackbar.show({
+      message: error.response?.data?.message || 'Failed to update blog overview',
+      color: 'error',
+    });
   } finally {
     saving.value = false;
   }

@@ -32,7 +32,7 @@
         </v-btn>
       </div>
       <div class="text-caption text-medium-emphasis mt-2">
-        {{ formatBytes(file.file_size ?? file.size) }} | {{ Number(file.width ?? 0) }} x {{ Number(file.height ?? 0) }} px
+        {{ file.size_info }}
       </div>
     </template>
 
@@ -47,9 +47,9 @@
           size="small"
           label
           variant="tonal"
-          :color="file.meta?.is_active === true ? 'success' : 'warning'"
+          :color="file.status === true ? 'success' : 'warning'"
         >
-          {{ file.meta?.is_active === true ? 'Active' : 'Inactive' }}
+          {{ file.status === true ? 'Active' : 'Inactive' }}
         </v-chip>
       </td>
       <td class="py-3 meta-col">

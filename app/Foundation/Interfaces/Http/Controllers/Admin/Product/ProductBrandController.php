@@ -80,12 +80,7 @@ class ProductBrandController extends Controller
     public function update(UpdateBrandRequest $request, string $id): JsonResponse
     {
         $brand = ProductBrandModel::query()->findOrFail($id);
-        $validated = $request->validated();
-
-        $brand->name = trim((string) $validated['name']);
-        $brand->slug = trim((string) $validated['slug']);
-        $brand->status = (bool) $validated['status'];
-        $brand->save();
+        $brand->update($request->validated());
 
         return response()->json([
             'message' => 'Brand updated successfully.',

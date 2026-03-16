@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Foundation\Interfaces\Http\Resources;
 
+use App\Foundation\Shared\Support\Formatters\ByteSizeFormatter;
+use App\Foundation\Shared\Support\Formatters\FileDimensionFormatter;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class BannerResource extends JsonResource
@@ -22,13 +24,39 @@ class BannerResource extends JsonResource
         return $this->listResponse($defaultFile);
     }
 
+    private function isImageActive($file, string $today): bool
+    {
+        $rawMeta = is_array($file->pivot?->meta) ? $file->pivot?->meta : [];
+        $startDate = $rawMeta['start_date'] ?? null;
+        $endDate = $rawMeta['end_date'] ?? null;
+
+        if ($startDate && $endDate && $today >= $startDate && $today <= $endDate) {
+            return true;
+        }
+
+        return false;
+    }
+
     private function listResponse($defaultFile): array
     {
+        $status = (bool) $this->status;
+        if ($this->relationLoaded('files')) {
+            $today = date('Y-m-d');
+            $hasActiveImage = false;
+            foreach ($this->files as $file) {
+                if ($this->isImageActive($file, $today)) {
+                    $hasActiveImage = true;
+                    break;
+                }
+            }
+            $status = $hasActiveImage;
+        }
+
         return [
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
-            'status' => (bool) $this->status,
+            'status' => $status,
             'created_at' => $this->created_at,
             'total_images' => (int) ($this->total_images ?? 0),
             'thumb' => $defaultFile?->url,
@@ -38,9 +66,25 @@ class BannerResource extends JsonResource
     private function showResponse($defaultFile): array
     {
         $files = [];
+        $overallStatus = false;
+
         if ($this->relationLoaded('files')) {
-            $files = $this->files->map(static function ($file) {
-                $meta = is_array($file->pivot?->meta) ? $file->pivot?->meta : [];
+            $today = date('Y-m-d');
+            $files = $this->files->map(function ($file) use ($today, &$overallStatus) {
+                $rawMeta = is_array($file->pivot?->meta) ? $file->pivot?->meta : [];
+                $meta = [
+                    'link' => $rawMeta['link'] ?? null,
+                    'start_date' => $rawMeta['start_date'] ?? null,
+                    'end_date' => $rawMeta['end_date'] ?? null,
+                ];
+
+                $isActive = $this->isImageActive($file, $today);
+                if ($isActive) {
+                    $overallStatus = true;
+                }
+
+                $fileSize = ByteSizeFormatter::format($file->file_size ?? null);
+                $fileDimension = FileDimensionFormatter::format($file->width ?? null, $file->height ?? null);
 
                 return [
                     'id' => $file->pivot?->id,
@@ -48,11 +92,9 @@ class BannerResource extends JsonResource
                     'url' => $file->url,
                     'title' => $file->pivot?->title,
                     'alt_text' => $file->pivot?->alt_text,
+                    'status' => $isActive,
                     'meta' => $meta,
-                    'file_size' => is_numeric($file->file_size ?? null) ? (float) $file->file_size : null,
-                    'size' => is_numeric($file->file_size ?? null) ? (float) $file->file_size : null,
-                    'height' => is_numeric($file->height ?? null) ? (float) $file->height : null,
-                    'width' => is_numeric($file->width ?? null) ? (float) $file->width : null,
+                    'size_info' => "{$fileSize} | {$fileDimension}",
                 ];
             })->values()->all();
         }
@@ -61,7 +103,7 @@ class BannerResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
-            'status' => (bool) $this->status,
+            'status' => $overallStatus,
             'created_at' => $this->created_at,
             'total_images' => (int) ($this->total_images ?? 0),
             'thumb' => $defaultFile?->url,

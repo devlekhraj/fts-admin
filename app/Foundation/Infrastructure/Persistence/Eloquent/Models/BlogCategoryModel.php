@@ -12,6 +12,17 @@ class BlogCategoryModel extends BaseModel
 {
     protected $table = 'blog_categories';
 
+    protected $fillable = [
+        'title',
+        'slug',
+        'short_desc',
+        'content',
+        'status',
+        'meta_title',
+        'meta_keywords',
+        'meta_description',
+    ];
+
 
     protected $casts = [
         'status' => 'boolean',

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Foundation\Interfaces\Http\Controllers\Admin\Product;
 
 use App\Foundation\Infrastructure\Persistence\Eloquent\Models\ProductModel;
+use App\Foundation\Interfaces\Http\Requests\Admin\UpdateProductRequest;
 use App\Foundation\Interfaces\Http\Resources\ProductResource;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
@@ -78,16 +79,13 @@ class ProductsController extends Controller
         return response()->json([], 201);
     }
 
-    public function update(Request $request, string $id): JsonResponse
+    public function update(UpdateProductRequest $request, string $id): JsonResponse
     {
         $product = ProductModel::query()->findOrFail($id);
-        $payload = $request->all();
+        $validated = $request->validated();
 
-        $tableColumns = array_flip(Schema::getColumnListing($product->getTable()));
-
-        if (array_key_exists('attributes', $payload)) {
-            $attributes = $payload['attributes'];
-
+        if (array_key_exists('attributes', $validated)) {
+            $attributes = $validated['attributes'];
             $product->attributes = is_array($attributes) ? $attributes : null;
 
             if (is_array($attributes) && array_key_exists('attribute_class_id', $attributes)) {
@@ -98,27 +96,7 @@ class ProductsController extends Controller
             }
         }
 
-        foreach ($payload as $key => $value) {
-            if ($key === 'attributes') {
-                continue;
-            }
-
-            if (!array_key_exists($key, $tableColumns)) {
-                continue;
-            }
-
-            if (in_array($key, ['status', 'emi_enabled'], true)) {
-                $product->{$key} = filter_var($value, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE) ?? false;
-                continue;
-            }
-
-            if ($key === 'attribute_class_id') {
-                $product->attribute_class_id = ($value === null || $value === '') ? null : (int) $value;
-                continue;
-            }
-
-            $product->{$key} = $value;
-        }
+        $product->update($validated);
 
         $product->save();
 

@@ -79,13 +79,7 @@ class BlogsController extends Controller
     public function blogUpdate(UpdateBlogPostRequest $request, string $id): JsonResponse
     {
         $blog = BlogModel::query()->findOrFail($id);
-        $validated = $request->validated();
-
-        $blog->title = trim((string) $validated['title']);
-        $blog->slug = trim((string) $validated['slug']);
-        $blog->author = isset($validated['author']) ? trim((string) $validated['author']) : null;
-        $blog->status = (bool) $validated['status'];
-        $blog->save();
+        $blog->update($request->validated());
 
         return response()->json([
             'message' => 'Blog updated successfully.',

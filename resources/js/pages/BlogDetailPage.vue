@@ -9,6 +9,7 @@
   </AppPageHeader>
 
   <v-card class="pa-6">
+    <!-- <div v-if="loading" class="text-body-2 text-medium-emphasis mt-4">Loading blog detail...</div> -->
     <div class="blog-top-grid">
       <div class="blog-thumb-cell">
         <v-avatar size="112" rounded="lg" color="grey-lighten-3">
@@ -36,7 +37,7 @@
       </div>
     </div>
 
-    <div v-if="loading" class="text-body-2 text-medium-emphasis mt-4">Loading blog detail...</div>
+   
   </v-card>
 
   <v-card class="mt-4">

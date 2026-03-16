@@ -128,7 +128,6 @@ function onAddImage() {
 .table-image-preview {
   width: 140px;
   height: 78px;
-  background: rgb(var(--v-theme-surface-variant));
   overflow: hidden;
 }
 

@@ -19,9 +19,13 @@ class UpdateBrandRequest extends FormRequest
         $id = (string) $this->route('id');
 
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'slug' => ['required', 'string', 'max:255', Rule::unique('product_brands', 'slug')->ignore($id)],
-            'status' => ['required', 'boolean'],
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'slug' => ['sometimes', 'required', 'string', 'max:255', Rule::unique('product_brands', 'slug')->ignore($id)],
+            'status' => ['sometimes', 'required', 'boolean'],
+            'description' => ['nullable', 'string'],
+            'meta_title' => ['nullable', 'string'],
+            'meta_keywords' => ['nullable', 'string'],
+            'meta_description' => ['nullable', 'string'],
         ];
     }
 }

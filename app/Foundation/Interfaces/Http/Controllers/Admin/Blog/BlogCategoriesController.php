@@ -79,12 +79,7 @@ class BlogCategoriesController extends Controller
     public function update(UpdateBlogCategoryRequest $request, string $id): JsonResponse
     {
         $category = BlogCategoryModel::query()->findOrFail($id);
-        $validated = $request->validated();
-
-        $category->title = trim((string) $validated['title']);
-        $category->slug = trim((string) $validated['slug']);
-        $category->status = (bool) $validated['status'];
-        $category->save();
+        $category->update($request->validated());
 
         return response()->json([
             'message' => 'Blog category updated successfully.',

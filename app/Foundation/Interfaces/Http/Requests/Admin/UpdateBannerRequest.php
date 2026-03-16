@@ -10,7 +10,10 @@ class UpdateBannerRequest extends FormRequest
 {
     public function rules(): array
     {
-        // TODO: Define validation rules.
-        return [];
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'slug' => ['required', 'string', 'max:255', 'unique:banners,slug,' . $this->route('id')],
+            'status' => ['required', 'boolean'],
+        ];
     }
 }

@@ -68,7 +68,6 @@ import AppPageHeader from '@/components/AppPageHeader.vue';
 import { getBannerDetail, type BannerDetailResponse } from '@/api/banners.api';
 import BannerDetailTabImages from '@/components/banner/BannerDetailTabImages.vue';
 import BannerDetailTabOverview from '@/components/banner/BannerDetailTabOverview.vue';
-import BannerDetailTabSeo from '@/components/banner/BannerDetailTabSeo.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -76,7 +75,6 @@ const activeTab = ref('images');
 const tabItems = [
   { value: 'images', label: 'Images', component: BannerDetailTabImages },
   { value: 'overview', label: 'Overview', component: BannerDetailTabOverview },
-  { value: 'seo', label: 'SEO', component: BannerDetailTabSeo },
 ];
 
 const bannerId = computed(() => String(route.params.id ?? ''));

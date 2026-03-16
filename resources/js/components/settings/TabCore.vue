@@ -1,7 +1,7 @@
 <template>
 	<v-container>
 		<v-row>
-			<v-col cols="12" lg="8" offset-md="2">
+			<v-col cols="12" lg="8" offset-lg="2">
 				<div>
 					<v-card class="pa-4" variant="flat">
 
@@ -24,6 +24,19 @@
 							<RichText v-model="form.description" />
 						</div>
 
+						<v-divider class="my-6"></v-divider>
+
+						<div class="d-flex justify-end">
+							<v-btn
+								color="primary"
+								variant="flat"
+								:loading="loading"
+								prepend-icon="mdi-content-save-outline"
+								@click="onUpdate">
+								Update Settings
+							</v-btn>
+						</div>
+
 					</v-card>
 				</div>
 
@@ -33,14 +46,46 @@
 </template>
 
 <script setup lang="ts">
-import { defineAsyncComponent, reactive } from 'vue';
+import { defineAsyncComponent, onMounted, reactive, ref, watch } from 'vue';
+import { updateSettings } from '@/api/settings.api';
+import { useSnackbarStore } from '@/stores/snackbar.store';
+import { getErrorMessage } from '@/shared/errors';
 
-defineProps<{ data?: unknown }>();
+const props = defineProps<{ data?: any }>();
 const RichText = defineAsyncComponent(() => import('@/components/RichText.vue'));
+const snackbar = useSnackbarStore();
+const loading = ref(false);
 
 const form = reactive({
-	brand_name: 'Fatafat Sewa',
-	brand_acronym: 'Fatafat',
-	description: '<h1><strong>Nepal’s first service-oriented Shopping Site</strong></h1>...',
+	brand_name: '',
+	brand_acronym: '',
+	description: '',
 });
+
+function initForm() {
+	if (props.data) {
+		form.brand_name = props.data.brand_name || '';
+		form.brand_acronym = props.data.brand_acronym || '';
+		form.description = props.data.description || '';
+	}
+}
+
+watch(
+	() => props.data,
+	() => initForm(),
+	{ immediate: true }
+);
+
+async function onUpdate() {
+	loading.value = true;
+	try {
+		await updateSettings('core', { settings: { ...form } });
+		snackbar.show({ message: 'Core settings updated successfully', color: 'success' });
+	} catch (err) {
+		const message = getErrorMessage(err);
+		snackbar.show({ message, color: 'error' });
+	} finally {
+		loading.value = false;
+	}
+}
 </script>

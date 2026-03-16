@@ -2,21 +2,23 @@
   <div class="pa-6">
     <v-row>
       <v-col cols="12" lg="8" offset-lg="2">
-        <div class="d-flex justify-end mb-4">
-          <v-btn color="primary" :loading="saving" @click="onUpdate">Update</v-btn>
+        <div class="d-flex align-center justify-space-between mb-6">
+          <div>
+            <div class="text-h6">Brand Description</div>
+            <div class="text-body-2 text-medium-emphasis">Update brand detailed description.</div>
+          </div>
+          <v-btn color="primary" variant="flat" :loading="saving" @click="onUpdate">
+            <v-icon start size="16">mdi-content-save-outline</v-icon>
+            Update
+          </v-btn>
         </div>
 
-        <v-textarea
-          v-model="form.short_desc"
-          label="Short Description"
-          variant="outlined"
-          density="comfortable"
-          auto-grow />
-
-        <div class="mt-4">
-          <div class="text-overline text-medium-emphasis mb-2">Content</div>
-          <RichText v-model="form.content" />
-        </div>
+        <v-form ref="descriptionFormRef">
+          <div class="mt-4">
+            <app-field-label label="Description" />
+            <RichText v-model="form.description" />
+          </div>
+        </v-form>
       </v-col>
     </v-row>
   </div>
@@ -25,6 +27,8 @@
 <script setup lang="ts">
 import { defineAsyncComponent, reactive, ref, watch } from 'vue';
 import { updateBrand, type ProductBrandDetailResponse } from '@/api/products.api';
+import AppFieldLabel from '@/components/shared/AppFieldLabel.vue';
+import { useSnackbarStore } from '@/stores/snackbar.store';
 
 const RichText = defineAsyncComponent(() => import('@/components/RichText.vue'));
 
@@ -37,17 +41,18 @@ const emit = defineEmits<{
   (e: 'updated'): void;
 }>();
 
-const form = reactive({
-  short_desc: '',
-  content: '',
-});
+const snackbar = useSnackbarStore();
 const saving = ref(false);
+const descriptionFormRef = ref();
+
+const form = reactive({
+  description: '',
+});
 
 watch(
   () => props.item,
   (item) => {
-    form.short_desc = item?.short_desc ? String(item.short_desc) : '';
-    form.content = item?.content ? String(item.content) : String(item?.description ?? '');
+    form.description = item?.description ? String(item.description) : '';
   },
   { immediate: true },
 );
@@ -56,13 +61,26 @@ async function onUpdate() {
   const id = String(props.brandId ?? '').trim();
   if (!id) return;
 
+  const { valid } = await descriptionFormRef.value?.validate();
+  if (!valid) return;
+
   saving.value = true;
   try {
     await updateBrand(id, {
-      short_desc: form.short_desc,
-      content: form.content,
+      description: form.description,
     });
+    
+    snackbar.show({
+      message: 'Brand description updated successfully',
+      color: 'success',
+    });
+    
     emit('updated');
+  } catch (error: any) {
+    snackbar.show({
+      message: error.response?.data?.message || 'Failed to update brand description',
+      color: 'error',
+    });
   } finally {
     saving.value = false;
   }

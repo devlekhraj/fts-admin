@@ -102,6 +102,7 @@ export function fileAssign(payload: FileAssignPayload) {
 export type UpdateFileUsagePayload = {
   usage_type?: string;
   usage_id?: number | string;
+  title?: string | null;
   alt_text: string;
   link?: string | null;
   start_date?: string | null;
@@ -110,6 +111,14 @@ export type UpdateFileUsagePayload = {
   is_default?: boolean;
   is_active?: boolean;
 };
+
+export function getFileUsages(params: { usage_type: string; usage_id: string | number }) {
+  return http.get('/admin/file-usages', { params });
+}
+
+export function getLogoImages() {
+  return http.get('/admin/logo-images');
+}
 
 export function updateFileUsage(fileUsageId: number | string, payload: UpdateFileUsagePayload) {
   return http.put(`/admin/file-usage/${fileUsageId}`, payload);

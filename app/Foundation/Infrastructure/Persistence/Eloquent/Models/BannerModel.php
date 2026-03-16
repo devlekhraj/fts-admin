@@ -10,6 +10,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class BannerModel extends BaseModel
 {
     protected $table = 'banners';
+    
+    protected $fillable = [
+        'name',
+        'slug',
+        'status',
+    ];
 
     protected $casts = [
         'status' => 'boolean',
@@ -26,7 +32,8 @@ class BannerModel extends BaseModel
             ->using(FileUsageModel::class)
             ->whereIn('file_usages.usage_type', ['banners'])
             ->withPivot(['id', 'usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
-            ->withTimestamps();
+            ->withTimestamps()
+            ->orderByPivot('id', 'desc');
     }
 
     public function defaultFile(): BelongsToMany
@@ -34,8 +41,7 @@ class BannerModel extends BaseModel
         return $this->belongsToMany(FileModel::class, 'file_usages', 'usage_id', 'file_id')
             ->using(FileUsageModel::class)
             ->whereIn('file_usages.usage_type', ['banners'])
-            ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(file_usages.meta, '$.collection_name'))) = 'default'")
             ->withPivot(['id', 'usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
-            ->orderByPivot('id', 'desc');
+            ->orderByPivot('id', 'asc');
     }
 }

@@ -18,7 +18,15 @@ class ProductBrandModel extends BaseModel
         'status' => 'boolean',
     ];
 
-    // TODO: Define table, fillable, casts, relations.
+    protected $fillable = [
+        'name',
+        'slug',
+        'status',
+        'description',
+        'meta_title',
+        'meta_keywords',
+        'meta_description',
+    ];
 
     public function products()
     {

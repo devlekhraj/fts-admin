@@ -47,22 +47,21 @@ class ProductResource extends JsonResource
         $data = $this->resource->toArray();
         $images = [];
         $variants = [];
-        $attribute = null;
         $brand = null;
 
         if ($this->relationLoaded('files')) {
             $images = $this->files->map(static function ($file) {
-                $meta = $file->pivot?->meta;
-                if (is_string($meta)) {
-                    $decoded = json_decode($meta, true);
-                    $meta = json_last_error() === JSON_ERROR_NONE && is_array($decoded) ? $decoded : [];
+                $rawMeta = $file->pivot?->meta;
+                if (is_string($rawMeta)) {
+                    $decoded = json_decode($rawMeta, true);
+                    $rawMeta = json_last_error() === JSON_ERROR_NONE && is_array($decoded) ? $decoded : [];
                 }
-                if (!is_array($meta)) {
-                    $meta = [];
+                if (!is_array($rawMeta)) {
+                    $rawMeta = [];
                 }
 
                 $meta = [
-                    'is_default' => in_array($meta['is_default'] ?? false, [true, 1, '1', 'true'], true),
+                    'is_default' => in_array($rawMeta['is_default'] ?? false, [true, 1, '1', 'true'], true),
                 ];
 
                 $fileSize = ByteSizeFormatter::format($file->file_size ?? null);
@@ -70,8 +69,11 @@ class ProductResource extends JsonResource
 
                 return [
                     'id' => $file->pivot?->id,
+                    'file_id' => $file->id,
                     'url' => $file->url,
+                    'title' => $file->pivot?->title,
                     'alt_text' => $file->pivot?->alt_text,
+                    'status' => true,
                     'meta' => $meta,
                     'size_info' => "{$fileSize} | {$fileDimension}",
                 ];
@@ -92,17 +94,17 @@ class ProductResource extends JsonResource
                 $variantFiles = [];
                 if ($variant->relationLoaded('files')) {
                     $variantFiles = $variant->files->map(static function ($file) {
-                        $meta = $file->pivot?->meta;
-                        if (is_string($meta)) {
-                            $decoded = json_decode($meta, true);
-                            $meta = json_last_error() === JSON_ERROR_NONE && is_array($decoded) ? $decoded : [];
+                        $rawMeta = $file->pivot?->meta;
+                        if (is_string($rawMeta)) {
+                            $decoded = json_decode($rawMeta, true);
+                            $rawMeta = json_last_error() === JSON_ERROR_NONE && is_array($decoded) ? $decoded : [];
                         }
-                        if (!is_array($meta)) {
-                            $meta = [];
+                        if (!is_array($rawMeta)) {
+                            $rawMeta = [];
                         }
 
                         $meta = [
-                            'is_default' => in_array($meta['is_default'] ?? false, [true, 1, '1', 'true'], true),
+                            'is_default' => in_array($rawMeta['is_default'] ?? false, [true, 1, '1', 'true'], true),
                         ];
 
                         $fileSize = ByteSizeFormatter::format($file->file_size ?? null);
@@ -110,8 +112,11 @@ class ProductResource extends JsonResource
 
                         return [
                             'id' => $file->pivot?->id,
+                            'file_id' => $file->id,
                             'url' => $file->url,
+                            'title' => $file->pivot?->title,
                             'alt_text' => $file->pivot?->alt_text,
+                            'status' => true,
                             'meta' => $meta,
                             'size_info' => "{$fileSize} | {$fileDimension}",
                         ];
@@ -170,7 +175,7 @@ class ProductResource extends JsonResource
             ],
             'description' => [
                 'description' => $data['description'] ?? null,
-                'short_desc' => $data['short_desc'] ?? null,
+                'short_description' => $data['short_description'] ?? null,
                 'highlights' => $data['highlights'] ?? null,
                 'warranty_description' => $data['warranty_description'] ?? null,
             ],

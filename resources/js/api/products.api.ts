@@ -82,7 +82,7 @@ export type ProductDetailMeta = {
 
 export type ProductDetailDescription = {
   description?: string | null;
-  short_desc?: string | null;
+  short_description?: string | null;
   highlights?: string | null;
   warranty_description?: string | null;
 };
@@ -175,8 +175,6 @@ export type ProductBrandFileItem = {
 };
 
 export type ProductBrandDetailResponse = ProductBrandListItem & {
-  short_desc?: string | null;
-  content?: string | null;
   description?: string | null;
   meta_title?: string | null;
   meta_keywords?: string | null;

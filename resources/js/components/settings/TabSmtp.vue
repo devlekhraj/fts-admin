@@ -65,24 +65,74 @@
 							hide-details />
 					</v-col>
 				</v-row>
+
+				<v-divider class="my-6"></v-divider>
+
+				<div class="d-flex justify-end">
+					<v-btn
+						color="primary"
+						variant="flat"
+						:loading="loading"
+						prepend-icon="mdi-content-save-outline"
+						@click="onUpdate">
+						Update Settings
+					</v-btn>
+				</div>
 			</v-col>
 		</v-row>
 	</v-card>
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { reactive, ref, watch } from 'vue';
+import { updateSettings } from '@/api/settings.api';
+import { useSnackbarStore } from '@/stores/snackbar.store';
+import { getErrorMessage } from '@/shared/errors';
 
-defineProps<{ data?: unknown }>();
+const props = defineProps<{ data?: any }>();
+const snackbar = useSnackbarStore();
+const loading = ref(false);
 
 const form = reactive({
-	mail_host: 'smtp.gmail.com',
-	mail_port: '587',
-	mail_mailer: 'smtp',
+	mail_host: '',
+	mail_port: '',
+	mail_mailer: '',
 	mail_username: '',
 	mail_password: '',
-	mail_from_name: 'Fatafat Sewa',
-	mail_encryption: 'tls',
-	mail_from_address: 'fatafatnp@gmail.com',
+	mail_from_name: '',
+	mail_encryption: '',
+	mail_from_address: '',
 });
+
+function initForm() {
+	if (props.data) {
+		form.mail_host = props.data.mail_host || '';
+		form.mail_port = props.data.mail_port || '';
+		form.mail_mailer = props.data.mail_mailer || '';
+		form.mail_username = props.data.mail_username || '';
+		form.mail_password = props.data.mail_password || '';
+		form.mail_from_name = props.data.mail_from_name || '';
+		form.mail_encryption = props.data.mail_encryption || '';
+		form.mail_from_address = props.data.mail_from_address || '';
+	}
+}
+
+watch(
+	() => props.data,
+	() => initForm(),
+	{ immediate: true }
+);
+
+async function onUpdate() {
+	loading.value = true;
+	try {
+		await updateSettings('smtp', { settings: { ...form } });
+		snackbar.show({ message: 'SMTP settings updated successfully', color: 'success' });
+	} catch (err) {
+		const message = getErrorMessage(err);
+		snackbar.show({ message, color: 'error' });
+	} finally {
+		loading.value = false;
+	}
+}
 </script>

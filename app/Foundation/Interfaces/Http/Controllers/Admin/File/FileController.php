@@ -115,8 +115,8 @@ class FileController extends Controller
             usageType: $usageType,
             usageId: $usageId,
             altText: $altText,
-            caption: isset($validated['caption']) ? (string) $validated['caption'] : null,
-            description: isset($validated['description']) ? (string) $validated['description'] : null,
+            // caption: isset($validated['caption']) ? (string) $validated['caption'] : null,
+            // description: isset($validated['description']) ? (string) $validated['description'] : null,
         ));
         $usage = $usageResult['usage'] ?? null;
 

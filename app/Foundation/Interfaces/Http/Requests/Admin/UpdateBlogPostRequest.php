@@ -19,10 +19,16 @@ class UpdateBlogPostRequest extends FormRequest
         $id = (string) $this->route('id');
 
         return [
-            'title' => ['required', 'string', 'max:255'],
-            'slug' => ['required', 'string', 'max:255', Rule::unique('blogs', 'slug')->ignore($id)],
+            'title' => ['sometimes', 'required', 'string', 'max:255'],
+            'slug' => ['sometimes', 'required', 'string', 'max:255', Rule::unique('blogs', 'slug')->ignore($id)],
             'author' => ['nullable', 'string', 'max:255'],
-            'status' => ['required', 'boolean'],
+            'status' => ['sometimes', 'required', 'boolean'],
+            'short_desc' => ['nullable', 'string'],
+            'content' => ['nullable', 'string'],
+            'meta_title' => ['nullable', 'string'],
+            'meta_keywords' => ['nullable', 'string'],
+            'meta_description' => ['nullable', 'string'],
+            'category_id' => ['sometimes', 'nullable'],
         ];
     }
 }

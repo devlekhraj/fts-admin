@@ -73,12 +73,7 @@ class ProductCategoryController extends Controller
     public function update(UpdateProductCategoryRequest $request, string $id): JsonResponse
     {
         $category = ProductCategoryModel::query()->findOrFail($id);
-        $validated = $request->validated();
-
-        $category->title = trim((string) $validated['title']);
-        $category->slug = trim((string) $validated['slug']);
-        $category->status = (bool) $validated['status'];
-        $category->save();
+        $category->update($request->validated());
 
         return response()->json([
             'message' => 'Product category updated successfully.',

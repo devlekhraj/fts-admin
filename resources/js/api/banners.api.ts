@@ -47,11 +47,13 @@ export type BannerDetailResponse = {
     url?: string | null;
     title?: string | null;
     alt_text?: string | null;
-    meta?: Record<string, unknown>;
-    file_size?: number | null;
-    size?: number | null;
-    height?: number | null;
-    width?: number | null;
+    meta?: {
+      link?: string | null;
+      start_date?: string | null;
+      end_date?: string | null;
+    };
+    size_info?: string | null;
+    status?: boolean;
   }>;
   [key: string]: unknown;
 };

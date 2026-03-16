@@ -14,11 +14,18 @@ class ProductCategoryModel extends BaseModel
 
     protected $table = 'product_categories';
 
-    protected $casts = [
+     protected $casts = [
         'status' => 'boolean',
     ];
-
-    // TODO: Define table, fillable, casts, relations.
+    protected $fillable = [
+        'title',
+        'slug',
+        'status',
+        'description',
+        'meta_title',
+        'meta_keywords',
+        'meta_description',
+    ];
 
     public function products()
     {

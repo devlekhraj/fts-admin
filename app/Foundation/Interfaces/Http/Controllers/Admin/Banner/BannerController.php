@@ -8,6 +8,7 @@ use App\Foundation\Infrastructure\Persistence\Eloquent\Models\BannerModel;
 use App\Foundation\Interfaces\Http\Resources\BannerResource;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
+use App\Foundation\Interfaces\Http\Requests\Admin\UpdateBannerRequest;
 use Illuminate\Http\Request;
 
 class BannerController extends Controller
@@ -16,7 +17,7 @@ class BannerController extends Controller
     {
         $query = BannerModel::query()
             ->select(['id', 'name', 'slug', 'status', 'created_at'])
-            ->with(['defaultFile'])
+            ->with(['defaultFile', 'files'])
             ->withCount(['files as total_images'])
             ->orderByDesc('created_at');
 
@@ -75,9 +76,12 @@ class BannerController extends Controller
         return response()->json([], 201);
     }
 
-    public function update(string $id): JsonResponse
+    public function update(string $id, UpdateBannerRequest $request): JsonResponse
     {
-        return response()->json(['id' => $id]);
+        $banner = BannerModel::findOrFail($id);
+        $banner->update($request->validated());
+
+        return response()->json((new BannerResource($banner->refresh()))->resolve());
     }
 
     public function destroy(string $id): JsonResponse

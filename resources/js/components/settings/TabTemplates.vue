@@ -10,23 +10,36 @@
 				</div>
 				<div>
 					<div class="text-body-2 text-medium-emphasis mb-1">Placed</div>
-					<v-textarea v-model="form.placed" density="comfortable" variant="outlined" auto-grow rows="3" />
+					<v-textarea v-model="form.temp_order_placed" density="comfortable" variant="outlined" auto-grow rows="3" />
 				</div>
 				<div>
 					<div class="text-body-2 text-medium-emphasis mb-1">Canceled</div>
-					<v-textarea v-model="form.canceled" density="comfortable" variant="outlined" auto-grow rows="3" />
+					<v-textarea v-model="form.temp_order_canceled" density="comfortable" variant="outlined" auto-grow rows="3" />
 				</div>
 				<div>
 					<div class="text-body-2 text-medium-emphasis mb-1">Completed</div>
-					<v-textarea v-model="form.completed" density="comfortable" variant="outlined" auto-grow rows="3" />
+					<v-textarea v-model="form.temp_order_completed" density="comfortable" variant="outlined" auto-grow rows="3" />
 				</div>
 				<div>
 					<div class="text-body-2 text-medium-emphasis mb-1">Confirmed</div>
-					<v-textarea v-model="form.confirmed" density="comfortable" variant="outlined" auto-grow rows="3" />
+					<v-textarea v-model="form.temp_order_confirmed" density="comfortable" variant="outlined" auto-grow rows="3" />
 				</div>
 				<div>
 					<div class="text-body-2 text-medium-emphasis mb-1">Dispatched</div>
-					<v-textarea v-model="form.dispatched" density="comfortable" variant="outlined" auto-grow rows="3" />
+					<v-textarea v-model="form.temp_order_dispatched" density="comfortable" variant="outlined" auto-grow rows="3" />
+				</div>
+
+				<v-divider class="my-6"></v-divider>
+
+				<div class="d-flex justify-end">
+					<v-btn
+						color="primary"
+						variant="flat"
+						:loading="loading"
+						prepend-icon="mdi-content-save-outline"
+						@click="onUpdate">
+						Update Settings
+					</v-btn>
 				</div>
 			</v-col>
 		</v-row>
@@ -34,15 +47,49 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { reactive, ref, watch } from 'vue';
+import { updateSettings } from '@/api/settings.api';
+import { useSnackbarStore } from '@/stores/snackbar.store';
+import { getErrorMessage } from '@/shared/errors';
 
-defineProps<{ data?: unknown }>();
+const props = defineProps<{ data?: any }>();
+const snackbar = useSnackbarStore();
+const loading = ref(false);
 
 const form = reactive({
-	placed: 'Dear {user_name}, Your order #{order_id} has been successfully placed. Thank you for shopping with us.',
-	canceled: 'Dear {user_name}, We are sorry to inform you that your order {order_id} has been cancelled.',
-	completed: 'Dear {user_name}, Your order #{order_id} has been delivered and completed. Thank you for shopping with us.',
-	confirmed: 'Hello {user_name}, Your current order of invoice number #{order_id} has been confirmed. Your total amount is Rs. {order_total}. Thank you for shopping with FatafatSewa.',
-	dispatched: 'Dear {user_name}, We are glad to inform you that your order #{order_id} has been dispatched. Your total order amount is Rs. {order_total}. Thank you for shopping with us.',
+	temp_order_placed: '',
+	temp_order_canceled: '',
+	temp_order_completed: '',
+	temp_order_confirmed: '',
+	temp_order_dispatched: '',
 });
+
+function initForm() {
+	if (props.data) {
+		form.temp_order_placed = props.data.temp_order_placed || '';
+		form.temp_order_canceled = props.data.temp_order_canceled || '';
+		form.temp_order_completed = props.data.temp_order_completed || '';
+		form.temp_order_confirmed = props.data.temp_order_confirmed || '';
+		form.temp_order_dispatched = props.data.temp_order_dispatched || '';
+	}
+}
+
+watch(
+	() => props.data,
+	() => initForm(),
+	{ immediate: true }
+);
+
+async function onUpdate() {
+	loading.value = true;
+	try {
+		await updateSettings('templates', { settings: { ...form } });
+		snackbar.show({ message: 'Message templates updated successfully', color: 'success' });
+	} catch (err) {
+		const message = getErrorMessage(err);
+		snackbar.show({ message, color: 'error' });
+	} finally {
+		loading.value = false;
+	}
+}
 </script>

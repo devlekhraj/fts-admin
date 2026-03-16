@@ -13,12 +13,48 @@ class ProductModel extends BaseModel
 {
     protected $table = 'products';
 
+    protected $fillable = [
+        'name',
+        'slug',
+        'short_description',
+        'description',
+        'sku',
+        'price',
+        'original_price',
+        'brand_id',
+        'vendor_id',
+        'quantity',
+        'pre_order',
+        'pre_order_price',
+        'unit',
+        'highlights',
+        'product_video_url',
+        'weight',
+        'length',
+        'width',
+        'height',
+        'status',
+        'is_featured',
+        'emi_enabled',
+        'attributes',
+        'attribute_class_id',
+        'variant_attributes',
+        'meta_title',
+        'meta_keywords',
+        'meta_description',
+        'custom_code',
+        'warranty_description',
+    ];
+
     protected $casts = [
         'status' => 'boolean',
         'emi_enabled' => 'boolean',
         'pre_order' => 'boolean',
         'is_featured' => 'boolean',
-        'attributes' => 'array'
+        'attributes' => 'array',
+        'price' => 'float',
+        'original_price' => 'float',
+        'pre_order_price' => 'float',
     ];
 
     public function brand(): BelongsTo
@@ -35,7 +71,8 @@ class ProductModel extends BaseModel
         return $this->belongsToMany(FileModel::class, 'file_usages', 'usage_id', 'file_id')
             ->wherePivot('usage_type', 'products')
              ->withPivot(['id', 'usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
-            ->withTimestamps();
+            ->withTimestamps()
+            ->orderByPivot('id', 'desc');
     }
 
     public function defaultFile(): BelongsToMany

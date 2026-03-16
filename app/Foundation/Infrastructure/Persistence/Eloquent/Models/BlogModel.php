@@ -12,6 +12,19 @@ class BlogModel extends BaseModel
 {
     protected $table = 'blogs';
 
+    protected $fillable = [
+        'title',
+        'slug',
+        'author',
+        'status',
+        'short_desc',
+        'content',
+        'meta_title',
+        'meta_keywords',
+        'meta_description',
+        'category_id',
+    ];
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(BlogCategoryModel::class, 'category_id');

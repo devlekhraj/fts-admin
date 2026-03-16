@@ -42,8 +42,6 @@ export type ProductCategoryFileItem = {
 };
 
 export type ProductCategoryDetailResponse = ProductCategoryListItem & {
-  short_desc?: string | null;
-  content?: string | null;
   description?: string | null;
   meta_title?: string | null;
   meta_keywords?: string | null;

@@ -11,6 +11,8 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::get('file-list', [FileController::class, 'fileList'])->name('admin.files.list');
     Route::get('file-list-with-usages', [FileController::class, 'fileListWithUsages'])->name('admin.files.list.withUsages');
 
+    Route::get('file-usages', [FileUsageController::class, 'index'])->name('admin.files.usage.index');
+
     // file usages routes
     Route::put('file-usage/{fileUsageId}', [FileUsageController::class, 'update'])->name('admin.files.usage.update');
     Route::delete('file-usage/{fileUsageId}', [FileUsageController::class, 'delete'])->name('admin.files.usage.delete');

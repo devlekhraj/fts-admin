@@ -12,6 +12,7 @@ final class UpdateFileUsageRequest extends FormRequest
     {
         return [
             'alt_text' => ['required', 'string', 'max:255'],
+            'title' => ['nullable', 'string', 'max:255'],
             'link' => ['nullable', 'string', 'max:2000'],
             'start_date' => ['nullable', 'date_format:Y-m-d'],
             'end_date' => ['nullable', 'date_format:Y-m-d'],

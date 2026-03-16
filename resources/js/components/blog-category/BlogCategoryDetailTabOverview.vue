@@ -3,30 +3,55 @@
     <v-row>
       <v-col cols="12" lg="6" offset-lg="3">
 
-        <div class="pt-10">
-          <app-field-label label="Title" />
-          <v-text-field v-model="form.title" variant="outlined" density="comfortable" />
-        </div>
 
-        <div>
-          <app-field-label label="Slug" />
-          <v-text-field v-model="form.slug" variant="outlined" density="comfortable" />
-        </div>
-
-        <div>
-          <app-field-label label="Status" />
-          <div style="max-width: 200px;">
-            <v-select v-model="form.status" :items="statusOptions" item-title="label" item-value="value"
-              variant="outlined" density="comfortable" />
+        <div class="d-flex align-center justify-space-between mb-6">
+          <div>
+            <div class="text-h6">Category Details</div>
+            <div class="text-body-2 text-medium-emphasis">Update category title, slug, and visibility status.</div>
+          </div>
+          <div class="d-flex justify-space-around mb-4">
+            <v-btn color="primary" variant="flat" :loading="saving" @click="onUpdate">
+              <v-icon start size="16">mdi-content-save-outline</v-icon>
+              Update
+            </v-btn>
           </div>
         </div>
 
-        <div class="d-flex justify-space-around mb-4">
-          <v-btn color="primary" variant="flat" :loading="saving" @click="onUpdate">
-            <v-icon start size="16">mdi-content-save-outline</v-icon>
-            Update
-          </v-btn>
-        </div>
+        <v-form ref="overviewFormRef">
+          <div class="mb-4">
+            <app-field-label label="Title" />
+            <v-text-field
+              v-model="form.title"
+              variant="outlined"
+              density="comfortable"
+              :rules="[v => !!v || 'Title is required']"
+            />
+          </div>
+
+          <div class="mb-4">
+            <app-field-label label="Slug" />
+            <v-text-field
+              v-model="form.slug"
+              variant="outlined"
+              density="comfortable"
+              :rules="[v => !!v || 'Slug is required']"
+            />
+          </div>
+
+          <div>
+            <app-field-label label="Status" />
+            <div style="max-width: 200px;">
+              <v-select
+                v-model="form.status"
+                :items="statusOptions"
+                item-title="label"
+                item-value="value"
+                variant="outlined"
+                density="comfortable"
+              />
+            </div>
+          </div>
+        </v-form>
       </v-col>
     </v-row>
   </div>
@@ -48,6 +73,7 @@ const emit = defineEmits<{
   (e: 'updated'): void;
 }>();
 
+const overviewFormRef = ref();
 const form = reactive({
   title: '',
   slug: '',
@@ -74,6 +100,9 @@ async function onUpdate() {
   const id = String(props.categoryId ?? '').trim();
   if (!id) return;
 
+  const { valid } = await overviewFormRef.value?.validate();
+  if (!valid) return;
+
   saving.value = true;
   try {
     await updateBlogCategory(id, {
@@ -82,7 +111,12 @@ async function onUpdate() {
       status: Number(form.status) === 1,
     });
     snackbar.show({ message: 'Blog category updated successfully.', color: 'success' });
-    // emit('updated');
+    emit('updated');
+  } catch (error: any) {
+    snackbar.show({
+      message: error.response?.data?.message || 'Failed to update blog category',
+      color: 'error',
+    });
   } finally {
     saving.value = false;
   }

@@ -5,20 +5,23 @@
 		</template> -->
 	</AppPageHeader>
 
-	<v-tabs v-model="activeTab" density="compact">
-		<v-tab v-for="tab in tabItems" :key="tab.id" color="primary" :value="tab.module">
-			{{ tab.name || 'Unnamed Module' }}
-		</v-tab>
-	</v-tabs>
-  <v-divider></v-divider>
 
+	<v-container fluid>
+		<v-tabs v-model="activeTab" density="compact">
+			<v-tab v-for="tab in tabItems" :key="tab.id" color="primary" :value="tab.module">
+				{{ tab.name || 'Unnamed Module' }}
+			</v-tab>
+		</v-tabs>
+		<v-divider></v-divider>
+	
+	
+		<v-window v-model="activeTab">
+			<v-window-item v-for="tab in tabItems" :key="tab.id" :value="tab.module">
+				<component :is="tab.component" :data="settingsData[tab.module]" />
+			</v-window-item>
+		</v-window>
+	</v-container>
 
-	<v-window v-model="activeTab">
-		<v-window-item v-for="tab in tabItems" :key="tab.id" :value="tab.module">
-			<component :is="tab.component" />
-		</v-window-item>
-	</v-window>
-  
 </template>
 
 <script setup lang="ts">
@@ -34,7 +37,7 @@ import TabCustomScript from '@/components/settings/TabCustomScript.vue';
 import TabLogo from '@/components/settings/TabLogo.vue';
 import TabSeo from '@/components/settings/TabSeo.vue';
 import TabSmtp from '@/components/settings/TabSmtp.vue';
-import TabSocialCredential from '@/components/settings/TabSocialCredential.vue';
+import TabCredential from '@/components/settings/TabCredential.vue';
 import TabSocialProfile from '@/components/settings/TabSocialProfile.vue';
 import TabTemplates from '@/components/settings/TabTemplates.vue';
 
@@ -45,22 +48,22 @@ const tabConfigMap: Record<string, { name: string; component: any }> = {
 	logo: { name: 'Logo', component: markRaw(TabLogo) },
 	contact: { name: 'Contact', component: markRaw(TabContact) },
 	smtp: { name: 'SMTP', component: markRaw(TabSmtp) },
-	social_credentials: { name: 'Social Credentials', component: markRaw(TabSocialCredential) },
+	credentials: { name: 'Credentials', component: markRaw(TabCredential) },
 	social_profiles: { name: 'Social Profiles', component: markRaw(TabSocialProfile) },
 	custom_scripts: { name: 'Custom Scripts', component: markRaw(TabCustomScript) },
 	seo: { name: 'SEO', component: markRaw(TabSeo) },
 	templates: { name: 'Templates', component: markRaw(TabTemplates) },
 };
-const tabItems = ref<Array<{ id?: number | string; name?: string | null; module?: string | null; component?: any }>>([
+const tabItems = ref<Array<{ id?: number | string; name?: string | null; module: string; component?: any }>>([
 	{ id: 'core', name: tabConfigMap.core.name, module: 'core', component: tabConfigMap.core.component },
 	{ id: 'logo', name: tabConfigMap.logo.name, module: 'logo', component: tabConfigMap.logo.component },
 	{ id: 'contact', name: tabConfigMap.contact.name, module: 'contact', component: tabConfigMap.contact.component },
 	{ id: 'smtp', name: tabConfigMap.smtp.name, module: 'smtp', component: tabConfigMap.smtp.component },
 	{
-		id: 'social_credentials',
-		name: tabConfigMap.social_credentials.name,
-		module: 'social_credentials',
-		component: tabConfigMap.social_credentials.component,
+		id: 'credentials',
+		name: tabConfigMap.credentials.name,
+		module: 'credentials',
+		component: tabConfigMap.credentials.component,
 	},
 	{
 		id: 'social_profiles',
@@ -83,12 +86,19 @@ const tabItems = ref<Array<{ id?: number | string; name?: string | null; module?
 	},
 ]);
 const activeTab = ref<string>('core');
+const settingsData = ref<Record<string, any>>({});
 
 async function fetchSettings() {
 	loading.value = true;
 	try {
-		const { data } = await listSettings();
-		console.log('settings response:', data);
+		const response = await listSettings();
+		if (response && response.data) {
+			const mapped: Record<string, any> = {};
+			response.data.forEach((item: any) => {
+				mapped[item.module] = item.settings;
+			});
+			settingsData.value = mapped;
+		}
 	} catch (err) {
 		const message = getErrorMessage(err);
 		snackbar.show({ message, color: 'error' });
