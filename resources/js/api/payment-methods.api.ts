@@ -6,15 +6,28 @@ export type ListPaymentMethodsParams = {
   search?: string;
 };
 
+export type PaymentMethodAsset = {
+  id: number | string;
+  file_id: number | string;
+  url: string;
+  title?: string | null;
+  alt_text?: string | null;
+  status: boolean;
+  meta?: Record<string, any>;
+  size_info?: string | null;
+};
+
 export type PaymentMethodListItem = {
   id: number | string;
-  name?: string | null;
-  slug?: string | null;
+  name: string;
+  slug: string;
   status: boolean;
   test_mode: boolean;
   is_international: boolean;
   logo_url?: string | null;
-  created_at?: string | null;
+  thumb?: string | null;
+  image_counts?: number;
+  created_at: string;
   [key: string]: unknown;
 };
 
@@ -34,7 +47,8 @@ export type PaymentMethodListResponse = {
 };
 
 export type PaymentMethodDetailResponse = PaymentMethodListItem & {
-  config?: Record<string, unknown>;
+  config: Record<string, any>;
+  images: PaymentMethodAsset[];
   updated_at?: string | null;
 };
 
@@ -50,4 +64,21 @@ export async function getPaymentMethodDetail(id: number | string): Promise<Payme
     return wrapped.data as PaymentMethodDetailResponse;
   }
   return response as unknown as PaymentMethodDetailResponse;
+}
+
+export async function updatePaymentMethod(id: number | string, data: Partial<PaymentMethodDetailResponse>): Promise<PaymentMethodDetailResponse> {
+  const response = await http.put(`/admin/payment-methods/${id}`, data);
+  const wrapped = response as { data?: unknown };
+  if (wrapped && typeof wrapped === 'object' && 'data' in wrapped && wrapped.data) {
+    return wrapped.data as PaymentMethodDetailResponse;
+  }
+  return response as unknown as PaymentMethodDetailResponse;
+}
+
+export async function updatePaymentMethodImage(id: number | string, fileUsageId: number | string, data: { alt_text: string, is_default: boolean }): Promise<void> {
+  await http.put(`/admin/payment-methods/${id}/images/${fileUsageId}`, data);
+}
+
+export async function deletePaymentMethodImage(id: number | string, fileUsageId: number | string): Promise<void> {
+  await http.delete(`/admin/payment-methods/${id}/images/${fileUsageId}`);
 }

@@ -231,13 +231,14 @@ main.v-main {
 
 
 .drawer-header {
-    background:
-        repeating-linear-gradient(45deg,
-            rgba(0, 0, 0, 0.03),
-            rgba(0, 0, 0, 0.03) 2px,
-            transparent 2px,
-            transparent 10px),
-        linear-gradient(262deg, #f4faff 0%, #fafafa 100%);
+    // background:
+    //     repeating-linear-gradient(45deg,
+    //         rgba(0, 0, 0, 0.03),
+    //         rgba(0, 0, 0, 0.03) 2px,
+    //         transparent 2px,
+    //         transparent 10px),
+    //     linear-gradient(262deg, #f4faff 0%, #fafafa 100%);
+    background: repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.03) 2px, transparent 2px, transparent 10px), linear-gradient(92deg, #ffffff 0%, #ffffff 100%);
     padding: 0 10px;
 }
 

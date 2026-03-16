@@ -1,45 +1,51 @@
 <template>
   <AppPageHeader title="Banners" subtitle="Promotional banners" />
 
-  <AppDataTable
-    :headers="headers"
-    :items="items"
-    :total="total"
-    :loading="loading"
-    :page="options.page"
-    :items-per-page="options.itemsPerPage"
-    @update:options="onOptions">
-    <template #item.name="{ item }">
-      <div class="d-flex align-center ga-2">
-        <v-avatar size="28" color="grey-lighten-3" rounded>
-          <v-img v-if="item.thumb" :src="item.thumb" :alt="item.name" class="banner-thumb" />
-          <v-icon v-else size="18" color="grey-darken-1">mdi-image-outline</v-icon>
-        </v-avatar>
-        <span>{{ item.name }}</span>
-      </div>
-    </template>
-    <template #item.status="{ item }">
-      <v-chip size="small" label variant="tonal" :color="item.status ? 'success' : 'warning'">
-        {{ item.status ? 'Active' : 'Inactive' }}
-      </v-chip>
-    </template>
-    <template #item.total_images="{ item }">
-      <span class="text-primary cursor-pointer">{{ item.total_images }} images</span>
-    </template>
-    <template #item.created_at="{ item }">
-      <span>{{ formatLongDate(item.created_at) ?? '-' }}</span>
-    </template>
-    <template #item.action="{ item }">
-      <div class="d-flex align-center ga-1">
-        <v-btn icon size="x-small" variant="tonal" color="primary" @click="router.push({ name: 'admin.banners.detail', params: { id: item.id } })">
-          <v-icon size="16">mdi-eye</v-icon>
-        </v-btn>
-        <v-btn icon size="x-small" variant="tonal" color="error" @click="onDelete(item)">
-          <v-icon size="16">mdi-delete</v-icon>
-        </v-btn>
-      </div>
-    </template>
-  </AppDataTable>
+  <v-container fluid>
+    <v-row>
+      <v-col cols="12">
+        <AppDataTable
+          :headers="headers"
+          :items="items"
+          :total="total"
+          :loading="loading"
+          :page="options.page"
+          :items-per-page="options.itemsPerPage"
+          @update:options="onOptions">
+          <template #item.name="{ item }">
+            <div class="d-flex align-center ga-2">
+              <v-avatar size="28" color="grey-lighten-3" rounded>
+                <v-img v-if="item.thumb" :src="item.thumb" :alt="item.name" class="banner-thumb" />
+                <v-icon v-else size="18" color="grey-darken-1">mdi-image-outline</v-icon>
+              </v-avatar>
+              <span>{{ item.name }}</span>
+            </div>
+          </template>
+          <template #item.status="{ item }">
+            <v-chip size="small" label variant="tonal" :color="item.status ? 'success' : 'warning'">
+              {{ item.status ? 'Active' : 'Inactive' }}
+            </v-chip>
+          </template>
+          <template #item.total_images="{ item }">
+            <span class="text-primary cursor-pointer">{{ item.total_images }} images</span>
+          </template>
+          <template #item.created_at="{ item }">
+            <span>{{ formatLongDate(item.created_at) ?? '-' }}</span>
+          </template>
+          <template #item.action="{ item }">
+            <div class="d-flex align-center ga-1">
+              <v-btn icon size="x-small" variant="tonal" color="primary" @click="router.push({ name: 'admin.banners.detail', params: { id: item.id } })">
+                <v-icon size="16">mdi-eye</v-icon>
+              </v-btn>
+              <v-btn icon size="x-small" variant="tonal" color="error" @click="onDelete(item)">
+                <v-icon size="16">mdi-delete</v-icon>
+              </v-btn>
+            </div>
+          </template>
+        </AppDataTable>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script setup lang="ts">

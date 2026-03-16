@@ -1,18 +1,17 @@
 <template>
   <BaseDetailTabImages
-    :files="imageItems"
+    :files="paymentMethodFiles"
     usage-type="payment_methods"
     :usage-id="item?.id ?? null"
-    :edit-modal="null"
-    empty-state-message="No logo image available."
+    directory="payment-methods"
+    :edit-modal="PaymentMethodImageEditModal"
+    :edit-modal-props="(file: any) => ({ paymentMethodId: item?.id ?? null, file })"
+    edit-modal-title="Edit Payment Logo"
+    empty-state-message="No logos attached to this payment method."
     @updated="emit('updated')"
   >
     <template #headers>
       <th>Primary Image</th>
-    </template>
-    <template #details="{ file }">
-      <div class="text-body-2 font-weight-medium">{{ file.label }}</div>
-      <div class="text-caption text-medium-emphasis">{{ file.url || '-' }}</div>
     </template>
     <template #rows="{ file }">
       <td class="py-3">
@@ -32,6 +31,7 @@
 import { computed } from 'vue';
 import type { PaymentMethodDetailResponse } from '@/api/payment-methods.api';
 import BaseDetailTabImages from '@/components/media/BaseDetailTabImages.vue';
+import PaymentMethodImageEditModal from '@/components/payment-method/PaymentMethodImageEditModal.vue';
 
 const props = defineProps<{
   item: PaymentMethodDetailResponse | null;
@@ -41,17 +41,5 @@ const emit = defineEmits<{
   (e: 'updated'): void;
 }>();
 
-const imageItems = computed(() => {
-  const logoUrl = typeof props.item?.logo_url === 'string' ? props.item.logo_url : '';
-  if (!logoUrl) return [];
-  return [
-    {
-      id: 'logo',
-      key: 'logo',
-      label: 'Logo',
-      url: logoUrl,
-      meta: { is_default: true },
-    },
-  ];
-});
+const paymentMethodFiles = computed(() => props.item?.images ?? []);
 </script>

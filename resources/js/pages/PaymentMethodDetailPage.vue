@@ -12,7 +12,7 @@
     <div class="top-grid">
       <div class="thumb-cell">
         <v-avatar size="112" rounded="lg" color="grey-lighten-3">
-          <v-img v-if="paymentMethodDetail?.logo_url" :src="String(paymentMethodDetail.logo_url)" cover />
+          <v-img v-if="paymentMethodDetail?.thumb" :src="String(paymentMethodDetail.thumb)" contain />
           <v-icon v-else size="32" color="grey-darken-1">mdi-credit-card-outline</v-icon>
         </v-avatar>
       </div>
@@ -53,7 +53,7 @@
     <v-divider />
     <v-window v-model="activeTab">
       <v-window-item v-for="tab in tabItems" :key="tab.value" :value="tab.value">
-        <component :is="tab.component" :item="paymentMethodDetail" />
+        <component :is="tab.component" :item="paymentMethodDetail" @updated="fetchPaymentMethodDetail" />
       </v-window-item>
     </v-window>
   </v-card>
@@ -124,7 +124,7 @@ onMounted(fetchPaymentMethodDetail);
   }
 }
 
-@media (min-width: 960px) {
+
   .top-grid {
     grid-template-columns: 128px minmax(0, 1fr);
     gap: 20px;
@@ -133,5 +133,5 @@ onMounted(fetchPaymentMethodDetail);
   .thumb-cell {
     justify-content: flex-start;
   }
-}
+
 </style>

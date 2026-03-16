@@ -8,6 +8,7 @@ use App\Foundation\Infrastructure\Persistence\Eloquent\Models\PaymentMethodModel
 use App\Foundation\Interfaces\Http\Resources\PaymentMethodResource;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
+use App\Foundation\Interfaces\Http\Requests\Admin\UpdatePaymentMethodRequest;
 use Illuminate\Http\Request;
 
 class PaymentMethodController extends Controller
@@ -15,6 +16,8 @@ class PaymentMethodController extends Controller
     public function list(Request $request): JsonResponse
     {
         $query = PaymentMethodModel::query()
+            ->with(['files', 'defaultFile'])
+            ->withCount('files')
             ->orderByDesc('created_at');
 
         if ($search = $request->query('search')) {
@@ -60,6 +63,7 @@ class PaymentMethodController extends Controller
     public function show(string $id): JsonResponse
     {
         $paymentMethod = PaymentMethodModel::query()
+            ->with(['files', 'defaultFile'])
             ->findOrFail($id);
 
         return response()->json([
@@ -73,9 +77,15 @@ class PaymentMethodController extends Controller
         return response()->json([], 201);
     }
 
-    public function update(string $id): JsonResponse
+    public function update(UpdatePaymentMethodRequest $request, string $id): JsonResponse
     {
-        return response()->json(['id' => $id]);
+        $paymentMethod = PaymentMethodModel::query()->findOrFail($id);
+        $paymentMethod->update($request->validated());
+
+        return response()->json([
+            'message' => 'Payment method updated successfully.',
+            'data' => (new PaymentMethodResource($paymentMethod)),
+        ]);
     }
 
     public function destroy(string $id): JsonResponse

@@ -23,7 +23,7 @@
         <tr v-for="file in files" :key="String(file.id)">
           <td class="py-3">
             <div class="table-image-preview rounded">
-              <v-img v-if="file.url" :src="String(file.url)" cover :title="String(file.url)" />
+              <v-img v-if="file.url" :src="String(file.url)" contain :title="String(file.url)" />
               <div v-else class="d-flex align-center justify-center h-100">
                 <v-icon size="22" color="grey-darken-1">mdi-image-outline</v-icon>
               </div>

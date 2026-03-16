@@ -10,12 +10,15 @@
     :items-per-page="options.itemsPerPage"
     @update:options="onOptions">
     <template #item.name="{ item }">
-      <div class="d-flex align-center ga-2">
-        <v-avatar size="28" color="grey-lighten-3" rounded>
-          <v-img v-if="item.logo_url" :src="item.logo_url" :alt="item.name" class="method-thumb" />
-          <v-icon v-else size="18" color="grey-darken-1">mdi-credit-card-outline</v-icon>
+      <div class="d-flex align-center ga-3">
+        <v-avatar size="36" color="grey-lighten-4" rounded="lg" class="border">
+          <v-img v-if="item.thumb || item.logo_url" :src="String(item.thumb || item.logo_url)" :alt="item.name" class="method-thumb" />
+          <v-icon v-else size="20" color="grey-darken-1">mdi-credit-card-outline</v-icon>
         </v-avatar>
-        <span>{{ item.name }}</span>
+        <div class="d-flex flex-column">
+          <span class="font-weight-medium">{{ item.name }}</span>
+          <span class="text-caption text-medium-emphasis">{{ item.slug }}</span>
+        </div>
       </div>
     </template>
     <template #item.status="{ item }">
@@ -24,7 +27,7 @@
       </v-chip>
     </template>
     <template #item.test_mode="{ item }">
-      <v-chip size="small" label variant="tonal" :color="item.test_mode ? 'gray' : 'primary'">
+      <v-chip size="small" label variant="tonal" :color="item.test_mode ? 'grey' : 'primary'">
         <v-icon
           v-if="!item.test_mode"
           start
@@ -33,21 +36,33 @@
           class="live-blink">
           mdi-circle
         </v-icon>
-        {{ item.test_mode ? 'Test' : 'Live' }}
+        {{ item.test_mode ? 'Test Mode' : 'Live Mode' }}
       </v-chip>
     </template>
     <template #item.is_international="{ item }">
       <v-chip size="small" label variant="tonal" :color="item.is_international ? 'info' : 'grey'">
-        {{ item.is_international ? 'Yes' : 'No' }}
+        {{ item.is_international ? 'International' : 'Domestic' }}
       </v-chip>
     </template>
+    <template #item.image_counts="{ item }">
+      <div class="d-flex align-center ga-1">
+        <v-icon size="14" color="medium-emphasis">mdi-image-multiple-outline</v-icon>
+        <span class="caption-text">{{ item.image_counts ?? 0 }}</span>
+      </div>
+    </template>
     <template #item.created_at="{ item }">
-      <span>{{ formatLongDate(item.created_at) ?? '-' }}</span>
+      <span class="caption-text">{{ formatLongDate(item.created_at) ?? '-' }}</span>
     </template>
     <template #item.action="{ item }">
-      <div class="d-flex align-center ga-1">
-        <v-btn icon size="x-small" variant="tonal" color="primary" @click="router.push({ name: 'admin.paymentMethods.detail', params: { id: item.id } })">
-          <v-icon size="16">mdi-eye</v-icon>
+      <div class="d-flex justify-end">
+        <v-btn
+          size="small"
+          variant="tonal"
+          color="primary"
+          class="text-none"
+          @click="router.push({ name: 'admin.paymentMethods.detail', params: { id: item.id } })">
+          <v-icon start size="16">mdi-eye-outline</v-icon>
+          Detail
         </v-btn>
       </div>
     </template>
@@ -55,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
@@ -64,27 +79,16 @@ import { listPaymentMethods, type PaymentMethodListItem } from '@/api/payment-me
 import { formatLongDate } from '@/shared/utils';
 
 const headers = [
-  { title: 'Name', key: 'name', sortable: false, minWidth: '220' },
-  { title: 'Slug', key: 'slug', sortable: false, minWidth: '180' },
-  { title: 'Status', key: 'status', sortable: false, minWidth: '130' },
-  { title: 'Test Mode', key: 'test_mode', sortable: false, minWidth: '130' },
-  { title: 'International', key: 'is_international', sortable: false, minWidth: '140' },
+  { title: 'Payment Method', key: 'name', sortable: false, minWidth: '240' },
+  { title: 'Status', key: 'status', sortable: false, minWidth: '120' },
+  { title: 'Mode', key: 'test_mode', sortable: false, minWidth: '130' },
+  { title: 'Region', key: 'is_international', sortable: false, minWidth: '130' },
+  { title: 'Assets', key: 'image_counts', sortable: false, minWidth: '100' },
   { title: 'Created At', key: 'created_at', sortable: false, minWidth: '180' },
-  { title: 'Actions', key: 'action', sortable: false, minWidth: '110' },
+  { title: 'Actions', key: 'action', sortable: false, minWidth: '110', align: 'end' as const },
 ];
 
-type PaymentMethod = {
-  id: number | string;
-  name: string;
-  slug: string;
-  status: boolean;
-  test_mode: boolean;
-  is_international: boolean;
-  logo_url: string;
-  created_at: string;
-};
-
-const items = ref<PaymentMethod[]>([]);
+const items = ref<PaymentMethodListItem[]>([]);
 const total = ref(0);
 const loading = ref(false);
 const options = ref<DataTableOptions>({
@@ -105,14 +109,11 @@ async function fetchPaymentMethods() {
 
     const list = Array.isArray(response) ? response : response?.data ?? [];
     items.value = list.map((method: PaymentMethodListItem) => ({
-      id: method.id,
-      name: method.name ?? '-',
-      slug: method.slug ?? '-',
+      ...method,
       status: Boolean(method.status),
       test_mode: Boolean(method.test_mode),
       is_international: Boolean(method.is_international),
-      logo_url: typeof method.logo_url === 'string' ? method.logo_url : '',
-      created_at: method.created_at ?? '-',
+      image_counts: Number(method.image_counts ?? 0),
     }));
     total.value = Number(response?.total ?? response?.meta?.total ?? list.length);
     if (response?.meta?.current_page) {
@@ -133,13 +134,6 @@ function onOptions(next: DataTableOptions) {
   }
   fetchPaymentMethods();
 }
-
-onMounted(() => {
-  if (!hasLoadedOnce.value) {
-    fetchPaymentMethods();
-    hasLoadedOnce.value = true;
-  }
-});
 </script>
 
 <style scoped>

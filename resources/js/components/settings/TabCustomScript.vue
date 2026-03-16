@@ -1,7 +1,7 @@
 <template>
 	<v-card class="pa-4" variant="flat">
 		<v-row>
-			<v-col cols="12" lg="8" offset-lg="2">
+			<v-col cols="12" lg="10" offset-lg="1">
 				<div class="pt-4">
 					<div class="text-h6 mb-1">Custom Scripts</div>
 					<div class="text-body-2 text-medium-emphasis mb-4">
@@ -11,38 +11,20 @@
 
 				<div class="mb-6">
 					<div class="text-body-2 text-medium-emphasis mb-1">Header Script (Before &lt;/head&gt;)</div>
-					<v-textarea
-						v-model="form.header_script"
-						density="comfortable"
-						variant="outlined"
-						auto-grow
-						rows="4"
-						class="font-monospace"
-						hint="Injected before the closing head tag"
-						persistent-hint />
+					<v-textarea v-model="form.header_script" density="comfortable" variant="outlined" auto-grow rows="4"
+						class="font-monospace" hint="Injected before the closing head tag" persistent-hint />
 				</div>
 
 				<div class="mb-6">
 					<div class="text-body-2 text-medium-emphasis mb-1">Footer Script (Before &lt;/body&gt;)</div>
-					<v-textarea
-						v-model="form.footer_script"
-						density="comfortable"
-						variant="outlined"
-						auto-grow
-						rows="4"
-						class="font-monospace"
-						hint="Injected before the closing body tag"
-						persistent-hint />
+					<v-textarea v-model="form.footer_script" density="comfortable" variant="outlined" auto-grow rows="4"
+						class="font-monospace" hint="Injected before the closing body tag" persistent-hint />
 				</div>
 
 				<v-divider class="my-6"></v-divider>
 
 				<div class="d-flex justify-end">
-					<v-btn
-						color="primary"
-						variant="flat"
-						:loading="loading"
-						prepend-icon="mdi-content-save-outline"
+					<v-btn color="primary" variant="flat" :loading="loading" prepend-icon="mdi-content-save-outline"
 						@click="onUpdate">
 						Update Settings
 					</v-btn>

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Foundation\Interfaces\Http\Resources;
 
+use App\Foundation\Shared\Support\Formatters\ByteSizeFormatter;
+use App\Foundation\Shared\Support\Formatters\FileDimensionFormatter;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class PaymentMethodResource extends JsonResource
@@ -19,6 +21,8 @@ class PaymentMethodResource extends JsonResource
 
     private function listResponse(): array
     {
+        $defaultFile = $this->defaultFile->first() ?? $this->files->first();
+
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -26,7 +30,8 @@ class PaymentMethodResource extends JsonResource
             'status' => (bool) $this->status,
             'test_mode' => (bool) $this->test_mode,
             'is_international' => (bool) $this->is_international,
-            'logo_url' => $this->logo_url,
+            'thumb' => $defaultFile?->url,
+            'image_counts' => (int) $this->files_count,
             'created_at' => $this->created_at,
         ];
     }
@@ -35,12 +40,44 @@ class PaymentMethodResource extends JsonResource
     {
         $data = $this->resource->toArray();
 
-        $data['status'] = (bool) ($data['status'] ?? $this->status);
-        $data['test_mode'] = (bool) ($data['test_mode'] ?? $this->test_mode);
-        $data['is_international'] = (bool) ($data['is_international'] ?? $this->is_international);
-        $data['config'] = $this->decodeConfig($data['config'] ?? null);
+        $images = [];
+        if ($this->relationLoaded('files')) {
+            $images = $this->files->map(static function ($item): array {
 
-        return $data;
+                $fileSize = ByteSizeFormatter::format($item->file_size ?? null);
+                $fileDimension = FileDimensionFormatter::format($item->width ?? null, $item->height ?? null);
+                $meta = is_array($item->pivot->meta) ? $item->pivot->meta : json_decode($item->pivot->meta ?? '[]', true);
+
+                return [
+                    'id' => $item->pivot->id,
+                    'url' => $item->url,
+                    'title' => $item->pivot->title,
+                    'alt_text' => $item->pivot->alt_text,
+                    'status' => (bool) $item->status,
+                    'meta' => [
+                        'is_default' => (bool) ($meta['is_default'] ?? false),
+                    ],
+                    'size_info' => "{$fileSize} | {$fileDimension}",
+                ];
+            })->values()->all();
+        }
+
+        $defaultFile = $this->defaultFile->first();
+
+        return [
+
+            'id' => $this->id,
+            'name' => $this->name,
+            'slug' => $this->slug,
+            'status' => (bool) $this->status,
+            'test_mode' => (bool) $this->test_mode,
+            'is_international' => (bool) $this->is_international,
+            'thumb' => $defaultFile?->url,
+            'config' => $this->decodeConfig($data['config'] ?? null),
+            'images' => $images,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+        ];
     }
 
     private function decodeConfig($config): array

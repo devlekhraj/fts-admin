@@ -1,7 +1,7 @@
 <template>
 	<v-card class="pa-4" variant="flat">
 		<v-row>
-			<v-col cols="12" lg="8" offset-lg="2">
+			<v-col cols="12" lg="10" offset-lg="1">>
 				<div class="pt-4">
 					<div class="text-h6 mb-1">SEO Settings</div>
 					<div class="text-body-2 text-medium-emphasis mb-4">
@@ -14,21 +14,19 @@
 				</div>
 				<div>
 					<div class="text-body-2 text-medium-emphasis mb-1">Meta Description</div>
-					<v-textarea v-model="form.meta_description" density="comfortable" variant="outlined" auto-grow rows="4" />
+					<v-textarea v-model="form.meta_description" density="comfortable" variant="outlined" auto-grow
+						rows="4" />
 				</div>
 				<div>
 					<div class="text-body-2 text-medium-emphasis mb-1">Meta Keywords</div>
-					<v-textarea v-model="form.meta_keywords" density="comfortable" variant="outlined" auto-grow rows="3" />
+					<v-textarea v-model="form.meta_keywords" density="comfortable" variant="outlined" auto-grow
+						rows="3" />
 				</div>
 
 				<v-divider class="my-6"></v-divider>
 
 				<div class="d-flex justify-end">
-					<v-btn
-						color="primary"
-						variant="flat"
-						:loading="loading"
-						prepend-icon="mdi-content-save-outline"
+					<v-btn color="primary" variant="flat" :loading="loading" prepend-icon="mdi-content-save-outline"
 						@click="onUpdate">
 						Update Settings
 					</v-btn>

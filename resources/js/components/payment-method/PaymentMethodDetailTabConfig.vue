@@ -1,40 +1,60 @@
 <template>
-  <div class="pa-6">
-    <div class="config-wrap">
-      <div class="d-flex align-center justify-space-between mb-4">
-        <div>
-          <div class="text-h6 mb-1">Configuration</div>
-          <div class="text-body-2 text-medium-emphasis">
-            Provider-specific configuration payload.
+  <div class="pa-6 pt-10">
+    <v-form ref="formRef" @submit.prevent="onUpdate">
+      <v-row>
+        <v-col cols="12" md="10" offset-md="1" lg="8" offset-lg="2">
+          <div class="d-flex align-center justify-space-between mb-6">
+            <div>
+              <div class="text-h6 mb-1">Configuration</div>
+              <div class="text-body-2 text-medium-emphasis">
+                Provider-specific configuration payload.
+              </div>
+            </div>
+            <v-btn color="primary" variant="flat" :loading="loading" @click="onUpdate">
+              <v-icon start size="16">mdi-content-save-outline</v-icon>
+              Update
+            </v-btn>
           </div>
-        </div>
-        <v-btn color="primary" variant="flat" @click="onUpdate">
-          <v-icon start size="16">mdi-content-save-outline</v-icon>
-          Update
-        </v-btn>
-      </div>
 
-      <v-row v-if="configKeys.length">
-        <v-col v-for="key in configKeys" :key="key" cols="12">
-          <v-text-field
-            v-model="form[key]"
-            :label="toLabel(key)"
-            variant="outlined"
-            density="comfortable" />
+          <v-row v-if="configKeys.length">
+            <v-col v-for="key in configKeys" :key="key" cols="12">
+              <AppFieldLabel :label="toLabel(key)" />
+              <v-text-field
+                v-model="form[key]"
+                variant="outlined"
+                density="comfortable"
+                :error-messages="fieldErrors[`config.${key}`]"
+                @update:model-value="clearFieldError(`config.${key}`)"
+                placeholder="Enter value"
+              />
+            </v-col>
+          </v-row>
+          <div v-else class="text-body-2 text-medium-emphasis py-4 text-center border rounded">
+            No configuration fields found for this payment method.
+          </div>
         </v-col>
       </v-row>
-      <div v-else class="text-body-2 text-medium-emphasis">No config fields found.</div>
-    </div>
+    </v-form>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import type { PaymentMethodDetailResponse } from '@/api/payment-methods.api';
+import { updatePaymentMethod } from '@/api/payment-methods.api';
+import AppFieldLabel from '@/components/shared/AppFieldLabel.vue';
+import { useSnackbarStore } from '@/stores/snackbar.store';
 
 const props = defineProps<{
   item: PaymentMethodDetailResponse | null;
 }>();
+
+const emit = defineEmits(['updated']);
+
+const snackbar = useSnackbarStore();
+const formRef = ref<any>(null);
+const loading = ref(false);
+const fieldErrors = ref<Record<string, string[]>>({});
 
 const form = ref<Record<string, string>>({});
 const configKeys = ref<string[]>([]);
@@ -58,7 +78,7 @@ watch(
     form.value = next;
     configKeys.value = Object.keys(next);
   },
-  { immediate: true },
+  { immediate: true }
 );
 
 function toLabel(key: string): string {
@@ -67,15 +87,38 @@ function toLabel(key: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function onUpdate() {
-  // TODO: replace with update API call.
-  console.log('Update payment method config:', form.value);
+function clearFieldError(field: string) {
+  if (fieldErrors.value[field]) {
+    delete fieldErrors.value[field];
+  }
+}
+
+async function onUpdate() {
+  if (!props.item?.id) return;
+
+  const { valid } = await formRef.value.validate();
+  if (!valid) return;
+
+  loading.value = true;
+  fieldErrors.value = {};
+
+  try {
+    await updatePaymentMethod(props.item.id, { config: form.value });
+    snackbar.show({
+      message: 'Configuration updated successfully',
+      color: 'success',
+    });
+    emit('updated');
+  } catch (error: any) {
+    if (error.response?.status === 422) {
+      fieldErrors.value = error.response.data.errors || {};
+    }
+    snackbar.show({
+      message: error.response?.data?.message || 'Failed to update configuration',
+      color: 'error',
+    });
+  } finally {
+    loading.value = false;
+  }
 }
 </script>
-
-<style scoped>
-.config-wrap {
-  max-width: 880px;
-  margin: 0 auto;
-}
-</style>

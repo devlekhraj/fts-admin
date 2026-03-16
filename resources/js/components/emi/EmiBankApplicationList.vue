@@ -21,7 +21,7 @@
 					</div>
 					<div>
 						<v-data-table :headers="headers" :items="items" density="comfortable" class="elevation-0 border rounded"
-							:loading="loading">
+							:loading="loading" :hide-default-footer="items.length <= 10">
 							<template #item.created_at="{ item }">
 								<div class="application-date-cell">{{ item.created_at ?? '--' }}</div>
 							</template>

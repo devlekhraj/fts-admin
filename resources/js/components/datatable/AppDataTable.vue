@@ -8,6 +8,7 @@
 
 		<v-data-table-server :headers="normalizedHeaders" :items="items" :items-length="total" :loading="loading"
 			:search="searchModel" :page="page" :items-per-page="itemsPerPage"
+			:hide-default-footer="total <= itemsPerPage"
 			@update:options="(opts) => $emit('update:options', opts)">
 			<template v-for="(_, name) in $slots" v-slot:[name]="slotProps">
 				<slot :name="name" v-bind="slotProps" />

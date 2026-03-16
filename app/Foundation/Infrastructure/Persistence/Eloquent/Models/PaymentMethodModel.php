@@ -11,10 +11,15 @@ class PaymentMethodModel extends BaseModel
 {
     protected $table = 'payment_methods';
 
+    protected $fillable = [
+        'name', 'slug', 'status', 'test_mode', 'is_international', 'config',
+    ];
+
     protected $casts = [
         'status' => 'boolean',
         'is_international' => 'boolean',
         'test_mode' => 'boolean',
+        'config' => 'array',
     ];
     public function files(): BelongsToMany
     {
