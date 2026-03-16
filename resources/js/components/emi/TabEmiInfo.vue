@@ -1,7 +1,7 @@
 <template>
-  <v-container class="pt-0" fluid>
+  <v-container fluid>
     <v-row>
-      <v-col cols="12" lg="8" offset-lg="2">
+      <v-col cols="12" lg="10" offset-lg="1">
         <div>
           <div class="pt-10">
             <div class="text-h6 mb-1">EMI Info</div>

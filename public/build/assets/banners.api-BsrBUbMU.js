@@ -1,0 +1,1 @@
+import{E as s}from"./main-DQTZoN17.js";async function a(n){return await s.get("/admin/banners",{params:n})}async function r(n){return await s.get(`/admin/banners/${n}`)}function o(n,e){return s.put(`/admin/banners/${n}`,e)}export{r as g,a as l,o as u};

@@ -1,7 +1,7 @@
 <template>
     <v-container fluid>
         <v-row>
-            <v-col cols="12" lg="6" offset-lg="3">
+            <v-col cols="12" lg="10" offset-lg="1">
                 <v-card class="pa-4">
                     <v-table>
                         <thead>

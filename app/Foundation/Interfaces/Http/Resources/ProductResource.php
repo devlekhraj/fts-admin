@@ -190,6 +190,7 @@ class ProductResource extends JsonResource
             ],
             'images' => $images,
             'variants' => $variants,
+            'attribute' => $attribute,
             'attributes' => $this->attributes,
             'schema_jsonld' => $this->custom_code,
         ];

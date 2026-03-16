@@ -1,7 +1,7 @@
 <template>
-  <div class="pa-6">
+  <v-container fluid>
     <v-row>
-      <v-col cols="12" lg="6" offset-lg="3">
+      <v-col cols="12" lg="10" offset-lg="1">
         <div class="text-h6 mb-1">Customer Detail</div>
         <div class="text-body-2 text-medium-emphasis mb-4">Requester information for this EMI request.</div>
 
@@ -34,7 +34,7 @@
         </div>
       </v-col>
     </v-row>
-  </div>
+  </v-container>
 </template>
 
 <script setup lang="ts">

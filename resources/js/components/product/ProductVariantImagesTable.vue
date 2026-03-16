@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <v-row>
-            <v-col cols="12" lg="8" offset-lg="2">
+            <v-col cols="12" lg="10" offset-lg="1">
                 <div class="py-14">
                     <div class="mb-4">
                         <div>

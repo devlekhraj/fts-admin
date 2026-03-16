@@ -128,7 +128,7 @@
                                     >
                                     Delete
                                 </v-btn>
-                                <v-btn
+                                <!-- <v-btn
                                     size="small"
                                     variant="tonal"
                                     color="primary"
@@ -140,7 +140,7 @@
                                             : "mdi-chevron-down"
                                     }}</v-icon>
                                     &nbsp; Expand
-                                </v-btn>
+                                </v-btn> -->
                             </div>
                         </td>
                     </tr>

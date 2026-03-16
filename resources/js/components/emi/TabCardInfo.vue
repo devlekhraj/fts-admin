@@ -1,7 +1,7 @@
 <template>
   <v-container fluid>
     <v-row>
-      <v-col cols="12" lg="8" offset-lg="2">
+      <v-col cols="12" lg="10" offset-lg="1">
         <v-card class="pa-4">
           <div class="pt-10">
             <div class="text-h6 mb-1">Credit Card Info</div>
