@@ -1,0 +1,115 @@
+.vuetify-pro-tiptap-editor__content.markdown-theme-default {
+    .tiptap.ProseMirror, .content {
+        h1, h2, h3, h4, h5, h6 {
+            position: static !important;
+            padding: 0 !important;
+            border: none !important;
+            margin: 0;
+            color: inherit !important;
+            transition: none !important;
+            font-weight: 600;
+            
+            &::before, &::after {
+                content: none !important;
+                display: none !important;
+            }
+        }
+
+        h1 { margin-top: 1.5rem; margin-bottom: 0.75rem; font-size: 2rem; }
+        h2 { margin-top: 1.25rem; margin-bottom: 0.5rem; font-size: 1.5rem; }
+        h3 { margin-top: 1rem; margin-bottom: 0.5rem; font-size: 1.25rem; }
+
+        b, strong {
+            color: inherit !important;
+            font-weight: 700 !important;
+        }
+
+        a {
+            color: var(--v-theme-primary) !important;
+        }
+
+        hr {
+            background-image: none !important;
+            border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
+            height: 0 !important;
+            width: 100% !important;
+            margin: 2rem 0 !important;
+        }
+
+        blockquote {
+            border-left: 4px solid rgba(0, 0, 0, 0.1) !important;
+            padding-left: 1rem !important;
+            margin: 1.5rem 0 !important;
+            color: rgba(0, 0, 0, 0.6) !important;
+            font-style: italic !important;
+            background: transparent !important;
+        }
+
+        ul, ol {
+            padding-left: 1.5rem !important;
+            margin: 1rem 0 !important;
+            
+            li {
+                margin: 0.25rem 0 !important;
+                &::marker {
+                    color: inherit !important;
+                }
+            }
+        }
+
+        table {
+            border-collapse: collapse !important;
+
+            th, td {
+                border: 1px solid rgba(0, 0, 0, 0.1) !important;
+                padding: 0.5rem !important;
+                background-color: transparent !important;
+                color: inherit !important;
+            }
+
+            th {
+                background-color: rgba(0, 0, 0, 0.02) !important;
+                font-weight: 600 !important;
+            }
+        }
+
+        code {
+            background-color: rgba(0, 0, 0, 0.05) !important;
+            color: #d63384 !important;
+            padding: 0.2rem 0.4rem !important;
+            border-radius: 4px !important;
+            font-family: monospace !important;
+            font-size: 0.9em !important;
+        }
+
+        pre {
+            background-color: #f8f9fa !important;
+            padding: 1rem !important;
+            border-radius: 8px !important;
+            overflow-x: auto !important;
+            margin: 1rem 0 !important;
+            
+            code {
+                background-color: transparent !important;
+                color: inherit !important;
+                padding: 0 !important;
+                display: block !important;
+                font-size: 0.875rem !important;
+            }
+        }
+
+        p {
+            margin-bottom: 1rem !important;
+        }
+        
+        // Remove those specific decorative characters like "「"
+        h2::before, h2::after,
+        h1::before, h1::after,
+        h3::before, h3::after {
+            content: none !important;
+            display: none !important;
+            position: static !important;
+            border: none !important;
+        }
+    }
+}
