@@ -146,6 +146,8 @@ function openProductModal(){
         fetchProducts();
       }
     }
+  }, {
+    title: 'New Product'
   });
 }
 
