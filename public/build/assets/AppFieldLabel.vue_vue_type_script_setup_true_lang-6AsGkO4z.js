@@ -1,0 +1,1 @@
+import{d as t,c as a,t as s,q as o}from"./main-BHkGlWKW.js";const n={class:"text-caption text-medium-emphasis mb-1"},l=t({__name:"AppFieldLabel",props:{label:{}},setup(e){return(c,p)=>(o(),a("div",n,s(e.label),1))}});export{l as _};

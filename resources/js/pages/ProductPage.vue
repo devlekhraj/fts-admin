@@ -17,7 +17,7 @@
         </v-list>
       </v-menu>
 
-      <v-btn color="primary" variant="flat" prepend-icon="mdi-plus" :to="{ name: 'admin.product.create' }">
+      <v-btn color="primary" variant="flat" prepend-icon="mdi-plus" @click="openProductModal()">
         Create Product
       </v-btn>
     </template>
@@ -79,6 +79,8 @@ import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
 import { listProducts, type ProductListItem } from '@/api/products.api';
 import { formatLongDate } from '@/shared/utils';
+import { openModal } from '@/shared/modal';
+import ProductCreateModal from '@/components/product/ProductCreateModal.vue';
 
 type Product = {
   id: number | string;
@@ -132,6 +134,19 @@ function onView(product: Product) {
 function onDelete(product: Product) {
   // TODO: replace with delete confirmation + API call.
   console.log('Delete product:', product.slug);
+}
+
+function openProductModal(){
+  openModal(ProductCreateModal, {
+    onSaved: (product: any) => {
+      console.log({product});
+      if (product?.id) {
+        router.push({ name: 'admin.product.detail', params: { id: product.id } });
+      } else {
+        fetchProducts();
+      }
+    }
+  });
 }
 
 async function fetchProducts() {

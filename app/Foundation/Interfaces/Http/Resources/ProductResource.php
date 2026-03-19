@@ -48,6 +48,7 @@ class ProductResource extends JsonResource
         $images = [];
         $variants = [];
         $brand = null;
+        $attribute = null;
 
         if ($this->relationLoaded('files')) {
             $images = $this->files->map(static function ($file) {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Foundation\Interfaces\Http\Controllers\Admin\Product;
 
 use App\Foundation\Infrastructure\Persistence\Eloquent\Models\ProductModel;
+use App\Foundation\Interfaces\Http\Requests\Admin\StoreProductRequest;
 use App\Foundation\Interfaces\Http\Requests\Admin\UpdateProductRequest;
 use App\Foundation\Interfaces\Http\Resources\ProductResource;
 use App\Http\Controllers\Controller;
@@ -73,10 +74,18 @@ class ProductsController extends Controller
         ], 200);
     }
 
-    public function store(): JsonResponse
+    public function store(StoreProductRequest $request): JsonResponse
     {
-        // TODO: Create product.
-        return response()->json([], 201);
+        $validated = $request->validated();
+        $validated['sku'] = $validated['slug'];
+
+        $product = ProductModel::query()->create($validated);
+
+        return response()->json([
+            'message' => 'Product created successfully.',
+            'data' => (new ProductResource($product)),
+            'success' => true,
+        ], 201);
     }
 
     public function update(UpdateProductRequest $request, string $id): JsonResponse
