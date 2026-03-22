@@ -51,7 +51,14 @@ class AdminCampaignController extends Controller
         $campaign = DiscountCampaignModel::find($id);
         return response()->json([
             'success' => true,
-            'data' => $campaign,
+            'data' => [
+                'id'=> $campaign->id,
+                'title'=> $campaign->title,
+                'slug'=> $campaign->slug,
+                'start_date'=> $campaign->start_date,
+                'end_date'=> $campaign->end_date,
+                'is_published'=> $campaign->is_published,
+            ]
             // 'data' => new BannerResource($banner),
         ], 200);
     }
@@ -116,21 +123,31 @@ class AdminCampaignController extends Controller
 
         // Transform
         $data = $paginated->getCollection()->transform(function ($discountProduct) {
-            // dd($discountProduct);
-            // return $discountProduct;
+         
             $product = $discountProduct->product;
+
+            $discountedPrice = $this->calculateDiscountedPrice(
+                $product->price, 
+                $discountProduct->discount_type, 
+                $discountProduct->discount_value
+            );
 
             return [
                 'id'             => $discountProduct->id,
                 'product_id'     => $product->id,
                 'name'           => $product->name,
-                'price'          => $product->price,
-                'original_price' => $product->original_price,
-                'preview_image'  => $product->preview_image,
-                'discount_price' => $product->discounted_price, // if you have it
-                'discount_type' => $discountProduct->discount_type,
-                'discount_value' => $discountProduct->discount_value, // if you have it
-                'categories' => $product->categories,
+                'thumb' => [
+                    'url' => $product->defaultFile->first()?->url,
+                    'alt_text' => $product->defaultFile->first()?->alt_text,
+                ],
+                'price'          => [
+                    "original_price" => $product->price,
+                    "discounted_price" => $discountedPrice,
+                ],
+                'discount' => [ 
+                    "type" => $discountProduct->discount_type_label,
+                    "value" => $discountProduct->discount_value,
+                ],
             ];
         });
 
@@ -231,5 +248,18 @@ class AdminCampaignController extends Controller
             'message' => 'Campaign product updated successfully.',
             'data'    => $product, // optional: return updated product
         ], 200);
+    }
+
+    private function calculateDiscountedPrice($originalPrice, $discountType, $discountValue)
+    {
+        if ($discountType == 1) { // Fixed
+            return max(0, $originalPrice - $discountValue);
+        }
+
+        if ($discountType == 2) { // Percentage
+            return max(0, $originalPrice - ($originalPrice * $discountValue / 100));
+        }
+
+        return $originalPrice;
     }
 }

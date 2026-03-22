@@ -13,8 +13,8 @@
           :items-per-page="options.itemsPerPage"
           @update:options="onOptions">
           
-          <template #item.name="{ item }">
-            <span class="font-weight-medium">{{ item.name }}</span>
+          <template #item.title="{ item }">
+            <span class="font-weight-medium">{{ item.title }}</span>
           </template>
 
           <template #item.status="{ item }">
@@ -27,26 +27,15 @@
             <div>
               <div v-if="!item.start_date">-</div>
               <div v-else>
-                <div class="text-caption text-medium-emphasis">Start</div>
-                <div>{{ formatLongDate(item.start_date) }}</div>
-              </div>
-            </div>
-          </template>
-
-          <template #item.end_date="{ item }">
-            <div>
-              <div v-if="!item.end_date">-</div>
-              <div v-else>
-                <div class="text-caption text-medium-emphasis">End</div>
-                <div>{{ formatLongDate(item.end_date) }}</div>
+                <div>{{ formatLongDate(item.start_date) }} - {{ formatLongDate(item.end_date) }}</div>
               </div>
             </div>
           </template>
 
           <template #item.action="{ item }">
             <div class="d-flex align-center ga-1">
-              <v-btn icon size="x-small" variant="tonal" color="primary" @click="router.push({ name: 'admin.campaigns.edit', params: { id: item.id } })">
-                <v-icon size="16">mdi-pencil</v-icon>
+              <v-btn icon size="x-small" variant="tonal" color="primary" @click="router.push({ name: 'admin.campaigns.detail', params: { id: item.id } })">
+                <v-icon size="16">mdi-eye</v-icon>
               </v-btn>
               <v-btn icon size="x-small" variant="tonal" color="error" @click="onDelete(item)">
                 <v-icon size="16">mdi-delete</v-icon>
@@ -70,17 +59,16 @@ import { list } from '@/api/campaigns.api';
 import { formatLongDate } from '@/shared/utils';
 
 const headers = [
-  { title: 'Name', key: 'name', sortable: false, minWidth: '240' },
+  { title: 'Name', key: 'title', sortable: false, minWidth: '240' },
   { title: 'Slug', key: 'slug', sortable: false, minWidth: '220' },
   { title: 'Status', key: 'status', sortable: false, minWidth: '120' },
-  { title: 'Start Date', key: 'start_date', sortable: false, minWidth: '160' },
-  { title: 'End Date', key: 'end_date', sortable: false, minWidth: '160' },
+  { title: 'Duration', key: 'start_date', sortable: false, minWidth: '160' },
   { title: 'Actions', key: 'action', sortable: false, minWidth: '120' },
 ];
 
 type Campaign = {
   id: number | string;
-  name: string;
+  title: string;
   slug: string;
   status: string;
   start_date: string | null;
@@ -113,7 +101,7 @@ async function fetchCampaigns() {
     const dataList = Array.isArray(response) ? response : response?.data ?? [];
     items.value = dataList.map((campaign: any) => ({
       id: campaign.id,
-      name: campaign.name ?? '-',
+      title: campaign.title ?? '-',
       slug: campaign.slug ?? '-',
       status: campaign.status ?? 'draft',
       start_date: campaign.start_date ?? null,

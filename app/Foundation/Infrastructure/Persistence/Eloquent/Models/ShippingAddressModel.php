@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ShippingAddressModel extends BaseModel
 {
     protected $table = 'user_shipping_addresses';
+    protected $guarded = [];
 
     public function user(): BelongsTo
     {

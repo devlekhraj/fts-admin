@@ -70,7 +70,7 @@ class ProductModel extends BaseModel
     {
         return $this->belongsToMany(FileModel::class, 'file_usages', 'usage_id', 'file_id')
             ->wherePivot('usage_type', 'products')
-             ->withPivot(['id', 'usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
+            ->withPivot(['id', 'usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
             ->withTimestamps()
             ->orderByPivot('id', 'desc');
     }
@@ -80,8 +80,8 @@ class ProductModel extends BaseModel
         return $this->belongsToMany(FileModel::class, 'file_usages', 'usage_id', 'file_id')
             ->wherePivot('usage_type', 'products')
             ->whereRaw("JSON_EXTRACT(file_usages.meta, '$.is_default') = true")
-             ->withPivot(['id', 'usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
-              ->orderByPivot('id', 'asc');
+            ->withPivot(['id', 'usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
+            ->orderByPivot('id', 'asc');
     }
 
 

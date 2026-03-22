@@ -16,6 +16,13 @@ class DiscountCampaignProductModel extends Model
       'product_id', 'discount_type', 'discount_value', 'campaign_id'
     ];
 
+    protected $appends = ['discount_type_label'];
+
+    public function getDiscountTypeLabelAttribute()
+    {
+        return $this->discount_type == 1 ? 'fixed' : 'percentage';
+    }
+
     public function product()
     {
         return $this->hasOne(ProductModel::class, 'id', 'product_id');

@@ -1,23 +1,27 @@
 <template>
     <v-app>
         <v-navigation-drawer v-model="drawer" app width="280">
-            <v-sheet class="drawer-header py-4">
-                <div class="d-flex flex-column align-center text-center">
+            <v-sheet class="drawer-header py-4 px-6">
+                <div class="d-flex align-center ga-0">
                     <template v-if="isAdminLoading">
-                        <v-skeleton-loader class="mb-2 drawer-admin-avatar-skeleton" type="avatar" />
-                        <v-skeleton-loader class="drawer-admin-name-skeleton" type="text" />
-                        <v-skeleton-loader class="drawer-admin-username-skeleton" type="text" />
+                        <v-skeleton-loader class="drawer-admin-avatar-skeleton" type="avatar" />
+                        <div class="ms-3">
+                            <v-skeleton-loader class="drawer-admin-name-skeleton mb-1" type="text" width="100" />
+                            <v-skeleton-loader class="drawer-admin-username-skeleton" type="text" width="60" />
+                        </div>
                     </template>
                     <template v-else>
-                        <v-avatar size="56" class="mb-2">
+                        <v-avatar size="42" class="me-3">
                             <v-img v-if="adminAvatar" :src="adminAvatar" alt="Admin" />
-                            <v-icon v-else size="52">mdi-account-circle</v-icon>
+                            <v-icon v-else size="44">mdi-account-circle</v-icon>
                         </v-avatar>
-                        <div class="text-subtitle-2 font-weight-semibold">
-                            {{ adminDisplayName }}
-                        </div>
-                        <div class="text-caption text-medium-emphasis text-lowercase">
-                            @{{ authStore.admin?.username }}
+                        <div class="text-left">
+                            <div class="text-subtitle-2 font-weight-semibold">
+                                {{ adminDisplayName }}
+                            </div>
+                            <div class="text-caption text-medium-emphasis text-lowercase">
+                                @{{ authStore.admin?.username }}
+                            </div>
                         </div>
                     </template>
                 </div>
