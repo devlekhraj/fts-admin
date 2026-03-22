@@ -182,7 +182,7 @@ async function logout() {
 </script>
 <style lang="scss" scoped>
 main.v-main {
-    background-color: #fff;
+    background-color: #f4f4f4;
 }
 
 .custom-title {
@@ -193,7 +193,7 @@ main.v-main {
     max-height: calc(100vh - 65px);
     min-height: calc(100vh - 65px);
     overflow-y: scroll;
-    background-color: #fff;
+    // background-color: #fff;
 }
 
 .hover-notification {
@@ -209,7 +209,7 @@ main.v-main {
 .v-navigation-drawer {
     border: 0 !important;
     box-shadow: none;
-    background-color: transparent;
+    background: #fff;
 }
 
 .v-navigation-drawer--temporary.v-navigation-drawer--active {
@@ -218,8 +218,7 @@ main.v-main {
 }
 
 .v-list-item.v-list-item--active {
-    background: linear-gradient(90deg, #f1f6f9 0%, #e3f2fd 100%);
-    color: #1976d2;
+    background: #fefefe;
 }
 
 
@@ -231,6 +230,7 @@ main.v-main {
 
 
 .drawer-header {
+    background: transparent;
     // background:
     //     repeating-linear-gradient(45deg,
     //         rgba(0, 0, 0, 0.03),
@@ -238,7 +238,7 @@ main.v-main {
     //         transparent 2px,
     //         transparent 10px),
     //     linear-gradient(262deg, #f4faff 0%, #fafafa 100%);
-    background: repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.03) 2px, transparent 2px, transparent 10px), linear-gradient(92deg, #ffffff 0%, #ffffff 100%);
+    // background: repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.03) 2px, transparent 2px, transparent 10px), linear-gradient(92deg, #ffffff 0%, #ffffff 100%);
     padding: 0 10px;
 }
 

@@ -1,7 +1,7 @@
 import { http } from './http';
 
-export function list() {
-  return http.get('/campaigns');
+export function list(params?: Record<string, unknown>) {
+  return http.get('/campaigns', { params });
 }
 
 export function create(payload: Record<string, unknown>) {
