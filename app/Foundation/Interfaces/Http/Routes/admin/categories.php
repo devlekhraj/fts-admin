@@ -11,4 +11,6 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::post('categories', [CategoriesController::class, 'store']);
     Route::put('categories/{id}', [CategoriesController::class, 'update']);
     Route::delete('categories/{id}', [CategoriesController::class, 'destroy']);
+
+    
 });

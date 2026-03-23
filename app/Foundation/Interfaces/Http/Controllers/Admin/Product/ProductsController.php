@@ -22,6 +22,18 @@ class ProductsController extends Controller
             ->withCount('variants')
             ->orderByDesc('created_at');
 
+        if ($name = $request->query('name')) {
+            $query->where('name', 'like', "%{$name}%");
+        }
+
+        if ($categoryId = $request->query('category_id')) {
+            $query->where('category_id', $categoryId);
+        }
+
+        if ($brandId = $request->query('brand_id')) {
+            $query->where('brand_id', $brandId);
+        }
+
         if ($search = $request->query('search')) {
             $query->where(function ($builder) use ($search) {
                 $builder->where('name', 'like', "%{$search}%")

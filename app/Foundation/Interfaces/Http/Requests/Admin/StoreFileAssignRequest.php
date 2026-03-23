@@ -20,6 +20,7 @@ final class StoreFileAssignRequest extends FormRequest
             'caption' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:5000'],
             'directory' => ['nullable', 'string', 'max:120'],
+            'is_default' => ['nullable', 'boolean'],
         ];
     }
 }

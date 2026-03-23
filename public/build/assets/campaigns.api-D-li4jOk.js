@@ -1,1 +1,0 @@
-import{E as t}from"./main-BrV37geS.js";function s(n){return t.get("/admin/campaigns",{params:n})}function r(n){return t.get(`/admin/campaigns/${n}`)}function c(n,a){return t.get(`/admin/campaigns/${n}/products`,{params:a})}export{c,s as l,r as s};

@@ -35,4 +35,24 @@ class DiscountCampaignModel extends Model
     public function products(){
         return $this->hasMany(DiscountCampaignProductModel::class, 'campaign_id', 'id');
     }
+
+    public function files(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(FileModel::class, 'file_usages', 'usage_id', 'file_id')
+            ->using(FileUsageModel::class)
+            ->wherePivot('usage_type', 'campaigns')
+            ->withPivot(['id', 'usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
+            ->withTimestamps()
+            ->orderByPivot('id', 'desc');
+    }
+
+    public function defaultFile(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(FileModel::class, 'file_usages', 'usage_id', 'file_id')
+            ->using(FileUsageModel::class)
+            ->wherePivot('usage_type', 'campaigns')
+            ->wherePivot('meta->is_default', true)
+            ->withPivot(['id', 'usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
+            ->limit(1);
+    }
 }

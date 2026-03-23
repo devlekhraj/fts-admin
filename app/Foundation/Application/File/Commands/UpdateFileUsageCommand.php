@@ -15,5 +15,6 @@ final class UpdateFileUsageCommand
         public readonly ?string $endDate = null,
         public readonly int $seqNo = 0,
         public readonly bool $isActive = false,
+        public readonly bool $isDefault = false,
     ) {}
 }

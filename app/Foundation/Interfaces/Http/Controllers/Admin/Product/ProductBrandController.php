@@ -92,4 +92,22 @@ class ProductBrandController extends Controller
     {
         return response()->json(null, 204);
     }
+
+    public function getList(Request $request)
+    {
+        $brands = ProductBrandModel::with('defaultFile')
+            ->has('products') // Only brands with at least one product
+            ->orderBy('name', 'asc')
+            ->get()
+            ->map(function ($brand) {
+                return [
+                    'id' => $brand->id,
+                    'name' => $brand->name,
+                    'slug' => $brand->slug,
+                    'thumb' => $brand->defaultFile->first()?->url,
+                ];
+            });
+
+        return response()->json($brands);
+    }
 }

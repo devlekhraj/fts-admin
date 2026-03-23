@@ -15,6 +15,8 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
      Route::get('campaigns', [AdminCampaignController::class, 'index']);
     Route::post('campaigns', [AdminCampaignController::class, 'storeUpdate']);
 
+    Route::put('campaigns/{id}/update', [AdminCampaignController::class, 'storeUpdate']);
+
     Route::get('campaigns/{id}', [AdminCampaignController::class, 'show']);
     Route::get('campaigns/{id}/products', [AdminCampaignController::class, 'getCampaignProducts']);
     Route::post('campaigns/{id}/assign-products', [AdminCampaignController::class, 'assignProducts']);

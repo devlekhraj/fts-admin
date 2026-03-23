@@ -13,5 +13,6 @@ final class AssignFileUsageCommand
         public readonly string $altText,
         public readonly ?string $caption = null,
         public readonly ?string $description = null,
+        public readonly bool $isDefault = false,
     ) {}
 }

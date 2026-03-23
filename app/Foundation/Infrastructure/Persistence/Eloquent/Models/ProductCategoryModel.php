@@ -27,9 +27,9 @@ class ProductCategoryModel extends BaseModel
         'meta_description',
     ];
 
-    public function products()
+    public function products(): BelongsToMany
     {
-        return $this->hasMany(ProductModel::class, 'category_id');
+        return $this->belongsToMany(ProductModel::class, 'categories_products', 'product_category_id', 'product_id');
     }
 
     public function files(): BelongsToMany

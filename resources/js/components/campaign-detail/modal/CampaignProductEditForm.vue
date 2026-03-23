@@ -1,11 +1,5 @@
 <template>
-    <v-card flat>
-        <v-card-title class="d-flex align-center justify-space-between">
-            <span class="font-medium">Edit Product Discount</span>
-            <v-btn variant="text" icon @click="handleCancel"><v-icon>mdi-close</v-icon></v-btn>
-        </v-card-title>
 
-        <v-divider />
 
         <v-card-text class="pt-8">
             <!-- Select All Checkbox -->
@@ -75,21 +69,14 @@
 
         </v-card-text>
 
-        <!-- <v-divider></v-divider>
-        <v-card-actions class="mt-0 pt-0">
-            <v-btn variant="text" @click="handleCancel">No</v-btn>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" :loading="loading" :disabled="loading" @click="submitForm">
-                Add Products
-            </v-btn>
-        </v-card-actions> -->
-    </v-card>
+       
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useSnackbar } from '@/composables/snackbar'
-import { formatAmount } from '@/utils/format'
+import { updateCampaignProduct } from '@/api/campaigns.api'
+import { formatAmount } from '@/shared/utils'
 
 
 const emit = defineEmits(['close', 'saved'])
@@ -134,12 +121,6 @@ const rules = {
 }
 
 
-// Cancel and reset form
-function handleCancel() {
-    formRef.value?.reset()
-    emit('close')
-}
-
 // Submit form (Create or Update)
 async function submitForm() {
 
@@ -158,9 +139,10 @@ async function submitForm() {
     try {
 
 
-        let resp = await axios.put(`campaign-products/${props.item.id}/update`, form)
+        let resp = await updateCampaignProduct(props.item.id, form)
 
-        showSuccess(resp?.data?.message || 'Products assigned successfully')
+        showSuccess(resp?.message || 'Products assigned successfully')
+         emit('close');
         emit('saved')
 
     } catch (error) {

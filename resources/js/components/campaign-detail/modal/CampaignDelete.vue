@@ -1,131 +1,61 @@
 <template>
-    <v-card flat>
-        <!-- <v-card-title>
-            <span class="font-medium">Delete Item</span>
-        </v-card-title> -->
+    <v-card-text>
+        <div class="py-4 text-center pt-5 pb-0 mb-0">
+            <v-icon color="error" size="64" class="mb-4">mdi-alert-circle-outline</v-icon>
+            <h3 class="text-h6 font-weight-bold">Delete Campaign?</h3>
+            <p class="text-body-2 text-medium-emphasis mt-2">
+                Are you sure you want to delete <strong>{{ item?.title }}</strong>? This action cannot be undone.
+            </p>
+        </div>
+    </v-card-text>
 
-        <v-divider />
-
-        <v-card-text>
-            <div class="py-4 text-center pt-5 pb-0 mb-0">
-                <h4 class="text-error">Do you want to delete ?</h4>
-                <div class="mt-4">
-                   {{ item?.name }}
-                </div>
-            </div>
-        </v-card-text>
-
-        <v-card-actions class="mt-0 pt-0">
-            <v-btn variant="text" @click="handleCancel">No</v-btn>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" :loading="loading" :disabled="loading" @click="submitForm">
-                Yes
-            </v-btn>
-        </v-card-actions>
-    </v-card>
+    <v-card-actions class="pa-4 pt-0">
+        <v-btn variant="text" @click="handleCancel" :disabled="loading">Cancel</v-btn>
+        <v-spacer></v-spacer>
+        <v-btn color="error" variant="flat" :loading="loading" :disabled="loading" @click="submitForm">
+            Delete
+        </v-btn>
+    </v-card-actions>
 </template>
 
-<script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { useSnackbar } from '@/composables/snackbar'
+<script setup lang="ts">
+import { ref } from 'vue'
+import { remove } from '@/api/campaigns.api'
+import { useSnackbarStore } from '@/stores/snackbar.store'
+import { Campaign } from '@/types/models'
 
 const emit = defineEmits(['close', 'saved'])
-const props = defineProps({
-    item: {
-        type: Object,
-        default: () => ({}),
-    },
-    productId: {
-        require: true,
-        type: Number
-    }
-})
+const props = defineProps<{
+    item: Campaign
+}>()
 
-const formRef = ref(null)
-const isValid = ref(false)
 const loading = ref(false)
-
-const { showSuccess, showError } = useSnackbar()
-
-const form = reactive({
-    name: '',
-    description: '',
-    sort_order: 0,
-    is_active: true,
-})
-
-const selectedFile = ref(null)
-const previewImage = ref(null)
-const serverErrors = reactive({})
-
-const rules = {
-    required: (v) => !!v || 'This field is required',
-}
-
-function handleImageUpload(file) {
-    const selected = Array.isArray(file) ? file[0] : file
-    if (selected instanceof File) {
-        // Optional: Max size validation
-        if (selected.size > 2 * 1024 * 1024) {
-            serverErrors.image = ['Image must be less than 2MB']
-            selectedFile.value = null
-            previewImage.value = null
-            return
-        }
-
-        selectedFile.value = selected
-
-        const reader = new FileReader()
-        reader.onload = (e) => {
-            previewImage.value = e.target?.result
-        }
-        reader.readAsDataURL(selected)
-    } else {
-        selectedFile.value = null
-        previewImage.value = null
-    }
-}
+const snackbar = useSnackbarStore()
 
 function handleCancel() {
-    formRef.value?.reset()
-    selectedFile.value = null
-    previewImage.value = null
     emit('close')
 }
 
 async function submitForm() {
+    if (!props.item?.id) return
+
     loading.value = true
     try {
-        const resp = await axios.delete(`campaigns/${props.item.id}/delete`)
-        showSuccess(resp?.message || 'Campaign Deleted successfully')
-        emit('close')
+        const resp = await remove(String(props.item.id))
+        snackbar.show({
+            message: resp?.data?.message || 'Campaign deleted successfully',
+        });
+        emit('close');
+        emit('saved')
     } catch (error) {
-        console.log({error});
-        if (error.response?.status === 422) {
-            Object.assign(serverErrors, error.response.data.errors || {})
-        } else {
-            showError(error?.response?.data?.message || 'Submission failed')
-        }
+        snackbar.show({
+            message: 'Deletion failed',
+            color: 'error'
+        })
     } finally {
         loading.value = false
     }
 }
-
-onMounted(() => {
-    if (props.item?.id) {
-        Object.assign(form, {
-            id: props.item.id,
-            name: props.item.name || '',
-            description: props.item.description || '',
-            sort_order: props.item.sort_order || 0,
-            is_active: props.item.is_active ?? true,
-        })
-
-        if (props.item.url) {
-            previewImage.value = props.item.url
-        }
-    }
-})
 </script>
 
 <style scoped></style>

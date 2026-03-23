@@ -15,4 +15,6 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::delete('brands/{id}', [ProductBrandController::class, 'destroy'])->name('admin.brands.destroy');
     Route::put('brands/{id}/images/{fileUsageId}', [ProductBrandImageController::class, 'update'])->name('admin.brands.images.update');
     Route::delete('brands/{id}/images/{fileUsageId}', [ProductBrandImageController::class, 'delete'])->name('admin.brands.images.delete');
+
+    Route::get('product-brand-list', [ProductBrandController::class, 'getList']);
 });

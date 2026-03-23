@@ -21,7 +21,7 @@ class ProductCategoryController extends Controller
 
         if ($search = $request->query('search')) {
             $query->where(function ($builder) use ($search) {
-                $builder->where('name', 'like', "%{$search}%");
+                $builder->where('title', 'like', "%{$search}%");
             });
         }
 
@@ -79,5 +79,22 @@ class ProductCategoryController extends Controller
             'message' => 'Product category updated successfully.',
             'data' => new ProductCategoryResource($category),
         ]);
+    }
+    public function getList(Request $request)
+    {
+        $categories = ProductCategoryModel::with('defaultFile')
+            ->has('products')
+            ->orderBy('title', 'asc')
+            ->get()
+            ->map(function ($category) {
+                return [
+                    'id' => $category->id,
+                    'title' => $category->title,
+                    'slug' => $category->slug,
+                    'thumb' => $category->defaultFile->first()?->url,
+                ];
+            });
+
+        return response()->json($categories);
     }
 }

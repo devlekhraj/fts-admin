@@ -67,6 +67,7 @@ class FileUsageController extends Controller
                 endDate: isset($validated['end_date']) ? trim((string) $validated['end_date']) : null,
                 seqNo: isset($validated['seq_no']) ? (int) $validated['seq_no'] : 0,
                 isActive: (bool) ($validated['is_active'] ?? false),
+                isDefault: (bool) ($validated['is_default'] ?? false),
             ));
 
             return response()->json([

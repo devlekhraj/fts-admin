@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Foundation\Interfaces\Http\Controllers\Admin\Product\ProductsController;
 use App\Foundation\Interfaces\Http\Controllers\Admin\Product\ProductVariantController;
 use App\Foundation\Interfaces\Http\Controllers\Admin\Product\ProductImageController;
+use App\Foundation\Interfaces\Http\Controllers\Admin\Product\ProductListController;
 use App\Foundation\Interfaces\Http\Controllers\Admin\Product\ProductVariantImageController;
 
 
@@ -23,4 +24,10 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::delete('products/{id}', [ProductsController::class, 'destroy'])->name('admin.products.destroy');
     Route::put('product-variants/{variant_id}/images/{fileUsageId}', [ProductVariantImageController::class, 'update'])->name('admin.products.variants.images.update');
     Route::delete('product-variants/{variant_id}/images/{fileUsageId}', [ProductVariantImageController::class, 'delete'])->name('admin.products.variants.images.delete');
+
+    Route::get('product-list', [ProductListController::class, 'getList'])
+    ->name('product.list');
+     
+
+
 });

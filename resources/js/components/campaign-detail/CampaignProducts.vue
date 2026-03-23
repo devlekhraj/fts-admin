@@ -1,15 +1,17 @@
 <template>
 	<div>
 		<!-- Products Table -->
-		<v-data-table :headers="headers" :items="data_list || []" class="" density="comfortable" hide-default-footer
-			:items-per-page="pagination.per_page">
+		<v-data-table-server :headers="headers" :items="data_list || []" class="" density="comfortable"
+			v-model:page="pagination.current_page" v-model:items-per-page="pagination.per_page"
+			:items-length="pagination.total" @update:page="fetchData" @update:items-per-page="fetchData"
+			:loading="fetching_data">
 
 			<!-- Top slot -->
 			<template #top>
 				<v-row>
 					<v-col cols="12" md="4">
 						<div>
-							<v-btn color="primary" @click="openModal()">
+							<v-btn color="primary" variant="flat" @click="openModal()">
 								<v-icon>mdi-plus</v-icon>
 								Assign Products
 							</v-btn>
@@ -18,7 +20,7 @@
 					<v-col cols="12" md="4">
 						<div class="d-flex align-center">
 							<v-text-field label="Search" v-model="search" density="compact" variant="outlined"
-								hide-details></v-text-field>
+								hide-details clearable @click:clear="handleSearch()"></v-text-field>
 								<div class="ps-2">
 									<v-btn color="primary" variant="outlined" @click="handleSearch()"><v-icon>mdi-magnify</v-icon> Search</v-btn>
 								</div>
@@ -35,35 +37,6 @@
 				</v-row>
 			</template>
 
-			<!-- Bottom slot -->
-			<template #bottom v-if="pagination.total > pagination.per_page">
-				<div class="w-100 d-flex justify-space-around pa-4 align-center">
-					<div class="d-flex">
-						<div class="d-flex align-center">
-							<span class="mr-2">Items per page:</span>
-							<v-select v-model="pagination.per_page" :items="[10, 20, 30, 50, 100]" hide-details
-								variant="outlined" density="compact" style="width: 80px"
-								@update:model-value="fetchData()"></v-select>
-						</div>
-
-						<div class="d-flex align-center">
-							<v-btn :disabled="pagination.current_page <= 1" @click="goToPreviousPage" class="mx-1"
-								variant="tonal" color="primary">
-								Previous
-							</v-btn>
-
-							<span class="mx-2 align-self-center">
-								Page {{ pagination.current_page }} of {{ pagination.last_page }}
-							</span>
-
-							<v-btn :disabled="pagination.current_page >= pagination.last_page" @click="goToNextPage"
-								class="mx-1" variant="tonal" color="primary">
-								Next
-							</v-btn>
-						</div>
-					</div>
-				</div>
-			</template>
 
 			<template #item.name="{ item }">
 				<div class="d-flex align-center">
@@ -73,6 +46,7 @@
 					</div>
 					<div>
 						<p class="mb-1" style="font-weight: 500;">{{ item.name }}</p>
+							<p class="text-primary">{{ formatAmount(item.price?.original_price) }}</p>
 					</div>
 				</div>
 			</template>
@@ -84,11 +58,8 @@
 			</template>
 			<template #item.discount="{ item }">
 				<div style="width: max-content;">
-					<v-chip variant="tonal" size="small" color="primary"
-						class="px-4">
-						<v-icon size="16" start>
-							{{ item.discount?.type === 'percentage' ? 'mdi-percent' : 'mdi-cash' }}
-						</v-icon>
+					<v-chip variant="tonal" size="small" label color="primary"
+						class="px-4 text-capitalize">
 						{{ item.discount?.type === 'percentage' ? item.discount?.value + '%' : item.discount?.type }}
 					</v-chip>
 				</div>
@@ -103,21 +74,21 @@
 					</v-btn>
 				</div>
 			</template>
-		</v-data-table>
+		</v-data-table-server>
 
 	</div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { campaignProducts } from '@/api/campaigns.api';
 import { formatAmount } from '@/shared/utils'
 import { Campaign, CampaignProductListItem } from '@/types/models';
 import { useModalStore } from '@/stores/modal.store';
 import CampaignProductForm from './modal/CampaignProductForm.vue';
-// import CampaignProductEditForm from './modal/CampaignProductEditForm.vue';
-// import CampaignDiscountForm from './modal/CampaignDiscountForm.vue';
-// import CampaignProductDelete from './modal/CampaignProductDelete.vue';
+import CampaignProductEditForm from './modal/CampaignProductEditForm.vue';
+import CampaignDiscountForm from './modal/CampaignDiscountForm.vue';
+import CampaignProductDelete from './modal/CampaignProductDelete.vue';
 
 const modal = useModalStore();
 
@@ -140,19 +111,6 @@ const pagination = reactive({
 	to: 0,
 })
 
-function goToPreviousPage() {
-	if (pagination.current_page > 1) {
-		pagination.current_page--
-		fetchData()
-	}
-}
-
-function goToNextPage() {
-	if (pagination.current_page < pagination.last_page) {
-		pagination.current_page++
-		fetchData()
-	}
-}
 
 function handleSearch(){
 	is_searching.value = true
@@ -201,46 +159,47 @@ function openModal() {
 }
 
 function updateItem(item: any) {
-	// modal.open(
-	// 	CampaignProductEditForm,
-	// 	{ item },
-	// 	{
-	// 		size: 'md',
-	// 		title: 'Update Item',
-	// 		onSaved: () => fetchData()
-	// 	}
-	// );
+	modal.open(
+		CampaignProductEditForm,
+		{ item },
+		{
+			size: 'md',
+			title: 'Update Item',
+			onSaved: () => fetchData()
+		}
+	);
 }
 
 function updateDiscount() {
-	// modal.open(
-	// 	CampaignDiscountForm,
-	// 	{ item: props.campaign },
-	// 	{
-	// 		size: 'md',
-	// 		title: 'Update Discount',
-	// 		onSaved: () => fetchData()
-	// 	}
-	// );
+	modal.open(
+		CampaignDiscountForm,
+		{ campaign: props.campaign },
+		{
+			size: 'md',
+			title: 'Update Discount',
+			onSaved: () => fetchData()
+		}
+	);
 }
 
 function deleteModal(item: any) {
-	// modal.open(
-	// 	CampaignProductDelete,
-	// 	{ item },
-	// 	{
-	// 		size: 'sm',
-	// 		title: 'Delete Item',
-	// 		onSaved: () => fetchData()
-	// 	}
-	// );
+	modal.open(
+		CampaignProductDelete,
+		{ item },
+		{
+			size: 'sm',
+			title: 'Delete Item',
+			onSaved: () => fetchData()
+		}
+	);
 }
 
-onMounted(() => {
-	if (props.campaign?.id) {
+watch(() => props.campaign?.id, (newId) => {
+	if (newId) {
 		fetchData()
 	}
-})
+}, { immediate: true })
+
 </script>
 
 <style scoped></style>

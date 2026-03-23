@@ -13,6 +13,10 @@ class ProductModel extends BaseModel
 {
     protected $table = 'products';
 
+    const STATUS_ENABLED = 1;
+    const STATUS_DISABLED = 0;
+    const STATUS_DRAFT = 2;
+
     protected $fillable = [
         'name',
         'slug',
@@ -89,5 +93,20 @@ class ProductModel extends BaseModel
     public function attribute(): BelongsTo
     {
         return $this->belongsTo(AttributeClassModel::class, 'attribute_class_id');
+    }
+
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(ProductCategoryModel::class, 'categories_products', 'product_id', 'product_category_id');
+    }
+
+    public function campaignProducts(): HasMany
+    {
+        return $this->hasMany(DiscountCampaignProductModel::class, 'product_id');
+    }
+
+    public function getThumbAttribute(): ?string
+    {
+        return $this->defaultFile->first()?->url;
     }
 }

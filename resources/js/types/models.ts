@@ -16,6 +16,21 @@ export interface Campaign {
   start_date: string;
   end_date: string;
   is_published: boolean | number;
+  thumb?: { url: string; alt_text?: string } | null;
+  files?: any[];
+}
+export interface ProductListItem {
+  id: number | string;
+  name: string;
+  price: number;
+  slug: string;
+  thumb:string,
+}
+export interface ProductCategoryListItem {
+  id: number | string;
+  slug: string;
+  thumb:string,
+  title: string;
 }
 
 export interface CampaignProductListItem {

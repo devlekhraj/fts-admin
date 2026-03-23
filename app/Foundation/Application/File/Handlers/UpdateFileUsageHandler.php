@@ -41,7 +41,16 @@ final class UpdateFileUsageHandler
             'end_date' => $endDate !== '' ? $endDate : null,
             'seq_no' => $command->seqNo,
             'is_active' => $command->isActive,
+            'is_default' => $command->isDefault,
         ];
+
+        if ($command->isDefault) {
+            DB::table('file_usages')
+                ->where('usage_type', $usage->usage_type)
+                ->where('usage_id', $usage->usage_id)
+                ->where('id', '!=', (int) $usage->id)
+                ->update(['meta->is_default' => false]);
+        }
 
         DB::table('file_usages')
             ->where('id', (int) $usage->id)

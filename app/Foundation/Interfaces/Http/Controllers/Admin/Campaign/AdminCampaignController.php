@@ -5,17 +5,24 @@ namespace App\Foundation\Interfaces\Http\Controllers\Admin\Campaign;
 use App\Foundation\Infrastructure\Persistence\Eloquent\Models\DiscountCampaignModel;
 use App\Foundation\Infrastructure\Persistence\Eloquent\Models\DiscountCampaignProductModel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Foundation\Interfaces\Http\Resources\CampaignResource;
 
 class AdminCampaignController extends Controller
 {
     public function index(Request $request)
     {
-        $banners = DiscountCampaignModel::orderByDesc('created_at')->get();
+        $query = DiscountCampaignModel::with(['defaultFile'])->withCount('products')->orderByDesc('created_at');
+
+        if ($request->has('name') && $request->filled('name')) {
+            $query->where('title', 'like', '%' . $request->get('name') . '%');
+        }
+
+        $data = $query->get();
         return response()->json([
             'success' => true,
-            'data' => $banners,
-            // 'data' => BannerResource::collection($banners)
+            'data' => CampaignResource::collection($data),
         ], 200);
     }
 
@@ -48,19 +55,57 @@ class AdminCampaignController extends Controller
 
     public function show(Request $request, $id)
     {
-        $campaign = DiscountCampaignModel::find($id);
+        $campaign = DiscountCampaignModel::with(['files', 'defaultFile'])->findOrFail($id);
         return response()->json([
             'success' => true,
-            'data' => [
-                'id'=> $campaign->id,
-                'title'=> $campaign->title,
-                'slug'=> $campaign->slug,
-                'start_date'=> $campaign->start_date,
-                'end_date'=> $campaign->end_date,
-                'is_published'=> $campaign->is_published,
-            ]
-            // 'data' => new BannerResource($banner),
+            'data' => new CampaignResource($campaign),
         ], 200);
+    }
+
+    public function storeImage(Request $request, $id)
+    {
+        $campaign = DiscountCampaignModel::findOrFail($id);
+
+        $validated = $request->validate([
+            'image' => 'required|image|max:10240',
+            'link' => 'nullable|string',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'alt_text' => 'nullable|string',
+        ]);
+
+        try {
+            /** @var \App\Foundation\Shared\Application\Contracts\FileUploadService $fileUploadService */
+            $fileUploadService = app(\App\Foundation\Shared\Application\Contracts\FileUploadService::class);
+            $uploadResult = $fileUploadService->uploadImageAsWebp($request->file('image'), 'campaigns');
+            
+            $fileData = $uploadResult['file_data'];
+            
+            DB::table('file_usages')->insert([
+                'file_id' => $fileData['id'],
+                'usage_type' => 'campaigns',
+                'usage_id' => $campaign->id,
+                'alt_text' => $validated['alt_text'] ?? $campaign->title,
+                'meta' => json_encode([
+                    'link' => $validated['link'] ?? null,
+                    'start_date' => $validated['start_date'] ?? null,
+                    'end_date' => $validated['end_date'] ?? null,
+                    'is_default' => false,
+                ]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Image uploaded successfully.',
+            ], 201);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to upload image: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function assignProducts(Request $request, $id)

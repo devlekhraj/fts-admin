@@ -12,29 +12,29 @@
 
                 <v-row>
                     <v-col cols="12" md="3">
-                        <v-text-field label="Product Name" density="comfortable" v-model="form.name" clearable
-                            hide-details variant="outlined" :error-messages="serverErrors.title"></v-text-field>
+                        <v-text-field label="Product Name" density="compact" v-model="form.name" clearable hide-details
+                            variant="outlined" :error-messages="serverErrors.title"></v-text-field>
 
                     </v-col>
                     <v-col cols="12" md="3">
                         <v-select variant="outlined" :items="product_categories" class="w-100" item-value="id" clearable
-                            label="Categories" v-model="form.category_id" hide-details density="comfortable"
+                            label="Categories" v-model="form.category_id" hide-details density="compact"
                             item-title="title"></v-select>
 
                     </v-col>
                     <v-col cols="12" md="3">
                         <v-select variant="outlined" :items="product_brands" class="w-100" item-value="id" clearable
-                            label="Brands" v-model="form.brand_id" hide-details density="comfortable"
+                            label="Brands" v-model="form.brand_id" hide-details density="compact"
                             item-title="name"></v-select>
 
                     </v-col>
                     <v-col cols="12" md="3">
-                        <v-btn color="primary" size="large" @click="fetchProducts()"> <v-icon>mdi-magnify</v-icon>
+                        <v-btn color="primary" @click="fetchProducts()" variant="flat"> <v-icon>mdi-magnify</v-icon>
                             Search</v-btn>
                     </v-col>
 
                 </v-row>
-                <div>
+                <div class="mt-4">
                     <v-row>
                         <v-col cols="12" md="9" lg="9">
                             <div>
@@ -55,12 +55,16 @@
                                                 hide-details>
                                                 <template #label>
                                                     <div class="d-flex align-center">
-                                                        <v-img :src="product.preview_image || product.image" alt=""
-                                                            height="60" width="60" class="me-2"></v-img>
+                                                        <v-img
+                                                            :src="product.thumb || product.preview_image || product.image"
+                                                            alt="" height="60" width="60" class="me-2"></v-img>
                                                         <div>
-                                                            <p class="mb-1" style="font-weight: 500;">{{ product.name }}
+                                                            <p class="mb-1"
+                                                                style="font-weight: 500; font-size: 0.875rem;">{{
+                                                                product.name }}
                                                             </p>
-                                                            <p class="text-primary mb-0">{{ formatAmount(product.price)
+                                                            <p class="text-primary mb-0" style="font-size: 0.875rem;">{{
+                                                                formatAmount(product.price)
                                                                 }}</p>
                                                         </div>
                                                     </div>
@@ -70,7 +74,7 @@
 
                                     </v-row>
                                     <div class="text-center py-4" v-if="pagination.current_page < pagination.last_page">
-                                        <v-btn color="primary" size="large" :loading="loading" variant="tonal"
+                                        <v-btn color="primary" :loading="loading" variant="flat"
                                             @click="fetchProducts(pagination.current_page + 1)">
                                             <v-icon>mdi-refresh</v-icon> load more</v-btn>
                                     </div>
@@ -87,17 +91,17 @@
                                     <v-select variant="outlined" :items="discount_types" class="w-100" item-value="id"
                                         clearable label="Discount Type" v-model="form.discount_type"
                                         :rules="[rules.required]" :error-messages="serverErrors.discount_type"
-                                        density="comfortable" item-title="name" prepend-inner-icon="mdi-tag"></v-select>
+                                        density="compact" item-title="name" prepend-inner-icon="mdi-tag"></v-select>
                                 </div>
 
                                 <div class="mb-4">
-                                    <v-text-field type="number" label="Discount Value" density="comfortable"
+                                    <v-text-field type="number" label="Discount Value" density="compact"
                                         v-model="form.discount_value" variant="outlined" :rules="[rules.required]"
                                         :error-messages="serverErrors.discount_value"
                                         prepend-inner-icon="mdi-currency-usd"></v-text-field>
                                 </div>
-                                <v-btn color="primary" block :loading="loading" :disabled="loading" size="large"
-                                    @click="submitForm">
+                                <v-btn color="primary" block :loading="loading" :disabled="loading"
+                                    @click="submitForm" variant="flat">
                                     <v-icon>mdi-check-outline</v-icon>
                                     Assign Products
                                 </v-btn>
@@ -116,7 +120,7 @@
 <script setup>
 import { ref, reactive, onMounted, watch } from 'vue'
 import { formatAmount } from '@/shared/utils'
-import axios from 'axios'
+import { getProductCategories, getProductBrands, getProducts, assignProducts } from '@/api/campaigns.api'
 
 const emit = defineEmits(['close', 'saved'])
 const props = defineProps({
@@ -134,7 +138,8 @@ const product_categories = ref([]);
 const product_brands = ref([]);
 const product_list = ref([]);
 const selectedProducts = ref([])
-const { showSuccess, showError } = useSnackbar()
+
+// const { showSuccess, showError } = useSnackbar()
 
 const form = reactive({
     discount_type: 2,
@@ -205,7 +210,7 @@ async function submitForm() {
     // Clear previous errors
     Object.keys(serverErrors).forEach(key => delete serverErrors[key])
     if (selectedProducts.value.length === 0) {
-        showError('Please select at least one product.')
+        // showError('Please select at least one product.')
         loading.value = false
         return
     }
@@ -224,9 +229,11 @@ async function submitForm() {
         // }
         form.product_ids = selectedProducts.value;
 
-        let resp = await axios.post(`campaigns/${props.item.id}/assign-products`, form)
+        let resp = await assignProducts(props.item.id, form)
 
-        showSuccess(resp?.data?.message || 'Products assigned successfully')
+        fetchProducts();
+         emit('close');
+        // showSuccess(resp?.data?.message || 'Products assigned successfully')
         emit('saved')
 
     } catch (error) {
@@ -245,9 +252,9 @@ const fetchProductCategories = async () => {
     try {
 
 
-        const resp = await axios.get('product-categories')
+        const resp = await getProductCategories()
 
-        product_categories.value = resp.data.sort((a, b) => {
+        product_categories.value = resp.sort((a, b) => {
             return a.title.localeCompare(b.title)
         })
 
@@ -264,8 +271,8 @@ const fetchProductBrands = async () => {
     try {
 
 
-        const resp = await axios.get('product-brand-list')
-        product_brands.value = resp.data.sort((a, b) => {
+        const resp = await getProductBrands()
+        product_brands.value = resp.sort((a, b) => {
             return a.name.localeCompare(b.name)
         })
 
@@ -284,14 +291,13 @@ const fetchProducts = async (page = 1) => {
             loading.value = true;
         }
 
-        const resp = await axios.get('product-list', {
-            params: {
-                name: form.name,
-                category_id: form.category_id,
-                brand_id: form.brand_id,
-                page: page, // send page to backend
-                per_page: pagination.per_page, // optional
-            },
+        const resp = await getProducts({
+            campaign_id: props.item.id,
+            name: form.name,
+            category_id: form.category_id,
+            brand_id: form.brand_id,
+            page: page, // send page to backend
+            per_page: pagination.per_page, // optional
         })
         fetching_data.value = false;
         loading.value = false;

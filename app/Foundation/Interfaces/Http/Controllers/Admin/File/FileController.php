@@ -115,6 +115,7 @@ class FileController extends Controller
             usageType: $usageType,
             usageId: $usageId,
             altText: $altText,
+            isDefault: (bool) ($validated['is_default'] ?? false),
             // caption: isset($validated['caption']) ? (string) $validated['caption'] : null,
             // description: isset($validated['description']) ? (string) $validated['description'] : null,
         ));

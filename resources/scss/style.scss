@@ -90,3 +90,7 @@ main.v-main {
         --v-btn-size: 0.8rem
     }
 }
+
+.v-btn__content {
+    text-transform: capitalize;
+}

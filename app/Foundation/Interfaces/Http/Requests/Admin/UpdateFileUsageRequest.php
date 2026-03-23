@@ -18,6 +18,7 @@ final class UpdateFileUsageRequest extends FormRequest
             'end_date' => ['nullable', 'date_format:Y-m-d'],
             'seq_no' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['nullable', 'boolean'],
+            'is_default' => ['nullable', 'boolean'],
         ];
     }
 }

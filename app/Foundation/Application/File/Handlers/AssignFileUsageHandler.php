@@ -14,6 +14,13 @@ final class AssignFileUsageHandler
         $caption = is_string($command->caption) ? trim($command->caption) : '';
         $description = is_string($command->description) ? trim($command->description) : '';
 
+        if ($command->isDefault) {
+            DB::table('file_usages')
+                ->where('usage_type', $command->usageType)
+                ->where('usage_id', $command->usageId)
+                ->update(['meta->is_default' => false]);
+        }
+
         DB::table('file_usages')->upsert(
             [[
                 'file_id' => $command->fileId,
@@ -24,6 +31,7 @@ final class AssignFileUsageHandler
                 'meta' => json_encode([
                     'caption' => $caption !== '' ? $caption : null,
                     'description' => $description !== '' ? $description : null,
+                    'is_default' => $command->isDefault,
                 ], JSON_UNESCAPED_UNICODE),
                 'created_at' => now(),
                 'updated_at' => now(),
