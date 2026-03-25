@@ -6,6 +6,7 @@ namespace App\Foundation\Interfaces\Http\Controllers\Admin\Blog;
 
 use App\Foundation\Infrastructure\Persistence\Eloquent\Models\BlogCategoryModel;
 use App\Foundation\Interfaces\Http\Requests\Admin\UpdateBlogCategoryRequest;
+use App\Foundation\Interfaces\Http\Requests\Admin\StoreBlogCategoryRequest;
 use App\Foundation\Interfaces\Http\Resources\BlogCategoryResource;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
@@ -71,9 +72,23 @@ class BlogCategoriesController extends Controller
         ],200);
     }
 
-    public function store(): JsonResponse
+    public function store(StoreBlogCategoryRequest $request): JsonResponse
     {
-        return response()->json([], 201);
+        $validated = $request->validated();
+
+        $category = BlogCategoryModel::query()->create([
+            'title' => $validated['title'],
+            'slug' => $validated['slug'],
+            'short_desc' => "",
+            'content' => "",
+            'status' => array_key_exists('status', $validated) ? (bool) $validated['status'] : true,
+        ]);
+
+        return response()->json([
+            'message' => 'Blog category created successfully.',
+            'data' => new BlogCategoryResource($category),
+            'success' => true,
+        ], 201);
     }
 
     public function update(UpdateBlogCategoryRequest $request, string $id): JsonResponse
@@ -89,6 +104,19 @@ class BlogCategoriesController extends Controller
 
     public function destroy(string $id): JsonResponse
     {
-        return response()->json(null, 204);
+        $category = BlogCategoryModel::query()->findOrFail($id);
+
+        try {
+            $category->files()->detach();
+        } catch (\Throwable $e) {
+            // Best effort cleanup; proceed to delete category even if detach fails.
+        }
+
+        $category->delete();
+
+        return response()->json([
+            'message' => 'Blog category deleted successfully.',
+            'success' => true,
+        ], 200);
     }
 }

@@ -103,7 +103,7 @@ class BannerResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
-            'status' => $overallStatus,
+            'status' => $this->status,
             'created_at' => $this->created_at,
             'total_images' => (int) ($this->total_images ?? 0),
             'thumb' => $defaultFile?->url,

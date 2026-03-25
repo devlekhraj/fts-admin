@@ -17,9 +17,7 @@
         </v-list>
       </v-menu>
 
-      <v-btn color="primary" variant="flat" prepend-icon="mdi-plus" :to="{ name: 'admin.blogs.create' }">
-        Create Blog
-      </v-btn>
+      <BlogCreateButton @saved="onBlogCreated" />
     </template>
   </AppPageHeader>
 
@@ -59,9 +57,7 @@
         <v-btn icon size="x-small" variant="tonal" color="primary" @click="onView(item)">
           <v-icon size="16">mdi-eye</v-icon>
         </v-btn>
-        <v-btn icon size="x-small" variant="tonal" color="error" @click="onDelete(item)">
-          <v-icon size="16">mdi-delete</v-icon>
-        </v-btn>
+        <BlogDeleteButton :blog="item" @deleted="onBlogDeleted" />
       </div>
     </template>
   </AppDataTable>
@@ -72,6 +68,8 @@ import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
+import BlogCreateButton from '@/components/blog/BlogCreateButton.vue';
+import BlogDeleteButton from '@/components/blog/BlogDeleteButton.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
 import { listBlogs, type BlogListItem } from '@/api/blogs.api';
 
@@ -129,9 +127,19 @@ function onView(blog: Blog) {
   router.push({ name: 'admin.blogs.detail', params: { id: blog.id } });
 }
 
-function onDelete(blog: Blog) {
-  // TODO: replace with delete confirmation + API call.
-  console.log('Delete blog:', blog.slug);
+function onBlogCreated(payload?: unknown) {
+  const created: any = payload ?? {};
+  if (created?.id) {
+    router.push({ name: 'admin.blogs.detail', params: { id: created.id } });
+    return;
+  }
+  options.value.page = 1;
+  fetchBlogs();
+}
+
+function onBlogDeleted() {
+  options.value.page = 1;
+  fetchBlogs();
 }
 
 function categoryColor(categoryName: string) {

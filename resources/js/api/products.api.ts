@@ -213,6 +213,14 @@ export function updateBrand(id: string, payload: Record<string, unknown>) {
   return http.put(`/admin/brands/${id}`, payload);
 }
 
+export function createBrand(payload: Record<string, unknown>) {
+  return http.post('/admin/brands', payload);
+}
+
+export function deleteBrand(id: string) {
+  return http.delete(`/admin/brands/${id}`);
+}
+
 export function updateBrandImage(
   brandId: number | string,
   fileUsageId: number | string,

@@ -77,6 +77,14 @@ export function updateProductCategory(id: string, payload: Record<string, unknow
   return http.put(`/admin/product-categories/${id}`, payload);
 }
 
+export function createProductCategory(payload: Record<string, unknown>) {
+  return http.post('/admin/product-categories', payload);
+}
+
+export function deleteProductCategory(id: string) {
+  return http.delete(`/admin/product-categories/${id}`);
+}
+
 export function updateProductCategoryImage(
   categoryId: number | string,
   fileUsageId: number | string,

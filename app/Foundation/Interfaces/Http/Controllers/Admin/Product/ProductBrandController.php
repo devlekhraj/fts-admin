@@ -6,6 +6,7 @@ namespace App\Foundation\Interfaces\Http\Controllers\Admin\Product;
 
 use App\Foundation\Infrastructure\Persistence\Eloquent\Models\ProductBrandModel;
 use App\Foundation\Interfaces\Http\Requests\Admin\UpdateBrandRequest;
+use App\Foundation\Interfaces\Http\Requests\Admin\StoreBrandRequest;
 use App\Foundation\Interfaces\Http\Resources\ProductBrandResource;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
@@ -72,9 +73,21 @@ class ProductBrandController extends Controller
         ], 200);
     }
 
-    public function store(): JsonResponse
+    public function store(StoreBrandRequest $request): JsonResponse
     {
-        return response()->json([], 201);
+        $validated = $request->validated();
+
+        $brand = ProductBrandModel::query()->create([
+            'name' => $validated['name'],
+            'slug' => $validated['slug'],
+            'status' => array_key_exists('status', $validated) ? (bool) $validated['status'] : true,
+        ]);
+
+        return response()->json([
+            'message' => 'Brand created successfully.',
+            'data' => new ProductBrandResource($brand),
+            'success' => true,
+        ], 201);
     }
 
     public function update(UpdateBrandRequest $request, string $id): JsonResponse
@@ -90,7 +103,13 @@ class ProductBrandController extends Controller
 
     public function destroy(string $id): JsonResponse
     {
-        return response()->json(null, 204);
+        $brand = ProductBrandModel::query()->findOrFail($id);
+        $brand->delete(); // Soft delete
+
+        return response()->json([
+            'message' => 'Brand deleted successfully.',
+            'success' => true,
+        ], 200);
     }
 
     public function getList(Request $request)

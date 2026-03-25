@@ -86,6 +86,21 @@ class BannerController extends Controller
 
     public function destroy(string $id): JsonResponse
     {
-        return response()->json(null, 204);
+        $banner = BannerModel::query()->findOrFail($id);
+
+        // Clean up related records/pivots if present.
+        try {
+            $banner->files()->detach();
+            $banner->bannerImages()->delete();
+        } catch (\Throwable $e) {
+            // Best-effort cleanup; continue with deletion.
+        }
+
+        $banner->delete();
+
+        return response()->json([
+            'message' => 'Banner deleted successfully.',
+            'success' => true,
+        ], 200);
     }
 }

@@ -1,5 +1,9 @@
 <template>
-  <AppPageHeader title="Banners" subtitle="Promotional banners" />
+  <AppPageHeader title="Banners" subtitle="Promotional banners">
+    <template #actions>
+      <BannerCreateButton @saved="onBannerCreated" />
+    </template>
+  </AppPageHeader>
 
   <v-container fluid>
     <v-row>
@@ -37,9 +41,7 @@
               <v-btn icon size="x-small" variant="tonal" color="primary" @click="router.push({ name: 'admin.banners.detail', params: { id: item.id } })">
                 <v-icon size="16">mdi-eye</v-icon>
               </v-btn>
-              <v-btn icon size="x-small" variant="tonal" color="error" @click="onDelete(item)">
-                <v-icon size="16">mdi-delete</v-icon>
-              </v-btn>
+              <BannerDeleteButton :banner="item" @deleted="onBannerDeleted" />
             </div>
           </template>
         </AppDataTable>
@@ -53,6 +55,8 @@ import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
+import BannerCreateButton from '@/components/banner/BannerCreateButton.vue';
+import BannerDeleteButton from '@/components/banner/BannerDeleteButton.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
 import { listBanners, type BannerListItem } from '@/api/banners.api';
 import { formatLongDate } from '@/shared/utils';
@@ -87,9 +91,19 @@ const options = ref<DataTableOptions>({
 const hasLoadedOnce = ref(false);
 const router = useRouter();
 
-function onDelete(banner: Banner) {
-  // TODO: replace with delete confirmation + API call.
-  console.log('Delete banner:', banner.slug);
+function onBannerCreated(payload?: unknown) {
+  const created: any = payload ?? {};
+  if (created?.id) {
+    router.push({ name: 'admin.banners.detail', params: { id: created.id } });
+    return;
+  }
+  options.value.page = 1;
+  fetchBanners();
+}
+
+function onBannerDeleted() {
+  options.value.page = 1;
+  fetchBanners();
 }
 
 async function fetchBanners() {

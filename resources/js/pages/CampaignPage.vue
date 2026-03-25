@@ -153,7 +153,13 @@ async function openAddModal() {
     {
       size: 'md',
       title: 'Add Campaign',
-      onSaved: () => fetchCampaigns(),
+      onSaved: (payload: any) => {
+        if (payload?.id) {
+          router.push({ name: 'admin.campaigns.detail', params: { id: payload.id } });
+          return;
+        }
+        fetchCampaigns();
+      },
     }
   );
 }

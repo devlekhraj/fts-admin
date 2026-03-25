@@ -13,9 +13,7 @@
         </v-list>
       </v-menu>
 
-      <v-btn color="primary" variant="flat" prepend-icon="mdi-plus">
-        Add Category
-      </v-btn>
+      <ProductCategoryCreateButton @saved="onCategoryCreated" />
     </template>
   </AppPageHeader>
 
@@ -43,9 +41,7 @@
         <v-btn icon size="x-small" variant="tonal" color="primary" @click="onView(item)">
           <v-icon size="16">mdi-eye</v-icon>
         </v-btn>
-        <v-btn icon size="x-small" variant="tonal" color="error" @click="onDelete(item)">
-          <v-icon size="16">mdi-delete</v-icon>
-        </v-btn>
+        <ProductCategoryDeleteButton :category="item" @deleted="onCategoryDeleted" />
       </div>
     </template>
   </AppDataTable>
@@ -56,6 +52,8 @@ import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
+import ProductCategoryCreateButton from '@/components/category/ProductCategoryCreateButton.vue';
+import ProductCategoryDeleteButton from '@/components/category/ProductCategoryDeleteButton.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
 import {
   listProductCategories,
@@ -108,11 +106,6 @@ function onView(category: ProductCategory) {
   router.push({ name: 'admin.product.categories.detail', params: { id: category.id } });
 }
 
-function onDelete(category: ProductCategory) {
-  // TODO: replace with delete confirmation + API call.
-  console.log('Delete category:', category.id);
-}
-
 async function fetchCategories() {
   loading.value = true;
   try {
@@ -156,6 +149,21 @@ onMounted(() => {
     hasLoadedOnce.value = true;
   }
 });
+
+function onCategoryCreated(payload?: unknown) {
+  const created: any = payload ?? {};
+  if (created?.id) {
+    router.push({ name: 'admin.product.categories.detail', params: { id: created.id } });
+    return;
+  }
+  options.value.page = 1;
+  fetchCategories();
+}
+
+function onCategoryDeleted() {
+  options.value.page = 1;
+  fetchCategories();
+}
 </script>
 
 <style scoped>

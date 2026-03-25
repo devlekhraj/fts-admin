@@ -10,7 +10,10 @@ class StoreBrandRequest extends FormRequest
 {
     public function rules(): array
     {
-        // TODO: Define validation rules.
-        return [];
+        return [
+            'name' => ['required', 'string', 'max:255', 'unique:product_brands,name'],
+            'slug' => ['required', 'string', 'max:255', 'unique:product_brands,slug'],
+            'status' => ['nullable', 'boolean'],
+        ];
     }
 }

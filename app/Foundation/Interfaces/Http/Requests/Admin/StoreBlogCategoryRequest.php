@@ -10,7 +10,10 @@ class StoreBlogCategoryRequest extends FormRequest
 {
     public function rules(): array
     {
-        // TODO: Define validation rules.
-        return [];
+        return [
+            'title' => ['required', 'string', 'max:255', 'unique:blog_categories,title'],
+            'slug' => ['required', 'string', 'max:255', 'unique:blog_categories,slug'],
+            'status' => ['nullable', 'boolean'],
+        ];
     }
 }

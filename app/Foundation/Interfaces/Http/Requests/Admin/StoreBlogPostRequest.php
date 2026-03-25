@@ -10,7 +10,10 @@ class StoreBlogPostRequest extends FormRequest
 {
     public function rules(): array
     {
-        // TODO: Define validation rules.
-        return [];
+        return [
+            'title' => ['required', 'string', 'max:255', 'unique:blogs,title'],
+            'slug' => ['required', 'string', 'max:255', 'unique:blogs,slug'],
+            'status' => ['nullable', 'boolean'],
+        ];
     }
 }

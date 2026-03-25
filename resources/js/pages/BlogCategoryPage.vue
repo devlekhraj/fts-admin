@@ -17,9 +17,7 @@
         </v-list>
       </v-menu>
 
-      <v-btn color="primary" variant="flat" prepend-icon="mdi-plus" @click="onCreate">
-        Create Category
-      </v-btn>
+      <BlogCategoryCreateButton @saved="onCategoryCreated" />
     </template>
   </AppPageHeader>
 
@@ -53,9 +51,7 @@
         <v-btn icon size="x-small" variant="tonal" color="primary" @click="onView(item)">
           <v-icon size="16">mdi-eye</v-icon>
         </v-btn>
-        <v-btn icon size="x-small" variant="tonal" color="error" @click="onDelete(item)">
-          <v-icon size="16">mdi-delete</v-icon>
-        </v-btn>
+        <BlogCategoryDeleteButton :category="item" @deleted="onCategoryDeleted" />
       </div>
     </template>
   </AppDataTable>
@@ -66,6 +62,8 @@ import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
+import BlogCategoryCreateButton from '@/components/blog/BlogCategoryCreateButton.vue';
+import BlogCategoryDeleteButton from '@/components/blog/BlogCategoryDeleteButton.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
 import {
   listBlogCategories,
@@ -119,14 +117,19 @@ function onView(category: BlogCategory) {
   router.push({ name: 'admin.blogCategories.detail', params: { id: category.id } });
 }
 
-function onDelete(category: BlogCategory) {
-  // TODO: replace with delete confirmation + API call.
-  console.log('Delete category:', category.slug);
+function onCategoryCreated(payload?: unknown) {
+  const created: any = payload ?? {};
+  if (created?.id) {
+    router.push({ name: 'admin.blogCategories.detail', params: { id: created.id } });
+    return;
+  }
+  options.value.page = 1;
+  fetchCategories();
 }
 
-function onCreate() {
-  // TODO: replace with create category route/modal action.
-  console.log('Create category clicked');
+function onCategoryDeleted() {
+  options.value.page = 1;
+  fetchCategories();
 }
 
 async function fetchCategories() {

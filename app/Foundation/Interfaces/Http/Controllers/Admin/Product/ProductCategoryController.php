@@ -6,6 +6,7 @@ namespace App\Foundation\Interfaces\Http\Controllers\Admin\Product;
 
 use App\Foundation\Infrastructure\Persistence\Eloquent\Models\ProductCategoryModel;
 use App\Foundation\Interfaces\Http\Requests\Admin\UpdateProductCategoryRequest;
+use App\Foundation\Interfaces\Http\Requests\Admin\StoreProductCategoryRequest;
 use App\Foundation\Interfaces\Http\Resources\ProductCategoryResource;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
@@ -70,6 +71,22 @@ class ProductCategoryController extends Controller
         ], 200);
     }
 
+    public function store(StoreProductCategoryRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
+        $category = ProductCategoryModel::query()->create([
+            'title' => $validated['title'],
+            'slug' => $validated['slug'],
+            'status' => array_key_exists('status', $validated) ? (bool) $validated['status'] : true,
+        ]);
+
+        return response()->json([
+            'message' => 'Product category created successfully.',
+            'data' => new ProductCategoryResource($category),
+            'success' => true,
+        ], 201);
+    }
+
     public function update(UpdateProductCategoryRequest $request, string $id): JsonResponse
     {
         $category = ProductCategoryModel::query()->findOrFail($id);
@@ -79,6 +96,17 @@ class ProductCategoryController extends Controller
             'message' => 'Product category updated successfully.',
             'data' => new ProductCategoryResource($category),
         ]);
+    }
+
+    public function destroy(string $id): JsonResponse
+    {
+        $category = ProductCategoryModel::query()->findOrFail($id);
+        $category->delete(); // Soft delete
+
+        return response()->json([
+            'message' => 'Product category deleted successfully.',
+            'success' => true,
+        ], 200);
     }
     public function getList(Request $request)
     {

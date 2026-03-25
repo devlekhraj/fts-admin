@@ -17,9 +17,7 @@
         </v-list>
       </v-menu>
 
-      <v-btn color="primary" variant="flat" prepend-icon="mdi-plus">
-        Add Brand
-      </v-btn>
+      <BrandCreateButton @saved="onBrandCreated" />
     </template>
   </AppPageHeader>
 
@@ -56,9 +54,7 @@
         <v-btn icon size="x-small" variant="tonal" color="primary" @click="onView(item)">
           <v-icon size="16">mdi-eye</v-icon>
         </v-btn>
-        <v-btn icon size="x-small" variant="tonal" color="error" @click="onDelete(item)">
-          <v-icon size="16">mdi-delete</v-icon>
-        </v-btn>
+        <BrandDeleteButton :brand="item" @deleted="onBrandDeleted" />
       </div>
     </template>
   </AppDataTable>
@@ -69,6 +65,8 @@ import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
+import BrandCreateButton from '@/components/brand/BrandCreateButton.vue';
+import BrandDeleteButton from '@/components/brand/BrandDeleteButton.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
 import { listBrands, type ProductBrandListItem } from '@/api/products.api';
 import { formatLongDate } from '@/shared/utils';
@@ -120,11 +118,6 @@ function onView(brand: ProductBrand) {
   router.push({ name: 'admin.product.brands.detail', params: { id: brand.id } });
 }
 
-function onDelete(brand: ProductBrand) {
-  // TODO: replace with delete confirmation + API call.
-  console.log('Delete brand:', brand.slug);
-}
-
 async function fetchBrands() {
   loading.value = true;
   try {
@@ -169,6 +162,21 @@ onMounted(() => {
     hasLoadedOnce.value = true;
   }
 });
+
+function onBrandCreated(payload?: unknown) {
+  const created: any = payload ?? {};
+  if (created?.id) {
+    router.push({ name: 'admin.product.brands.detail', params: { id: created.id } });
+    return;
+  }
+  options.value.page = 1;
+  fetchBrands();
+}
+
+function onBrandDeleted() {
+  options.value.page = 1;
+  fetchBrands();
+}
 </script>
 
 <style scoped>

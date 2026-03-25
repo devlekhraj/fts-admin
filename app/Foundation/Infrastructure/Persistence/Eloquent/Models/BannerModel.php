@@ -6,9 +6,11 @@ namespace App\Foundation\Infrastructure\Persistence\Eloquent\Models;
 
 use App\Foundation\Shared\Infrastructure\Persistence\Eloquent\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class BannerModel extends BaseModel
 {
+    use SoftDeletes;
     protected $table = 'banners';
     
     protected $fillable = [

@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Foundation\Interfaces\Http\Controllers\Admin\Blog;
 
+use App\Foundation\Infrastructure\Persistence\Eloquent\Models\BlogCategoryModel;
 use App\Foundation\Infrastructure\Persistence\Eloquent\Models\BlogModel;
+use App\Foundation\Infrastructure\Persistence\Eloquent\Models\FileUsageModel;
+use App\Foundation\Interfaces\Http\Requests\Admin\StoreBlogPostRequest;
 use App\Foundation\Interfaces\Http\Requests\Admin\UpdateBlogPostRequest;
 use App\Foundation\Interfaces\Http\Resources\BlogResource;
-use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class BlogsController extends Controller
@@ -71,9 +74,46 @@ class BlogsController extends Controller
         ], 200);
     }
 
-    public function blogStore(): JsonResponse
+    public function blogStore(StoreBlogPostRequest $request): JsonResponse
     {
-        return response()->json([], 201);
+        $validated = $request->validated();
+
+        // Ensure default "Unlisted" category exists (restoring if soft-deleted).
+        $category = BlogCategoryModel::query()
+            ->withTrashed()
+            ->where('slug', 'unlisted')
+            ->first();
+
+        if ($category?->trashed()) {
+            $category->restore();
+        }
+
+        if (! $category) {
+            $category = BlogCategoryModel::query()->create([
+                'title' => 'Unlisted',
+                'slug' => 'unlisted',
+                'short_desc' => '',
+                'content' => '',
+                'status' => false,
+            ]);
+        }
+
+        $blog = BlogModel::query()->create([
+            'title' => $validated['title'],
+            'slug' => $validated['slug'],
+            'status' => array_key_exists('status', $validated) ? (bool) $validated['status'] : true,
+            'category_id' => $category->id,
+            //   'short_desc' =>null,
+            'content' =>'',
+            'author' =>''
+
+        ]);
+
+        return response()->json([
+            'message' => 'Blog created successfully.',
+            'data' => new BlogResource($blog),
+            'success' => true,
+        ], 201);
     }
 
     public function blogUpdate(UpdateBlogPostRequest $request, string $id): JsonResponse
@@ -89,6 +129,23 @@ class BlogsController extends Controller
 
     public function blogDestroy(string $id): JsonResponse
     {
-        return response()->json(null, 204);
+        $blog = BlogModel::query()->findOrFail($id);
+
+        try {
+            FileUsageModel::query()
+                ->where('usage_type', 'blogs')
+                ->where('usage_id', $blog->id)
+                ->delete();
+            $blog->files()->detach();
+        } catch (\Throwable $e) {
+            // proceed even if cleanup partially fails
+        }
+
+        $blog->delete();
+
+        return response()->json([
+            'message' => 'Blog deleted successfully.',
+            'success' => true,
+        ], 200);
     }
 }

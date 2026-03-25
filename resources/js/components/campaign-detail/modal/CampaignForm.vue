@@ -131,11 +131,13 @@ async function submitForm() {
             resp = await create(payload)
         }
 
+        const savedData = (resp as any)?.data?.data ?? (resp as any)?.data ?? payload;
+
         snackbar.show({
             message: resp?.data?.message || 'Campaign saved successfully',
             color: 'success'
         })
-        emit('saved')
+        emit('saved', savedData)
         emit('close')
     } catch (error: any) {
         if (error.response?.status === 422) {
