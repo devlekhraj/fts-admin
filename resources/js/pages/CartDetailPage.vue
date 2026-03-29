@@ -7,61 +7,77 @@
       </v-btn>
     </template>
   </AppPageHeader>
-  <v-card flat class="pa-4" :loading="loading">
-    <div class="d-flex align-center ga-3 mb-4">
-      <v-avatar size="40" color="grey-lighten-3" rounded>
-        <v-img v-if="cart?.customer?.avatar" :src="cart.customer.avatar" :alt="cart?.customer?.name ?? 'Customer'" cover />
-        <v-icon v-else size="24" color="grey-darken-1">mdi-account-circle</v-icon>
-      </v-avatar>
-      <div class="d-flex flex-column">
-        <div class="font-weight-medium">{{ cart?.customer?.name ?? '-' }}</div>
-        <div class="text-caption text-medium-emphasis">{{ cart?.customer?.address ?? '-' }}</div>
-      </div>
-    </div>
+  <v-card flat class="pa-4 py-10" :loading="loading">
+    <v-row>
+      <v-col cols="12" lg="8" offset-lg="2">
+        <div class="d-flex align-center justify-space-between flex-wrap ga-3 mb-4">
+          <div class="d-flex align-center ga-3">
+            <v-avatar size="40" color="grey-lighten-3" rounded>
+              <v-img v-if="cart?.customer?.avatar" :src="cart.customer.avatar" :alt="cart?.customer?.name ?? 'Customer'"
+                cover />
+              <v-icon v-else size="24" color="grey-darken-1">mdi-account-circle</v-icon>
+            </v-avatar>
+            <div class="">
+              <div class="font-weight-medium">{{ cart?.customer?.name ?? '-' }}</div>
+            <v-chip :color="cart?.is_proceed ? 'success' : 'warning'" label size="small">{{
+              cart?.is_proceed ? 'Processed' : 'Pending' }}</v-chip>
+            </div>
+          </div>
+          <div class="d-flex align-center ga-3">
+            <span class="text-medium-emphasis updated-text">Updated {{ cart?.updated_at ? timeAgo(cart.updated_at) : '-'
+            }}</span>
+          </div>
+        </div>
+        <v-divider></v-divider>
+        <div class="py-10">
+          <h3>Cart Items:</h3>
+          <v-table density="comfortable" class="mb-4 border rounded" style="font-size: 0.82rem;">
+            <thead>
+              <tr>
+                <th class="text-left">Item</th>
+                <th class="text-right">Qty</th>
+                <th class="text-right">Price</th>
+                <th class="text-right">Line Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in cart?.items ?? []" :key="item.id">
+                <td>
+                  <div class="d-flex align-center ga-3 py-2">
+                    <v-avatar size="100" color="grey-lighten-4" rounded>
+                      <v-img v-if="item?.thumb" :src="String(item.thumb)" :alt="item.description" cover />
+                      <v-icon v-else size="18" color="grey-darken-1">mdi-image-off-outline</v-icon>
+                    </v-avatar>
+                    <div class="d-flex flex-column">
+                      <span>{{ item.description }}</span>
+                      <div v-if="item.product_attributes && Object.keys(item.product_attributes).length" class="text-caption text-medium-emphasis">
+                        <span v-for="(attrEntry, idx) in Object.entries(item.product_attributes)" :key="`${item.id}-${attrEntry[0]}`">
+                          <strong>{{ attrEntry[0] }}:</strong> {{ attrEntry[1] }}<span v-if="idx < Object.entries(item.product_attributes).length - 1"> • </span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="text-right">{{ item.quantity }}</td>
+                <td class="text-right">{{ formatNPR(item.price) }}</td>
+                <td class="text-right">{{ formatNPR(item.line_total) }}</td>
+              </tr>
 
-    <v-table density="comfortable" class="mb-4">
-      <thead>
-        <tr>
-          <th class="text-left">Item</th>
-          <th class="text-right">Qty</th>
-          <th class="text-right">Price</th>
-          <th class="text-right">Line Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="item in cart?.items ?? []" :key="item.id">
-          <td>{{ item.description }}</td>
-          <td class="text-right">{{ item.quantity }}</td>
-          <td class="text-right">{{ formatNPR(item.price) }}</td>
-          <td class="text-right">{{ formatNPR(item.line_total) }}</td>
-        </tr>
-        <template v-for="item in cart?.items ?? []" :key="`${item.id}-attrs`">
-          <tr v-if="item.product_attributes && Object.keys(item.product_attributes).length">
-            <td colspan="4" class="ps-6 text-caption text-medium-emphasis">
-              <span v-for="(val, key, idx) in item.product_attributes" :key="`${item.id}-${key}`">
-                <strong>{{ key }}:</strong> {{ val }}<span v-if="idx < Object.keys(item.product_attributes).length - 1"> • </span>
-              </span>
-            </td>
-          </tr>
-        </template>
-        <tr v-if="(cart?.items?.length ?? 0) === 0">
-          <td colspan="4" class="text-center text-medium-emphasis py-4">No items found.</td>
-        </tr>
-      </tbody>
-      <tfoot>
-        <tr>
-          <td colspan="3" class="text-right font-weight-medium">Total</td>
-          <td class="text-right font-weight-medium">{{ formatNPR(cart?.total ?? 0) }}</td>
-        </tr>
-      </tfoot>
-    </v-table>
+              <tr v-if="(cart?.items?.length ?? 0) === 0">
+                <td colspan="4" class="text-center text-medium-emphasis py-4">No items found.</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3" class="text-right font-weight-medium">Total</td>
+                <td class="text-right font-weight-medium">{{ formatNPR(cart?.total ?? 0) }}</td>
+              </tr>
+            </tfoot>
+          </v-table>
+        </div>
+      </v-col>
+    </v-row>
 
-    <div class="d-flex align-center ga-3">
-      <v-chip size="small" label variant="tonal" :color="cart?.is_proceed ? 'success' : 'error'">
-        {{ cart?.is_proceed ? 'Yes' : 'No' }}
-      </v-chip>
-      <span class="text-medium-emphasis">Updated {{ cart?.updated_at ? timeAgo(cart.updated_at) : '-' }}</span>
-    </div>
   </v-card>
 </template>
 
@@ -91,3 +107,9 @@ async function fetchCart() {
 
 onMounted(fetchCart);
 </script>
+
+<style scoped>
+.updated-text {
+  font-size: 0.82rem;
+}
+</style>

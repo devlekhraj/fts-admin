@@ -1,0 +1,1 @@
+import{M as e}from"./main-sjiDk1-N.js";async function r(n){return await e.get("/admin/banners",{params:n})}async function s(n){return await e.get(`/admin/banners/${n}`)}function o(n){return e.post("/admin/banners",n)}function i(n,t){return e.put(`/admin/banners/${n}`,t)}function u(n){return e.delete(`/admin/banners/${n}`)}export{o as c,s as g,r as l,u as r,i as u};

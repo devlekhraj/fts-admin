@@ -30,6 +30,7 @@ export type CartDetailItem = {
   quantity: number;
   line_total: number;
   product_attributes?: Record<string, unknown>;
+  thumb?: string | null;
 };
 
 export type CartDetail = {
@@ -41,6 +42,7 @@ export type CartDetail = {
   } | null;
   is_proceed?: boolean | null;
   items_count?: number | null;
+  thumb?: string|null,
   updated_at?: string | null;
   total?: number | null;
   items?: CartDetailItem[];

@@ -20,6 +20,7 @@ class CartDetailResource extends JsonResource
                 'id' => $item->id,
                 'description' => $item->product->name ?? '-',
                 'product_attributes' => $item->product_attributes,
+                'thumb' => $item->product->thumb ?? $item->product->image ?? null,
                 'price' => $price,
                 'quantity' => $qty,
                 'line_total' => $lineTotal,
