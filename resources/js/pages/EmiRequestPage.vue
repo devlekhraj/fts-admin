@@ -39,7 +39,7 @@
 				</div>
 			</template>
 			<template #item.time="{ item }">
-				<span>{{ formatDateTime(item.time) }}</span>
+				<span>{{ timeAgo(item.time) }}</span>
 			</template>
 			<template #item.emi_per_month="{ item }">
 				<span>{{ formatNPR(item.emi_per_month) }}</span>
@@ -62,9 +62,9 @@
 				</v-chip>
 			</template>
 			<template #item.action="{ item }">
-				<v-btn variant="tonal" color="primary" size="x-small"
-					:to="{ name: 'admin.emi.requests.detail', params: { id: item.id } }" icon>
-					<v-icon>mdi-eye</v-icon>
+				<v-btn variant="tonal" color="primary" size="small"
+					:to="{ name: 'admin.emi.requests.detail', params: { id: item.id } }">
+					view
 				</v-btn>
 			</template>
 		</AppDataTable>
@@ -78,17 +78,18 @@ import type { DataTableOptions } from '@/components/datatable/types';
 import { list as listEmiRequests } from '@/api/emi-requests.api';
 import { formatDateTime, formatNPR } from '@/shared/formatters';
 import { getEmiIconColor, getEmiIconTextColor, getEmiTypeIcon, statusColor } from '@/shared/emi';
+import { timeAgo } from '@/shared/utils';
 
 type EmiRequest = Record<string, unknown>;
 
 const headers = [
-	{ title: 'Product', key: 'product', sortable: false, minWidth:'250' },
-	{ title: 'Per Month', key: 'emi_per_month', minWidth: '120', sortable: false },
-	{ title: 'EMI Type', key: 'emi_type', sortable: false, minWidth:'120' },
-	{ title: 'User', key: 'user', sortable: false,minWidth:'200' },
-	{ title: 'Time', key: 'time', minWidth: '160', sortable: false },
-	{ title: 'Status', key: 'status_label', sortable: false },
-	{ title: 'Actions', key: 'action', sortable: false },
+	{ title: 'Product', key: 'product', sortable: false, maxWidth:'300' },
+	// { title: 'Per Month', key: 'emi_per_month', minWidth: '120', sortable: false },
+	{ title: 'EMI Type', key: 'emi_type', sortable: false, width:'120' },
+	// { title: 'User', key: 'user', sortable: false,minWidth:'200' },
+	{ title: 'Status', key: 'status_label', sortable: false, width:'100' },
+	{ title: 'Time', key: 'time', width:'200', sortable: false },
+	{ title: 'Actions', key: 'action', sortable: false, width:'100'  },
 ];
 
 const items = ref<EmiRequest[]>([]);

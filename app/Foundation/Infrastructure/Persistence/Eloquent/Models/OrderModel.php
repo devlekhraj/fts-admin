@@ -49,10 +49,8 @@ class OrderModel extends BaseModel
 
     const STATUS_CANCELED = 5;
 
-
     protected $appends = ['order_status'];
 
-   
     public function getOrderStatusAttribute(): string
     {
         return match ((int) $this->status) {
