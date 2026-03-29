@@ -26,3 +26,4 @@ require __DIR__ . '/admin/route_file.php';
 require __DIR__ . '/admin/route_developer.php';
 require __DIR__ . '/admin/route_product_attributes.php';
 require __DIR__ . '/admin/route_campaign.php';
+require __DIR__ . '/admin/route_page.php';

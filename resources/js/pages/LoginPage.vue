@@ -79,7 +79,7 @@ async function onSubmit() {
 	loading.value = true;
 	try {
 		await authStore.signIn(email.value, password.value);
-		await router.push({ name: 'admin.dashboard' });
+		await router.push({ name: 'admin.overview' });
 	} catch (caughtError: unknown) {
 		error.value = resolveLoginError(caughtError);
 	} finally {

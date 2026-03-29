@@ -60,11 +60,11 @@
     </template>
     <template #item.action="{ item }">
       <div class="d-flex align-center ga-1">
-        <v-btn icon size="x-small" variant="tonal" color="primary" @click="onView(item)">
-          <v-icon size="16">mdi-eye</v-icon>
+        <v-btn size="small" variant="tonal" class="mr-2" color="primary" @click="onView(item)">
+          <v-icon size="16">mdi-eye</v-icon> Edit Product
         </v-btn>
-        <v-btn icon size="x-small" variant="tonal" color="error" @click="onDelete(item)">
-          <v-icon size="16">mdi-delete</v-icon>
+        <v-btn size="small" variant="tonal" color="error" @click="onDelete(item)">
+          <v-icon size="16">mdi-delete</v-icon> Delete
         </v-btn>
       </div>
     </template>
@@ -103,11 +103,11 @@ const exportOptions: Array<{ type: ExportType; title: string; icon: string }> = 
 
 const headers = [
   { title: 'Name', key: 'name', sortable: false, minWidth: '260' },
-  { title: 'Slug', key: 'slug', sortable: false, minWidth: '220' },
-  { title: 'Variants', key: 'variants_count', sortable: false, minWidth: '120' },
+  // { title: 'Slug', key: 'slug', sortable: false, minWidth: '220' },
+  // { title: 'Variants', key: 'variants_count', sortable: false, minWidth: '120' },
   { title: 'Status', key: 'status', sortable: false, minWidth: '140' },
   { title: 'EMI', key: 'emi_enabled', sortable: false, minWidth: '140' },
-  { title: 'Created', key: 'created_at', sortable: false, minWidth: '170' },
+  // { title: 'Created', key: 'created_at', sortable: false, minWidth: '170' },
   { title: 'Actions', key: 'action', sortable: false, minWidth: '120' },
 ];
 

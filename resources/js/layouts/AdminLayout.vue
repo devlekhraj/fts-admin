@@ -31,11 +31,21 @@
                     variant="outlined" placeholder="Search menu" prepend-inner-icon="mdi-magnify" hide-details
                     clearable />
             </div>
-            <v-list density="comfortable" class="px-6" id="side-nav-items">
-                <template v-for="group in filteredItems" :key="group.group">
-                    <v-list-subheader class="mt-3" v-if="group && group.group">{{ group.group }}</v-list-subheader>
-                    <v-list-item v-for="link in group.links" class="py-2" :key="link.to.name || link.title"
-                        :to="link.to" :title="link.title" :prepend-icon="link.icon" rounded link />
+            <v-list density="comfortable" class="px-6" id="side-nav-items" v-model:opened="openGroups"
+                open-strategy="multiple">
+                <template v-for="group in filteredItems" :key="group.routeName || group.group">
+                    <v-list-group v-if="group.items && group.items.length" :value="group.group">
+                        <template #activator="{ props }">
+                            <v-list-item v-bind="props" :title="group.group" class="py-1 text-uppercase"
+                                :prepend-icon="group.icon || 'mdi-menu'" />
+                        </template>
+                        <v-list-item v-for="item in group.items" class="py-2" :key="item.routeName || item.title"
+                            :to="{ name: item.routeName }" :title="item.title" prepend-icon="mdi-minus" rounded link />
+                    </v-list-group>
+
+                    <v-list-item v-else class="py-2" :key="group.routeName || group.group"
+                        :to="{ name: group.routeName }" :title="group.group"
+                        :prepend-icon="group.icon || 'mdi-menu'" rounded link />
                 </template>
             </v-list>
         </v-navigation-drawer>
@@ -83,7 +93,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth.store';
 import { logout as apiLogout } from '@/api/auth.api';
@@ -103,19 +113,19 @@ const breadcrumbItems = computed(() => {
     const currentName = typeof route.name === 'string' ? route.name : '';
     const chain: string[] = [];
 
-    if (currentName !== 'admin.dashboard') {
-        chain.push('admin.dashboard');
+    if (currentName !== 'admin.overview') {
+        chain.push('admin.overview');
     }
 
     const parentName = breadcrumbRouteConfig[currentName]?.parent;
-    if (parentName && parentName !== 'admin.dashboard') {
+    if (parentName && parentName !== 'admin.overview') {
         chain.push(parentName);
     }
 
     if (currentName) {
         chain.push(currentName);
     } else {
-        chain.push('admin.dashboard');
+        chain.push('admin.overview');
     }
 
     return chain
@@ -142,10 +152,29 @@ const adminDisplayName = computed(() => {
     return authStore.admin?.name?.trim() || 'Admin';
 });
 const navSearch = ref('');
+const openGroups = ref<string[]>([]);
+const searchOpenBackup = ref<string[] | null>(null);
 
 const projectType = String(import.meta.env.VITE_PROJECT_TYPE ?? 'ecommerce').toLowerCase() as ProjectType;
 
-const items = computed<NavGroup[]>(() => menuByProject[projectType] ?? menuByProject.travel);
+const items = computed<NavGroup[]>(() => menuByProject[projectType] ?? menuByProject.ecommerce);
+
+watch(items, (groups) => {
+    const defaultGroup = 'Dashboard';
+    const expandable = groups
+        .filter((group) => Array.isArray(group.items) && group.items.length > 0)
+        .map((group) => group.group);
+
+    // keep only still-present expandable groups
+    const nextOpen: string[] = openGroups.value.filter((name) => expandable.includes(name));
+
+    // ensure dashboard is open by default when present
+    if (expandable.includes(defaultGroup) && !nextOpen.includes(defaultGroup)) {
+        nextOpen.push(defaultGroup);
+    }
+
+    openGroups.value = nextOpen;
+}, { immediate: true });
 
 const filteredItems = computed(() => {
     const query = (navSearch.value ?? '').trim().toLowerCase();
@@ -154,15 +183,47 @@ const filteredItems = computed(() => {
     return items.value
         .map((group) => {
             const groupMatch = (group.group ?? '').toLowerCase().includes(query);
-            const links = group.links.filter((link) =>
-                link.title.toLowerCase().includes(query)
-            );
-            return {
-                ...group,
-                links: groupMatch ? group.links : links,
-            };
+
+            if (group.items && group.items.length) {
+                const matchedItems = group.items.filter((item) =>
+                    item.title.toLowerCase().includes(query)
+                );
+                return {
+                    ...group,
+                    items: groupMatch ? group.items : matchedItems,
+                };
+            }
+
+            // leaf group: include if the group title matches
+            return groupMatch ? group : null;
         })
-        .filter((group) => group.links.length > 0);
+        .filter((group) => {
+            if (!group) return false;
+            if (group.items && group.items.length) return true;
+            return !!group.routeName; // leaf groups
+        }) as NavGroup[];
+});
+
+watch(filteredItems, (groups) => {
+    const query = (navSearch.value ?? '').trim();
+    if (!query) {
+        if (searchOpenBackup.value) {
+            openGroups.value = [...searchOpenBackup.value];
+            searchOpenBackup.value = null;
+        }
+        return;
+    }
+
+    // store the current open groups the first time we search
+    if (!searchOpenBackup.value) {
+        searchOpenBackup.value = [...openGroups.value];
+    }
+
+    const matchedExpandable = groups
+        .filter((group) => Array.isArray(group.items) && group.items.length > 0)
+        .map((group) => group.group);
+
+    openGroups.value = Array.from(new Set(matchedExpandable));
 });
 
 async function logout() {
@@ -211,9 +272,18 @@ main.v-main {
 }
 
 .v-navigation-drawer {
-    border: 0 !important;
-    box-shadow: none;
-    background: #fff;
+	border: 0 !important;
+	box-shadow: none;
+	background: #fff;
+
+	.v-list-group__items .v-list-item {
+		color: #0009;
+		padding-inline-start: calc(-40px + var(--indent-padding)) !important;
+	}
+
+	.v-list-group__items {
+		min-width: max-content !important;
+	}
 }
 
 .v-navigation-drawer--temporary.v-navigation-drawer--active {

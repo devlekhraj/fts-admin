@@ -4,10 +4,13 @@ export type BreadcrumbRouteConfig = {
 };
 
 export const breadcrumbRouteConfig: Record<string, BreadcrumbRouteConfig> = {
-    'admin.dashboard': { title: 'Dashboard' },
+    'admin.overview': { title: 'Overview' },
+    'admin.analytics': { title: 'Analytics', parent: 'admin.overview' },
     'admin.emi.requests': { title: 'EMI Requests' },
     'admin.emi.requests.detail': { title: 'EMI Request Detail', parent: 'admin.emi.requests' },
     'admin.emi.users': { title: 'EMI Users' },
+    'admin.emi.applications': { title: 'EMI Applications' },
+    'admin.emi.finance': { title: 'EMI Finance' },
     'admin.orders.list': { title: 'All Orders' },
     'admin.orders.detail': { title: 'Order Detail', parent: 'admin.orders.list' },
     'admin.orders.pre': { title: 'Pre Orders' },
@@ -38,7 +41,9 @@ export const breadcrumbRouteConfig: Record<string, BreadcrumbRouteConfig> = {
     'admin.banners.list': { title: 'Banners' },
     'admin.banners.detail': { title: 'Banner Detail', parent: 'admin.banners.list' },
     'admin.campaigns.list': { title: 'Campaigns' },
-    'admin.pages.list': { title: 'Pages' },
+    'admin.coupons.list': { title: 'Coupons' },
+    'admin.pages': { title: 'Pages' },
+    'admin.pages.detail': { title: 'Page Detail', parent: 'admin.pages' },
     'admin.inquiries.list': { title: 'Inquiries' },
     'admin.users.list': { title: 'User Lists' },
     'admin.faqs.list': { title: 'FAQs Management' },

@@ -2,7 +2,8 @@ import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import AuthLayout from '../layouts/AuthLayout.vue';
 import AdminLayout from '../layouts/AdminLayout.vue';
 import LoginPage from '../pages/LoginPage.vue';
-import DashboardPage from '../pages/DashboardPage.vue';
+import OverviewPage from '../pages/OverviewPage.vue';
+import AnalyticsPage from '../pages/AnalyticsPage.vue';
 import { useAuthStore } from '../stores/auth.store';
 
 const routes: RouteRecordRaw[] = [
@@ -16,15 +17,18 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     component: AdminLayout,
-    redirect: { name: 'admin.dashboard' },
+    redirect: { name: 'admin.overview' },
     meta: { requiresAuth: true },
     children: [
-      { path: 'dashboard', name: 'admin.dashboard', component: DashboardPage, meta: { title: 'Dashboard' } },
+      { path: 'overview', name: 'admin.overview', component: OverviewPage, meta: { title: 'Overview' } },
+      { path: 'analytics', name: 'admin.analytics', component: AnalyticsPage, meta: { title: 'Analytics' } },
       // emi requests
       { path: 'emi-requests', name: 'admin.emi.requests', component: () => import('@/pages/EmiRequestPage.vue'), meta: { title: 'EMI Requests' } },
       { path: 'emi-requests/:id', name: 'admin.emi.requests.detail', component: () => import('@/pages/EmiRequestDetailPage.vue'), meta: { title: 'EMI Request Detail' } },
       { path: 'emi-users', name: 'admin.emi.users', component: () => import('@/pages/EmiUsersListPage.vue'), meta: { title: 'EMI Users' } },
+      { path: 'emi-applications', name: 'admin.emi.applications', component: () => import('@/pages/EmiUsersListPage.vue'), meta: { title: 'EMI Applications' } },
       { path: 'emi-banks', name: 'admin.emi.banks', component: () => import('@/pages/EmiBankListPage.vue'), meta: { title: 'EMI Banks' } },
+      { path: 'emi-finance', name: 'admin.emi.finance', component: () => import('@/pages/EmiFinancePage.vue'), meta: { title: 'EMI Finance' } },
       // blogs
       { path: 'blogs', name: 'admin.blogs.list', component: () => import('@/pages/BlogPage.vue'), meta: { title: 'All Blogs' } },
       { path: 'blogs-create', name: 'admin.blogs.create', component: () => import('@/pages/BlogCreatePage.vue'), meta: { title: 'Create Blog' } },
@@ -64,9 +68,11 @@ const routes: RouteRecordRaw[] = [
       { path: 'marketing-banners/:id', name: 'admin.banners.detail', component: () => import('@/pages/BannerDetailPage.vue'), meta: { title: 'Banner Detail' } },
       { path: 'marketing-campaign', alias: ['marketing-campaigns'], name: 'admin.campaigns.list', component: () => import('@/pages/CampaignPage.vue'), meta: { title: 'Campaigns' } },
       { path: 'marketing-campaign/:id', name: 'admin.campaigns.detail', component: () => import('@/pages/CampaignDetailPage.vue'), meta: { title: 'Campaign Detail' } },
+      { path: 'marketing-coupons', name: 'admin.coupons.list', component: () => import('@/pages/CouponPage.vue'), meta: { title: 'Coupons' } },
       
       
-      { path: 'pages', name: 'admin.pages.list', component: () => import('@/pages/PagesListPage.vue'), meta: { title: 'Pages' } },
+      { path: 'pages', name: 'admin.pages', component: () => import('@/pages/WebPage.vue'), meta: { title: 'Pages' } },
+      { path: 'pages/:id', name: 'admin.pages.detail', component: () => import('@/pages/PageDetailPage.vue'), meta: { title: 'Page Detail' } },
       { path: 'inquiries', name: 'admin.inquiries.list', component: () => import('@/pages/InquiriesListPage.vue'), meta: { title: 'Inquiries' } },
       { path: 'user-lists', name: 'admin.users.list', component: () => import('@/pages/UserListsPage.vue'), meta: { title: 'User Lists' } },
       // settings
@@ -97,7 +103,7 @@ router.beforeEach((to) => {
   }
 
   if (isLogin && auth.isAuthenticated) {
-    return { name: 'admin.dashboard' };
+    return { name: 'admin.overview' };
   }
 
   return true;

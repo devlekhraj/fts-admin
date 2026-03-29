@@ -1,12 +1,14 @@
-export type NavLink = {
+export type NavItem = {
     title: string;
-    to: { name: string };
+    routeName: string;
     icon: string;
 };
 
 export type NavGroup = {
+    icon: string;
     group: string;
-    links: NavLink[];
+    items?: NavItem[];
+    routeName?: string;
 };
 
-export type ProjectType = 'travel' | 'ecommerce' | 'newsportal';
+export type ProjectType = 'ecommerce';

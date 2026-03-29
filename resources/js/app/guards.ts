@@ -10,7 +10,7 @@ export function applyGuards(router: Router) {
     }
 
     if (to.name === 'admin.login' && token) {
-      return { name: 'admin.dashboard' };
+      return { name: 'admin.overview' };
     }
 
     return true;
