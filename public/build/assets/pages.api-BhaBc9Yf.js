@@ -1,0 +1,1 @@
+import{M as n}from"./main-DPcPleVH.js";async function i(a){return await n.get("/admin/pages",{params:a})}async function o(a){await n.delete(`/admin/pages/${a}`)}async function r(a){const t=await n.get(`/admin/pages/${a}`),e=t;return e&&typeof e=="object"&&"data"in e&&e.data?e.data:t}export{o as d,r as g,i as l};

@@ -50,7 +50,7 @@ import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
 import { listOrders, type OrderListItem } from '@/api/orders.api';
 import { formatNPR } from '@/shared/formatters';
-import { formatLongDate } from '@/shared/utils';
+import { timeAgo } from '@/shared/utils';
 
 const headers = [
   { title: 'Order #', key: 'order_number', sortable: false, minWidth: '160' },
@@ -109,7 +109,7 @@ async function fetchOrders() {
       items_count: Number(order.items_count ?? 0),
       status: String(order.status ?? '-'),
       total: order.total !== null && order.total !== undefined ? formatNPR(order.total) : '-',
-      created_at: formatLongDate(order.created_at) ?? '-',
+      created_at: order.created_at ? timeAgo(order.created_at) : '-',
     }));
     total.value = Number(response?.total ?? response?.meta?.total ?? list.length);
     if (response?.meta?.current_page) {

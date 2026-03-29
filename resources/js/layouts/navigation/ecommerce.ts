@@ -10,6 +10,16 @@ export const ecommerceNav: NavGroup[] = [
         ],
     },
     {
+        group: 'Cart List',
+        icon: 'mdi-cart-outline',
+        routeName: 'admin.orders.cart',
+    },
+    {
+        group: 'Wish List',
+        icon: 'mdi-heart-outline',
+        routeName: 'admin.orders.wish',
+    },
+    {
         group: 'Sales',
         icon: 'mdi-chart-line',
         items: [
@@ -19,12 +29,11 @@ export const ecommerceNav: NavGroup[] = [
     },
     {
         group: 'EMI',
-        icon: 'mdi-cash-multiple',
+        icon: 'mdi-bank-outline',
         items: [
             { title: 'EMI Requests', routeName: 'admin.emi.requests', icon: 'mdi-cash-multiple' },
             { title: 'EMI Applications', routeName: 'admin.emi.applications', icon: 'mdi-file-document-edit-outline' },
             { title: 'EMI Banks', routeName: 'admin.emi.banks', icon: 'mdi-bank-outline' },
-            { title: 'EMI Finance', routeName: 'admin.emi.finance', icon: 'mdi-finance' },
         ],
     },
     {
@@ -40,7 +49,7 @@ export const ecommerceNav: NavGroup[] = [
     },
     {
         group: 'Blogs / Articles',
-        icon: 'mdi-text-box-multiple-outline',
+        icon: 'mdi-post-outline',
         items: [
             { title: 'Blogs', routeName: 'admin.blogs.list', icon: 'mdi-post-outline' },
             { title: 'Blog Categories', routeName: 'admin.blogCategories.list', icon: 'mdi-folder-multiple-outline' },
@@ -66,7 +75,7 @@ export const ecommerceNav: NavGroup[] = [
     },
     {
         group: 'System Admin',
-        icon: 'mdi-cog',
+        icon: 'mdi-shield-crown-outline',
         items: [
             { title: 'Admin Users', routeName: 'admin.list', icon: 'mdi-account-group-outline' },
             { title: 'Roles & Permissions', routeName: 'admin.roles.manage', icon: 'mdi-shield-account-outline' },
@@ -79,7 +88,7 @@ export const ecommerceNav: NavGroup[] = [
     },
     {
         group: 'Pages',
-        icon: 'mdi-cog-outline',
+        icon: 'mdi-file-edit-outline',
         routeName: 'admin.pages',
     },
 ];
