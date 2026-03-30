@@ -8,4 +8,6 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::get('orders/list', [OrderController::class, 'list'])->name('admin.orders.api.list');
     Route::get('orders/{id}/details', [OrderController::class, 'details'])->name('admin.orders.api.details');
+    Route::post('orders/{id}/warranty', [OrderController::class, 'generateWarranty'])->name('admin.orders.api.warranty.generate');
+    Route::post('orders/{id}/status', [OrderController::class, 'updateStatus'])->name('admin.orders.api.status.update');
 });

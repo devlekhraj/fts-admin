@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Foundation\Infrastructure\Persistence\Eloquent\Models;
 
+
+use App\Foundation\Infrastructure\Persistence\Eloquent\Models\OrderReceipentModel;
 use App\Foundation\Shared\Infrastructure\Persistence\Eloquent\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -71,5 +73,9 @@ class OrderModel extends BaseModel
     public function shippingAddress(): BelongsTo
     {
         return $this->belongsTo(ShippingAddressModel::class, 'shipping_address_id');
+    }
+
+    public function receipent(){
+        return $this->hasOne(OrderReceipentModel::class,'order_id','id');
     }
 }

@@ -9,6 +9,7 @@ use App\Foundation\Interfaces\Http\Resources\OrderResource;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class OrderController extends Controller
 {
@@ -65,12 +66,50 @@ class OrderController extends Controller
     public function details(string $id): JsonResponse
     {
         $order = OrderModel::query()
-            ->with(['user', 'paymentMethod'])
+            ->with(['user', 'paymentMethod','receipent','shippingAddress'])
             ->findOrFail($id);
 
         return response()->json([
             'data' => new OrderResource($order),
             'success' => true,
+        ], 200);
+    }
+
+    public function generateWarranty(string $id): JsonResponse
+    {
+        $order = OrderModel::query()->findOrFail($id);
+
+        if ($order->warranty_token) {
+            return response()->json([
+                'warranty_token' => $order->warranty_token,
+                'success' => true,
+                'message' => 'Warranty token already exists.',
+            ], 200);
+        }
+
+        $order->warranty_token = 'WS-' . Str::upper(Str::random(8));
+        $order->save();
+
+        return response()->json([
+            'warranty_token' => $order->warranty_token,
+            'success' => true,
+        ], 200);
+    }
+
+    public function updateStatus(Request $request, string $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'status' => ['required', 'integer', 'in:0,1,2,3,4,5'],
+        ]);
+
+        $order = OrderModel::query()->findOrFail($id);
+        $order->status = (int) $validated['status'];
+        $order->save();
+
+        return response()->json([
+            'success' => true,
+            'status' => $order->order_status,
+            'status_code' => $order->status,
         ], 200);
     }
 }

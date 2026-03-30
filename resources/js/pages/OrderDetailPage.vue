@@ -8,169 +8,275 @@
     </template>
   </AppPageHeader>
 
-  <v-card class="pa-6 pb-0">
-    <div class="top-grid">
-      <div class="thumb-cell">
-        <v-avatar size="112" rounded="lg" color="grey-lighten-3">
-          <v-img v-if="customerAvatar" :src="customerAvatar" cover />
-          <v-img v-else src="https://placehold.co/112x112?text=User" cover />
-        </v-avatar>
-      </div>
-      <div>
-        <h3>{{ orderDetail?.customer?.name || '-' }}</h3>
-        <div class="text-body-2 text-medium-emphasis mt-2 text-primary">{{ formatPhoneNumber(orderDetail?.customer?.mobile) || '-' }}</div>
-        <!-- <div class="text-body-2 text-medium-emphasis mt-2">{{ orderDetail?.order_number || '-' }}</div> -->
-        <!-- <div class="text-body-2 text-medium-emphasis mt-1"><span class="text-primary">{{ Number(orderDetail?.items_count ?? 0) }} items</span></div> -->
-        <div>
-          <h4 class="text-primary">{{ orderDetail?.total !== null && orderDetail?.total !== undefined ? formatNPR(orderDetail.total) : '-' }}</h4>
-        </div>
-        <div class="text-body-2 text-medium-emphasis mt-1"><v-chip color="primary" label size="small">{{ orderDetail?.status || '-' }}</v-chip></div>
-      </div>
-      <div class="shipping-panel">
-        <v-row class="ma-0" align="center">
-          <v-col cols="12" md="6" class="pa-0 pe-md-3">
-            <div class="d-flex ga-2 text-subtitle-2 font-weight-medium">
-              <v-icon size="28" color="primary">mdi-map-marker-outline</v-icon>
+  <!-- <v-card class="pa-6 pb-0"> -->
+  <v-container fluid class="order-overview pa-6">
+    <v-row>
+      <v-col cols="12" lg="4">
+        <v-card class="pa-4">
+          <div class="card order-card">
+            <div class="card-head">
+
               <div>
-                <h3>Shipping Address</h3>
-                <div class="address-text mt-2">{{ shippingRecipient }}</div>
-                <div class="address-text text-medium-emphasis mt-1">{{ shippingAddressLine1 }}</div>
-                <div class="address-text text-medium-emphasis">{{ shippingAddressLine2 }}</div>
-                <div class="address-text text-medium-emphasis">{{ shippingAddressLine3 }}</div>
+                <h3 class="mb-1">{{ orderNumber }}</h3>
+                <div class="text-body-2 text-medium-emphasis">{{ orderDate }}</div>
               </div>
             </div>
-          </v-col>
-          <v-col cols="12" md="6" class="pa-0 pt-3 pt-md-0">
-            <iframe
-              class="shipping-map"
-              :src="shippingMapUrl"
-              loading="lazy"
-              referrerpolicy="no-referrer-when-downgrade"
-              title="Shipping Address Map"
-            />
-          </v-col>
-        </v-row>
-      </div>
-    </div>
-  </v-card>
+            <div class="meta-row mt-3">
+              <!-- <span class="meta-label">Status</span> -->
+              <span class="meta-value d-flex align-center ga-2">
+                <v-chip size="small" color="primary" variant="tonal" label>{{ orderStatus }}</v-chip>
+              </span>
+            </div>
+            <div class="meta-row mt-2">
+              <span class="meta-label">Total</span>
+              <span class="meta-value">{{ orderTotal }}</span>
+            </div>
+            <div class="order-card-actions mt-3">
+              <WarrantySerialCard
+                class="flex-grow-1"
+                :order-id="summary?.id ?? ''"
+                :serial="summary?.warranty_token ?? null"
+                @generated="handleWarrantyGenerated"
+              />
+              <StatusUpdateAction
+                :order-id="summary?.id ?? ''"
+                :current-status="orderStatus"
+                @selected="handleStatusSelected"
+              />
+            </div>
+          </div>
 
-  <v-card>
-    <v-tabs v-model="activeTab" color="primary">
-      <v-tab v-for="tab in tabItems" :key="tab.value" :value="tab.value">
-        <v-icon start size="16">{{ tab.icon }}</v-icon>
-        {{ tab.label }}
-      </v-tab>
-    </v-tabs>
-    <v-divider />
-    <v-window v-model="activeTab">
-      <v-window-item v-for="tab in tabItems" :key="tab.value" :value="tab.value">
-        <component :is="tab.component" :item="orderDetail" />
-      </v-window-item>
-    </v-window>
-  </v-card>
+          <div class="card customer-card">
+            <div class="card-head">
+              <v-avatar size="44" rounded="lg" color="grey-lighten-3">
+                <v-img v-if="customerAvatar" :src="customerAvatar" cover />
+                <v-icon v-else size="24" color="grey-darken-1">mdi-account-circle</v-icon>
+              </v-avatar>
+              <div>
+                <div class="text-caption text-medium-emphasis">Customer</div>
+                <h3 class="mb-1">{{ customerName }}</h3>
+                <div class="text-body-2 text-medium-emphasis">{{ customerEmail }}</div>
+                <div class="text-body-2 text-medium-emphasis">{{ customerMobile }}</div>
+              </div>
+            </div>
+          </div>
+        </v-card>
+      </v-col>
+      <v-col cols="12" lg="8">
+        <v-card class="pa-4">
+          <section v-if="orderDetail && !isLoading" class="mb-6 w-100">
+
+
+            <div class="card shipping-card d-flex justify-space-between">
+              <div class="shipping-head">
+                <v-avatar size="44" rounded="lg" color="primary" variant="tonal">
+                  <v-icon size="24" color="primary-darken-2">mdi-account-outline</v-icon>
+                </v-avatar>
+                <div>
+                  <div class="text-caption text-medium-emphasis">Shipped To</div>
+                  <h3 class="mb-1">{{ shippingRecipient }}</h3>
+                  <div class="text-body-2 text-medium-emphasis">Phone: {{ shippingContact }}</div>
+                </div>
+              </div>
+
+              <div class="address-lines mt-3">
+                <div class="text-caption text-medium-emphasis d-flex align-center ga-2">
+                  <v-icon size="18" color="primary">mdi-map-marker-outline</v-icon>
+                  <span>Shipping Address</span>
+                </div>
+                <div>{{ shippingLine1 }}</div>
+                <div class="text-medium-emphasis">{{ shippingLine2 }}</div>
+                <div class="text-medium-emphasis">{{ shippingLine3 }}</div>
+              </div>
+            </div>
+          </section>
+          <div v-else class="text-body-2 text-medium-emphasis my-4">Loading order details...</div>
+
+          <section class="left-pane">
+            <!-- <div class="head-actions">
+            
+              <v-btn color="warning" variant="flat" prepend-icon="mdi-shield-plus-outline">
+                Create Warrenty Serial
+              </v-btn>
+            </div>
+
+            -->
+
+            <v-divider class="my-5" />
+
+            <div class="section-head mb-3">
+              <h3>Products</h3>
+
+            </div>
+
+            <v-table class="product-table" density="comfortable">
+              <thead>
+                <tr>
+                  <th class="text-left">Item</th>
+                  <th class="text-left">Quantity</th>
+                  <th class="text-right">Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in orderItems" :key="row.id ?? row.product_name">
+                  <td class="text-left text-body-2">
+                    <div class="d-flex ga-3 align-center pt-4">
+                      <v-avatar size="48" rounded>
+                        <v-img :src="row.product_thumb || 'https://placehold.co/96x96?text=Item'" cover />
+                      </v-avatar>
+                      <div class="d-flex flex-column ga-1">
+                        <span class="product-title">{{ row.product_name || '-' }}</span>
+                        <span v-if="row.sku" class="text-caption text-medium-emphasis">SKU: {{ row.sku }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-left text-body-2">{{ row.quantity ?? 0 }}</td>
+                  <td class="text-right text-body-2 font-weight-medium">
+                    {{ formatNPR((row.price ?? 0) * (row.quantity ?? 1)) }}
+                  </td>
+                </tr>
+              </tbody>
+            </v-table>
+
+            <v-divider class="my-5" />
+
+            <!-- <div class="section-head mb-3">
+              <h3>Payment Details</h3>
+              <v-chip size="small" color="success" variant="tonal">Paid</v-chip>
+            </div> -->
+
+            <div class="summary-table">
+              <div class="summary-row">
+                <span>Sub Total</span>
+                <strong>{{ formatNPR(paymentSummary.subtotal) }}</strong>
+              </div>
+              <!-- <div class="summary-row">
+                  <span>Tax</span>
+                  <strong>{{ formatNPR(paymentSummary.tax_total) }}</strong>
+                </div> -->
+              <div class="summary-row">
+                <span>Shipping Fee</span>
+                <strong>{{ formatNPR(paymentSummary.shipping_total) }}</strong>
+              </div>
+              <div class="summary-row">
+                <span>Discount</span>
+                <strong>{{ formatNPR(paymentSummary.discount_total) }}</strong>
+              </div>
+              <v-divider></v-divider>
+              <div class="summary-row total-row">
+                <span>Total</span>
+                <strong>{{ formatNPR(paymentSummary.total) }}</strong>
+              </div>
+              <v-divider></v-divider>
+              <div class="summary-row">
+                <span>Payment Type: </span>
+                <div class="paid-by text-right">
+                  <p class="paid-by-method text-primary">{{ orderDetail?.total_summary?.payment_type ?? 'N/A' }}</p>
+                  <p class="paid-by-time text-medium-emphasis ">{{ orderDate }}
+                  </p>
+                </div>
+              </div>
+
+            </div>
+          </section>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
+  <!-- </v-card> -->
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import { useRouter } from 'vue-router';
-import AppPageHeader from '@/components/AppPageHeader.vue';
-import type { OrderDetailResponse } from '@/api/orders.api';
+import { computed, onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
 import { formatNPR } from '@/shared/formatters';
-import OrderDetailTabOverview from '@/components/order/OrderDetailTabOverview.vue';
-import OrderDetailTabCustomer from '@/components/order/OrderDetailTabCustomer.vue';
-import OrderDetailTabIinvoice from '@/components/order/OrderDetailTabIinvoice.vue';
-import { formatPhoneNumber } from '@/shared/utils';
+import router from '@/app/router';
+import AppPageHeader from '@/components/AppPageHeader.vue';
+import { formatDateLong } from '@/shared/utils';
+import { getOrderDetails } from '@/api/orders.api';
+import type { OrderDetailResponse } from '@/api/orders.api';
+import WarrantySerialCard from '@/components/order/WarrantySerialCard.vue';
+import StatusUpdateAction from '@/components/order/StatusUpdateAction.vue';
 
-const router = useRouter();
-const activeTab = ref('overview');
-const tabItems = [
-  { value: 'overview', label: 'Overview', icon: 'mdi-view-dashboard-outline', component: OrderDetailTabOverview },
-  { value: 'customer', label: 'Customer', icon: 'mdi-account-outline', component: OrderDetailTabCustomer },
-  { value: 'payment', label: 'Invoice', icon: 'mdi-credit-card-outline', component: OrderDetailTabIinvoice },
-];
+const route = useRoute();
+const isLoading = ref(false);
+const orderDetail = ref<OrderDetailResponse | null>(null);
 
-const orderDetail = ref<OrderDetailResponse | null>({
-  id: 5012,
-  order_number: 'ORD-5012',
-  status: 'Confirmed',
-  total: 73500,
-  items_count: 3,
-  currency: 'NPR',
-  created_at: '2026-03-03T10:30:00.000000Z',
-  customer: {
-    id: 88,
-    name: 'Riya Shrestha',
-    email: 'riya@example.com',
-    mobile: '9861234567',
-    avatar_url: 'https://placehold.co/112x112?text=R',
-  },
-  payment_method: {
-    id: 2,
-    name: 'eSewa',
-    slug: 'esewa',
-  },
-  subtotal: 70000,
-  discount_total: 1500,
-  tax_total: 2000,
-  shipping_total: 3000,
-  notes: 'Deliver in afternoon.',
-  shipping_address: {
-    first_name: 'Riya',
-    last_name: 'Shrestha',
-    city: 'Kathmandu',
-    district: 'Kathmandu',
-    province: 'Bagmati',
-    country: 'Nepal',
-    landmark: 'Near New Road Gate',
-  },
-});
+async function loadOrder() {
+  const id = route.params.id;
+  if (!id) return;
+  isLoading.value = true;
+  try {
+    orderDetail.value = await getOrderDetails(id as string);
+  } catch (e) {
+    console.error('Failed to load order details', e);
+  } finally {
+    isLoading.value = false;
+  }
+}
 
-const customerAvatar = computed(() => {
-  const customer = orderDetail.value?.customer as Record<string, unknown> | undefined;
-  return String(customer?.avatar_url ?? customer?.avatar ?? '').trim();
+onMounted(loadOrder);
+
+const customer = computed(() => orderDetail.value?.customer ?? null);
+const customerAvatar = computed(() => String(customer.value?.avatar_url ?? '').trim());
+const customerName = computed(() => customer.value?.name || '-');
+const customerEmail = computed(() => customer.value?.email || '-');
+const customerMobile = computed(() => customer.value?.mobile || '-');
+const summary = computed(() => orderDetail.value?.summary ?? null);
+const orderNumber = computed(() => summary.value?.order_no || summary.value?.invoice_no || `Order #${summary.value?.id ?? '-'}`);
+const orderDate = computed(() => (summary.value?.order_date ? formatDateLong(summary.value.order_date) : '-'));
+const orderStatus = computed(() => summary.value?.status || '-');
+const orderTotal = computed(() => {
+  const total = orderDetail.value?.total_summary?.total ?? orderDetail.value?.total_summary?.sub_total;
+  return total !== null && total !== undefined ? formatNPR(Number(total)) : '-';
 });
 
 const shippingAddress = computed(() => {
-  const raw = orderDetail.value?.shipping_address;
-  return (raw && typeof raw === 'object') ? (raw as Record<string, unknown>) : null;
+  const raw = (orderDetail.value as Record<string, unknown> | null)?.shipping_address;
+  return raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : null;
 });
 
-const shippingRecipient = computed(() => {
-  const firstName = String(shippingAddress.value?.first_name ?? '').trim();
-  const lastName = String(shippingAddress.value?.last_name ?? '').trim();
-  const fullName = [firstName, lastName].filter(Boolean).join(' ');
-  return fullName || orderDetail.value?.customer?.name || '-';
-});
+const shippingRecipient = computed(() => orderDetail.value?.receipent?.name || customerName.value);
 
-const shippingAddressLine1 = computed(() => {
-  const landmark = String(shippingAddress.value?.landmark ?? '').trim();
-  return landmark || '-';
-});
+const shippingContact = computed(() => orderDetail.value?.receipent?.phone || customerMobile.value || '-');
 
-const shippingAddressLine2 = computed(() => {
+const shippingLine1 = computed(() => String(shippingAddress.value?.landmark ?? '').trim() || '-');
+const shippingLine2 = computed(() => {
   const city = String(shippingAddress.value?.city ?? '').trim();
   const district = String(shippingAddress.value?.district ?? '').trim();
   return [city, district].filter(Boolean).join(', ') || '-';
 });
-
-const shippingAddressLine3 = computed(() => {
+const shippingLine3 = computed(() => {
   const province = String(shippingAddress.value?.province ?? '').trim();
-  const country = String(shippingAddress.value?.country ?? '').trim();
-  return [province, country].filter(Boolean).join(', ') || '-';
+  const label = String(shippingAddress.value?.label ?? '').trim();
+  return province || label || '-';
 });
 
-const shippingMapUrl = computed(() => {
-  const query = [
-    shippingAddressLine1.value,
-    shippingAddressLine2.value,
-    shippingAddressLine3.value,
-  ]
-    .filter((part) => part && part !== '-')
-    .join(', ');
-
-  const q = encodeURIComponent(query || 'Nepal');
-  return `https://maps.google.com/maps?q=${q}&z=15&output=embed`;
+const orderItems = computed(() => {
+  const items = (orderDetail.value as Record<string, unknown> | null)?.order_items;
+  return Array.isArray(items) ? items : [];
 });
+
+const paymentSummary = computed(() => ({
+  subtotal: Number(orderDetail.value?.total_summary?.sub_total ?? 0),
+  tax_total: 0,
+  discount_total: Number(orderDetail.value?.total_summary?.discount_total ?? 0),
+  shipping_total: Number(orderDetail.value?.total_summary?.shipping_cost ?? 0),
+  total: Number(orderDetail.value?.total_summary?.total ?? orderDetail.value?.total_summary?.sub_total ?? 0),
+}));
+
+function handleWarrantyGenerated(token: string) {
+  if (orderDetail.value?.summary) {
+    orderDetail.value.summary.warranty_token = token;
+  }
+}
+
+function handleStatusSelected(payload: { status: string; orderId: string | number }) {
+  if (orderDetail.value?.summary) {
+    orderDetail.value.summary.status = payload.status;
+  }
+  // TODO: add API call to persist status change
+}
 
 function goBack() {
   router.push({ name: 'admin.orders.list' });
@@ -178,43 +284,172 @@ function goBack() {
 </script>
 
 <style scoped>
-.top-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-  align-items: start;
-}
-
-.thumb-cell {
-  display: flex;
-  justify-content: center;
-}
-
-.shipping-panel {
+.left-pane {
   border: 1px solid rgb(var(--v-theme-outline-variant));
   border-radius: 10px;
-  padding: 12px;
+  padding: 14px;
 }
 
-.shipping-map {
+.head-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.cancel-link {
+  font-size: 0.86rem;
+  text-decoration: underline;
+  color: rgb(var(--v-theme-on-surface));
+}
+
+
+.warranty-code {
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.warranty-row {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+
+.section-head h3 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.product-list {
+  display: grid;
+  gap: 12px;
+}
+
+.product-row {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.product-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.product-sub {
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+
+.product-price {
+  font-size: 0.9rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.summary-table {
+  display: grid;
+  gap: 10px;
+  max-width: 420px;
   width: 100%;
-  min-height: 170px;
-  border: 0;
-  border-radius: 6px;
-  display: block;
+  margin-left: auto;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.9rem;
+}
+
+.paid-by {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.paid-by-method {
+  font-size: 0.9rem;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+}
+
+.paid-by-time {
+  /* margin: 4px 0 0; */
+  font-size: 0.77rem;
+  /* font-weight: 500; */
+  /* line-height: 1.2; */
+}
+
+.total-row {
+  padding-top: 8px;
+  border-top: 1px solid rgb(var(--v-theme-outline-variant));
+}
+
+.top-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.card {
+  border: 1px solid rgb(var(--v-theme-outline-variant));
+  border-radius: 10px;
+  padding: 14px;
+  background: rgb(var(--v-theme-surface));
+}
+
+.card-head,
+.shipping-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.customer-meta {
+  display: grid;
+  gap: 8px;
+}
+
+.meta-row {
+  display: flex;
+  gap: 10px;
+  font-size: 0.9rem;
+}
+
+.meta-label {}
+
+.meta-value {
+  font-weight: 600;
+}
+
+.address-lines div {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.order-card-actions {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  flex-wrap: wrap;
 }
 
 @media (min-width: 960px) {
   .top-grid {
-    grid-template-columns: 128px minmax(0, 1fr) minmax(280px, 500px);
-    gap: 20px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
   }
 
-  .thumb-cell {
-    justify-content: flex-start;
+  .customer-card {
+    justify-self: start;
   }
-}
-.address-text{
-  font-size: 0.8rem;
+
+  .shipping-card {
+  
+  }
 }
 </style>
