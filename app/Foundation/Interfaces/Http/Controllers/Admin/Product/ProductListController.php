@@ -14,7 +14,7 @@ class ProductListController extends Controller
     public function getList(Request $request): JsonResponse
     {
         try {
-            $products = ProductModel::query()->with('defaultFile');
+            $products = ProductModel::query()->with('defaultFile')->withCount('files');
 
             if ($request->has('brand_id')) {
                 $products = $products->where('brand_id', $request->input('brand_id'));
@@ -75,6 +75,7 @@ class ProductListController extends Controller
                     'slug' => $product->slug,
                     'price' => $product->price ?? null,
                     'thumb' => $product->thumb,
+                    'images_count' => is_numeric($product->files_count ?? null) ? (int) $product->files_count : 0,
                 ];
             });
 

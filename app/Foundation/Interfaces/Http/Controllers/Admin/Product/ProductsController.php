@@ -20,6 +20,7 @@ class ProductsController extends Controller
         $query = ProductModel::query()
             ->with('defaultFile')
             ->withCount('variants')
+            ->withCount('files')
             ->orderByDesc('created_at');
 
         if ($name = $request->query('name')) {

@@ -8,12 +8,8 @@
           </v-btn>
         </template>
         <v-list class="export-menu-list" density="comfortable" min-width="170">
-          <v-list-item
-            v-for="option in exportOptions"
-            :key="option.type"
-            :title="option.title"
-            :prepend-icon="option.icon"
-            @click="onExport(option.type)" />
+          <v-list-item v-for="option in exportOptions" :key="option.type" :title="option.title"
+            :prepend-icon="option.icon" @click="onExport(option.type)" />
         </v-list>
       </v-menu>
 
@@ -23,14 +19,33 @@
     </template>
   </AppPageHeader>
 
-  <AppDataTable
-    :headers="headers"
-    :items="items"
-    :total="total"
-    :loading="loading"
-    :page="options.page"
-    :items-per-page="options.itemsPerPage"
-    @update:options="onOptions">
+  <AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :page="options.page"
+    :items-per-page="options.itemsPerPage" v-model:expanded="expandedRows" @update:options="onOptions">
+    <template #actions>
+      <v-container fluid class="py-4">
+        <v-row align="center">
+          <v-col cols="12" md="6" lg="4">
+            <div class="d-flex align-center ga-3">
+              <v-text-field v-model="search" density="compact" variant="outlined" label="Search products"
+                placeholder="Search by name..." prepend-inner-icon="mdi-magnify" hide-details clearable
+                style="min-width: 260px" @click:clear="onClearSearch" />
+              <v-btn color="primary" variant="tonal" height="40" @click="onSearch">
+                <v-icon start>mdi-magnify</v-icon>
+                Search
+              </v-btn>
+            </div>
+          </v-col>
+
+          <v-spacer></v-spacer>
+
+          <v-col cols="12" md="auto" class="text-right">
+            <div class="text-medium-emphasis">
+              <span class="text-primary" style="font-size: smaller;">Total: {{ total }} Items found.</span>
+            </div>
+          </v-col>
+        </v-row>
+      </v-container>
+    </template>
     <template #item.name="{ item }">
       <div class="d-flex align-center ga-2">
         <v-avatar size="28" color="grey-lighten-3" rounded>
@@ -44,6 +59,15 @@
       <v-chip size="small" label variant="tonal" :color="item.status ? 'success' : 'warning'">
         {{ item.status ? 'Active' : 'Inactive' }}
       </v-chip>
+    </template>
+    <template #item.images_count="{ item }">
+      <div class="d-flex align-center ga-2">
+        <v-btn icon size="x-small" variant="tonal" :color="isExpanded(item.id) ? 'primary' : 'default'"
+          @click.stop="toggleExpand(item.id)">
+          <v-icon size="16">{{ isExpanded(item.id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+        </v-btn>
+        <span>{{ Number(item.images_count ?? 0) === 0 ? '-' : `${Number(item.images_count ?? 0)} images` }}</span>
+      </div>
     </template>
     <template #item.emi_enabled="{ item }">
       <v-chip size="small" label variant="tonal" :color="item.emi_enabled ? 'primary' : 'grey'">
@@ -61,23 +85,92 @@
     <template #item.action="{ item }">
       <div class="d-flex align-center ga-1">
         <v-btn size="small" variant="tonal" class="mr-2" color="primary" @click="onView(item)">
-          <v-icon size="16">mdi-eye</v-icon> Edit Product
+          Edit Product
         </v-btn>
         <v-btn size="small" variant="tonal" color="error" @click="onDelete(item)">
-          <v-icon size="16">mdi-delete</v-icon> Delete
+          Delete
         </v-btn>
       </div>
+    </template>
+    <template #expanded-row="{ item, columns }">
+      <tr>
+        <td :colspan="columns.length">
+          <v-container>
+            <div class="pa-4">
+              <div class="d-flex align-center ga-2 mb-3">
+                <!-- <div class="text-subtitle-2">Images for {{ item.name }}</div> -->
+                <v-chip size="small" color="primary" label>Total {{ item.images_count || 0 }} images</v-chip>
+              </div>
+
+              <div v-if="productImages[String(item.id)]?.loading" class="d-flex align-center ga-2 text-medium-emphasis">
+                <v-progress-circular indeterminate size="20" width="2" color="primary" />
+                <span>Loading images...</span>
+              </div>
+              <div v-else-if="productImages[String(item.id)]?.error" class="text-error">
+                {{ productImages[String(item.id)]?.error }}
+              </div>
+              <div v-else>
+                <div v-if="(productImages[String(item.id)]?.images?.length ?? 0) === 0" class="text-medium-emphasis">
+                  No images found.
+                </div>
+                <v-table v-else density="comfortable" class="product-images-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 120px;">Preview</th>
+                      <th>Info</th>
+                      <th style="width: 120px;">Default</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="img in productImages[String(item.id)]?.images ?? []"
+                      :key="String(img.id ?? Math.random())">
+                      <td class="py-3">
+                        <div class="table-image-preview rounded">
+                          <v-img v-if="img.url" :src="String(img.url)" contain
+                            :alt="img.alt_text || 'Image'" />
+                          <div v-else class="d-flex align-center justify-center h-100">
+                            <v-icon size="18" color="grey-darken-1">mdi-image-outline</v-icon>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="py-3">
+                        <div class="text-body-2 font-weight-medium">{{ img.alt_text || 'Untitled' }}</div>
+                        <div class="text-caption text-medium-emphasis">Alt: {{ img.alt_text || '-' }}</div>
+                        <div class="text-caption text-medium-emphasis">Size: {{ img.size_info || '-' }}</div>
+                        <div class="text-caption text-medium-emphasis">
+                          URL:
+                          <a v-if="img.url" :href="String(img.url)" target="_blank" rel="noopener" class="text-primary">
+                            {{ String(img.url) }}
+                          </a>
+                          <span v-else>-</span>
+                        </div>
+                        <div v-if="img.id" class="text-caption text-medium-emphasis">File ID: {{ img.id }}</div>
+                      </td>
+                      <td class="py-3">
+                        <v-chip size="small" label variant="tonal"
+                          :color="img.meta?.is_default ? 'primary' : 'default'">
+                          {{ img.meta?.is_default ? 'Yes' : 'No' }}
+                        </v-chip>
+                      </td>
+                    </tr>
+                  </tbody>
+                </v-table>
+              </div>
+            </div>
+          </v-container>
+        </td>
+      </tr>
     </template>
   </AppDataTable>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
-import { listProducts, type ProductListItem } from '@/api/products.api';
+import { getProductDetail, listProducts, type ProductDetailResponse, type ProductListItem } from '@/api/products.api';
 import { formatLongDate } from '@/shared/utils';
 import { openModal } from '@/shared/modal';
 import ProductCreateModal from '@/components/product/ProductCreateModal.vue';
@@ -89,6 +182,7 @@ type Product = {
   status: boolean;
   emi_enabled: boolean;
   variants_count: number;
+  images_count: number;
   created_at: string;
   thumb: string;
 };
@@ -104,22 +198,26 @@ const exportOptions: Array<{ type: ExportType; title: string; icon: string }> = 
 const headers = [
   { title: 'Name', key: 'name', sortable: false, minWidth: '260' },
   // { title: 'Slug', key: 'slug', sortable: false, minWidth: '220' },
+  { title: 'Images', key: 'images_count', sortable: false, minWidth: '120' },
   // { title: 'Variants', key: 'variants_count', sortable: false, minWidth: '120' },
   { title: 'Status', key: 'status', sortable: false, minWidth: '140' },
   { title: 'EMI', key: 'emi_enabled', sortable: false, minWidth: '140' },
   // { title: 'Created', key: 'created_at', sortable: false, minWidth: '170' },
-  { title: 'Actions', key: 'action', sortable: false, minWidth: '120' },
+  { title: 'Actions', key: 'action', sortable: false, width: '100' },
 ];
 
 const items = ref<Product[]>([]);
 const total = ref(0);
 const loading = ref(false);
+const expandedRows = ref<Array<string | number>>([]);
+const productImages = ref<Record<string, { loading: boolean; error: string | null; images: ProductDetailResponse['images'] }>>({});
 const options = ref<DataTableOptions>({
   page: 1,
   itemsPerPage: 10,
   sortBy: [],
 });
 const hasLoadedOnce = ref(false);
+const search = ref('');
 const router = useRouter();
 
 function onExport(type: ExportType) {
@@ -136,10 +234,10 @@ function onDelete(product: Product) {
   console.log('Delete product:', product.slug);
 }
 
-function openProductModal(){
+function openProductModal() {
   openModal(ProductCreateModal, {
     onSaved: (product: any) => {
-      console.log({product});
+      console.log({ product });
       if (product?.id) {
         router.push({ name: 'admin.product.detail', params: { id: product.id } });
       } else {
@@ -157,6 +255,7 @@ async function fetchProducts() {
     const response = await listProducts({
       page: options.value.page,
       per_page: options.value.itemsPerPage,
+      search: search.value.trim() || undefined,
     });
 
     const list = Array.isArray(response) ? response : response?.data ?? [];
@@ -167,6 +266,7 @@ async function fetchProducts() {
       status: Boolean(product.status),
       emi_enabled: Boolean(product.emi_enabled),
       variants_count: Number(product.variants_count ?? 0),
+      images_count: Number((product as any).images_count ?? (Array.isArray((product as any).images) ? (product as any).images.length : 0)),
       created_at: typeof product.created_at === 'string' ? product.created_at : '',
       thumb: typeof product.thumb === 'string' ? product.thumb : '',
     }));
@@ -190,6 +290,64 @@ function onOptions(next: DataTableOptions) {
   fetchProducts();
 }
 
+watch(expandedRows, (rows) => {
+  rows.forEach((id) => {
+    ensureProductImages(id);
+  });
+});
+
+function isExpanded(id: string | number): boolean {
+  return expandedRows.value.some((entry) => String(entry) === String(id));
+}
+
+function toggleExpand(id: string | number) {
+  if (isExpanded(id)) {
+    expandedRows.value = expandedRows.value.filter((entry) => String(entry) !== String(id));
+  } else {
+    expandedRows.value = [...expandedRows.value, id];
+    ensureProductImages(id);
+  }
+}
+
+watch(expandedRows, (rows) => {
+  rows.forEach((id) => {
+    ensureProductImages(id);
+  });
+});
+
+async function ensureProductImages(productId: string | number) {
+  const key = String(productId);
+  const cache = productImages.value[key];
+  if (cache && (cache.loading || cache.images)) return;
+
+  productImages.value[key] = { loading: true, error: null, images: [] };
+  try {
+    const detail = await getProductDetail(productId);
+    productImages.value[key] = {
+      loading: false,
+      error: null,
+      images: Array.isArray(detail?.images) ? detail.images : [],
+    };
+  } catch (err: any) {
+    productImages.value[key] = {
+      loading: false,
+      error: err?.message || 'Failed to load images',
+      images: [],
+    };
+  }
+}
+
+function onSearch() {
+  options.value.page = 1;
+  fetchProducts();
+}
+
+function onClearSearch() {
+  search.value = '';
+  options.value.page = 1;
+  fetchProducts();
+}
+
 onMounted(() => {
   if (!hasLoadedOnce.value) {
     fetchProducts();
@@ -205,5 +363,10 @@ onMounted(() => {
 
 :deep(.product-thumb .v-img__img) {
   object-fit: contain;
+}
+
+.product-images-table .table-image-preview {
+  width: 200px;
+  height: 150px;
 }
 </style>

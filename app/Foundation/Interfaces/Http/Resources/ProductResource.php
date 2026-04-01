@@ -30,6 +30,10 @@ class ProductResource extends JsonResource
             ? (int) $this->variants_count
             : ($this->relationLoaded('variants') ? $this->variants->count() : 0);
 
+        $imagesCount = is_numeric($this->files_count ?? null)
+            ? (int) $this->files_count
+            : ($this->relationLoaded('files') ? $this->files->count() : 0);
+
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -37,6 +41,7 @@ class ProductResource extends JsonResource
             'status' => (bool) $this->status,
             'emi_enabled' => (bool) $this->emi_enabled,
             'variants_count' => $variantsCount,
+            'images_count' => $imagesCount,
             'created_at' => $this->created_at,
             'thumb' => $defaultFile?->url,
         ];
