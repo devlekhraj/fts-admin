@@ -11,6 +11,7 @@ export type ProductCategoryListItem = {
   title?: string | null;
   slug?: string | null;
   thumb?: string | null;
+  products_count?: number | null;
   status?: boolean | null;
   created_at?: string | null;
   [key: string]: unknown;
@@ -62,6 +63,15 @@ export async function listProductCategories(
 ): Promise<ProductCategoryListResponse> {
   const response = await http.get('/admin/product-categories', { params });
   return response as unknown as ProductCategoryListResponse;
+}
+
+// Lightweight list used for selectors; returns plain array without meta
+export async function listProductCategoriesLite(): Promise<ProductCategoryListItem[]> {
+  const response = await http.get('/admin/product-categorie-list');
+  if (Array.isArray(response)) return response as ProductCategoryListItem[];
+  const wrapped = response as { data?: unknown };
+  if (wrapped && Array.isArray(wrapped.data)) return wrapped.data as ProductCategoryListItem[];
+  return [];
 }
 
 export async function getProductCategory(id: number | string): Promise<ProductCategoryDetailResponse> {

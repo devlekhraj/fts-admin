@@ -26,7 +26,7 @@
         <v-row align="center">
           <v-col cols="12" md="6" lg="4">
             <div class="d-flex align-center ga-3">
-              <v-text-field v-model="search" density="compact" variant="outlined" label="Search products"
+              <AppTextField v-model="search" label="Search products"
                 placeholder="Search by name..." prepend-inner-icon="mdi-magnify" hide-details clearable
                 style="min-width: 260px" @click:clear="onClearSearch" />
               <v-btn color="primary" variant="tonal" height="40" @click="onSearch">
@@ -34,6 +34,12 @@
                 Search
               </v-btn>
             </div>
+          </v-col>
+
+          <v-col cols="12" md="6" lg="3">
+            <AppSelectField v-model="categoryFilter" :items="categoryOptions" item-title="title" item-value="value"
+              label="Category" clearable hide-details
+              @update:model-value="onCategoryChange" />
           </v-col>
 
           <v-spacer></v-spacer>
@@ -170,7 +176,10 @@ import { useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
+import AppTextField from '@/components/shared/AppTextField.vue';
+import AppSelectField from '@/components/shared/AppSelectField.vue';
 import { getProductDetail, listProducts, type ProductDetailResponse, type ProductListItem } from '@/api/products.api';
+import { listProductCategoriesLite, type ProductCategoryListItem } from '@/api/product-categories.api';
 import { formatLongDate } from '@/shared/utils';
 import { openModal } from '@/shared/modal';
 import ProductCreateModal from '@/components/product/ProductCreateModal.vue';
@@ -218,6 +227,8 @@ const options = ref<DataTableOptions>({
 });
 const hasLoadedOnce = ref(false);
 const search = ref('');
+const categoryFilter = ref<number | string | null>(null);
+const categoryOptions = ref<Array<{ title: string; value: number | string | null }>>([]);
 const router = useRouter();
 
 function onExport(type: ExportType) {
@@ -256,6 +267,7 @@ async function fetchProducts() {
       page: options.value.page,
       per_page: options.value.itemsPerPage,
       search: search.value.trim() || undefined,
+      category_id: categoryFilter.value || undefined,
     });
 
     const list = Array.isArray(response) ? response : response?.data ?? [];
@@ -280,6 +292,18 @@ async function fetchProducts() {
   } finally {
     loading.value = false;
   }
+}
+
+async function fetchCategories() {
+  const list = await listProductCategoriesLite();
+  console.log({list});
+  categoryOptions.value = [
+    { title: 'All categories', value: null },
+    ...list.map((cat: ProductCategoryListItem) => ({
+      title: cat.title + " " + ((Number(cat.products_count ?? 0) > 0) ? `(${cat.products_count})` : '') || '-',
+      value: cat.id,
+    })).sort((a, b) => a.title.localeCompare(b.title)),
+  ];
 }
 
 function onOptions(next: DataTableOptions) {
@@ -342,6 +366,11 @@ function onSearch() {
   fetchProducts();
 }
 
+function onCategoryChange() {
+  options.value.page = 1;
+  fetchProducts();
+}
+
 function onClearSearch() {
   search.value = '';
   options.value.page = 1;
@@ -349,6 +378,7 @@ function onClearSearch() {
 }
 
 onMounted(() => {
+  fetchCategories();
   if (!hasLoadedOnce.value) {
     fetchProducts();
     hasLoadedOnce.value = true;

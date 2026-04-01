@@ -28,7 +28,9 @@ class ProductsController extends Controller
         }
 
         if ($categoryId = $request->query('category_id')) {
-            $query->where('category_id', $categoryId);
+            $query->whereHas('categories', function ($builder) use ($categoryId) {
+                $builder->where('product_category_id', $categoryId);
+            });
         }
 
         if ($brandId = $request->query('brand_id')) {

@@ -111,6 +111,7 @@ class ProductCategoryController extends Controller
     public function getList(Request $request)
     {
         $categories = ProductCategoryModel::with('defaultFile')
+            ->withCount('products')
             ->has('products')
             ->orderBy('title', 'asc')
             ->get()
@@ -120,6 +121,7 @@ class ProductCategoryController extends Controller
                     'title' => $category->title,
                     'slug' => $category->slug,
                     'thumb' => $category->defaultFile->first()?->url,
+                    'products_count' => $category->products_count ?? 0,
                 ];
             });
 

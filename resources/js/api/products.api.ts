@@ -8,6 +8,7 @@ export type ListProductsParams = {
   page?: number;
   per_page?: number;
   search?: string;
+  category_id?: number | string | null;
 };
 
 export type ProductListItem = {

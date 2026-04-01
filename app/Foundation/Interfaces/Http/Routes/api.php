@@ -6,7 +6,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/auth/admin.php';
 require __DIR__ . '/admin/admin-users.php';
-require __DIR__ . '/admin/categories.php';
+// require __DIR__ . '/admin/categories.php';
 require __DIR__ . '/admin/brands.php';
 require __DIR__ . '/admin/blogs.php';
 require __DIR__ . '/admin/blog-categories.php';
