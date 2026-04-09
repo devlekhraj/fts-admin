@@ -6,6 +6,7 @@ namespace App\Foundation\Infrastructure\Persistence\Eloquent\Models;
 
 use App\Foundation\Shared\Infrastructure\Persistence\Eloquent\Models\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class EmiRequestModel extends BaseModel
 {
@@ -47,8 +48,17 @@ class EmiRequestModel extends BaseModel
     {
         return $this->belongsTo(UserModel::class, 'user_id');
     }
+
     public function bank(): BelongsTo
     {
         return $this->belongsTo(EmiBankModel::class, 'bank');
+    }
+
+    public function files(): BelongsToMany
+    {
+        return $this->belongsToMany(FileModel::class, 'file_usages', 'usage_id', 'file_id')
+            ->wherePivot('usage_type', 'emi_requests')
+            ->withPivot(['title'])
+            ->withTimestamps();
     }
 }

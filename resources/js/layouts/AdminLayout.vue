@@ -26,39 +26,48 @@
                     </template>
                 </div>
             </v-sheet>
-            <div class="px-6 pb-2">
+            <!-- <div class="px-6 pb-2">
                 <v-text-field v-model="navSearch" color="primary" class="nav-search-field" density="compact"
                     variant="outlined" placeholder="Search menu" prepend-inner-icon="mdi-magnify" hide-details
                     clearable />
-            </div>
-            <v-list density="comfortable" class="px-6" id="side-nav-items" v-model:opened="openGroups"
-                open-strategy="multiple">
-                <template v-for="group in filteredItems" :key="group.routeName || group.group">
-                    <v-list-group v-if="group.items && group.items.length" :value="group.group">
-                        <template #activator="{ props }">
-                            <v-list-item v-bind="props" :title="group.group" class="py-1 text-uppercase"
-                                :prepend-icon="group.icon || 'mdi-menu'" />
-                        </template>
-                        <v-list-item v-for="item in group.items" class="py-2" :key="item.routeName || item.title"
-                            :to="{ name: item.routeName }" :title="item.title" prepend-icon="mdi-minus" rounded link />
-                    </v-list-group>
+            </div> -->
+            <div class="pt-6">
+                <v-list density="comfortable" class="px-6" id="side-nav-items" open-strategy="single"
+                    v-model:opened="openGroups" :ripple="false">
+                    <template v-for="group in filteredItems" :key="group.routeName || group.group">
+                        <v-list-group v-if="group.items && group.items.length" :value="group.group"
+                            :class="{ 'active-nav-group': isGroupActive(group) }">
+                            <template #activator="{ props }">
+                                <v-list-item v-bind="props" :title="group.group"
+                                    class="py-1 text-uppercase group-activator" :prepend-icon="group.icon || 'mdi-menu'"
+                                    :ripple="false" :active-class="'active-nav-group'" />
+                            </template>
+                            <v-list-item v-for="item in group.items" class="py-2 submenu-item submenu-child"
+                                :key="item.routeName || item.title" :to="{ name: item.routeName }" :title="item.title"
+                                rounded link :ripple="false"
+                                :class="{ 'active-nav-item': isRouteActive(item.routeName) }"
+                                active-class="active-nav-item" />
+                        </v-list-group>
 
-                    <v-list-item v-else class="py-2" :key="group.routeName || group.group"
-                        :to="{ name: group.routeName }" :title="group.group"
-                        :prepend-icon="group.icon || 'mdi-menu'" rounded link />
-                </template>
-            </v-list>
+                        <v-list-item v-else class="py-2 submenu-item" :key="group.routeName || group.group"
+                            :to="{ name: group.routeName }" :title="group.group"
+                            :prepend-icon="group.icon || 'mdi-menu'" rounded link :ripple="false"
+                            :class="{ 'active-nav-item': isRouteActive(group.routeName) }"
+                            active-class="active-nav-item" />
+                    </template>
+                </v-list>
+            </div>
+
         </v-navigation-drawer>
 
         <v-app-bar app flat class="admin-app-bar">
-            <v-app-bar-nav-icon @click="drawer = !drawer" />
+            <v-app-bar-nav-icon color="primary" :icon="drawer ? 'mdi-dock-left' : 'mdi-dock-right'"
+                @click="drawer = !drawer" />
             <v-toolbar-title>
                 <div class="toolbar-title-wrap">
-                    <v-breadcrumbs class="toolbar-breadcrumbs pa-0" :items="breadcrumbItems">
-                        <template #divider>
-                            <v-icon size="14">mdi-chevron-right</v-icon>
-                        </template>
-                    </v-breadcrumbs>
+                    <v-text-field v-model="navSearch" color="primary" class="nav-search-field" density="compact"
+                        variant="outlined" placeholder="Search menu" prepend-inner-icon="mdi-magnify" hide-details
+                        clearable />
                 </div>
             </v-toolbar-title>
             <v-spacer />
@@ -85,7 +94,7 @@
         </v-app-bar>
 
         <v-main class="admin-main">
-            <v-container class="main-container-content py-4" fluid>
+            <v-container class="main-container-content pa-8" fluid>
                 <RouterView />
             </v-container>
         </v-main>
@@ -226,6 +235,17 @@ watch(filteredItems, (groups) => {
     openGroups.value = Array.from(new Set(matchedExpandable));
 });
 
+function isRouteActive(name?: string) {
+    if (!name) return false;
+    return route.name === name;
+}
+
+function isGroupActive(group: NavGroup) {
+    if (group.routeName && isRouteActive(group.routeName)) return true;
+    if (!group.items || !group.items.length) return false;
+    return group.items.some((item) => isRouteActive(item.routeName));
+}
+
 async function logout() {
     if (isLoggingOut.value) return;
 
@@ -245,13 +265,16 @@ async function logout() {
     }
 }
 </script>
-<style lang="scss" scoped>
-main.v-main {
-    background-color: #f4f4f4;
+<style lang="scss">
+.top-fixed {
+    position: sticky;
+    top: 0;
+    background: var(--white-color);
+    z-index: 1;
 }
 
 .custom-title {
-    font-size: 0.9rem;
+    font-size: 0.82rem;
 }
 
 .main-container-content {
@@ -272,47 +295,123 @@ main.v-main {
 }
 
 .v-navigation-drawer {
-	border: 0 !important;
-	box-shadow: none;
-	background: #fff;
+    border: 0 !important;
+    box-shadow: none;
+    background: #fff;
 
-	.v-list-group__items .v-list-item {
-		color: #0009;
-		padding-inline-start: calc(-40px + var(--indent-padding)) !important;
-	}
+    .v-list-group__items .v-list-item {
+        font-size: 0.8rem !important;
+        padding-inline-start: 4px !important;
+    }
 
-	.v-list-group__items {
-		min-width: max-content !important;
-	}
+    .v-list-group__items {
+        min-width: max-content !important;
+        margin-left: 28px;
+        padding-left: 14px;
+        border-left: 1px dashed #858585;
+
+    }
+
+    .v-list-group.active-nav-group {
+        .v-list-group__items {
+            border-left-color: rgb(var(--v-theme-primary)) !important;
+        }
+    }
+
+    .v-list-item__prepend {
+        width: 30px;
+    }
 }
 
 .v-navigation-drawer--temporary.v-navigation-drawer--active {
     box-shadow: none;
-
 }
 
 .v-list-item.v-list-item--active {
-    background: #fefefe;
+    background: transparent !important;
+}
+
+.v-list-item__overlay {
+    background-color: transparent !important;
 }
 
 
 .v-list-item {
-    min-height: 36px !important;
-    font-size: 0.8rem;
+    // min-height: 36px !important;
+    font-size: 0.82rem;
     // font-weight: 400;
 }
 
+.group-activator {
+    // min-height: 36px !important;
+    padding-top: 0;
+    padding-bottom: 0;
+    // margin-bottom: 6px;
+
+    &.group-active-tonal {
+        background: rgba(63, 193, 131, 0.1) !important;
+        border-radius: 4px !important;
+    }
+
+    .v-list-item-title {
+        // line-height: 36px;
+    }
+}
+
+.submenu-item {
+    // min-height: 20px !important;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-bottom: 0px;
+
+    &.submenu-child {
+        position: relative;
+        min-height: 30px !important;
+
+        &::before {
+            content: "";
+            position: absolute;
+            left: -14px;
+            top: 50%;
+            width: 11px;
+            border-top: 1px dashed #cdcccc;
+        }
+    }
+
+    &.active-nav-item {
+        color: rgb(var(--v-theme-primary)) !important;
+
+        .v-list-item-title {
+            color: rgb(var(--v-theme-primary)) !important;
+        }
+
+        &::before {
+            border-top-color: rgb(var(--v-theme-primary)) !important;
+        }
+    }
+
+    .v-list-item-title {
+        // line-height: 30px;
+        font-size: 0.8rem;
+    }
+
+    .v-list-item__overlay {
+        background-color: transparent;
+    }
+}
+
+.active-nav-item {
+    color: rgb(var(--v-theme-primary)) !important;
+
+    .v-list-item__prepend .v-icon,
+    .v-list-item-title {
+        color: rgb(var(--v-theme-primary)) !important;
+    }
+}
 
 .drawer-header {
     background: transparent;
-    // background:
-    //     repeating-linear-gradient(45deg,
-    //         rgba(0, 0, 0, 0.03),
-    //         rgba(0, 0, 0, 0.03) 2px,
-    //         transparent 2px,
-    //         transparent 10px),
-    //     linear-gradient(262deg, #f4faff 0%, #fafafa 100%);
-    // background: repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.03) 2px, transparent 2px, transparent 10px), linear-gradient(92deg, #ffffff 0%, #ffffff 100%);
+
     padding: 0 10px;
 }
 
@@ -360,12 +459,19 @@ main.v-main {
 .toolbar-title-wrap {
     display: flex;
     flex-direction: column;
+    // font-size: sm;
+    font-weight: 600;
+    max-width: 400px;
 }
 
 .toolbar-breadcrumbs :deep(.v-breadcrumbs-item),
 .toolbar-breadcrumbs :deep(.v-breadcrumbs-divider) {
     font-size: 0.875rem;
     color: rgba(var(--v-theme-on-surface), 0.58);
+}
+
+.toolbar-breadcrumbs {
+    margin-top: 2px;
 }
 
 .toolbar-page-title {
@@ -382,5 +488,34 @@ main.v-main {
 
 .nav-search-field :deep(.v-field) {
     --v-field-input-size: 0.8rem;
+}
+
+.v-list-item__content {
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+
+#side-nav-items {
+    .v-list-item.active-nav-item {
+        color: rgb(var(--v-theme-primary)) !important;
+
+        .v-list-item__prepend .v-icon,
+        .v-list-item-title {
+            color: rgb(var(--v-theme-primary)) !important;
+        }
+
+        &::before {
+            border-top-color: rgb(var(--v-theme-primary)) !important;
+        }
+    }
+
+    .v-list-group.active-nav-group>.v-list-group__items {
+        border-left-color: rgb(var(--v-theme-primary)) !important;
+    }
+
+    .v-list-group.active-nav-group>.v-list-group__header .v-list-item-title,
+    .v-list-group.active-nav-group>.v-list-group__header .v-icon {
+        color: rgb(var(--v-theme-primary)) !important;
+    }
 }
 </style>

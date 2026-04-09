@@ -38,6 +38,7 @@ class EmiRequestListResource extends JsonResource
             'status' => $this->status,
             'status_label' => EmiRequestModel::getStatusLabels()[$this->status] ?? 'Unknown',
             'created_at' => $this->created_at,
+           
         ];
     }
 
@@ -90,6 +91,7 @@ class EmiRequestListResource extends JsonResource
             'card_holder_name' => $this->card_holder_name,
             'card_number' => $this->card_number,
             'card_expiry_date' => $this->card_expiry_date,
+             'files' => $this->files
         ];
     }
 

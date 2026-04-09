@@ -34,7 +34,7 @@
     <v-card-title>Content</v-card-title>
     <v-divider />
     <v-card-text>
-      <div v-if="pageDetail?.content" class="content-text">{{ pageDetail.content }}</div>
+      <div v-if="pageDetail?.content" class="content-text" v-html="pageDetail.content"></div>
       <div v-else class="text-medium-emphasis">No content available.</div>
     </v-card-text>
   </v-card>

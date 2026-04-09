@@ -66,6 +66,7 @@ class EmiRequestsController extends Controller
             ->with(['product.defaultFile', 'user'])
             ->findOrFail($id);
 
+            // dd($record);
         return response()->json(new EmiRequestListResource($record));
     }
 

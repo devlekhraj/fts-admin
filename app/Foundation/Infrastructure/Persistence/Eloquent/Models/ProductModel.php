@@ -14,7 +14,9 @@ class ProductModel extends BaseModel
     protected $table = 'products';
 
     const STATUS_ENABLED = 1;
+
     const STATUS_DISABLED = 0;
+
     const STATUS_DRAFT = 2;
 
     protected $fillable = [
@@ -65,6 +67,7 @@ class ProductModel extends BaseModel
     {
         return $this->belongsTo(ProductBrandModel::class, 'brand_id');
     }
+
     public function variants(): HasMany
     {
         return $this->hasMany(ProductVariantModel::class, 'product_id');
@@ -87,8 +90,6 @@ class ProductModel extends BaseModel
             ->withPivot(['id', 'usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
             ->orderByPivot('id', 'asc');
     }
-
-
 
     public function attribute(): BelongsTo
     {
