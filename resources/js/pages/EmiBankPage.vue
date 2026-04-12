@@ -28,11 +28,11 @@
     </template>
 
     <template #item.action="{ item }">
-      <div class="d-flex align-center ga-1">
-        <v-btn size="small" variant="tonal" color="primary"
+      <div class="d-flex align-center justify-end ga-1">
+        <!-- <v-btn size="small" variant="tonal" color="primary"
           @click="router.push({ name: 'admin.emi.banks.detail', params: { id: item.id } })">
           View
-        </v-btn>
+        </v-btn> -->
         <EmiBankEditButton :bank="item" @saved="onBankUpdated" />
         <EmiBankDeleteButton :bank="item" @deleted="onBankDeleted" />
       </div>
@@ -62,7 +62,7 @@ const headers = [
   { title: 'SN', key: 'sn', sortable: false, maxWidth: '80', minWidth:'80' },
   { title: 'Name', key: 'name', sortable: false, minWidth: '200' },
   { title: 'Code', key: 'code', sortable: false, maxWidth: '100', minWidth:'100' },
-  { title: 'Actions', key: 'action', sortable: false, maxWidth: '100', minWidth: '100' },
+  { title: 'Actions', key: 'action', sortable: false, maxWidth: '100', minWidth: '100', align: 'end' },
 ];
 
 const items = ref<EmiBank[]>([]);

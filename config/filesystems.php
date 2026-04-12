@@ -46,12 +46,12 @@ return [
             'throw' => false,
             'report' => false,
         ],
-        // 'cdn' => [
-        //     'driver' => 'local',
-        //     'root' => env('CDN_ROOT'),
-        //     'url' => env('CDN_URL'),
-        //     'visibility' => 'public',
-        // ],
+        'cdn' => [
+            'driver' => 'local',
+            'root' => env('CDN_ROOT'),
+            'url' => env('CDN_URL'),
+            'visibility' => 'public',
+        ],
 
         'fatafat_cdn' => [
             'driver' => 'ftp',

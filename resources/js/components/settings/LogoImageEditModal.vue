@@ -27,18 +27,19 @@
           <app-field-label label="Label / Type" />
           <v-select
             v-model="form.title"
-            :items="[
-              { title: 'Main Logo', value: 'main_logo' },
-              { title: 'Login Image', value: 'login_logo' },
-              { title: 'Favicon', value: 'favicon_logo' },
-              { title: 'Footer Logo', value: 'footer_logo' },
-              { title: 'Other', value: 'other_logo' },
-            ]"
+            :items="filteredOptions"
+            item-title="title"
+            item-value="value"
             variant="outlined"
             density="comfortable"
             placeholder="Select type"
             clearable
           />
+          <div class="text-caption text-medium-emphasis mt-2">
+            <span>Used: {{ usedOptions.map((o) => o.title).join(', ') || 'None' }}</span>
+            <br />
+            <span>Available: {{ unusedOptions.map((o) => o.title).join(', ') || 'None' }}</span>
+          </div>
         </v-col>
 
         <v-col cols="12" class="py-0">
@@ -75,7 +76,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
+import { reactive, ref, computed } from 'vue';
 import { updateFileUsage, deleteFileUsage } from '@/api/files.api';
 import AppFieldLabel from '@/components/shared/AppFieldLabel.vue';
 import { getErrorMessage } from '@/shared/errors';
@@ -83,11 +84,13 @@ import { useSnackbarStore } from '@/stores/snackbar.store';
 
 const props = defineProps<{
   file: any;
+  usedTitles?: string[];
 }>();
 
 const emit = defineEmits<{
   (e: 'close'): void;
   (e: 'saved', payload?: unknown): void;
+  (e: 'deleted', payload?: unknown): void;
 }>();
 
 const snackbar = useSnackbarStore();
@@ -97,6 +100,30 @@ const deleting = ref(false);
 const form = reactive({
   title: String(props.file.title ?? '').trim() || 'Main Logo',
   alt_text: String(props.file.alt_text ?? '').trim(),
+});
+
+const baseOptions = [
+  { title: 'Main Logo', value: 'main_logo' },
+  { title: 'Login Image', value: 'login_logo' },
+  { title: 'Favicon', value: 'favicon_logo' },
+  { title: 'Footer Logo', value: 'footer_logo' },
+  { title: 'Other', value: 'other_logo' },
+];
+
+const usedOptions = computed(() => {
+  const used = props.usedTitles ?? [];
+  return baseOptions.filter((opt) => used.includes(opt.value));
+});
+
+const unusedOptions = computed(() => {
+  const used = props.usedTitles ?? [];
+  return baseOptions.filter((opt) => !used.includes(opt.value));
+});
+
+const filteredOptions = computed(() => {
+  const used = props.usedTitles ?? [];
+  const current = form.title;
+  return baseOptions.filter((opt) => !used.includes(opt.value) || opt.value === current);
 });
 
 async function onUpdate() {
@@ -141,6 +168,7 @@ async function onDelete() {
 
     snackbar.show({ message: 'Logo image deleted successfully.', color: 'success' });
     emit('saved', { file_usage_id: props.file.id, action: 'deleted' });
+    emit('deleted', { file_usage_id: props.file.id });
     emit('close');
   } catch (error) {
     snackbar.show({ message: getErrorMessage(error), color: 'error' });

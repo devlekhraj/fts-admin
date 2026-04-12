@@ -29,6 +29,17 @@
     :page="options.page"
     :items-per-page="options.itemsPerPage"
     @update:options="onOptions">
+    <template #actions>
+      <PageFilter
+        v-model:search="search"
+        search-label="Search brands"
+        search-placeholder="Search by name or slug"
+        :total="total"
+        total-label="Items found."
+        @search="onSearch"
+        @clear="onClearSearch"
+      />
+    </template>
     <template #item.name="{ item }">
       <div class="d-flex align-center ga-2">
         <v-avatar size="28" color="grey-lighten-3" rounded>
@@ -65,6 +76,7 @@ import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
+import PageFilter from '@/components/filters/PageFilter.vue';
 import BrandCreateButton from '@/components/brand/BrandCreateButton.vue';
 import BrandDeleteButton from '@/components/brand/BrandDeleteButton.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
@@ -101,6 +113,7 @@ const headers = [
 const items = ref<ProductBrand[]>([]);
 const total = ref(0);
 const loading = ref(false);
+const search = ref('');
 const options = ref<DataTableOptions>({
   page: 1,
   itemsPerPage: 10,
@@ -124,6 +137,7 @@ async function fetchBrands() {
     const response = await listBrands({
       page: options.value.page,
       per_page: options.value.itemsPerPage,
+      search: search.value.trim() || undefined,
     });
 
     const list = Array.isArray(response) ? response : response?.data ?? [];
@@ -153,6 +167,17 @@ function onOptions(next: DataTableOptions) {
   if (!hasLoadedOnce.value) {
     hasLoadedOnce.value = true;
   }
+  fetchBrands();
+}
+
+function onSearch() {
+  options.value.page = 1;
+  fetchBrands();
+}
+
+function onClearSearch() {
+  search.value = '';
+  options.value.page = 1;
   fetchBrands();
 }
 

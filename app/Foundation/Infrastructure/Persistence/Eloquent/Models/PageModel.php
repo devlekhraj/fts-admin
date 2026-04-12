@@ -13,13 +13,12 @@ class PageModel extends BaseModel
     protected $fillable = [
         'title',
         'slug',
-        'status',
+        'excerpt',
         'content',
-        'meta',
+        'meta_title',
+        'meta_keywords',
+        'meta_description',
     ];
 
-    protected $casts = [
-        'status' => 'boolean',
-        'meta' => 'array',
-    ];
+    protected $casts = [];
 }

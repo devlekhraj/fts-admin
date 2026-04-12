@@ -4,6 +4,7 @@ export type ListBlogsParams = {
   page?: number;
   per_page?: number;
   search?: string;
+  category_id?: number | string;
 };
 
 export type BlogListItem = {

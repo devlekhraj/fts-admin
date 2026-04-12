@@ -9,6 +9,7 @@ export type ModalOptions = {
 	size?: ModalSize;
 	persistent?: boolean;
 	onSaved?: (payload?: unknown) => void;
+	onDeleted?: (payload?: unknown) => void;
 };
 
 export const useModalStore = defineStore('modal', {
@@ -20,6 +21,7 @@ export const useModalStore = defineStore('modal', {
 		size: 'md' as ModalSize,
 		persistent: true,
 		onSaved: null as ((payload?: unknown) => void) | null,
+		onDeleted: null as ((payload?: unknown) => void) | null,
 	}),
 	actions: {
 		open(component: Component, props: Record<string, unknown> = {}, options: ModalOptions = {}) {
@@ -29,6 +31,7 @@ export const useModalStore = defineStore('modal', {
 			this.size = options.size ?? 'md';
 			this.persistent = options.persistent ?? true;
 			this.onSaved = options.onSaved ?? null;
+			this.onDeleted = options.onDeleted ?? null;
 			this.isOpen = true;
 		},
 		close() {
@@ -41,6 +44,7 @@ export const useModalStore = defineStore('modal', {
 			this.size = 'md';
 			this.persistent = true;
 			this.onSaved = null;
+			this.onDeleted = null;
 		},
 	},
 });

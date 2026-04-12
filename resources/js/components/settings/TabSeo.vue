@@ -1,7 +1,7 @@
 <template>
 	<v-card class="pa-4" variant="flat">
 		<v-row>
-			<v-col cols="12" lg="10" offset-lg="1">>
+			<v-col cols="12" lg="10" offset-lg="1">
 				<div class="pt-4">
 					<div class="text-h6 mb-1">SEO Settings</div>
 					<div class="text-body-2 text-medium-emphasis mb-4">

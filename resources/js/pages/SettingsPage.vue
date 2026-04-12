@@ -7,19 +7,21 @@
 
 
 	<v-container fluid>
-		<v-tabs v-model="activeTab" density="compact">
-			<v-tab v-for="tab in tabItems" :key="tab.id" color="primary" :value="tab.module">
-				{{ tab.name || 'Unnamed Module' }}
-			</v-tab>
-		</v-tabs>
-		<v-divider></v-divider>
-	
-	
-		<v-window v-model="activeTab">
-			<v-window-item v-for="tab in tabItems" :key="tab.id" :value="tab.module">
-				<component :is="tab.component" :data="settingsData[tab.module]" />
-			</v-window-item>
-		</v-window>
+		<v-card>
+			<v-tabs v-model="activeTab" density="compact">
+				<v-tab v-for="tab in tabItems" :key="tab.id" color="primary" :value="tab.module">
+					{{ tab.name || 'Unnamed Module' }}
+				</v-tab>
+			</v-tabs>
+			<v-divider></v-divider>
+		
+		
+			<v-window v-model="activeTab">
+				<v-window-item v-for="tab in tabItems" :key="tab.id" :value="tab.module">
+					<component :is="tab.component" :data="settingsData[tab.module]" />
+				</v-window-item>
+			</v-window>
+		</v-card>
 	</v-container>
 
 </template>

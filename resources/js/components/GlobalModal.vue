@@ -14,7 +14,7 @@
         </v-btn>
       </v-card-title>
       <v-divider></v-divider>
-      <component :is="modal.component" v-bind="modal.props" @close="modal.close()" @saved="handleSaved" />
+      <component :is="modal.component" v-bind="modal.props" @close="modal.close()" @saved="handleSaved" @deleted="handleDeleted" />
     </v-card>
   </v-dialog>
 </template>
@@ -45,6 +45,10 @@ const dialogWidth = computed(() => {
 function handleSaved(payload: unknown) {
   modal.onSaved?.(payload);
   // modal.close();
+}
+
+function handleDeleted(payload: unknown) {
+  modal.onDeleted?.(payload);
 }
 
 </script>

@@ -20,6 +20,32 @@
     </AppPageHeader>
     <AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :page="options.page"
         :items-per-page="options.itemsPerPage" @update:options="onOptions">
+        <template #actions>
+            <v-container fluid class="py-4">
+                <v-row align="center">
+                    <v-col cols="12" md="6" lg="4">
+                        <div class="d-flex align-center ga-3">
+                            <AppTextField v-model="search" label="Search" placeholder="Search by name..."
+                                prepend-inner-icon="mdi-magnify" hide-details clearable style="min-width: 260px"
+                                @click:clear="onClearSearch" />
+                            <v-btn color="primary" variant="tonal" height="40">
+                                <v-icon start>mdi-magnify</v-icon>
+                                Search
+                            </v-btn>
+                        </div>
+                    </v-col>
+                    <v-spacer></v-spacer>
+
+                    <v-col cols="12" md="auto" class="text-right">
+                        <div class="text-medium-emphasis">
+                            <span class="text-primary" style="font-size: smaller;">Total: {{ total }} Items
+                                found.</span>
+                        </div>
+                    </v-col>
+                </v-row>
+            </v-container>
+        </template>
+
         <template #item.name="{ item }">
             <div class="d-flex align-center gap-2">
                 <v-avatar size="26" color="grey-lighten-3" rounded>
@@ -54,9 +80,11 @@ import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
+import PageFilter from '@/components/filters/PageFilter.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
 import { list as listCustomers, type CustomersListItem } from '@/api/customers.api';
 import { formatLongDate, formatPhoneNumber } from '@/shared/utils';
+import AppTextField from '@/components/shared/AppTextField.vue';
 
 type Customer = {
     id: number | string;
@@ -91,6 +119,7 @@ const headers = [
 const items = ref<Customer[]>([]);
 const total = ref(0);
 const loading = ref(false);
+const search = ref('');
 const options = ref<DataTableOptions>({
     page: 1,
     itemsPerPage: 10,
@@ -110,6 +139,7 @@ async function fetchCustomers() {
         const response = await listCustomers({
             page: options.value.page,
             per_page: options.value.itemsPerPage,
+            search: search.value.trim() || undefined,
         });
 
         const list = Array.isArray(response) ? response : response?.data ?? [];
@@ -143,6 +173,17 @@ function onOptions(next: DataTableOptions) {
     if (!hasLoadedOnce.value) {
         hasLoadedOnce.value = true;
     }
+    fetchCustomers();
+}
+
+function onSearch() {
+    options.value.page = 1;
+    fetchCustomers();
+}
+
+function onClearSearch() {
+    search.value = '';
+    options.value.page = 1;
     fetchCustomers();
 }
 

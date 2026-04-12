@@ -8,12 +8,8 @@
           </v-btn>
         </template>
         <v-list class="export-menu-list" density="comfortable" min-width="170">
-          <v-list-item
-            v-for="option in exportOptions"
-            :key="option.type"
-            :title="option.title"
-            :prepend-icon="option.icon"
-            @click="onExport(option.type)" />
+          <v-list-item v-for="option in exportOptions" :key="option.type" :title="option.title"
+            :prepend-icon="option.icon" @click="onExport(option.type)" />
         </v-list>
       </v-menu>
 
@@ -21,14 +17,39 @@
     </template>
   </AppPageHeader>
 
-  <AppDataTable
-    :headers="headers"
-    :items="items"
-    :total="total"
-    :loading="loading"
-    :page="options.page"
-    :items-per-page="options.itemsPerPage"
-    @update:options="onOptions">
+  <AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :page="options.page"
+    :items-per-page="options.itemsPerPage" @update:options="onOptions">
+    <template #actions>
+      <v-container fluid class="py-4">
+        <v-row align="center">
+          <v-col cols="12" md="6" lg="4">
+            <div class="d-flex align-center ga-3">
+              <AppTextField  label="Search" placeholder="Search by name..."
+                prepend-inner-icon="mdi-magnify" hide-details clearable style="min-width: 260px"
+                 />
+              <v-btn color="primary" variant="tonal" height="40">
+                <v-icon start>mdi-magnify</v-icon>
+                Search
+              </v-btn>
+            </div>
+          </v-col>
+
+          <!-- <v-col cols="12" md="6" lg="3">
+            <AppSelectField  item-title="title" item-value="value" label="Category" clearable
+              hide-details  />
+          </v-col> -->
+
+          <v-spacer></v-spacer>
+
+          <v-col cols="12" md="auto" class="text-right">
+            <div class="text-medium-emphasis">
+              <span class="text-primary" style="font-size: smaller;">Total: {{ total }} Items found.</span>
+            </div>
+          </v-col>
+        </v-row>
+      </v-container>
+    </template>
+
     <template #item.title="{ item }">
       <div class="d-flex align-center ga-2">
         <v-avatar size="28" color="grey-lighten-3" rounded>
@@ -71,6 +92,8 @@ import {
   type BlogCategoryListPaginatedResponse,
 } from '@/api/blog-categories.api';
 import { formatLongDate } from '@/shared/utils';
+import AppTextField from '@/components/shared/AppTextField.vue';
+import AppSelectField from '@/components/shared/AppSelectField.vue';
 
 type BlogCategory = {
   id: number | string;

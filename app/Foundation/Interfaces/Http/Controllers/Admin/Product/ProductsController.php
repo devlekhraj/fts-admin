@@ -11,7 +11,6 @@ use App\Foundation\Interfaces\Http\Resources\ProductResource;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Schema;
 
 class ProductsController extends Controller
 {
@@ -37,11 +36,30 @@ class ProductsController extends Controller
             $query->where('brand_id', $brandId);
         }
 
+        // if ($search = $request->query('search')) {
+        //     $query->where(function ($builder) use ($search) {
+        //         $builder->where('name', 'like', "%{$search}%")
+        //             ->orWhere('slug', 'like', "%{$search}%");
+        //     });
+        // }
         if ($search = $request->query('search')) {
             $query->where(function ($builder) use ($search) {
                 $builder->where('name', 'like', "%{$search}%")
                     ->orWhere('slug', 'like', "%{$search}%");
             });
+
+            $query->orderByRaw("
+        CASE 
+            WHEN name LIKE ? THEN 1   -- starts with 'iphone'
+            WHEN name LIKE ? THEN 2   -- contains 'iphone'
+            WHEN slug LIKE ? THEN 3
+            ELSE 4
+        END
+    ", [
+                "{$search}%",   // highest priority
+                "%{$search}%",  // medium
+                "%{$search}%",  // lower
+            ]);
         }
 
         $perPageParam = (int) $request->query('per_page', 15);
@@ -80,7 +98,7 @@ class ProductsController extends Controller
     public function show(string $id): JsonResponse
     {
         $product = ProductModel::query()
-            ->with(['defaultFile', 'files', 'variants.files', 'attribute.attributes','brand.defaultFile'])
+            ->with(['defaultFile', 'files', 'variants.files', 'attribute.attributes', 'brand.defaultFile'])
             ->findOrFail($id);
 
         return response()->json([

@@ -14,14 +14,22 @@ class PageResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'slug' => $this->slug,
-            'status' => (bool) $this->status,
             'updated_at' => $this->updated_at,
         ];
 
         if ($request->route()?->getName() === 'admin.pages.show') {
             return array_merge($base, [
                 'content' => $this->content,
-                'meta' => is_array($this->meta) ? $this->meta : json_decode((string) $this->meta, true),
+                'excerpt' => $this->excerpt,
+                'meta_title' => $this->meta_title,
+                'meta_keywords' => $this->meta_keywords,
+                'meta_description' => $this->meta_description,
+                'meta' => [
+                    'excerpt' => $this->excerpt,
+                    'meta_title' => $this->meta_title,
+                    'meta_keywords' => $this->meta_keywords,
+                    'meta_description' => $this->meta_description,
+                ],
                 'created_at' => $this->created_at,
             ]);
         }

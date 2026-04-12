@@ -29,6 +29,38 @@
     :page="options.page"
     :items-per-page="options.itemsPerPage"
     @update:options="onOptions">
+    <template #actions>
+      <v-container fluid class="py-4">
+        <v-row align="center">
+          <v-col cols="12" md="6" lg="4">
+            <div class="d-flex align-center ga-3">
+              <AppTextField v-model="search" label="Search"
+                placeholder="Search by name..." prepend-inner-icon="mdi-magnify" hide-details clearable
+                style="min-width: 260px" @click:clear="onClearSearch" />
+              <v-btn color="primary" variant="tonal" height="40">
+                <v-icon start>mdi-magnify</v-icon>
+                Search
+              </v-btn>
+            </div>
+          </v-col>
+
+          <v-col cols="12" md="6" lg="3">
+            <AppSelectField  :items="categoryOptions" item-title="title" item-value="value"
+              label="Category" clearable hide-details
+              @update:model-value="onCategoryChange" />
+          </v-col>
+
+          <v-spacer></v-spacer>
+
+          <v-col cols="12" md="auto" class="text-right">
+            <div class="text-medium-emphasis">
+              <span class="text-primary" style="font-size: smaller;">Total: {{ total }} Items found.</span>
+            </div>
+          </v-col>
+        </v-row>
+      </v-container>
+    </template>
+    
     <template #item.title="{ item }">
       <div class="d-flex align-center ga-2">
         <v-avatar size="28" color="grey-lighten-3" rounded>
@@ -64,14 +96,18 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
+import PageFilter from '@/components/filters/PageFilter.vue';
 import BlogCreateButton from '@/components/blog/BlogCreateButton.vue';
 import BlogDeleteButton from '@/components/blog/BlogDeleteButton.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
 import { listBlogs, type BlogListItem } from '@/api/blogs.api';
+import { listBlogCategories, type BlogCategoryListItem } from '@/api/blog-categories.api';
+import AppTextField from '@/components/shared/AppTextField.vue';
+import AppSelectField from '@/components/shared/AppSelectField.vue';
 
 type Blog = {
   id: number | string;
@@ -103,6 +139,11 @@ const headers = [
 const items = ref<Blog[]>([]);
 const total = ref(0);
 const loading = ref(false);
+const search = ref('');
+const selectedCategory = ref<number | string | null>(null);
+const categoryOptions = ref<Array<{ title: string; value: number | string | null }>>([
+  { title: 'All categories', value: null },
+]);
 const options = ref<DataTableOptions>({
   page: 1,
   itemsPerPage: 10,
@@ -110,6 +151,7 @@ const options = ref<DataTableOptions>({
 });
 const hasLoadedOnce = ref(false);
 const router = useRouter();
+let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 const CATEGORY_COLORS: Record<string, string> = {
   news: 'primary',
@@ -171,6 +213,8 @@ async function fetchBlogs() {
     const response = await listBlogs({
       page: options.value.page,
       per_page: options.value.itemsPerPage,
+      search: search.value.trim() || undefined,
+      category_id: selectedCategory.value || undefined,
     });
 
     const list = Array.isArray(response) ? response : response?.data ?? [];
@@ -203,8 +247,48 @@ function onOptions(next: DataTableOptions) {
   fetchBlogs();
 }
 
+function onClearSearch() {
+  search.value = '';
+  options.value.page = 1;
+  fetchBlogs();
+}
+
+function onCategoryChange() {
+  options.value.page = 1;
+}
+
+async function fetchCategories() {
+  const response = await listBlogCategories({ per_page: 100 });
+  const list = Array.isArray(response) ? response : response?.data ?? [];
+  const normalized = list.map((category: BlogCategoryListItem) => ({
+    title: category.title ?? 'Untitled',
+    value: category.id,
+  }));
+  categoryOptions.value = [{ title: 'All categories', value: null }, ...normalized];
+}
+
+watch(
+  search,
+  (value) => {
+    if (searchDebounceTimer) {
+      clearTimeout(searchDebounceTimer);
+    }
+    searchDebounceTimer = setTimeout(() => {
+      options.value.page = 1;
+      fetchBlogs();
+    }, value ? 400 : 0);
+  },
+  { flush: 'post' },
+);
+
+watch(selectedCategory, () => {
+  options.value.page = 1;
+  fetchBlogs();
+});
+
 onMounted(() => {
   if (!hasLoadedOnce.value) {
+    fetchCategories();
     fetchBlogs();
     hasLoadedOnce.value = true;
   }

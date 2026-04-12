@@ -70,6 +70,7 @@ class FileController extends Controller
     {
         $validated = $request->validated();
 
+        // dd($validated);
         $source = (string) $validated['source'];
         if ($source === 'upload' && ! $request->file('file')) {
             return response()->json([
@@ -94,7 +95,8 @@ class FileController extends Controller
             }
 
             $response = [
-                'message' => 'Failed to process file assignment.',
+                'message' => 'Failed to process file assignment. -'.$exception->getMessage(),
+
             ];
 
             if ((bool) config('app.debug', false)) {
@@ -109,7 +111,7 @@ class FileController extends Controller
 
         $usageType = trim((string) $validated['usage_type']);
         $usageId = (int) $validated['usage_id'];
-        $altText = trim((string) $validated['alt_text']);
+        $altText =  isset($validated['alt_text']) ?  trim((string) $validated['alt_text']) :'';
         $usageResult = $this->assignFileUsageHandler->handle(new AssignFileUsageCommand(
             fileId: $fileId,
             usageType: $usageType,
@@ -119,6 +121,7 @@ class FileController extends Controller
             // caption: isset($validated['caption']) ? (string) $validated['caption'] : null,
             // description: isset($validated['description']) ? (string) $validated['description'] : null,
         ));
+
         $usage = $usageResult['usage'] ?? null;
 
         return response()->json([
@@ -127,6 +130,7 @@ class FileController extends Controller
                 'source' => $source,
                 'file' => $fileData,
                 'usage' => $usage,
+                'url' => $fileData['url'],
             ],
         ], 201);
     }
@@ -178,10 +182,11 @@ class FileController extends Controller
             ->map(function (FileModel $file): ?string {
                 $meta = is_array($file->meta) ? $file->meta : [];
                 $directory = $meta['directory'] ?? null;
-                if (!is_string($directory)) {
+                if (! is_string($directory)) {
                     return null;
                 }
                 $normalized = trim($directory);
+
                 return $normalized !== '' ? $normalized : null;
             })
             ->filter()

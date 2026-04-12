@@ -16,7 +16,8 @@ use Throwable;
 
 final class FatafatCdnFileUploadService implements FileUploadService
 {
-    private const DISK = 'fatafat_cdn';
+    // private const DISK = 'fatafat_cdn';
+    private const DISK = 'cdn';
     private const DEFAULT_DIRECTORY = 'uploads';
     private const WEBP_QUALITY = 85;
 
@@ -26,6 +27,7 @@ final class FatafatCdnFileUploadService implements FileUploadService
 
     public function uploadImageAsWebp(UploadedFile $file, ?string $directory = null): array
     {
+
         $targetDirectory = $this->normalizeDirectory((string) ($directory ?? self::DEFAULT_DIRECTORY));
         $sanitizedFileName = $this->sanitizeTargetFileName((string) $file->getClientOriginalName());
         $safeBaseName = pathinfo($sanitizedFileName, PATHINFO_FILENAME);
@@ -41,6 +43,7 @@ final class FatafatCdnFileUploadService implements FileUploadService
 
         $contentHash = hash('sha256', $sourceBytes);
         $existing = $this->findExistingByContentHash($contentHash);
+
         if ($existing !== null) {
             return $existing;
         }
@@ -48,6 +51,7 @@ final class FatafatCdnFileUploadService implements FileUploadService
         $storedFileName = $safeBaseName.'.webp';
         $key = md5($targetDirectory.'/'.$storedFileName);
         $relativePath = $targetDirectory.'/'.$key.'/'.$storedFileName;
+
 
         $disk = Storage::disk(self::DISK);
         if ($disk->exists($relativePath)) {

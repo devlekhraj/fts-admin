@@ -73,10 +73,10 @@ import BlogDetailTabSeo from '@/components/blog/BlogDetailTabSeo.vue';
 
 const route = useRoute();
 const router = useRouter();
-const activeTab = ref('overview');
+const activeTab = ref('content');
 const tabItems = [
-  { value: 'overview', label: 'Overview', icon: 'mdi-view-dashboard-outline', component: BlogDetailTabOverview },
   { value: 'content', label: 'Content', icon: 'mdi-text-box-outline', component: BlogDetailTabContent },
+  { value: 'overview', label: 'Overview', icon: 'mdi-view-dashboard-outline', component: BlogDetailTabOverview },
   { value: 'images', label: 'Images', icon: 'mdi-image-multiple-outline', component: BlogDetailTabImages },
   { value: 'seo', label: 'SEO', icon: 'mdi-magnify', component: BlogDetailTabSeo },
 ];

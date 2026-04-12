@@ -1,5 +1,9 @@
 <template>
-  <AppPageHeader title="Developer" subtitle="Developer tools and utilities" />
+  <AppPageHeader title="Developer" subtitle="Developer tools and utilities">
+    <template #actions>
+      <ApiKeyCreateButton @saved="onApiKeyChanged" />
+    </template>
+  </AppPageHeader>
 
   <v-card class="mt-4 pa-4">
     <v-data-table
@@ -16,7 +20,7 @@
       </template>
 
       <template #item.mode="{ item }">
-        <v-chip size="small" label variant="tonal" color="primary">
+        <v-chip size="small" label class="text-uppercase" variant="tonal" :color="item.mode == 'live' ? 'primary':'warning'">
           {{ item.mode || '-' }}
         </v-chip>
       </template>
@@ -24,7 +28,7 @@
       <template #item.live_public_key="{ item }">
         <div class="d-flex align-center ga-2">
           <span class="text-caption text-medium-emphasis text-truncate key-preview">
-            {{ item.live_public_key }}
+            {{ maskKey(item.live_public_key) }}
           </span>
           <v-btn
             icon
@@ -45,13 +49,18 @@
       </template>
 
       <template #item.created_at="{ item }">
-        <span>{{ formatLongDate(item.created_at) ?? '-' }}</span>
+        <span class="text-muted">{{ formatLongDate(item.created_at) ?? '-' }}</span>
       </template>
 
       <template #item.action="{ item }">
-        <v-btn icon size="x-small" variant="tonal" color="primary" @click="onConfigure(item)">
-          <v-icon size="16">mdi-cog</v-icon>
-        </v-btn>
+        <div class="d-flex justify-end ga-1">
+          <v-btn size="small" variant="tonal" color="primary" @click="onConfigure(item)">
+            Edit
+          </v-btn>
+          <v-btn size="small" variant="tonal" color="error" @click="onDelete(item)">
+           delete
+          </v-btn>
+        </div>
       </template>
     </v-data-table>
   </v-card>
@@ -63,16 +72,20 @@ import { listApiKeys, type ApiKeyItem } from '@/api/developer.api';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import { formatLongDate } from '@/shared/utils';
 import { useSnackbarStore } from '@/stores/snackbar.store';
+import ApiKeyCreateButton from '@/components/developer/ApiKeyCreateButton.vue';
+import ApiKeyFormModal from '@/components/developer/ApiKeyFormModal.vue';
+import ApiKeyDeleteModal from '@/components/developer/ApiKeyDeleteModal.vue';
+import { openModal } from '@/shared/modal';
 
 const headers = [
-  { title: 'ID', key: 'sn', sortable: false, minWidth: '90' },
-  { title: 'Host', key: 'host', sortable: false, minWidth: '260' },
-  { title: 'Mode', key: 'mode', sortable: false, minWidth: '120' },
-  { title: 'Live Public Key', key: 'live_public_key', sortable: false, minWidth: '280' },
-  { title: 'Description', key: 'description', sortable: false, minWidth: '220' },
-  { title: 'Status', key: 'is_active', sortable: false, minWidth: '120' },
-  { title: 'Created At', key: 'created_at', sortable: false, minWidth: '180' },
-  { title: 'Action', key: 'action', sortable: false, minWidth: '90' },
+  { title: 'ID', key: 'sn', value: 'sn', sortable: false, minWidth: '90' },
+  { title: 'Host', key: 'host', value: 'host', sortable: false, minWidth: '260' },
+  { title: 'Mode', key: 'mode', value: 'mode', sortable: false, minWidth: '120' },
+  { title: 'Public Key', key: 'live_public_key', value: 'live_public_key', sortable: false, width: '120' },
+  // { title: 'Description', key: 'description', value: 'description', sortable: false, minWidth: '220' },
+  { title: 'Status', key: 'is_active', value: 'is_active', sortable: false, minWidth: '120' },
+  { title: 'Created At', key: 'created_at', value: 'created_at', sortable: false, minWidth: '180' },
+  { title: 'Action', key: 'action', value: 'action', sortable: false, minWidth: '100', align: 'end' as const },
 ];
 
 const items = ref<ApiKeyItem[]>([]);
@@ -82,8 +95,8 @@ const snackbar = useSnackbarStore();
 function maskKey(value: string | null | undefined): string {
   const text = String(value ?? '').trim();
   if (!text) return '-';
-  if (text.length <= 12) return text;
-  return `${text.slice(0, 8)}...${text.slice(-4)}`;
+  if (text.length <= 8) return `${text.slice(0, 2)}****${text.slice(-2)}`;
+  return `${text.slice(0, 10)}****`;
 }
 
 async function copyLivePublicKey(value: string | null | undefined) {
@@ -108,14 +121,39 @@ async function fetchApiKeys() {
 }
 
 function onConfigure(item: ApiKeyItem) {
-  snackbar.show({ message: `Configure API key #${item.id}`, color: 'info' });
+  openModal(
+    ApiKeyFormModal,
+    { mode: 'edit', item },
+    {
+      title: `Edit API Key #${item.id}`,
+      size: 'md',
+      onSaved: onApiKeyChanged,
+    },
+  );
+}
+
+function onDelete(item: ApiKeyItem) {
+  openModal(
+    ApiKeyDeleteModal,
+    { item },
+    {
+      title: `Delete API Key #${item.id}`,
+      size: 'sm',
+      onDeleted: onApiKeyChanged,
+    },
+  );
+}
+
+function onApiKeyChanged() {
+  fetchApiKeys();
 }
 
 onMounted(fetchApiKeys);
 </script>
 
 <style scoped>
-.key-preview {
-  min-width: 400px;
+.created-at-text {
+  font-size: 0.85rem;
+  color: rgb(var(--v-theme-primary));
 }
 </style>

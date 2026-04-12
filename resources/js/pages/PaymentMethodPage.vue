@@ -11,7 +11,7 @@
     @update:options="onOptions">
     <template #item.name="{ item }">
       <div class="d-flex align-center ga-3">
-        <v-avatar size="36" color="grey-lighten-4" rounded="lg" class="border">
+        <v-avatar size="36" color="grey-lighten-4" rounded="lg">
           <v-img v-if="item.thumb || item.logo_url" :src="String(item.thumb || item.logo_url)" :alt="item.name" class="method-thumb" />
           <v-icon v-else size="20" color="grey-darken-1">mdi-credit-card-outline</v-icon>
         </v-avatar>

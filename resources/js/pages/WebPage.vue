@@ -1,5 +1,9 @@
 <template>
-  <AppPageHeader title="Pages" subtitle="Manage static web pages" />
+  <AppPageHeader title="Pages" subtitle="Manage static web pages">
+    <template #actions>
+      <PageCreateButton @saved="() => fetchPages()" />
+    </template>
+  </AppPageHeader>
 
   <v-container fluid class="px-0">
     <v-row>
@@ -60,8 +64,7 @@
                 color="primary"
                 class="text-none"
                 @click="onView(item)">
-                <v-icon start size="16">mdi-eye-outline</v-icon>
-                View
+                Detail
               </v-btn>
               <PageDeleteButton :page="item" @deleted="onDeleted" />
             </div>
@@ -81,11 +84,12 @@ import { listPages, type PageListItem, type PageListResponse } from '@/api/pages
 import { formatLongDate } from '@/shared/utils';
 import { useRouter } from 'vue-router';
 import PageDeleteButton from '@/components/page/PageDeleteButton.vue';
+import PageCreateButton from '@/components/page/PageCreateButton.vue';
 
 const headers = [
   { title: 'Title', key: 'title', sortable: false, minWidth: '240' },
   { title: 'Slug', key: 'slug', sortable: false, minWidth: '200' },
-  { title: 'Status', key: 'status', sortable: false, minWidth: '120' },
+  // { title: 'Status', key: 'status', sortable: false, minWidth: '120' },
   { title: 'Updated At', key: 'updated_at', sortable: false, minWidth: '180' },
   { title: 'Actions', key: 'action', sortable: false, minWidth: '160', align: 'end' as const },
 ];

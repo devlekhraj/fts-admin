@@ -35,6 +35,20 @@ export type PageDetailResponse = PageListItem & {
   meta?: Record<string, any> | null;
   created_at?: string;
   updated_at?: string;
+  excerpt?: string | null;
+  meta_title?: string | null;
+  meta_keywords?: string | null;
+  meta_description?: string | null;
+};
+
+export type PagePayload = {
+  title: string;
+  slug: string;
+  content?: string | null;
+  excerpt?: string | null;
+  meta_title?: string | null;
+  meta_keywords?: string | null;
+  meta_description?: string | null;
 };
 
 export async function listPages(params?: ListPagesParams): Promise<PageListResponse> {
@@ -48,6 +62,20 @@ export async function deletePage(id: number | string): Promise<void> {
 
 export async function getPageDetail(id: number | string): Promise<PageDetailResponse> {
   const response = await http.get(`/admin/pages/${id}`);
+  const wrapped = response as { data?: unknown };
+  if (wrapped && typeof wrapped === 'object' && 'data' in wrapped && wrapped.data) {
+    return wrapped.data as PageDetailResponse;
+  }
+  return response as unknown as PageDetailResponse;
+}
+
+export async function createPage(payload: PagePayload): Promise<any> {
+  const response = await http.post('/admin/pages', payload);
+  return response;
+}
+
+export async function updatePage(id: number | string, payload: PagePayload): Promise<PageDetailResponse> {
+  const response = await http.put(`/admin/pages/${id}`, payload);
   const wrapped = response as { data?: unknown };
   if (wrapped && typeof wrapped === 'object' && 'data' in wrapped && wrapped.data) {
     return wrapped.data as PageDetailResponse;

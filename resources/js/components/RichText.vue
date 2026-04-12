@@ -5,6 +5,12 @@ import { http } from '@/api/http'
 const props = withDefaults(defineProps<{
     modelValue: string
     minHeight?: string | number
+    usage?: {
+        usage_type: string
+        usage_id: string | number
+        directory?: string
+        meta?: Record<string, unknown>
+    }
 }>(), {
     minHeight: '400px'
 })
@@ -83,8 +89,25 @@ onMounted(async () => {
                 allowBase64: false,
                 upload(file: File) {
                     const formData = new FormData()
-                    formData.append('image', file)
-                    return http.post('/admin/gallery-upload', formData).then((response: any) => {
+                    formData.append('file', file)
+                    formData.append('source', 'upload')
+                    const usageType = props.usage?.usage_type
+                    const usageId = props.usage?.usage_id
+
+                    if (!usageType || usageId === undefined || usageId === null) {
+                        return Promise.reject('Missing usage_type or usage_id')
+                    }
+                    formData.append('usage_type', String(usageType))
+                    formData.append('usage_id', String(usageId))
+                    if (props.usage?.directory !== undefined && props.usage?.directory !== null) {
+                        formData.append('directory', String(props.usage.directory))
+                    }
+                    if (props.usage?.meta && typeof props.usage.meta === 'object') {
+                        formData.append('meta', JSON.stringify(props.usage.meta))
+                    }
+
+                    // return http.post('/admin/image-assign', formData).then((response: any) => {
+                    return http.post('/admin/file-assign', formData).then((response: any) => {
                         const payload = response?.data ?? response
                         if (payload?.url) return payload.url
                         return Promise.reject('Upload failed')
@@ -107,49 +130,22 @@ onMounted(async () => {
 <template>
     <div class="rich-text-wrapper border rounded-lg overflow-hidden position-relative">
         <!-- Mode Toggle Button -->
-        <div class="mode-toggle-actions pa-1 d-flex justify-end border-b bg-grey-lighten-4">
-            <v-btn
-                size="small"
-                variant="text"
-                :color="isCodeView ? 'primary' : 'grey-darken-2'"
-                prepend-icon="mdi-code-tags"
-                block
-                class="justify-start px-3"
-                @click="isCodeView = !isCodeView"
-            >
+        <!-- <div class="mode-toggle-actions pa-1 d-flex justify-end border-b bg-grey-lighten-4">
+            <v-btn size="small" variant="text" :color="isCodeView ? 'primary' : 'grey-darken-2'"
+                prepend-icon="mdi-code-tags" block class="justify-start px-3" @click="isCodeView = !isCodeView">
                 {{ isCodeView ? 'Visual Editor' : 'HTML Source' }}
             </v-btn>
-        </div>
+        </div> -->
 
         <!-- Visual Editor -->
-        <component
-            :is="editorComponent"
-            v-if="editorReady && editorComponent && !isCodeView"
-            v-model="content"
-            :min-height="numericMinHeight"
-            class="p-4"
-            :style="{ minHeight: cssMinHeight }"
-            :placeholder="'Type here...'"
-            :toolbar="true"
-            :toolbar-position="'top'"
-            :extensions="extensions"
-        />
+        <component :is="editorComponent" v-if="editorReady && editorComponent" v-model="content"
+            :min-height="numericMinHeight" class="p-4" :style="{ minHeight: cssMinHeight }"
+            :placeholder="'Type here...'" :toolbar="true" :toolbar-position="'top'" :extensions="extensions" />
 
         <!-- Code Editor -->
-        <v-textarea
-            v-else-if="editorReady && isCodeView"
-            v-model="content"
-            variant="plain"
-            hide-details
-            class="html-code-editor"
-            bg-color="grey-darken-4"
-            base-color="grey-lighten-3"
-            color="primary"
-            persistent-hint
-            no-resize
-            auto-grow
-            rows="5"
-        />
+        <!-- <v-textarea v-else-if="editorReady && isCodeView" v-model="content" variant="plain" hide-details
+            class="html-code-editor" bg-color="grey-darken-4" base-color="grey-lighten-3" color="primary"
+            persistent-hint no-resize auto-grow rows="5" /> -->
 
         <v-alert v-else-if="editorError" type="error" variant="tonal" density="comfortable">
             {{ editorError }}
@@ -162,10 +158,12 @@ onMounted(async () => {
 .rich-text-wrapper {
     border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 }
+
 .mode-toggle-actions {
     height: 36px;
     z-index: 5;
 }
+
 .html-code-editor :deep(textarea) {
     font-family: 'Fira Code', 'Roboto Mono', monospace !important;
     font-size: 13px !important;

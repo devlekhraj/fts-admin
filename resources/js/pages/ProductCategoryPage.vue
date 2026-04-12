@@ -19,6 +19,17 @@
 
   <AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :page="options.page"
     :items-per-page="options.itemsPerPage" @update:options="onOptions">
+    <template #actions>
+      <PageFilter
+        v-model:search="search"
+        search-label="Search categories"
+        search-placeholder="Search by title or slug"
+        :total="total"
+        total-label="Items found."
+        @search="onSearch"
+        @clear="onClearSearch"
+      />
+    </template>
     <template #item.title="{ item }">
       <div class="d-flex align-center ga-2">
         <v-avatar size="28" color="grey-lighten-3" rounded>
@@ -52,6 +63,7 @@ import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
+import PageFilter from '@/components/filters/PageFilter.vue';
 import ProductCategoryCreateButton from '@/components/category/ProductCategoryCreateButton.vue';
 import ProductCategoryDeleteButton from '@/components/category/ProductCategoryDeleteButton.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
@@ -89,6 +101,7 @@ const headers = [
 const items = ref<ProductCategory[]>([]);
 const total = ref(0);
 const loading = ref(false);
+const search = ref('');
 const options = ref<DataTableOptions>({
   page: 1,
   itemsPerPage: 10,
@@ -112,6 +125,7 @@ async function fetchCategories() {
     const response = await listProductCategories({
       page: options.value.page,
       per_page: options.value.itemsPerPage,
+      search: search.value.trim() || undefined,
     });
 
     const list = Array.isArray(response) ? response : response?.data ?? [];
@@ -140,6 +154,17 @@ function onOptions(next: DataTableOptions) {
   if (!hasLoadedOnce.value) {
     hasLoadedOnce.value = true;
   }
+  fetchCategories();
+}
+
+function onSearch() {
+  options.value.page = 1;
+  fetchCategories();
+}
+
+function onClearSearch() {
+  search.value = '';
+  options.value.page = 1;
   fetchCategories();
 }
 
