@@ -11,39 +11,17 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
-class CopyMediaToFilesCommand extends Command
+class CopyProductMediaToFilesCommand extends Command
 {
-    private const DEFAULT_MODEL_TYPES = [
-        "Jed\\Blogs\\App\\BlogCategory",
-        "Jed\\Blogs\\App\\Blog",
-        'Jed\\Ecommerce\\App\\ProductBrand',
-        'Jed\\Ecommerce\\App\\ProductCategory',
-        'Jed\\Ecommerce\\App\\Product',
-    ];
+    private const PRODUCT_MODEL_TYPE = 'Jed\Ecommerce\App\Product';
+    private const TARGET_FOLDER = 'products';
+    private const TARGET_USAGE_TYPE = 'products';
 
-    private const MODEL_TYPE_TABLE_MAP = [
-        'Jed\\Ecommerce\\App\\ProductBrand' => 'product_brands',
-        'Jed\\Ecommerce\\App\\ProductCategory' => 'product_categories',
-        'Jed\\Ecommerce\\App\\Product' => 'products',
-        'Jed\\Blogs\\App\\BlogCategory' => 'blog_categories',
-        'Jed\\Blogs\\App\\Blog' => 'blogs',
-
-    ];
-
-    private const MODEL_TYPE_FOLDER_MAP = [
-        'Jed\\Ecommerce\\App\\ProductBrand' => 'brands',
-        'Jed\\Ecommerce\\App\\ProductCategory' => 'product-category',
-        'Jed\\Ecommerce\\App\\Product' => 'products',
-        'Jed\\Blogs\\App\\BlogCategory' => 'blog-category',
-        'Jed\\Blogs\\App\\Blog' => 'blogs',
-    ];
-
-    protected $signature = 'media:copy-to-files
+    protected $signature = 'media:copy-products-only
         {--chunk=500 : Chunk size for processing}
-        {--model-type=* : Only copy media rows for provided model_type values}
         {--dry-run : Show what would be copied without writing data}';
 
-    protected $description = 'Copy records from media table to files table';
+    protected $description = 'Copy records from media table to files table for products only';
 
     public function __construct(
         private readonly ImageConverter $imageConverter
@@ -53,31 +31,16 @@ class CopyMediaToFilesCommand extends Command
 
     public function handle(): int
     {
-        if (! Schema::hasTable('media')) {
-            $this->error('Table "media" does not exist.');
-
-            return self::FAILURE;
-        }
-
-        if (! Schema::hasTable('files')) {
-            $this->error('Table "files" does not exist.');
-
-            return self::FAILURE;
-        }
-
-        if (! Schema::hasTable('file_usages')) {
-            $this->error('Table "file_usages" does not exist.');
+        if (! Schema::hasTable('media') || ! Schema::hasTable('files') || ! Schema::hasTable('file_usages')) {
+            $this->error('Required tables (media, files, or file_usages) do not exist.');
 
             return self::FAILURE;
         }
 
         $chunkSize = max(1, (int) $this->option('chunk'));
-        $modelTypes = $this->option('model-type');
-        if (! is_array($modelTypes) || empty($modelTypes)) {
-            $modelTypes = self::DEFAULT_MODEL_TYPES;
-        }
         $dryRun = (bool) $this->option('dry-run');
         $cdnRoot = trim((string) (config('filesystems.disks.cdn.root') ?? env('CDN_ROOT', '')));
+
         if ($cdnRoot === '') {
             $this->error('CDN root is not configured. Set filesystems.disks.cdn.root (or CDN_ROOT in .env).');
 
@@ -106,20 +69,19 @@ class CopyMediaToFilesCommand extends Command
                 'created_at',
                 'updated_at',
             ])
-            ->whereIn('model_type', $modelTypes)
+            ->where('model_type', self::PRODUCT_MODEL_TYPE)
             ->orderBy('id');
 
         $total = (clone $baseQuery)->count();
         if ($total === 0) {
-            $this->info('No records found in media table.');
+            $this->info('No product media records found in media table.');
 
             return self::SUCCESS;
         }
 
         $this->info(sprintf(
-            'Processing %d media rows for model_type "%s" (chunk: %d)%s',
+            'Processing %d product media rows (chunk: %d)%s',
             $total,
-            implode(', ', $modelTypes),
             $chunkSize,
             $dryRun ? ' [dry-run]' : ''
         ));
@@ -166,38 +128,25 @@ class CopyMediaToFilesCommand extends Command
                 $fileName = $this->makeFileName($row, $convertToWebp);
                 $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
                 $dimensions = $this->extractDimensions($row->custom_properties, $sourcePath);
-                $targetFolder = $this->resolveTargetFolder((string) $row->model_type);
                 $existingFile = $existingFiles->get($fileName);
 
                 if ($existingFile) {
                     $key = is_string($existingFile->key ?? null) && trim((string) $existingFile->key) !== ''
                         ? trim((string) $existingFile->key)
                         : $this->makeKey();
-                    $filePath = $this->makeFilePath($targetFolder, $key, $fileName);
+                    $filePath = $this->makeFilePath(self::TARGET_FOLDER, $key, $fileName);
                 } else {
                     $key = $this->makeKey();
-                    $filePath = $this->makeFilePath($targetFolder, $key, $fileName);
+                    $filePath = $this->makeFilePath(self::TARGET_FOLDER, $key, $fileName);
 
-                    if ($this->copyToTargetDirectory($sourcePath, $key, $fileName, $cdnRoot, $targetFolder, $dryRun, $convertToWebp)) {
+                    if ($this->copyToTargetDirectory($sourcePath, $key, $fileName, $cdnRoot, self::TARGET_FOLDER, $dryRun, $convertToWebp)) {
                         $copied++;
                     } else {
                         $missing++;
                     }
                 }
 
-                $metaPayload = [
-                    'directory' => $targetFolder,
-                    // 'media_id' => $row->id,
-                    // 'model_type' => $this->resolveModelType((string) $row->model_type),
-                    // 'model_id' => $row->model_id,
-                    // 'name' => $row->name,
-                    // 'disk' => $row->disk,
-                    // 'conversions_disk' => $row->conversions_disk,
-                    // 'manipulations' => $this->decodeJson($row->manipulations),
-                    // 'custom_properties' => $this->decodeJson($row->custom_properties),
-                    // 'generated_conversions' => $this->decodeJson($row->generated_conversions),
-                    // 'responsive_images' => $this->decodeJson($row->responsive_images),
-                ];
+                $metaPayload = ['directory' => self::TARGET_FOLDER];
 
                 $upserts[] = [
                     'key' => $key,
@@ -255,14 +204,12 @@ class CopyMediaToFilesCommand extends Command
                     $usageMeta = $this->decodeJson($media->custom_properties);
                     $usageUpserts[] = [
                         'file_id' => (int) $file->id,
-                        'usage_type' => $this->resolveModelType((string) $media->model_type),
+                        'usage_type' => self::TARGET_USAGE_TYPE,
                         'usage_id' => $usageId,
                         'title' => is_string($media->name ?? null) ? trim((string) $media->name) : null,
                         'alt_text' => is_string($media->name ?? null) ? trim((string) $media->name) : null,
                         'meta' => json_encode(
-                            is_array($usageMeta)
-                                ? $usageMeta
-                                : [],
+                            is_array($usageMeta) ? $usageMeta : [],
                             JSON_UNESCAPED_UNICODE
                         ),
                         'created_at' => $media->created_at ?? now(),
@@ -289,7 +236,7 @@ class CopyMediaToFilesCommand extends Command
             }
 
             $processed += count($rows);
-            $this->line(sprintf('Processed %d rows...', $processed));
+            $this->line(sprintf('Processed %d product rows...', $processed));
         }, 'id');
 
         $this->newLine();
@@ -380,19 +327,16 @@ class CopyMediaToFilesCommand extends Command
     private function extractDimensions(mixed $customProperties, string $sourcePath): array
     {
         $decoded = $this->decodeJson($customProperties);
-
         $height = 0;
         $width = 0;
 
         if (is_array($decoded)) {
             $heightRaw = $decoded['height'] ?? $decoded['image_height'] ?? 0;
             $widthRaw = $decoded['width'] ?? $decoded['image_width'] ?? 0;
-
             $height = is_numeric($heightRaw) ? (float) $heightRaw : 0;
             $width = is_numeric($widthRaw) ? (float) $widthRaw : 0;
         }
 
-        // Prefer actual file dimensions when file exists and is a readable image.
         if (File::exists($sourcePath)) {
             $imageInfo = @getimagesize($sourcePath);
             if (is_array($imageInfo)) {
@@ -401,10 +345,7 @@ class CopyMediaToFilesCommand extends Command
             }
         }
 
-        return [
-            'height' => $height,
-            'width' => $width,
-        ];
+        return ['height' => $height, 'width' => $width];
     }
 
     private function decodeJson(mixed $value): mixed
@@ -424,11 +365,6 @@ class CopyMediaToFilesCommand extends Command
         }
     }
 
-    private function resolveModelType(string $modelType): string
-    {
-        return self::MODEL_TYPE_TABLE_MAP[$modelType] ?? $modelType;
-    }
-
     private function makeSourcePath(int $mediaId, string $sourceFileName): string
     {
         return public_path('media/'.$mediaId.'/'.$sourceFileName);
@@ -437,11 +373,6 @@ class CopyMediaToFilesCommand extends Command
     private function makeFilePath(string $targetFolder, string $key, string $targetFileName): string
     {
         return trim($targetFolder, '/').'/'.trim($key, '/').'/'.ltrim($targetFileName, '/');
-    }
-
-    private function resolveTargetFolder(string $modelType): string
-    {
-        return self::MODEL_TYPE_FOLDER_MAP[$modelType] ?? 'misc';
     }
 
     private function copyToTargetDirectory(
@@ -546,17 +477,13 @@ class CopyMediaToFilesCommand extends Command
     {
         try {
             $cdnDisk->delete($tempSourcePathOnDisk);
-        } catch (\Throwable) {
-            // Best effort fallback for local-capable disks.
-        }
+        } catch (\Throwable) {}
 
         try {
             if (! $cdnDisk->exists($tempSourcePathOnDisk)) {
                 return;
             }
-        } catch (\Throwable) {
-            return;
-        }
+        } catch (\Throwable) { return; }
 
         try {
             if (method_exists($cdnDisk, 'path')) {
@@ -565,18 +492,14 @@ class CopyMediaToFilesCommand extends Command
                     File::delete($absolutePath);
                 }
             }
-        } catch (\Throwable) {
-            // Ignore fallback cleanup failures.
-        }
+        } catch (\Throwable) {}
 
         try {
             $directory = dirname($tempSourcePathOnDisk);
             if ($directory !== '.' && $directory !== DIRECTORY_SEPARATOR) {
                 $cdnDisk->deleteDirectory($directory);
             }
-        } catch (\Throwable) {
-            // Ignore empty directory cleanup failures.
-        }
+        } catch (\Throwable) {}
     }
 
     private function shouldConvertToWebp(string $sourcePath, string $sourceMimeType): bool

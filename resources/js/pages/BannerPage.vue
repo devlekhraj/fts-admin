@@ -39,7 +39,7 @@
           <template #item.action="{ item }">
             <div class="d-flex align-center ga-1">
               <v-btn icon size="x-small" variant="tonal" color="primary" @click="router.push({ name: 'admin.banners.detail', params: { id: item.id } })">
-                <v-icon size="16">mdi-eye</v-icon>
+                detail
               </v-btn>
               <BannerDeleteButton :banner="item" @deleted="onBannerDeleted" />
             </div>
