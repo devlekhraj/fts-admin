@@ -16,8 +16,8 @@ use Throwable;
 
 final class FatafatCdnFileUploadService implements FileUploadService
 {
-    // private const DISK = 'fatafat_cdn';
-    private const DISK = 'cdn';
+    private const DISK = 'fatafat_cdn';
+    // private const DISK = 'cdn';
     private const DEFAULT_DIRECTORY = 'uploads';
     private const WEBP_QUALITY = 85;
 
