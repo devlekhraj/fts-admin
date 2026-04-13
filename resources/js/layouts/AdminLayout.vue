@@ -64,11 +64,11 @@
             <v-app-bar-nav-icon color="primary" :icon="drawer ? 'mdi-dock-left' : 'mdi-dock-right'"
                 @click="drawer = !drawer" />
             <v-toolbar-title>
-                <div class="toolbar-title-wrap">
+                <!-- <div class="toolbar-title-wrap">
                     <v-text-field v-model="navSearch" color="primary" class="nav-search-field" density="compact"
                         variant="outlined" placeholder="Search menu" prepend-inner-icon="mdi-magnify" hide-details
                         clearable />
-                </div>
+                </div> -->
             </v-toolbar-title>
             <v-spacer />
             <div class="d-flex align-center ga-3 pr-6">

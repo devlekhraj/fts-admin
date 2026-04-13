@@ -1,58 +1,51 @@
 <template>
-	<v-container class="pt-0" fluid>
-		<v-row>
-			<v-col cols="12" lg="10" offset-lg="1">
-				<div>
-					<div class="pt-10">
-						<div class="d-flex align-center justify-space-between flex-wrap ga-3 mb-4">
-							<div>
-								<div class="text-h6 mb-1">Application</div>
-								<div class="text-body-2 text-medium-emphasis">Generated bank applications and approval status.</div>
-							</div>
-							<v-btn
-								v-if="String(props.data?.status ?? '').toLowerCase() !== 'approved'"
-								color="primary"
-								variant="flat"
-								prepend-icon="mdi-file-plus"
-								@click="modalGenerate()">
-								Generate Application
-							</v-btn>
+	<v-container fluid>
+		<div>
+			<div>
+				<div class="d-flex align-center justify-space-between flex-wrap ga-3 mb-4">
+					<!-- <div>
+						<div class="text-h6 mb-1">Application</div>
+						<div class="text-body-2 text-medium-emphasis">Generated bank applications and approval status.
 						</div>
-					</div>
-					<div>
-						<v-data-table :headers="headers" :items="items" density="comfortable" class="elevation-0 border rounded"
-							:loading="loading" :hide-default-footer="items.length <= 10">
-							<template #item.created_at="{ item }">
-								<div class="application-date-cell">{{ item.created_at ?? '--' }}</div>
-							</template>
-							<template #item.status="{ item }">
-								<div class="">
-									<v-chip class="text-capitalize"
-										label
-										:color="(item.status.toLowerCase()) === 'approved' ? 'success' : 'warning'"
-										text-color="white" size="small">
-										{{ item.status ?? '--' }}
-									</v-chip>
-								</div>
-							</template>
-							<template #item.action="{ item }">
-								<div class="d-flex justify-end gap-2">
-									<v-btn variant="flat" color="primary" class="mr-4" size="small"
-										:disabled="!item.path" @click="openFile(item.path)">
-										<v-icon>mdi-eye</v-icon> View
-									</v-btn>
-									<v-btn variant="flat" color="success" class="mr-4" size="small"
-										:disabled="!item.path" @click="handleApprove(item)">
-										<v-icon>mdi-cog</v-icon> Action
-									</v-btn>
-								
-								</div>
-							</template>
-						</v-data-table>
-					</div>
+					</div> -->
+					<v-btn v-if="String(props.data?.status ?? '').toLowerCase() !== 'approved'" color="primary"
+						variant="flat" prepend-icon="mdi-file-plus" @click="modalGenerate()">
+						Generate Application
+					</v-btn>
 				</div>
-			</v-col>
-		</v-row>
+			</div>
+			<div>
+				<v-data-table :headers="headers" :items="items" density="comfortable" class="elevation-0 border rounded"
+					:loading="loading" :hide-default-footer="items.length <= 10">
+					<template #item.created_at="{ item }">
+						<div class="application-date-cell">{{ item.created_at ?? '--' }}</div>
+					</template>
+					<template #item.status="{ item }">
+						<div class="">
+							<v-chip class="text-capitalize" label
+								:color="(item.status.toLowerCase()) === 'approved' ? 'success' : 'warning'"
+								text-color="white" size="small">
+								{{ item.status ?? '--' }}
+							</v-chip>
+						</div>
+					</template>
+					<template #item.action="{ item }">
+						<div class="d-flex justify-end gap-2">
+							<v-btn variant="flat" color="primary" class="mr-4" size="small" :disabled="!item.path"
+								@click="openFile(item.path)">
+								<v-icon>mdi-eye</v-icon> View
+							</v-btn>
+							<v-btn variant="flat" color="success" class="mr-4" size="small" :disabled="!item.path"
+								@click="handleApprove(item)">
+								<v-icon>mdi-cog</v-icon> Action
+							</v-btn>
+
+						</div>
+					</template>
+				</v-data-table>
+			</div>
+		</div>
+
 	</v-container>
 </template>
 

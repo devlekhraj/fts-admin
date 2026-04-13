@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Foundation\Interfaces\Http\Resources;
 
-use Illuminate\Http\Resources\Json\JsonResource;
 use App\Foundation\Infrastructure\Persistence\Eloquent\Models\EmiRequestModel;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class EmiRequestListResource extends JsonResource
 {
@@ -34,11 +34,11 @@ class EmiRequestListResource extends JsonResource
             'time' => $this->created_at,
             'emi_per_month' => $this->emi_per_month,
             'emi_type' => $this->emi_type ?? null,
-            'emi_mode' => $this->emi_mode ? ($this->emi_mode . ' months') : 'n/a',
+            'emi_mode' => $this->emi_mode ? ($this->emi_mode.' months') : 'n/a',
             'status' => $this->status,
             'status_label' => EmiRequestModel::getStatusLabels()[$this->status] ?? 'Unknown',
             'created_at' => $this->created_at,
-           
+
         ];
     }
 
@@ -70,6 +70,7 @@ class EmiRequestListResource extends JsonResource
             'salary_certificate' => $this->salary_certificate,
             'citizenship' => $this->citizenship,
             'photo' => $this->photo,
+            'emi_type' => $this->emi_type ?? null,
             'product' => $this->product ? [
                 'id' => $this->product->id,
                 'name' => $this->product->name ?? null,
@@ -83,6 +84,22 @@ class EmiRequestListResource extends JsonResource
                 'mobile' => $this->contact_number ?? null,
                 'avatar' => $this->user->avatar ?? null,
             ] : null,
+            'guarantors' => $this->guarantors ? $this->guarantors->map(function ($guarantor) {
+                return [
+                    'name' => $guarantor->name,
+                    'email' => $guarantor->email,
+                    'phone' => $guarantor->phone,
+                    'gender' => $guarantor->gender,
+                    'marriage_status' => $guarantor->marriage_status,
+                    'citizenship_number' => $guarantor->citizenship_number,
+                    'documents' => $guarantor->files ? $guarantor->files->map(function ($doc) {
+                        return [
+                            'title' => $doc->pivot->title,
+                            'url' => $doc->url,
+                        ];
+                    }) : [],
+                ];
+            }) : [],
             'product_price' => $this->product_price,
             'status' => EmiRequestModel::getStatusLabels()[$this->status] ?? 'Unknown',
             'created_at' => $this->created_at,
@@ -91,8 +108,37 @@ class EmiRequestListResource extends JsonResource
             'card_holder_name' => $this->card_holder_name,
             'card_number' => $this->card_number,
             'card_expiry_date' => $this->card_expiry_date,
-             'files' => $this->files
+            'documents' => $this->files ? $this->files->map(function ($file) {
+                return [
+                    'title' => $file->pivot->title,
+                    'mime_type' => $file->mime_type,
+                    'url' => $file->url,
+                ];
+            }) : [],
+            'credit_card' => $this->creditCard ? [
+                'id' => $this->creditCard->id,
+                'emi_request_id' => $this->creditCard->emi_request_id,
+                'card_number' => $this->creditCard->card_number,
+                'card_holder' => $this->creditCard->card_holder,
+                'expiry_date' => $this->creditCard->expiry_date,
+                'credit_limit' => $this->creditCard->credit_limit,
+                'created_at' => $this->creditCard->created_at,
+                'updated_at' => $this->creditCard->updated_at,
+                'provider' => $this->creditCard->cardProvider ? [
+                    'id' => $this->creditCard->cardProvider->id,
+                    'name' => $this->creditCard->cardProvider->name,
+                    'bank_code' => $this->creditCard->cardProvider->bank_code,
+                ] : null,
+            ] : null,
+
+            'request_bank' => $this->requestBank ? [
+                'bank_name' => $this->requestBank->bank->name,
+                'bank_code' => $this->requestBank->bank->bank_code,
+                'branch' => $this->requestBank->branch,
+                'account_number' => $this->requestBank->account_number,
+            ] : null,
         ];
+        // id, emi_request_id, bank_id, account_number, branch, deleted_at, created_at, updated_at
     }
 
     private function resolveProductThumb(): ?string

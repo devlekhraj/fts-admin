@@ -63,10 +63,9 @@ class EmiRequestsController extends Controller
     public function show(string $id): JsonResponse
     {
         $record = EmiRequestModel::query()
-            ->with(['product.defaultFile', 'user'])
+            ->with(['product.defaultFile', 'user','guarantors.files','creditCard.cardProvider'])
             ->findOrFail($id);
-
-            // dd($record);
+            
         return response()->json(new EmiRequestListResource($record));
     }
 
