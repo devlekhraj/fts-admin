@@ -31,6 +31,6 @@ final class UpdateAdminPasswordHandler
         $admin->password = $this->hasher->hash($password);
         $admin->save();
 
-        return new ActionResult(true, 'Password updated successfully.');
+        return new ActionResult(true, 'Password updated successfully.', $admin);
     }
 }

@@ -39,8 +39,6 @@ export type CreateAdminPayload = {
     email: string;
     username: string;
     role_id: string | number | null;
-    password: string;
-    confirm_password: string;
 };
 
 export function create(payload: CreateAdminPayload) {
@@ -52,6 +50,7 @@ export type UpdateAdminBasicPayload = {
     name: string;
     username: string;
     role_id: string | number | null;
+    // passwords are generated server-side when creating admins; basic update does not include password.
 };
 
 export function updateBasicInfo(payload: UpdateAdminBasicPayload) {

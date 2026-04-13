@@ -7,8 +7,11 @@ namespace App\Foundation\Interfaces\Http\Controllers\Admin;
 use App\Foundation\Infrastructure\Persistence\Eloquent\Models\OrderModel;
 use App\Foundation\Interfaces\Http\Resources\OrderResource;
 use App\Http\Controllers\Controller;
+use App\Mail\OrderStatusUpdatedMail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class OrderController extends Controller
@@ -77,7 +80,7 @@ class OrderController extends Controller
 
     public function generateWarranty(string $id): JsonResponse
     {
-        $order = OrderModel::query()->findOrFail($id);
+        $order = OrderModel::query()->with('user')->findOrFail($id);
 
         if ($order->warranty_token) {
             return response()->json([
@@ -105,6 +108,28 @@ class OrderController extends Controller
         $order = OrderModel::query()->findOrFail($id);
         $order->status = (int) $validated['status'];
         $order->save();
+
+        try {
+            $customer = $order->user;
+            if ($customer && $customer->email) {
+                $orderNumber = $order->order_number ?? $order->order_no ?? $order->id;
+                $statusLabel = $order->order_status;
+                $timestamp = now()->timezone(config('app.timezone'))->format('Y-m-d H:i:s');
+
+                Mail::to($customer->email)->send(new OrderStatusUpdatedMail(
+                    orderNumber: (string) $orderNumber,
+                    status: $statusLabel,
+                    customerName: $customer->name ?? null,
+                    updatedAt: $timestamp,
+                ));
+            }
+        } catch (\Throwable $mailException) {
+            Log::error('Failed to send order status update email.', [
+                'order_id' => $order->id,
+                'email' => $order->user->email ?? null,
+                'error' => $mailException->getMessage(),
+            ]);
+        }
 
         return response()->json([
             'success' => true,

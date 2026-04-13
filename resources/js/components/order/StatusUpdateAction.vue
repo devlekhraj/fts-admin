@@ -1,5 +1,5 @@
 <template>
-  <v-btn color="primary" variant="flat" prepend-icon="mdi-clipboard-check-outline" @click="open">
+  <v-btn color="primary" variant="flat" append-icon="mdi-chevron-down" @click="open">
     Update Status
   </v-btn>
 </template>
@@ -24,9 +24,11 @@ function open() {
     {
       title: 'Update Order Status',
       size: 'sm',
-      // onSaved: (status: string) => {
-      //   emit('selected', { status, orderId: props.orderId });
-      // },
+      onSaved: (payload?: unknown) => {
+        const status = typeof payload === 'string' ? payload : props.currentStatus ?? '';
+        if (!status) return;
+        emit('selected', { status, orderId: props.orderId });
+      },
     },
   );
 }

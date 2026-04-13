@@ -11,11 +11,15 @@ use App\Foundation\Application\AdminIdentity\Handlers\UpdateAdminPasswordHandler
 use App\Foundation\Infrastructure\Persistence\Eloquent\Models\AdminModel;
 use App\Foundation\Interfaces\Http\Requests\Admin\UpdateAdminBasicRequest;
 use App\Foundation\Interfaces\Http\Requests\Admin\UpdateAdminPasswordRequest;
-use App\Foundation\Interfaces\Http\Resources\AdminResource;
+use App\Foundation\Shared\Application\DTO\ActionResult;
 use App\Foundation\Shared\Domain\Exceptions\FieldValidationException;
 use App\Http\Controllers\Controller;
+use App\Mail\AdminBasicUpdatedMail;
+use App\Mail\AdminPasswordUpdatedMail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class AdminUserUpdateController extends Controller
 {
@@ -34,6 +38,31 @@ class AdminUserUpdateController extends Controller
                 name: $data['name'],
                 roleId: (int) $data['role_id'],
             ));
+
+            $admin = $result->data instanceof AdminModel
+                ? $result->data
+                : AdminModel::with('role')->find($id);
+
+            if ($admin && $admin->email) {
+                $roleName = $admin->role->name ?? null;
+                $timestamp = now()->timezone(config('app.timezone'))->format('Y-m-d H:i:s');
+                try {
+                    Mail::to($admin->email)->send(new AdminBasicUpdatedMail(
+                        name: $admin->name ?? $admin->username ?? 'Admin',
+                        username: $admin->username ?? '',
+                        email: $admin->email,
+                        role: $roleName,
+                        updatedAt: $timestamp,
+                        timezone: config('app.timezone'),
+                    ));
+                } catch (\Throwable $mailException) {
+                    Log::error('Failed to send admin basic updated email.', [
+                        'admin_id' => $admin->id,
+                        'email' => $admin->email,
+                        'error' => $mailException->getMessage(),
+                    ]);
+                }
+            }
 
             return response()->json([
                 'message' => $result->message,
@@ -66,9 +95,40 @@ class AdminUserUpdateController extends Controller
                 password: $data['password'],
             ));
 
+            $admin = $result->data instanceof AdminModel
+                ? $result->data
+                : AdminModel::query()->find($id);
+
+
+            if ($admin && $admin->email) {
+                $name = $admin->name ?? $admin->username ?? 'Admin';
+                $username = $admin->username ?? '';
+                $timestamp = now()->timezone(config('app.timezone'))->format('Y-m-d H:i:s');
+                try {
+                    Mail::to($admin->email)->send(new AdminPasswordUpdatedMail(
+                        recipientName: $name,
+                        recipientUsername: $username,
+                        changedAt: $timestamp,
+                        timezone: config('app.timezone'),
+                    ));
+                } catch (\Throwable $mailException) {
+                    Log::error('Failed to send admin password updated email.', [
+                        'admin_id' => $admin->id,
+                        'email' => $admin->email,
+                        'error' => $mailException->getMessage(),
+                    ]);
+                    // Do not fail the password update because of mail errors.
+                }
+            }
+
+            $responseResult = new ActionResult(
+                success: $result->success,
+                message: $result->message,
+            );
+
             return response()->json([
-                'message' => $result->message,
-                'data' => $result,
+                'message' => $responseResult->message,
+                'data' => $responseResult,
             ]);
         } catch (FieldValidationException $e) {
             $message = $e->getMessage();
@@ -104,12 +164,12 @@ class AdminUserUpdateController extends Controller
             'id' => $id,
         ], 501);
     }
-   
+
     public function delete(Request $request, string $id): JsonResponse
     {
         try {
             $admin = AdminModel::query()->find($id);
-            if (!$admin) {
+            if (! $admin) {
                 return response()->json([
                     'message' => 'Admin not found.',
                 ], 404);

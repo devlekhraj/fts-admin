@@ -10,5 +10,6 @@ final class ActionResult
     public function __construct(
         public readonly bool $success,
         public readonly string $message,
+        public readonly mixed $data = null,
     ) {}
 }

@@ -319,7 +319,7 @@ async function logout() {
     }
 
     .v-list-item__prepend {
-        width: 30px;
+        width: 30px !important;
     }
 }
 

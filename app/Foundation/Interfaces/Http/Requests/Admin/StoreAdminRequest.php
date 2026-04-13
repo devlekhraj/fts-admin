@@ -35,9 +35,6 @@ final class StoreAdminRequest extends FormRequest
             ],
             'username' => ['required','string','max:50'],
             'role_id' => ['required','integer','exists:roles,id'],
-
-            'password' => ['required','string','min:8'],
-            'confirm_password' => ['required','same:password'],
         ];
     }
 }

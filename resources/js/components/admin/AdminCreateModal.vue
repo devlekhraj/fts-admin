@@ -29,24 +29,6 @@
 						:error-messages="getErrorMessages('role_id')" prepend-inner-icon="mdi-shield-account-outline"
 						@update:model-value="clearFieldError('role_id')" />
 				</v-col>
-				<v-col cols="12" md="6" class="pb-0">
-					<v-text-field v-model="form.password" label="Password" :type="showPassword ? 'text' : 'password'"
-						autocomplete="off" variant="outlined" density="comfortable" :rules="[rules.required]"
-						:error-messages="getErrorMessages('password')" prepend-inner-icon="mdi-lock-outline"
-						:append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
-						@click:append-inner="showPassword = !showPassword"
-						@update:model-value="clearFieldError('password')" />
-				</v-col>
-				<v-col cols="12" md="6" class="pb-0">
-					<v-text-field v-model="form.confirm_password" label="Confirm Password"
-						:type="showConfirmPassword ? 'text' : 'password'" autocomplete="off" variant="outlined"
-						density="comfortable" :rules="[rules.required, rules.passwordMatch]"
-						:error-messages="getErrorMessages('confirm_password')"
-						prepend-inner-icon="mdi-lock-check-outline"
-						:append-inner-icon="showConfirmPassword ? 'mdi-eye-off' : 'mdi-eye'"
-						@click:append-inner="showConfirmPassword = !showConfirmPassword"
-						@update:model-value="clearFieldError('confirm_password')" />
-				</v-col>
 			</v-row>
 
 		</v-form>
@@ -58,7 +40,7 @@
 				@click="resetForm" aria-label="Reset form">
 				<v-icon>mdi-refresh</v-icon>
 			</v-btn>
-			<v-btn color="primary" variant="tonal" class="px-5" :loading="loading" :disabled="loading"
+			<v-btn color="primary" variant="flat" class="px-5" :loading="loading" :disabled="loading"
 				@click="onSubmit">
 				<v-icon start>mdi-content-save-outline</v-icon>
 				submit
@@ -86,13 +68,9 @@ const form = ref({
 	email: '',
 	username: '',
 	role_id: null as null | string | number,
-	password: '',
-	confirm_password: '',
 });
 const fieldErrors = ref<Record<string, string[]>>({});
 const loading = ref(false);
-const showPassword = ref(false);
-const showConfirmPassword = ref(false);
 const snackbar = useSnackbarStore();
 
 async function fetchRoles() {
@@ -122,8 +100,6 @@ const rules = {
 		!value || (!value.startsWith('.') && !value.endsWith('.'))
 			? true
 			: 'Dot cannot be the first or last character',
-	passwordMatch: () =>
-		form.value.password === form.value.confirm_password ? true : 'Passwords do not match',
 };
 
 function onUsernameInput(value: string) {
@@ -150,13 +126,9 @@ function resetForm() {
 		email: '',
 		username: '',
 		role_id: null,
-		password: '',
-		confirm_password: '',
 	};
 	error.value = '';
 	fieldErrors.value = {};
-	showPassword.value = false;
-	showConfirmPassword.value = false;
 	formRef.value?.resetValidation?.();
 }
 
@@ -177,8 +149,6 @@ async function onSubmit() {
 			email: form.value.email,
 			username: form.value.username,
 			role_id: form.value.role_id,
-			password: form.value.password,
-			confirm_password: form.value.confirm_password,
 		};
 		const response = await createAdmin(payload);
 		snackbar.show({ message: response?.data?.message || 'Admin created successfully.', color: 'success' });

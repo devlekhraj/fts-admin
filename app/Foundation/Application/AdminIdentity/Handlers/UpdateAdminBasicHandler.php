@@ -39,6 +39,8 @@ final class UpdateAdminBasicHandler
         ]);
         $admin->save();
 
-        return new ActionResult(true, 'Admin updated successfully.');
+        $admin->load('role');
+
+        return new ActionResult(true, 'Admin updated successfully.', $admin);
     }
 }

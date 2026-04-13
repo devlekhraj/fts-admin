@@ -93,7 +93,7 @@ const headers = [
   { title: 'Status', key: 'status', sortable: false, minWidth: '130' },
   { title: 'Amount', key: 'total', sortable: false, minWidth: '130' },
   { title: 'Order Date', key: 'created_at', sortable: false, minWidth: '150' },
-  { title: 'Actions', key: 'action', sortable: false, minWidth: '130' },
+  { title: 'Actions', key: 'action', sortable: false, minWidth: '130', align:'end' },
 ];
 
 type Order = {
