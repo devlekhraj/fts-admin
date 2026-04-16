@@ -158,7 +158,9 @@ class FileController extends Controller
         $search = isset($validated['search']) ? trim((string) $validated['search']) : '';
         $tag = isset($validated['tag']) ? trim((string) $validated['tag']) : '';
 
-        $query = FileModel::query()->latest('id');
+        $query = FileModel::query()
+            ->where('file_path', 'not like', '%emi-requests%')
+            ->latest('id');
         if ($includeUsages) {
             $query->with(['usages' => static function ($builder): void {
                 $builder->latest('id');
@@ -178,6 +180,7 @@ class FileController extends Controller
         }
 
         $tags = FileModel::query()
+            ->where('file_path', 'not like', '%emi-requests%')
             ->get(['meta'])
             ->map(function (FileModel $file): ?string {
                 $meta = is_array($file->meta) ? $file->meta : [];

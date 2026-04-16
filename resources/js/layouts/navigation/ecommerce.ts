@@ -89,6 +89,9 @@ export const ecommerceNav: NavGroup[] = [
     {
         group: 'Pages',
         icon: 'mdi-file-edit-outline',
-        routeName: 'admin.pages',
+        items: [
+            { title: 'Pages', routeName: 'admin.pages', icon: 'mdi-file-edit-outline' },
+            { title: 'FAQs', routeName: 'admin.faqs.list', icon: 'mdi-help-circle-outline' },
+        ],
     },
 ];

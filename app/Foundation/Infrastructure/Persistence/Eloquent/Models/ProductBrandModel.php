@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Foundation\Infrastructure\Persistence\Eloquent\Models;
 
 use App\Foundation\Shared\Infrastructure\Persistence\Eloquent\Models\BaseModel;
+use App\Models\FaqModel;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProductBrandModel extends BaseModel
@@ -27,6 +29,11 @@ class ProductBrandModel extends BaseModel
         'meta_keywords',
         'meta_description',
     ];
+
+    public function faqs(): MorphMany
+    {
+        return $this->morphMany(FaqModel::class, 'faqable', 'type', 'type_id');
+    }
 
     public function products()
     {

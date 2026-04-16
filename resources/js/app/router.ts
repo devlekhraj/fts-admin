@@ -79,7 +79,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'inquiries', name: 'admin.inquiries.list', component: () => import('@/pages/InquiriesListPage.vue'), meta: { title: 'Inquiries' } },
       { path: 'user-lists', name: 'admin.users.list', component: () => import('@/pages/UserListsPage.vue'), meta: { title: 'User Lists' } },
       // settings
-      { path: 'settings-faqs', name: 'admin.faqs.list', component: () => import('@/pages/FaqsListPage.vue'), meta: { title: 'FAQs Management' } },
+      { path: 'settings-faqs', name: 'admin.faqs.list', component: () => import('@/pages/FaqPage.vue'), meta: { title: 'FAQs Management' } },
       { path: 'payment-methods', name: 'admin.paymentMethods.list', component: () => import('@/pages/PaymentMethodPage.vue'), meta: { title: 'Payment Methods' } },
       { path: 'payment-methods/:id', name: 'admin.paymentMethods.detail', component: () => import('@/pages/PaymentMethodDetailPage.vue'), meta: { title: 'Payment Method Detail' } },
       { path: 'admin-list', name: 'admin.list', component: () => import('@/pages/AdminPage.vue'), meta: { title: 'Admin Management' } },

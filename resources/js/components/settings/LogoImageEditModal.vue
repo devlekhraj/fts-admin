@@ -107,6 +107,7 @@ const baseOptions = [
   { title: 'Login Image', value: 'login_logo' },
   { title: 'Favicon', value: 'favicon_logo' },
   { title: 'Footer Logo', value: 'footer_logo' },
+  { title: 'Stamp', value: 'stamp' },
   { title: 'Other', value: 'other_logo' },
 ];
 

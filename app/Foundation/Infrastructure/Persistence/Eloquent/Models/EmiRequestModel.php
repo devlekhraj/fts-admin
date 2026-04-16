@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Foundation\Infrastructure\Persistence\Eloquent\Models;
 
 use App\Foundation\Shared\Infrastructure\Persistence\Eloquent\Models\BaseModel;
+use App\Models\Concerns\HasActivityLogs;
 use App\Models\EmiRequestBank;
 use App\Models\EmiRequestCreditCard;
 use App\Models\EmiRequestGuarantor;
@@ -15,7 +16,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class EmiRequestModel extends BaseModel
 {
+    use HasActivityLogs;
+    
     protected $table = 'emi_requests';
+
 
     protected $casts = [
         'product_attributes' => 'array',
@@ -66,15 +70,17 @@ class EmiRequestModel extends BaseModel
             ->withPivot(['title'])
             ->withTimestamps();
     }
+
     public function guarantors(): HasMany
     {
         return $this->hasMany(EmiRequestGuarantor::class, 'emi_request_id', 'id');
     }
+
     public function creditCard(): HasOne
     {
         return $this->hasOne(EmiRequestCreditCard::class, 'emi_request_id', 'id');
     }
-   
+
     public function requestBank(): HasOne
     {
         return $this->hasOne(EmiRequestBank::class, 'emi_request_id', 'id');

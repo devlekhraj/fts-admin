@@ -17,11 +17,11 @@
                             </tr>
                             <tr>
                                 <td>Email</td>
-                                <td class="text-right"> {{ formatNPR(data.email) }}</td>
+                                <td class="text-right"> {{ data.email }}</td>
                             </tr>
                             <tr>
                                 <td>Phone</td>
-                                <td class="text-right"> {{ formatNPR(data.phone) }}</td>
+                                <td class="text-right"> {{ data.phone }}</td>
                             </tr>
                             <tr>
                                 <td>Stamp</td>

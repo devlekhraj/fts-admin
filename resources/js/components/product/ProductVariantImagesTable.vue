@@ -38,7 +38,7 @@
                                         <v-img
                                             v-if="image.url"
                                             :src="String(image.url)"
-                                            cover
+                                            contain
                                             :title="String(image.url)"
                                         />
                                         <div
@@ -162,15 +162,12 @@ function onEditFile(file: any) {
 
 <style scoped>
 .variant-images-table {
-    background: rgb(var(--v-theme-surface));
     border: 1px solid rgb(var(--v-theme-outline-variant));
     border-radius: 8px;
 }
 
 .table-image-preview {
-    width: 140px;
     height: 78px;
-    background: rgb(var(--v-theme-surface-variant));
     overflow: hidden;
 }
 

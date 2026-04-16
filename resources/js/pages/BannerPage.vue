@@ -37,8 +37,8 @@
             <span>{{ formatLongDate(item.created_at) ?? '-' }}</span>
           </template>
           <template #item.action="{ item }">
-            <div class="d-flex align-center ga-1">
-              <v-btn icon size="x-small" variant="tonal" color="primary" @click="router.push({ name: 'admin.banners.detail', params: { id: item.id } })">
+            <div class="d-flex align-center justify-end ga-1">
+              <v-btn size="small" variant="tonal" color="primary" @click="router.push({ name: 'admin.banners.detail', params: { id: item.id } })">
                 detail
               </v-btn>
               <BannerDeleteButton :banner="item" @deleted="onBannerDeleted" />
@@ -67,7 +67,7 @@ const headers = [
   { title: 'Images', key: 'total_images', sortable: false, minWidth: '120' },
   { title: 'Status', key: 'status', sortable: false, minWidth: '140' },
   { title: 'Created At', key: 'created_at', sortable: false, minWidth: '180' },
-  { title: 'Actions', key: 'action', sortable: false, minWidth: '120' },
+  { title: 'Actions', key: 'action', sortable: false, minWidth: '120', align: 'end' },
 ];
 
 type Banner = {

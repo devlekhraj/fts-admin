@@ -78,6 +78,7 @@ import { getProductDetail, type ProductDetailResponse } from '@/api/products.api
 import ProductDetailTabAttributes from '@/components/product/ProductDetailTabAttributes.vue';
 import ProductDetailTabDescription from '@/components/product/ProductDetailTabDescription.vue';
 import ProductDetailTabFreeGift from '@/components/product/ProductDetailTabFreeGift.vue';
+import ProductDetailTabFaqs from '@/components/product/ProductDetailTabFaqs.vue';
 import ProductDetailTabImages from '@/components/product/ProductDetailTabImages.vue';
 import ProductDetailTabOverview from '@/components/product/ProductDetailTabOverview.vue';
 import ProductDetailTabPriceStock from '@/components/product/ProductDetailTabPriceStock.vue';
@@ -95,6 +96,7 @@ const tabItems = [
   { value: 'attributes', label: 'Attributes', icon: 'mdi-tune-variant', component: ProductDetailTabAttributes },
   { value: 'variants', label: 'Variants', icon: 'mdi-shape-outline', component: ProductDetailTabVariants },
   { value: 'images', label: 'Images', icon: 'mdi-image-multiple-outline', component: ProductDetailTabImages },
+  { value: 'faqs', label: 'FAQs', icon: 'mdi-help-circle-outline', component: ProductDetailTabFaqs },
   { value: 'free_gift', label: 'Free Gift', icon: 'mdi-gift-outline', component: ProductDetailTabFreeGift },
   { value: 'seo', label: 'SEO', icon: 'mdi-magnify', component: ProductDetailTabSeo },
   { value: 'schema_jsonld', label: 'Schema | JSON-LD', icon: 'mdi-code-json', component: ProductDetailTabSchemaJsonld },

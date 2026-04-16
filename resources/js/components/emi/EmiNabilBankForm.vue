@@ -8,60 +8,73 @@
 				<v-text-field v-model="form.cardholder_name" label="Name of the cardholder" density="comfortable"
 					variant="outlined" :rules="[rules.required]" :disabled="loading" />
 			</v-col>
-			<v-col cols="12" md="6" class="py-1">
-				<v-text-field v-model="form.card_number" label="Nabil Credit Card Number" density="comfortable"
-					variant="outlined" :rules="[rules.required]" :disabled="loading" v-maska="'#### #### #### ####'" />
+		</v-row>
+		<v-row>
+			<v-col cols="8">
+				<div>
+					<v-row>
+						<v-col cols="12" md="6" class="py-1">
+							<v-text-field v-model="form.card_number" label="Nabil Credit Card Number"
+								density="comfortable" variant="outlined" :rules="[rules.required]" :disabled="loading"
+								v-maska="'#### #### #### ####'" />
+						</v-col>
+						<v-col cols="12" md="6" class="py-1">
+							<v-text-field v-model="form.expiry_date" label="Expiry Date (mm/yy)" density="comfortable"
+								variant="outlined" :rules="[rules.required]" :disabled="loading" v-maska="'##/##'" />
+						</v-col>
+						<v-col cols="12" md="6" class="py-1">
+							<v-text-field v-model="form.mobile" label="Mobile Number" density="comfortable"
+								variant="outlined" :rules="[rules.required]" :disabled="loading"
+								v-maska="'(###) ###-####'" />
+						</v-col>
+						<v-col cols="12" md="6" class="py-1">
+							<v-text-field v-model="form.telephone" label="Telephone Number" density="comfortable"
+								variant="outlined" :disabled="loading" v-maska="'(###) ###-####'" />
+						</v-col>
+					</v-row>
+				</div>
 			</v-col>
-			<v-col cols="12" md="6" class="py-1">
-				<v-text-field v-model="form.expiry_date" label="Expiry Date (mm/yy)" density="comfortable"
-					variant="outlined" :rules="[rules.required]" :disabled="loading" v-maska="'##/##'" />
+			<v-col cols="4">
+				<div class="text-center">
+					<v-label>Signature</v-label>
+					<v-img v-if="form.signature_file" :src="form.signature_file" max-height="80" class="mt-2" contain />
+				</div>
 			</v-col>
-			<v-col cols="12" md="6" class="py-1">
-				<v-text-field v-model="form.mobile" label="Mobile Number" density="comfortable" variant="outlined"
-					:rules="[rules.required]" :disabled="loading" v-maska="'(###) ###-####'" />
-			</v-col>
-			<v-col cols="12" md="6" class="py-1">
-				<v-text-field v-model="form.telephone" label="Telephone Number" density="comfortable" variant="outlined"
-					:disabled="loading" v-maska="'(###) ###-####'" />
-			</v-col>
+		</v-row>
 
-
+		<v-row>
 
 			<v-col cols="12">
+				<!-- {{ props.data?.documents.find((doc: any) => doc.title == 'signature')?.url ?? null}} -->
 				<div class="text-subtitle-2 text-primary">Item Details</div>
 			</v-col>
-			<v-col cols="12" md="6" class="py-1">
+			<v-col cols="12" md="12" class="py-1">
 				<v-text-field v-model="form.item_name" label="Name of the Item" density="comfortable" variant="outlined"
 					:rules="[rules.required]" :disabled="loading" />
 			</v-col>
-			<v-col cols="12" md="6" class="py-1">
+			<v-col cols="12" md="4" class="py-1">
 				<v-text-field v-model="form.manufactured_by" label="Manufactured By" density="comfortable"
 					variant="outlined" :disabled="loading" />
 			</v-col>
-			<v-col cols="12" md="6" class="py-1">
+			<v-col cols="12" md="4" class="py-1">
 				<v-text-field v-model="form.model_name" label="Model Number/Name" density="comfortable"
 					variant="outlined" :disabled="loading" />
 			</v-col>
-			<v-col cols="12" md="6" class="py-1">
+			<v-col cols="12" md="4" class="py-1">
 				<v-text-field v-model="form.serial_no" label="Serial Number" density="comfortable" variant="outlined"
 					:disabled="loading" />
 			</v-col>
 
-			<v-col cols="12" md="6" class="py-1">
-				<v-select v-model="form.tenure" :items="emiTenureOptions" label="Installment tenure (Months)"
-				density="comfortable" variant="outlined" :rules="[rules.required]" :disabled="loading" />
-			</v-col>
-			
-			<v-col cols="12" md="6" class="py-1">
-				<v-file-input v-model="form.signature_file" prepend-icon="" prepend-inner-icon="mdi-image" label="Signature of Cardholder" density="comfortable"
-				variant="outlined" accept="image/*" :disabled="loading" />
-				<v-img v-if="signaturePreview" :src="signaturePreview" max-height="140" class="mt-2" contain />
-			</v-col>
 			<v-col cols="12" md="3" class="py-1">
-				<v-text-field v-model="form.installment_amount" label="Installment Amount"
+				<v-select v-model="form.tenure" :items="emiTenureOptions" label="Tenure (Months)"
 					density="comfortable" variant="outlined" :rules="[rules.required]" :disabled="loading" />
 			</v-col>
-			<v-col cols="12" md="9" class="py-1">
+
+			<v-col cols="12" md="3" class="py-1">
+				<v-text-field v-model="form.installment_amount" label="Installment Amount" density="comfortable"
+					variant="outlined" :rules="[rules.required]" :disabled="loading" />
+			</v-col>
+			<v-col cols="12" md="6" class="py-1">
 				<v-text-field v-model="form.amount_in_words" label="Amount in Words" density="comfortable"
 					variant="outlined" :disabled="loading" />
 			</v-col>
@@ -77,7 +90,7 @@
 		</v-row>
 		<v-row>
 			<v-col cols="12" class="d-flex justify-space-around">
-				<v-btn color="primary" :loading="loading" type="submit">
+				<v-btn color="primary" size="large" :loading="loading" type="submit">
 					<v-icon>mdi-creation</v-icon>
 					Generate
 				</v-btn>
@@ -101,7 +114,7 @@ const rules = {
 const emiTenureOptions = ['3', '6', '9', '12', '18', '24'];
 
 const form = reactive({
-	bank_code:'',
+	bank_code: '',
 	cardholder_name: '',
 	card_number: '',
 	expiry_date: '',
@@ -114,35 +127,16 @@ const form = reactive({
 	installment_amount: '',
 	amount_in_words: '',
 	tenure: '',
-	signature_file: null as File | null,
+	signature_file: '',
 	merchant_name_address: '',
 });
-
-const signaturePreview = ref<string | null>(null);
-let signatureUrl: string | null = null;
-
-watch(
-	() => form.signature_file,
-	(file) => {
-		if (signatureUrl) {
-			URL.revokeObjectURL(signatureUrl);
-			signatureUrl = null;
-		}
-		if (file instanceof File) {
-			signatureUrl = URL.createObjectURL(file);
-			signaturePreview.value = signatureUrl;
-		} else {
-			signaturePreview.value = null;
-		}
-	},
-);
 
 watch(
 	() => props.data,
 	(data) => {
 		if (!data) return;
 		form.bank_code = data.bank_code ?? '';
-		form.cardholder_name = data?.user?.name?? '';
+		form.cardholder_name = data?.user?.name ?? '';
 		form.card_number = data.card_number ?? '';
 		form.expiry_date = data.card_expiry_date ?? '';
 		form.mobile = data?.user?.mobile ?? '';
@@ -154,6 +148,7 @@ watch(
 		form.installment_amount = data.finance_amount ?? data.product_price ?? '';
 		form.amount_in_words = '';
 		form.tenure = data.emi_mode ? String(data.emi_mode) : '';
+		form.signature_file = data?.documents.find((doc: any) => doc.title == 'signature')?.url ?? null
 	},
 	{ immediate: true },
 );
@@ -169,10 +164,6 @@ async function handleSubmit() {
 		const payload = new FormData();
 		Object.entries(form).forEach(([key, value]) => {
 			if (value === null || value === undefined || value === '') return;
-			if (value instanceof File) {
-				payload.append(key, value);
-				return;
-			}
 			payload.append(key, String(value));
 		});
 

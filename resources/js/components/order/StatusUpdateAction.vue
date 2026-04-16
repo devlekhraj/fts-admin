@@ -1,6 +1,5 @@
 <template>
-  <v-btn color="primary" variant="flat" append-icon="mdi-chevron-down" @click="open">
-    Update Status
+  <v-btn color="primary" variant="flat" append-icon="mdi-chevron-down" @click="open">Update Status
   </v-btn>
 </template>
 

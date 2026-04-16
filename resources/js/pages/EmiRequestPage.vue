@@ -49,7 +49,7 @@
 					<v-icon start class="mr-2" :color="getEmiIconColor(item.emi_type)"
 						:icon="getEmiTypeIcon(item.emi_type)" />
 					<span class="text-capitalize" :class="getEmiIconTextColor(item.emi_type)">
-						{{ item.emi_type ? item.emi_type.split('_').join(' ') : 'Citizenship' }}
+						{{ item.emi_type ? item.emi_type.split('_').join(' ') : 'Old' }}
 					</span>
 				</div>
 			</template>

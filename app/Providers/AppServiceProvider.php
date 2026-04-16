@@ -2,9 +2,14 @@
 
 namespace App\Providers;
 
+use App\Foundation\Infrastructure\Persistence\Eloquent\Models\AdminModel;
+use App\Foundation\Infrastructure\Persistence\Eloquent\Models\EmiRequestModel;
+use App\Foundation\Infrastructure\Persistence\Eloquent\Models\OrderModel;
 use App\Foundation\Infrastructure\Persistence\Eloquent\Models\SettingModel;
+use App\Foundation\Infrastructure\Persistence\Eloquent\Models\UserModel;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,6 +27,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Use table names as morph aliases (for ActivityLog entity/actor)
+        Relation::morphMap([
+            'orders'       => OrderModel::class,
+            'emi_requests' => EmiRequestModel::class,
+            'users'        => UserModel::class,
+            'admins'       => AdminModel::class,
+        ]);
+
         // Dynamically override mail configuration from DB settings (cached).
         $settings = Cache::remember('mail_settings', 300, static function () {
             return optional(

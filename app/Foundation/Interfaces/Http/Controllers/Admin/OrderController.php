@@ -24,11 +24,11 @@ class OrderController extends Controller
 
         if ($search = trim((string) $request->query('search', ''))) {
             $query->where(function ($builder) use ($search) {
-                $builder->where('order_number', 'like', "%{$search}%")
+                $builder
+                    ->where('order_number', 'like', "%{$search}%")
                     ->orWhere('status', 'like', "%{$search}%")
                     ->orWhereHas('user', function ($userQuery) use ($search) {
-                        $userQuery->where('name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%");
+                        $userQuery->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%");
                     });
             });
         }
@@ -69,35 +69,47 @@ class OrderController extends Controller
     public function details(string $id): JsonResponse
     {
         $order = OrderModel::query()
-            ->with(['user', 'paymentMethod','receipent','shippingAddress'])
+            ->with(['user', 'paymentMethod', 'receipent', 'shippingAddress'])
             ->findOrFail($id);
 
-        return response()->json([
-            'data' => new OrderResource($order),
-            'success' => true,
-        ], 200);
-    }
-
-    public function generateWarranty(string $id): JsonResponse
-    {
-        $order = OrderModel::query()->with('user')->findOrFail($id);
-
-        if ($order->warranty_token) {
-            return response()->json([
-                'warranty_token' => $order->warranty_token,
+        return response()->json(
+            [
+                'data' => new OrderResource($order),
                 'success' => true,
-                'message' => 'Warranty token already exists.',
-            ], 200);
-        }
-
-        $order->warranty_token = 'WS-' . Str::upper(Str::random(8));
-        $order->save();
-
-        return response()->json([
-            'warranty_token' => $order->warranty_token,
-            'success' => true,
-        ], 200);
+            ],
+            200,
+        );
     }
+
+    // public function generateWarranty(string $id): JsonResponse
+    // {
+    //     $order = OrderModel::query()->with('user')->findOrFail($id);
+
+    //     // dd($order);
+    //     if ($order->warranty_token) {
+    //         return response()->json(
+    //             [
+    //                 'warranty_token' => $order->warranty_token,
+    //                 'success' => true,
+    //                 'message' => 'Warranty token already exists.',
+    //             ],
+    //             200,
+    //         );
+    //     }
+
+    //     $order->warranty_token = 'WS-'.Str::upper(Str::random(8));
+    //     $order->save();
+
+    //     $order->logActivity(action: 'Warrenty Generated', label: 'Warrenty Generated', description: 'Warrenty generated for'.$order->order_no.' successfully', actor: auth()->user());
+
+    //     return response()->json(
+    //         [
+    //             'warranty_token' => $order->warranty_token,
+    //             'success' => true,
+    //         ],
+    //         200,
+    //     );
+    // }
 
     public function updateStatus(Request $request, string $id): JsonResponse
     {
@@ -106,22 +118,33 @@ class OrderController extends Controller
         ]);
 
         $order = OrderModel::query()->findOrFail($id);
+        $oldLabel = $order->order_status;
         $order->status = (int) $validated['status'];
         $order->save();
+
+        $newLabel = $order->order_status;
+        $order->logActivity(
+
+            action: 'order_status_updated',
+            label: "Order moved to {$newLabel}",
+            description: "Order has been {$newLabel}",
+            oldStatus: (string) $oldLabel,
+            newStatus: (string) $oldLabel,
+            meta: [
+                'old_status_label' => $oldLabel,
+                'new_status_label' => $newLabel,
+                'order_no' => $order->order_no,
+            ],
+            actor: auth()->user()
+        );
 
         try {
             $customer = $order->user;
             if ($customer && $customer->email) {
-                $orderNumber = $order->order_number ?? $order->order_no ?? $order->id;
+                $orderNumber = $order->order_number ?? ($order->order_no ?? $order->id);
                 $statusLabel = $order->order_status;
                 $timestamp = now()->timezone(config('app.timezone'))->format('Y-m-d H:i:s');
-
-                Mail::to($customer->email)->send(new OrderStatusUpdatedMail(
-                    orderNumber: (string) $orderNumber,
-                    status: $statusLabel,
-                    customerName: $customer->name ?? null,
-                    updatedAt: $timestamp,
-                ));
+                Mail::to($customer->email)->send(new OrderStatusUpdatedMail(orderNumber: (string) $orderNumber, status: $statusLabel, customerName: $customer->name ?? null, updatedAt: $timestamp));
             }
         } catch (\Throwable $mailException) {
             Log::error('Failed to send order status update email.', [
@@ -131,10 +154,13 @@ class OrderController extends Controller
             ]);
         }
 
-        return response()->json([
-            'success' => true,
-            'status' => $order->order_status,
-            'status_code' => $order->status,
-        ], 200);
+        return response()->json(
+            [
+                'success' => true,
+                'status' => $order->order_status,
+                'status_code' => $order->status,
+            ],
+            200,
+        );
     }
 }

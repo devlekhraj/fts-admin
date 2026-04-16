@@ -28,3 +28,4 @@ require __DIR__ . '/admin/route_product_attributes.php';
 require __DIR__ . '/admin/route_campaign.php';
 require __DIR__ . '/admin/route_page.php';
 require __DIR__ . '/admin/route_cart.php';
+require __DIR__ . '/admin/route_faqs.php';

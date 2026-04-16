@@ -2,8 +2,8 @@
   <AppPageHeader :title="orderNumber" subtitle="Order Detail">
     <template #actions>
 
-      <WarrantySerialCard :order-id="summary?.id ?? ''" :serial="summary?.warranty_token ?? null"
-          @generated="handleWarrantyGenerated" />
+      <!-- <WarrantySerialCard :order-id="summary?.id ?? ''" :serial="summary?.warranty_token ?? null"
+          @generated="handleWarrantyGenerated" /> -->
 
       <StatusUpdateAction :order-id="summary?.id ?? ''" :current-status="orderStatus"
           @selected="handleStatusSelected" />

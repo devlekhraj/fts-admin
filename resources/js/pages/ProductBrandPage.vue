@@ -61,9 +61,9 @@
       <span>{{ item.total_products }} products</span>
     </template>
     <template #item.action="{ item }">
-      <div class="d-flex align-center ga-1">
-        <v-btn icon size="x-small" variant="tonal" color="primary" @click="onView(item)">
-          <v-icon size="16">mdi-eye</v-icon>
+      <div class="d-flex align-center justify-end ga-1">
+        <v-btn size="small" variant="tonal" color="primary" @click="onView(item)">
+          edit brand
         </v-btn>
         <BrandDeleteButton :brand="item" @deleted="onBrandDeleted" />
       </div>
@@ -79,7 +79,7 @@ import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import PageFilter from '@/components/filters/PageFilter.vue';
 import BrandCreateButton from '@/components/brand/BrandCreateButton.vue';
 import BrandDeleteButton from '@/components/brand/BrandDeleteButton.vue';
-import type { DataTableOptions } from '@/components/datatable/types';
+import type { DataTableHeader, DataTableOptions } from '@/components/datatable/types';
 import { listBrands, type ProductBrandListItem } from '@/api/products.api';
 import { formatLongDate } from '@/shared/utils';
 
@@ -101,13 +101,13 @@ const exportOptions: Array<{ type: ExportType; title: string; icon: string }> = 
   { type: 'pdf', title: 'Export PDF', icon: 'mdi-file-pdf-box' },
 ];
 
-const headers = [
+const headers: DataTableHeader[] = [
   { title: 'Name', key: 'name', sortable: false, minWidth: '220' },
   { title: 'Slug', key: 'slug', sortable: false, minWidth: '220' },
   { title: 'Products', key: 'total_products', sortable: false, minWidth: '160' },
   { title: 'Status', key: 'status', sortable: false, minWidth: '140' },
   { title: 'Created', key: 'created_at', sortable: false, minWidth: '140' },
-  { title: 'Actions', key: 'action', sortable: false, minWidth: '120' },
+  { title: 'Actions', key: 'action', sortable: false, minWidth: '120', align: 'end' },
 ];
 
 const items = ref<ProductBrand[]>([]);

@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Foundation\Infrastructure\Persistence\Eloquent\Models;
 
-
-use App\Foundation\Infrastructure\Persistence\Eloquent\Models\OrderReceipentModel;
 use App\Foundation\Shared\Infrastructure\Persistence\Eloquent\Models\BaseModel;
+use App\Models\Concerns\HasActivityLogs;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OrderModel extends BaseModel
 {
+    use HasActivityLogs;
     protected $table = 'orders';
 
     protected $casts = [
@@ -75,7 +75,9 @@ class OrderModel extends BaseModel
         return $this->belongsTo(ShippingAddressModel::class, 'shipping_address_id');
     }
 
-    public function receipent(){
-        return $this->hasOne(OrderReceipentModel::class,'order_id','id');
+    public function receipent()
+    {
+        return $this->hasOne(OrderReceipentModel::class, 'order_id', 'id');
     }
+
 }

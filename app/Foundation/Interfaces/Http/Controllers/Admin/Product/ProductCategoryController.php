@@ -7,8 +7,10 @@ namespace App\Foundation\Interfaces\Http\Controllers\Admin\Product;
 use App\Foundation\Infrastructure\Persistence\Eloquent\Models\ProductCategoryModel;
 use App\Foundation\Interfaces\Http\Requests\Admin\UpdateProductCategoryRequest;
 use App\Foundation\Interfaces\Http\Requests\Admin\StoreProductCategoryRequest;
+use App\Foundation\Interfaces\Http\Resources\FaqResource;
 use App\Foundation\Interfaces\Http\Resources\ProductCategoryResource;
 use App\Http\Controllers\Controller;
+use App\Models\FaqModel;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -69,6 +71,59 @@ class ProductCategoryController extends Controller
             'data' => (new ProductCategoryResource($category)),
             'success' => true,
         ], 200);
+    }
+
+    public function faqs(Request $request, string $id): JsonResponse
+    {
+        // Ensure category exists.
+        ProductCategoryModel::query()
+            ->select(['id', 'title'])
+            ->findOrFail($id);
+
+        $query = FaqModel::query()
+            ->where('type', 'category')
+            ->where('type_id', $id)
+            ->with('category')
+            ->orderByDesc('updated_at');
+
+        if ($search = $request->query('search')) {
+            $query->where(function ($builder) use ($search) {
+                $builder->where('question', 'like', "%{$search}%")
+                    ->orWhere('answer', 'like', "%{$search}%");
+            });
+        }
+
+        $perPageParam = (int) $request->query('per_page', 15);
+        if ($perPageParam === -1) {
+            $items = $query->get();
+
+            return response()->json([
+                'data' => FaqResource::collection($items),
+                'meta' => [
+                    'current_page' => 1,
+                    'per_page' => $items->count(),
+                    'total' => $items->count(),
+                    'last_page' => 1,
+                    'from' => $items->count() > 0 ? 1 : null,
+                    'to' => $items->count() > 0 ? $items->count() : null,
+                ],
+            ]);
+        }
+
+        $perPage = max(1, min($perPageParam, 100));
+        $paginator = $query->paginate($perPage);
+
+        return response()->json([
+            'data' => FaqResource::collection($paginator->items()),
+            'meta' => [
+                'current_page' => $paginator->currentPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+                'last_page' => $paginator->lastPage(),
+                'from' => $paginator->firstItem(),
+                'to' => $paginator->lastItem(),
+            ],
+        ]);
     }
 
     public function store(StoreProductCategoryRequest $request): JsonResponse

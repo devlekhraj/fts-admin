@@ -367,7 +367,8 @@ class CopyProductMediaToFilesCommand extends Command
 
     private function makeSourcePath(int $mediaId, string $sourceFileName): string
     {
-        return public_path('media/'.$mediaId.'/'.$sourceFileName);
+        // return public_path('media/'.$mediaId.'/'.$sourceFileName);
+        return ('/Users/devlekh/Herd/fts/storage/app/public/media/'.$mediaId.'/'.$sourceFileName);
     }
 
     private function makeFilePath(string $targetFolder, string $key, string $targetFileName): string

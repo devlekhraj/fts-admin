@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Foundation\Infrastructure\Persistence\Eloquent\Models;
 
 use App\Foundation\Shared\Infrastructure\Persistence\Eloquent\Models\BaseModel;
+use App\Models\FaqModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class ProductModel extends BaseModel
 {
@@ -62,6 +64,12 @@ class ProductModel extends BaseModel
         'original_price' => 'float',
         'pre_order_price' => 'float',
     ];
+
+    public function faqs(): MorphMany
+    {
+        return $this->morphMany(FaqModel::class, 'faqable', 'type', 'type_id');
+    }
+    
 
     public function brand(): BelongsTo
     {

@@ -1,9 +1,22 @@
 <template>
 	<AppPageHeader title="EMI Request Detail" subtitle="View EMI request information">
 		<template #actions>
-			<v-btn color="success" variant="flat" prepend-icon="mdi-check-bold">Approve
-				Request</v-btn>
-			<v-btn color="error" variant="flat" prepend-icon="mdi-close-thick">Reject Request</v-btn>
+            <v-btn
+                color="success"
+                variant="flat"
+                prepend-icon="mdi-check-bold"
+                @click="openConfirm('approved')"
+            >
+                Approve Request
+            </v-btn>
+            <v-btn
+                color="error"
+                variant="flat"
+                prepend-icon="mdi-close-thick"
+                @click="openConfirm('rejected')"
+            >
+                Reject Request
+            </v-btn>
 
 			<v-btn color="error" variant="outlined" prepend-icon="mdi-delete-outline">Delete</v-btn>
 
@@ -391,9 +404,9 @@
 				<ActivityTimeline :items="timelineItems" dot-color="primary" class="pa-4" />
 			</v-card>
 		</v-col>
-	</v-row>
+    </v-row>
 
-	<v-alert v-if="loading" type="info" variant="tonal">Loading EMI request detail...</v-alert>
+    <v-alert v-if="loading" type="info" variant="tonal">Loading EMI request detail...</v-alert>
 </template>
 
 <script setup lang="ts">
@@ -405,6 +418,9 @@ import { formatNPR } from '@/shared/formatters';
 import ActivityTimeline from '@/components/emi/ActivityTimeline.vue';
 import DocGrid from '@/components/emi/DocGrid.vue';
 import EmiBankApplicationList from '@/components/emi/EmiBankApplicationList.vue';
+import { openModal } from '@/shared/modal';
+import EmiRequestApproveModal from '@/components/emi/EmiRequestApproveModal.vue';
+import EmiRequestRejectModal from '@/components/emi/EmiRequestRejectModal.vue';
 interface ApplicationUser {
 	name?: string;
 	email?: string;
@@ -444,6 +460,7 @@ const application = ref<Application>({
 	status: '',
 });
 const loading = ref(false);
+// modal-based actions
 
 const route = useRoute();
 const router = useRouter();
@@ -558,6 +575,21 @@ async function fetchDetail() {
 	} finally {
 		loading.value = false;
 	}
+}
+
+function openConfirm(decision: 'approved' | 'rejected') {
+	const id = String(route.params.id ?? '');
+	if (!id) return;
+	const component = decision === 'approved' ? EmiRequestApproveModal : EmiRequestRejectModal;
+	openModal(
+		component,
+		{ id },
+		{
+			title: decision === 'approved' ? 'Approve EMI Request' : 'Reject EMI Request',
+			size: 'sm',
+			onSaved: fetchDetail,
+		}
+	);
 }
 
 function goBack() {
