@@ -62,7 +62,7 @@ const headers = [
   { title: 'Images', key: 'total_images', sortable: false, minWidth: '120' },
   { title: 'Status', key: 'status', sortable: false, minWidth: '140' },
   { title: 'Created At', key: 'created_at', sortable: false, minWidth: '180' },
-  { title: 'Actions', key: 'action', sortable: false, minWidth: '120', align: 'end' },
+  { title: 'Actions', key: 'action', sortable: false, minWidth: '120', align: 'end' as const },
 ];
 
 type Banner = {

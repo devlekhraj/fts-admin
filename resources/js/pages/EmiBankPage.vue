@@ -61,7 +61,7 @@ const headers = [
   { title: 'SN', key: 'sn', sortable: false, maxWidth: '80', minWidth: '80' },
   { title: 'Name', key: 'name', sortable: false, minWidth: '200' },
   { title: 'Code', key: 'code', sortable: false, maxWidth: '100', minWidth: '100' },
-  { title: 'Actions', key: 'action', sortable: false, maxWidth: '100', minWidth: '100', align: 'end' },
+  { title: 'Actions', key: 'action', sortable: false, maxWidth: '100', minWidth: '100', align: 'end' as const },
 ];
 
 const items = ref<EmiBank[]>([]);

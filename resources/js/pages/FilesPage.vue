@@ -126,7 +126,7 @@ const headers = [
   { title: 'Tags', key: 'tags', sortable: false, minWidth: '170' },
   { title: 'Usages', key: 'usages', sortable: false, minWidth: '180' },
   { title: 'Created', key: 'created_at', sortable: false, minWidth: '170' },
-  { title: 'Action', key: 'action', sortable: false, minWidth: '90', align: 'end' },
+  { title: 'Action', key: 'action', sortable: false, minWidth: '90', align: 'end' as const },
 ];
 
 const items = ref<FileListItem[]>([]);
