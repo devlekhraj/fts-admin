@@ -1,5 +1,5 @@
 <template>
-  <v-btn size="small" variant="tonal" color="error" @click="open">
+  <v-btn size="small" variant="flat" color="error" @click="open">
     delete
   </v-btn>
 </template>

@@ -61,7 +61,7 @@
 			 </v-chip>
 		</template>
 		
-		<template #item.action="{ item }">
+		<template #item.action="{ item }" class="justify-end">
 			<AdminActionButtons :admin="item" @saved="onAdminUpdated" @deleted="onAdminDeleted" />
 		</template>
 		<template #item.created_at="{ item }">
@@ -105,7 +105,7 @@ const headers = [
 	{ title: 'Role', key: 'role', minWidth: '160', sortable: false },
 	{ title: 'Email', key: 'email', minWidth: '220', sortable: false },
 	{ title: 'Created', key: 'created_at', minWidth: '100', sortable: false },
-	{ title: 'Actions', key: 'action', sortable: false, minWidth: '100' },
+	{ title: 'Actions', key: 'action', sortable: false, minWidth: '100', align: 'end' as const },
 ];
 
 const items = ref<Admin[]>([]);

@@ -65,10 +65,10 @@
             <span>{{ Number(item.total_emi ?? 0) > 0 ? `${Number(item.total_emi ?? 0)} Requests` : '-' }}</span>
         </template>
         <template #item.action="{ item }">
-            <div class="d-flex align-center ga-1">
-                <v-btn icon size="x-small" variant="tonal" color="primary"
+            <div class="d-flex align-center justify-end ga-1">
+                <v-btn size="small" variant="flat" color="primary"
                     @click="router.push({ name: 'admin.customers.detail', params: { id: item.id } })">
-                    <v-icon size="16">mdi-eye</v-icon>
+                    detail
                 </v-btn>
             </div>
         </template>
@@ -113,7 +113,7 @@ const headers = [
     { title: 'Orders', key: 'total_order', sortable: false, minWidth: '130' },
     { title: 'EMI', key: 'total_emi', sortable: false, minWidth: '120' },
     { title: 'Since', key: 'created_at', sortable: false, minWidth: '140' },
-    { title: 'Actions', key: 'action', sortable: false, minWidth: '100' },
+    { title: 'Actions', key: 'action', sortable: false, minWidth: '100', align: 'end' as const },
 ];
 
 const items = ref<Customer[]>([]);

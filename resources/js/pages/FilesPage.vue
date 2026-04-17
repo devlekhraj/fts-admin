@@ -67,12 +67,12 @@
       </template>
 
       <template #item.action="{ item }">
-        <v-btn v-if="item.url" :href="String(item.url)" target="_blank" rel="noopener noreferrer" icon size="x-small"
-          variant="tonal" color="primary">
-          <v-icon size="16">mdi-eye</v-icon>
+        <v-btn v-if="item.url" :href="String(item.url)" target="_blank" rel="noopener noreferrer" size="small"
+          variant="flat" color="primary">
+          view image 
         </v-btn>
-        <v-btn v-else icon size="x-small" variant="tonal" color="primary" disabled>
-          <v-icon size="16">mdi-eye</v-icon>
+        <v-btn v-else icon size="x-small" variant="flat" color="primary" disabled>
+           view image
         </v-btn>
       </template>
 
@@ -126,7 +126,7 @@ const headers = [
   { title: 'Tags', key: 'tags', sortable: false, minWidth: '170' },
   { title: 'Usages', key: 'usages', sortable: false, minWidth: '180' },
   { title: 'Created', key: 'created_at', sortable: false, minWidth: '170' },
-  { title: 'Action', key: 'action', sortable: false, minWidth: '90' },
+  { title: 'Action', key: 'action', sortable: false, minWidth: '90', align: 'end' },
 ];
 
 const items = ref<FileListItem[]>([]);

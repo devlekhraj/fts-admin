@@ -24,9 +24,8 @@
         <v-row align="center">
           <v-col cols="12" md="6" lg="4">
             <div class="d-flex align-center ga-3">
-              <AppTextField  label="Search" placeholder="Search by name..."
-                prepend-inner-icon="mdi-magnify" hide-details clearable style="min-width: 260px"
-                 />
+              <AppTextField label="Search" placeholder="Search by name..." prepend-inner-icon="mdi-magnify" hide-details
+                clearable style="min-width: 260px" />
               <v-btn color="primary" variant="tonal" height="40">
                 <v-icon start>mdi-magnify</v-icon>
                 Search
@@ -68,9 +67,9 @@
       {{ item.created_at }}
     </template>
     <template #item.action="{ item }">
-      <div class="d-flex align-center ga-1">
-        <v-btn icon size="x-small" variant="tonal" color="primary" @click="onView(item)">
-          <v-icon size="16">mdi-eye</v-icon>
+      <div class="d-flex align-center justify-end ga-1">
+        <v-btn size="small" variant="flat" color="primary" @click="onView(item)">
+          Details
         </v-btn>
         <BlogCategoryDeleteButton :category="item" @deleted="onCategoryDeleted" />
       </div>
@@ -117,7 +116,7 @@ const headers = [
   { title: 'Slug', key: 'slug', sortable: false, minWidth: '220' },
   { title: 'Created', key: 'created_at', sortable: false, minWidth: '170' },
   { title: 'Status', key: 'status', sortable: false, minWidth: '140' },
-  { title: 'Actions', key: 'action', sortable: false, minWidth: '120' },
+  { title: 'Actions', key: 'action', sortable: false, minWidth: '120', align: 'end' as const },
 ];
 
 const items = ref<BlogCategory[]>([]);

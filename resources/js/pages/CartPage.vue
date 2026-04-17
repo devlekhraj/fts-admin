@@ -28,9 +28,9 @@
     <template #item.updatedAt="{ item }">
       <span class="text-medium-emphasis">{{ item.updatedAt }}</span>
     </template>
-    <template #item.action="{ item }">
-      <v-btn size="small" variant="tonal" color="primary" @click="onView(item)">
-        View
+    <template #item.action="{ item }" class="justify-end">
+      <v-btn size="small" variant="flat" color="primary" @click="onView(item)">
+        Details
       </v-btn>
     </template>
   </AppDataTable>
@@ -49,7 +49,7 @@ const headers = [
   { title: 'Items', key: 'items',minWidth:'150' },
   { title: 'Status', key: 'status', minWidth:'120' },
   { title: 'Updated', key: 'updatedAt', minWidth:'150' },
-  { title: 'Action', key: 'action', width:'120' },
+  { title: 'Action', key: 'action', width:'120', align: 'end' as const },
 ];
 
 const router = useRouter();

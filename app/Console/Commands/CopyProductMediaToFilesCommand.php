@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class CopyProductMediaToFilesCommand extends Command
 {
@@ -103,56 +104,66 @@ class CopyProductMediaToFilesCommand extends Command
             $dryRun,
             $cdnRoot
         ): void {
-            $fileNames = [];
-            $mediaByFileName = [];
+            $fileUpserts = [];
+            $usageRegistry = [];
+            $targetFileNames = [];
             foreach ($rows as $row) {
                 $sourceFileName = $this->makeSourceFileName($row);
                 $sourcePath = $this->makeSourcePath((int) $row->id, $sourceFileName);
-                $convertToWebp = $this->shouldConvertToWebp($sourcePath, (string) ($row->mime_type ?? ''));
-                $fileName = $this->makeFileName($row, $convertToWebp);
-                $fileNames[] = $fileName;
-                $mediaByFileName[$fileName] = $row;
+                if (File::exists($sourcePath)) {
+                    $convertToWebp = $this->shouldConvertToWebp($sourcePath, (string) ($row->mime_type ?? ''));
+                    $targetFileNames[] = $this->makeFileName($row, $convertToWebp);
+                }
             }
 
             $existingFiles = DB::table('files')
-                ->select(['id', 'file_name', 'key', 'file_path'])
-                ->whereIn('file_name', $fileNames)
-                ->get()
-                ->keyBy('file_name');
+                ->whereIn('file_name', array_unique($targetFileNames))
+                ->pluck('file_name')
+                ->all();
 
-            $upserts = [];
+            $currentBatchNames = [];
+
             foreach ($rows as $row) {
                 $sourceFileName = $this->makeSourceFileName($row);
                 $sourcePath = $this->makeSourcePath((int) $row->id, $sourceFileName);
-                $convertToWebp = $this->shouldConvertToWebp($sourcePath, (string) ($row->mime_type ?? ''));
-                $fileName = $this->makeFileName($row, $convertToWebp);
-                $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-                $dimensions = $this->extractDimensions($row->custom_properties, $sourcePath);
-                $existingFile = $existingFiles->get($fileName);
 
-                if ($existingFile) {
-                    $key = is_string($existingFile->key ?? null) && trim((string) $existingFile->key) !== ''
-                        ? trim((string) $existingFile->key)
-                        : $this->makeKey();
-                    $filePath = $this->makeFilePath(self::TARGET_FOLDER, $key, $fileName);
-                } else {
-                    $key = $this->makeKey();
-                    $filePath = $this->makeFilePath(self::TARGET_FOLDER, $key, $fileName);
+                if (! File::exists($sourcePath)) {
+                    $missing++;
 
-                    if ($this->copyToTargetDirectory($sourcePath, $key, $fileName, $cdnRoot, self::TARGET_FOLDER, $dryRun, $convertToWebp)) {
-                        $copied++;
-                    } else {
-                        $missing++;
-                    }
+                    continue;
                 }
 
+                $convertToWebp = $this->shouldConvertToWebp($sourcePath, (string) ($row->mime_type ?? ''));
+                $targetFileName = $this->makeFileName($row, $convertToWebp);
+                $typeId = (string) ($row->model_id ?? '0');
+
+                // Check for duplicates and append random string if needed
+                if (in_array($targetFileName, $existingFiles, true) || in_array($targetFileName, $currentBatchNames, true)) {
+                    $nameOnly = pathinfo($targetFileName, PATHINFO_FILENAME);
+                    $extension = pathinfo($targetFileName, PATHINFO_EXTENSION);
+                    $targetFileName = $nameOnly . '-' . strtolower(Str::random(4)) . ($extension ? '.' . $extension : '');
+                }
+                $currentBatchNames[] = $targetFileName;
+
+                $key = $this->makeKey(self::TARGET_FOLDER, $typeId);
+                $filePath = $this->makeFilePath(self::TARGET_FOLDER, $typeId, $targetFileName);
+
+                if ($this->copyToTargetDirectory($sourcePath, $typeId, $targetFileName, $cdnRoot, self::TARGET_FOLDER, $dryRun, $convertToWebp)) {
+                    $copied++;
+                } else {
+                    $missing++;
+
+                    continue;
+                }
+
+                $dimensions = $this->extractDimensions($row->custom_properties, $sourcePath);
                 $metaPayload = ['directory' => self::TARGET_FOLDER];
 
-                $upserts[] = [
+                $fileUpserts[] = [
                     'key' => $key,
-                    'file_name' => $fileName,
+                    'file_name' => $targetFileName,
                     'file_path' => $filePath,
-                    'extension' => $extension,
+                    'extension' => strtolower(pathinfo($targetFileName, PATHINFO_EXTENSION)),
                     'seq_no' => $row->order_column,
                     'mime_type' => $this->resolveTargetMimeType((string) ($row->mime_type ?? ''), $convertToWebp),
                     'file_size' => (float) ($row->size ?? 0),
@@ -162,14 +173,25 @@ class CopyProductMediaToFilesCommand extends Command
                     'created_at' => $row->created_at ?? now(),
                     'updated_at' => $row->updated_at ?? now(),
                 ];
+
+                $usageRegistry[] = [
+                    'target_file_name' => $targetFileName,
+                    'model_type' => $row->model_type,
+                    'model_id' => (int) $row->model_id,
+                    'name' => $row->name,
+                    'custom_properties' => $row->custom_properties,
+                    'created_at' => $row->created_at ?? now(),
+                    'updated_at' => $row->updated_at ?? now(),
+                ];
+
+                $created++;
             }
 
-            if (! $dryRun && ! empty($upserts)) {
+            if (! $dryRun && ! empty($fileUpserts)) {
                 DB::table('files')->upsert(
-                    $upserts,
+                    $fileUpserts,
                     ['file_name'],
                     [
-                        'key',
                         'file_path',
                         'extension',
                         'seq_no',
@@ -184,36 +206,30 @@ class CopyProductMediaToFilesCommand extends Command
 
                 $filesByName = DB::table('files')
                     ->select(['id', 'file_name'])
-                    ->whereIn('file_name', $fileNames)
+                    ->whereIn('file_name', collect($usageRegistry)->pluck('target_file_name')->unique())
                     ->get()
                     ->keyBy('file_name');
 
                 $usageUpserts = [];
-                foreach ($fileNames as $fileName) {
-                    $file = $filesByName->get($fileName);
-                    $media = $mediaByFileName[$fileName] ?? null;
-                    if (! $file || ! $media) {
+                foreach ($usageRegistry as $usage) {
+                    $file = $filesByName->get($usage['target_file_name']);
+                    if (! $file) {
                         continue;
                     }
 
-                    $usageId = (int) ($media->model_id ?? 0);
-                    if ($usageId <= 0) {
-                        continue;
-                    }
-
-                    $usageMeta = $this->decodeJson($media->custom_properties);
+                    $usageMeta = $this->decodeJson($usage['custom_properties']);
                     $usageUpserts[] = [
                         'file_id' => (int) $file->id,
                         'usage_type' => self::TARGET_USAGE_TYPE,
-                        'usage_id' => $usageId,
-                        'title' => is_string($media->name ?? null) ? trim((string) $media->name) : null,
-                        'alt_text' => is_string($media->name ?? null) ? trim((string) $media->name) : null,
+                        'usage_id' => (int) $usage['model_id'],
+                        'title' => is_string($usage['name'] ?? null) ? trim((string) $usage['name']) : null,
+                        'alt_text' => is_string($usage['name'] ?? null) ? trim((string) $usage['name']) : null,
                         'meta' => json_encode(
                             is_array($usageMeta) ? $usageMeta : [],
                             JSON_UNESCAPED_UNICODE
                         ),
-                        'created_at' => $media->created_at ?? now(),
-                        'updated_at' => $media->updated_at ?? now(),
+                        'created_at' => $usage['created_at'],
+                        'updated_at' => $usage['updated_at'],
                     ];
                 }
 
@@ -227,13 +243,6 @@ class CopyProductMediaToFilesCommand extends Command
                 }
             }
 
-            foreach ($fileNames as $fileName) {
-                if ($existingFiles->has($fileName)) {
-                    $updated++;
-                } else {
-                    $created++;
-                }
-            }
 
             $processed += count($rows);
             $this->line(sprintf('Processed %d product rows...', $processed));
@@ -254,28 +263,15 @@ class CopyProductMediaToFilesCommand extends Command
         return self::SUCCESS;
     }
 
-    private function makeKey(): string
+    private function makeKey(string $type, string $typeId): string
     {
-        return bin2hex(random_bytes(16));
+        return $type . '-' . $typeId . '-' . Str::orderedUuid()->toString();
     }
 
     private function makeFileName(object $row, bool $convertToWebp): string
     {
         $fileName = is_string($row->file_name ?? null) ? trim((string) $row->file_name) : '';
         $fileName = $this->sanitizeTargetFileName($fileName);
-
-        if ($convertToWebp) {
-            if ($fileName === '') {
-                $fileName = 'media-'.$row->id;
-            }
-
-            $nameWithoutExtension = $this->normalizeWebpBaseName($fileName);
-            if (trim($nameWithoutExtension) === '') {
-                $nameWithoutExtension = 'media-'.$row->id;
-            }
-
-            return strtolower(trim($nameWithoutExtension).'.webp');
-        }
 
         if ($fileName !== '') {
             return strtolower($fileName);
@@ -371,21 +367,21 @@ class CopyProductMediaToFilesCommand extends Command
         return ('/Users/devlekh/Herd/fts/storage/app/public/media/'.$mediaId.'/'.$sourceFileName);
     }
 
-    private function makeFilePath(string $targetFolder, string $key, string $targetFileName): string
+    private function makeFilePath(string $targetFolder, string $typeId, string $targetFileName): string
     {
-        return trim($targetFolder, '/').'/'.trim($key, '/').'/'.ltrim($targetFileName, '/');
+        return trim($targetFolder, '/').'/'.trim($typeId, '/').'/'.ltrim($targetFileName, '/');
     }
 
     private function copyToTargetDirectory(
         string $sourcePath,
-        string $key,
+        string $typeId,
         string $targetFileName,
         string $cdnRoot,
         string $targetFolder,
         bool $dryRun,
         bool $convertToWebp
     ): bool {
-        $targetDirectory = $cdnRoot.DIRECTORY_SEPARATOR.trim($targetFolder, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.trim($key, DIRECTORY_SEPARATOR);
+        $targetDirectory = $cdnRoot.DIRECTORY_SEPARATOR.trim($targetFolder, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.trim($typeId, DIRECTORY_SEPARATOR);
         $targetPath = $targetDirectory.DIRECTORY_SEPARATOR.$targetFileName;
 
         if (! File::exists($sourcePath)) {
@@ -505,35 +501,7 @@ class CopyProductMediaToFilesCommand extends Command
 
     private function shouldConvertToWebp(string $sourcePath, string $sourceMimeType): bool
     {
-        if (! str_starts_with(strtolower(trim($sourceMimeType)), 'image/')) {
-            return false;
-        }
-
-        if (! File::exists($sourcePath)) {
-            return false;
-        }
-
-        if (! function_exists('imagewebp') || ! function_exists('exif_imagetype')) {
-            return false;
-        }
-
-        if (! $this->hasEnoughMemoryForWebpConversion($sourcePath)) {
-            return false;
-        }
-
-        $imageType = @exif_imagetype($sourcePath);
-        if (! is_int($imageType)) {
-            return false;
-        }
-
-        return match ($imageType) {
-            IMAGETYPE_JPEG => function_exists('imagecreatefromjpeg'),
-            IMAGETYPE_PNG => function_exists('imagecreatefrompng'),
-            IMAGETYPE_GIF => function_exists('imagecreatefromgif'),
-            IMAGETYPE_WEBP => false,
-            IMAGETYPE_BMP => function_exists('imagecreatefrombmp'),
-            default => false,
-        };
+        return false;
     }
 
     private function hasEnoughMemoryForWebpConversion(string $sourcePath): bool

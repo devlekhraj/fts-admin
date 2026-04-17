@@ -1,9 +1,9 @@
 <template>
-	<v-btn variant="tonal" color="primary" size="x-small" icon @click="onEdit">
-		<v-icon>mdi-cog</v-icon>
+	<v-btn variant="flat" color="primary" size="small"  @click="onEdit">
+		Edit
 	</v-btn>
-	<v-btn variant="tonal" class="ml-2" color="error" size="x-small" icon @click="onDelete">
-		<v-icon>mdi-delete</v-icon>
+	<v-btn variant="flat" class="ml-2" color="error" size="small"  @click="onDelete">
+		Delete
 	</v-btn>
 </template>
 

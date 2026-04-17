@@ -8,12 +8,8 @@
           </v-btn>
         </template>
         <v-list class="export-menu-list" density="comfortable" min-width="170">
-          <v-list-item
-            v-for="option in exportOptions"
-            :key="option.type"
-            :title="option.title"
-            :prepend-icon="option.icon"
-            @click="onExport(option.type)" />
+          <v-list-item v-for="option in exportOptions" :key="option.type" :title="option.title"
+            :prepend-icon="option.icon" @click="onExport(option.type)" />
         </v-list>
       </v-menu>
 
@@ -21,22 +17,16 @@
     </template>
   </AppPageHeader>
 
-  <AppDataTable
-    :headers="headers"
-    :items="items"
-    :total="total"
-    :loading="loading"
-    :page="options.page"
-    :items-per-page="options.itemsPerPage"
-    @update:options="onOptions">
+  <AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :page="options.page"
+    :items-per-page="options.itemsPerPage" @update:options="onOptions">
     <template #actions>
       <v-container fluid class="py-4">
         <v-row align="center">
           <v-col cols="12" md="6" lg="4">
             <div class="d-flex align-center ga-3">
-              <AppTextField v-model="search" label="Search"
-                placeholder="Search by name..." prepend-inner-icon="mdi-magnify" hide-details clearable
-                style="min-width: 260px" @click:clear="onClearSearch" />
+              <AppTextField v-model="search" label="Search" placeholder="Search by name..."
+                prepend-inner-icon="mdi-magnify" hide-details clearable style="min-width: 260px"
+                @click:clear="onClearSearch" />
               <v-btn color="primary" variant="tonal" height="40">
                 <v-icon start>mdi-magnify</v-icon>
                 Search
@@ -45,9 +35,8 @@
           </v-col>
 
           <v-col cols="12" md="6" lg="3">
-            <AppSelectField  :items="categoryOptions" item-title="title" item-value="value"
-              label="Category" clearable hide-details
-              @update:model-value="onCategoryChange" />
+            <AppSelectField :items="categoryOptions" item-title="title" item-value="value" label="Category" clearable
+              hide-details @update:model-value="onCategoryChange" />
           </v-col>
 
           <v-spacer></v-spacer>
@@ -60,7 +49,7 @@
         </v-row>
       </v-container>
     </template>
-    
+
     <template #item.title="{ item }">
       <div class="d-flex align-center ga-2">
         <v-avatar size="28" color="grey-lighten-3" rounded>
@@ -85,9 +74,9 @@
       </span>
     </template>
     <template #item.action="{ item }">
-      <div class="d-flex align-center ga-1">
-        <v-btn icon size="x-small" variant="tonal" color="primary" @click="onView(item)">
-          <v-icon size="16">mdi-eye</v-icon>
+      <div class="d-flex align-center justify-end ga-1">
+        <v-btn size="small" variant="flat" color="primary" @click="onView(item)">
+          details
         </v-btn>
         <BlogDeleteButton :blog="item" @deleted="onBlogDeleted" />
       </div>
@@ -133,7 +122,7 @@ const headers = [
   { title: 'Category', key: 'category_name', sortable: false, minWidth: '180' },
   { title: 'Published', key: 'published_at', sortable: false, minWidth: '170' },
   { title: 'Status', key: 'status', sortable: false, minWidth: '140' },
-  { title: 'Actions', key: 'action', sortable: false, minWidth: '120' },
+  { title: 'Actions', key: 'action', sortable: false, minWidth: '120', align: 'end' as const },
 ];
 
 const items = ref<Blog[]>([]);

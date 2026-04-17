@@ -2,7 +2,7 @@
   <AppPageHeader title="Wish Pot" subtitle="Wishlist items" />
   <AppDataTable :headers="headers" :items="items" :total="total" :loading="loading">
     <template #item.action="{ item }">
-      <v-btn size="small" variant="tonal" color="primary" @click="onView(item)">
+      <v-btn size="small" variant="flat" color="primary" @click="onView(item)">
         View
       </v-btn>
     </template>
@@ -16,11 +16,18 @@ import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import { timeAgo } from '@/shared/utils';
 
-const headers = [
+interface DataTableHeader {
+  title: string;
+  key: string;
+  align?: 'end' | 'start' | 'center';
+  sortable?: boolean;
+}
+
+const headers: DataTableHeader[] = [
   { title: 'Customer', key: 'customer' },
   { title: 'Item', key: 'item' },
   { title: 'Added', key: 'addedAt' },
-  { title: 'Action', key: 'action' },
+  { title: 'Action', key: 'action', align: 'end', sortable: false },
 ];
 
 const router = useRouter();

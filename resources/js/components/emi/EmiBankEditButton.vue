@@ -1,5 +1,5 @@
 <template>
-  <v-btn size="small" variant="tonal" color="info" @click="open">
+  <v-btn size="small" variant="flat" color="primary" @click="open">
     Edit 
   </v-btn>
 </template>

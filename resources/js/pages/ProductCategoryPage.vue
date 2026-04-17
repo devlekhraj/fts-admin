@@ -20,15 +20,8 @@
   <AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :page="options.page"
     :items-per-page="options.itemsPerPage" @update:options="onOptions">
     <template #actions>
-      <PageFilter
-        v-model:search="search"
-        search-label="Search categories"
-        search-placeholder="Search by title or slug"
-        :total="total"
-        total-label="Items found."
-        @search="onSearch"
-        @clear="onClearSearch"
-      />
+      <PageFilter v-model:search="search" search-label="Search categories" search-placeholder="Search by title or slug"
+        :total="total" total-label="Items found." @search="onSearch" @clear="onClearSearch" />
     </template>
     <template #item.title="{ item }">
       <div class="d-flex align-center ga-2">
@@ -49,8 +42,8 @@
     </template>
     <template #item.action="{ item }">
       <div class="d-flex align-center justify-end ga-1">
-        <v-btn size="small" variant="tonal" color="primary" @click="onView(item)">
-          view category
+        <v-btn size="small" variant="flat" color="primary" @click="onView(item)">
+          Details
         </v-btn>
         <ProductCategoryDeleteButton :category="item" @deleted="onCategoryDeleted" />
       </div>

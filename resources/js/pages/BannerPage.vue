@@ -8,14 +8,8 @@
   <v-container fluid>
     <v-row>
       <v-col cols="12">
-        <AppDataTable
-          :headers="headers"
-          :items="items"
-          :total="total"
-          :loading="loading"
-          :page="options.page"
-          :items-per-page="options.itemsPerPage"
-          @update:options="onOptions">
+        <AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :page="options.page"
+          :items-per-page="options.itemsPerPage" @update:options="onOptions">
           <template #item.name="{ item }">
             <div class="d-flex align-center ga-2">
               <v-avatar size="28" color="grey-lighten-3" rounded>
@@ -38,8 +32,9 @@
           </template>
           <template #item.action="{ item }">
             <div class="d-flex align-center justify-end ga-1">
-              <v-btn size="small" variant="tonal" color="primary" @click="router.push({ name: 'admin.banners.detail', params: { id: item.id } })">
-                detail
+              <v-btn size="small" variant="flat" color="primary"
+                @click="router.push({ name: 'admin.banners.detail', params: { id: item.id } })">
+                Details
               </v-btn>
               <BannerDeleteButton :banner="item" @deleted="onBannerDeleted" />
             </div>

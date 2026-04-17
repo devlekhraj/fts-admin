@@ -20,8 +20,7 @@
         <v-chip size="small" label color="primary">
           {{ item.code ?? '-' }}
         </v-chip>
-        <v-btn v-if="item.code" icon size="small" variant="text" color=""
-          @click.stop="copyCode(item.code as string)">
+        <v-btn v-if="item.code" icon size="small" variant="text" color="" @click.stop="copyCode(item.code as string)">
           <v-icon size="14">mdi-content-copy</v-icon>
         </v-btn>
       </div>
@@ -29,7 +28,7 @@
 
     <template #item.action="{ item }">
       <div class="d-flex align-center justify-end ga-1">
-        <!-- <v-btn size="small" variant="tonal" color="primary"
+        <!-- <v-btn size="small" variant="flat" color="primary"
           @click="router.push({ name: 'admin.emi.banks.detail', params: { id: item.id } })">
           View
         </v-btn> -->
@@ -59,9 +58,9 @@ type EmiBank = {
 };
 
 const headers = [
-  { title: 'SN', key: 'sn', sortable: false, maxWidth: '80', minWidth:'80' },
+  { title: 'SN', key: 'sn', sortable: false, maxWidth: '80', minWidth: '80' },
   { title: 'Name', key: 'name', sortable: false, minWidth: '200' },
-  { title: 'Code', key: 'code', sortable: false, maxWidth: '100', minWidth:'100' },
+  { title: 'Code', key: 'code', sortable: false, maxWidth: '100', minWidth: '100' },
   { title: 'Actions', key: 'action', sortable: false, maxWidth: '100', minWidth: '100', align: 'end' },
 ];
 

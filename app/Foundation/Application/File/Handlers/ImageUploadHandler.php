@@ -55,7 +55,7 @@ final class ImageUploadHandler
                     'usage_id' => $dto->usageId,
                     'title' => is_string($title) && $title !== '' ? $title : null,
                     'alt_text' => $dto->altText,
-                    'meta' => json_encode($meta, JSON_UNESCAPED_UNICODE),
+                    'meta' => json_encode(array_filter($meta, fn($v) => ! is_null($v)), JSON_UNESCAPED_UNICODE),
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]],
@@ -130,10 +130,10 @@ final class ImageUploadHandler
             'width' => $width,
             'disk' => 'cdn',
             'content_hash' => $contentHash,
-            'meta' => json_encode([
+            'meta' => json_encode(array_filter([
                 'directory' => $directory !== '' ? $directory : null,
                 'original_name' => $dto->file->getClientOriginalName(),
-            ], JSON_UNESCAPED_SLASHES),
+            ], fn($v) => ! is_null($v)), JSON_UNESCAPED_SLASHES),
             'created_at' => $now,
             'updated_at' => $now,
         ]);

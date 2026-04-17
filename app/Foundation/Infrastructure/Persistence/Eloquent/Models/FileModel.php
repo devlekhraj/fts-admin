@@ -34,11 +34,11 @@ class FileModel extends BaseModel
             return $path;
         }
 
-        if($this->disk == 'cdn'){
+        // if($this->disk == 'cdn'){
             $baseUrl = trim((string) config('filesystems.disks.cdn.url', ''), '/');
-        }else{
-            $baseUrl = trim((string) config('filesystems.disks.fatafat_cdn.url', ''), '/');
-        }
+        // }else{
+        //     $baseUrl = trim((string) config('filesystems.disks.fatafat_cdn.url', ''), '/');
+        // }
         $relativePath = ltrim($path, '/');
 
         if ($baseUrl === '') {

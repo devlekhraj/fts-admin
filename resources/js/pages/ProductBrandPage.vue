@@ -8,12 +8,8 @@
           </v-btn>
         </template>
         <v-list class="export-menu-list" density="comfortable" min-width="170">
-          <v-list-item
-            v-for="option in exportOptions"
-            :key="option.type"
-            :title="option.title"
-            :prepend-icon="option.icon"
-            @click="onExport(option.type)" />
+          <v-list-item v-for="option in exportOptions" :key="option.type" :title="option.title"
+            :prepend-icon="option.icon" @click="onExport(option.type)" />
         </v-list>
       </v-menu>
 
@@ -21,24 +17,11 @@
     </template>
   </AppPageHeader>
 
-  <AppDataTable
-    :headers="headers"
-    :items="items"
-    :total="total"
-    :loading="loading"
-    :page="options.page"
-    :items-per-page="options.itemsPerPage"
-    @update:options="onOptions">
+  <AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :page="options.page"
+    :items-per-page="options.itemsPerPage" @update:options="onOptions">
     <template #actions>
-      <PageFilter
-        v-model:search="search"
-        search-label="Search brands"
-        search-placeholder="Search by name or slug"
-        :total="total"
-        total-label="Items found."
-        @search="onSearch"
-        @clear="onClearSearch"
-      />
+      <PageFilter v-model:search="search" search-label="Search brands" search-placeholder="Search by name or slug"
+        :total="total" total-label="Items found." @search="onSearch" @clear="onClearSearch" />
     </template>
     <template #item.name="{ item }">
       <div class="d-flex align-center ga-2">
@@ -62,8 +45,8 @@
     </template>
     <template #item.action="{ item }">
       <div class="d-flex align-center justify-end ga-1">
-        <v-btn size="small" variant="tonal" color="primary" @click="onView(item)">
-          edit brand
+        <v-btn size="small" variant="flat" color="primary" @click="onView(item)">
+          Details
         </v-btn>
         <BrandDeleteButton :brand="item" @deleted="onBrandDeleted" />
       </div>

@@ -78,17 +78,17 @@
           </template>
 
           <template #item.action="{ item }">
-            <div class="d-flex align-center ga-1">
-              <v-btn icon size="x-small" class="mr-1" variant="tonal" color="primary"
+            <div class="d-flex align-center justify-end ga-1">
+              <v-btn  size="small" class="mr-1" variant="flat" color="primary"
                 @click="router.push({ name: 'admin.campaigns.detail', params: { id: item.id } })">
-                <v-icon size="16">mdi-eye</v-icon>
+                Details
               </v-btn>
-              <v-btn icon size="x-small" class="mr-1" variant="tonal" color="primary"
+              <v-btn  size="small" class="mr-1" variant="flat" color="warning"
                 @click="openEditModal(item)">
-                <v-icon size="16">mdi-square-edit-outline</v-icon>
+                Edit
               </v-btn>
-              <v-btn icon size="x-small" variant="tonal" color="error" @click="onDelete(item)">
-                <v-icon size="16">mdi-delete</v-icon>
+              <v-btn  size="small" variant="flat" color="error" @click="onDelete(item)">
+                Delete
               </v-btn>
             </div>
           </template>
@@ -113,12 +113,12 @@ import CampaignDelete from '@/components/campaign-detail/modal/CampaignDelete.vu
 
 const headers = [
   { title: 'Name', key: 'title', sortable: false, minWidth: '240' },
-  { title: 'Slug', key: 'slug', sortable: false, minWidth: '220' },
+  // { title: 'Slug', key: 'slug', sortable: false, minWidth: '220' },
   { title: 'Status', key: 'status', sortable: false, minWidth: '120' },
   { title: 'Published', key: 'is_published', sortable: false, minWidth: '120' },
   { title: 'Duration', key: 'start_date', sortable: false, minWidth: '160' },
   { title: 'Products', key: 'products_count', sortable: false, minWidth: '120' },
-  { title: 'Actions', key: 'action', sortable: false, minWidth: '120' },
+  { title: 'Actions', key: 'action', sortable: false, minWidth: '120', align: 'end' as const },
 ];
 
 type Campaign = {

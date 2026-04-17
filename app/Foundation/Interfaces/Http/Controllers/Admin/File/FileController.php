@@ -85,7 +85,9 @@ class FileController extends Controller
                 ))
                 : $this->assignUploadedFileHandler->handle(new AssignUploadedFileCommand(
                     file: $request->file('file'),
-                    directory: isset($validated['directory']) ? (string) $validated['directory'] : null,
+                    usageType: trim((string) $validated['usage_type']),
+                    usageId: (int) $validated['usage_id'],
+                    fileName: isset($validated['file_name']) ? (string) $validated['file_name'] : null,
                 ));
         } catch (Throwable $exception) {
             if ($source === 'existing' && $exception->getMessage() === 'Selected image not found.') {

@@ -6,11 +6,7 @@
   </AppPageHeader>
 
   <v-card class="mt-4 pa-4">
-    <v-data-table
-      :headers="headers"
-      :items="items"
-      :loading="loading"
-      item-value="id">
+    <v-data-table :headers="headers" :items="items" :loading="loading" item-value="id">
       <template #item.sn="{ index }">
         <span>{{ index + 1 }}</span>
       </template>
@@ -20,7 +16,8 @@
       </template>
 
       <template #item.mode="{ item }">
-        <v-chip size="small" label class="text-uppercase" variant="tonal" :color="item.mode == 'live' ? 'primary':'warning'">
+        <v-chip size="small" label class="text-uppercase" variant="tonal"
+          :color="item.mode == 'live' ? 'primary' : 'warning'">
           {{ item.mode || '-' }}
         </v-chip>
       </template>
@@ -30,12 +27,7 @@
           <span class="text-caption text-medium-emphasis text-truncate key-preview">
             {{ maskKey(item.live_public_key) }}
           </span>
-          <v-btn
-            icon
-            size="x-small"
-            variant="tonal"
-            color="primary"
-            :disabled="!item.live_public_key"
+          <v-btn icon size="x-small" variant="tonal" color="primary" :disabled="!item.live_public_key"
             @click="copyLivePublicKey(item.live_public_key)">
             <v-icon size="14">mdi-content-copy</v-icon>
           </v-btn>
@@ -54,11 +46,11 @@
 
       <template #item.action="{ item }">
         <div class="d-flex justify-end ga-1">
-          <v-btn size="small" variant="tonal" color="primary" @click="onConfigure(item)">
+          <v-btn size="small" variant="flat" color="primary" @click="onConfigure(item)">
             Edit
           </v-btn>
-          <v-btn size="small" variant="tonal" color="error" @click="onDelete(item)">
-           delete
+          <v-btn size="small" variant="flat" color="error" @click="onDelete(item)">
+            delete
           </v-btn>
         </div>
       </template>

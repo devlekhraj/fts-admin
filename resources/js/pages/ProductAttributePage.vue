@@ -10,17 +10,13 @@
       <span>{{ formatLongDate(item.created_at) ?? '-' }}</span>
     </template>
     <template #item.action="{ item }">
-      <div class="d-flex align-center ga-2">
-        <v-btn
-          size="x-small"
-          variant="tonal"
-          color="primary"
-          icon
+      <div class="d-flex align-center justify-end ga-2">
+        <v-btn size="small" variant="flat" color="primary"
           :to="{ name: 'admin.product.attributes.detail', params: { id: item.id } }">
-          <v-icon size="16">mdi-eye-outline</v-icon>
+          details
         </v-btn>
-        <v-btn size="x-small" variant="tonal" color="error" icon>
-          <v-icon size="16">mdi-delete-outline</v-icon>
+        <v-btn size="small" variant="flat" color="error">
+          Delete
         </v-btn>
       </div>
     </template>
@@ -34,12 +30,12 @@ import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import { listAttributeProducts, type AttributeProductItem } from '@/api/attribute-products.api';
 import { formatLongDate } from '@/shared/utils';
 
-const headers = [
+const headers: { title: string; key: string; sortable?: boolean; align?: 'end' | 'start' | 'center' }[] = [
   // { title: 'ID', key: 'id' },
   { title: 'Name', key: 'name' },
   { title: 'Attributes Count', key: 'attributes_count' },
   { title: 'Created', key: 'created_at' },
-  { title: 'Action', key: 'action', sortable: false },
+  { title: 'Action', key: 'action', sortable: false, align: 'end' },
 ];
 
 const items = ref<AttributeProductItem[]>([]);

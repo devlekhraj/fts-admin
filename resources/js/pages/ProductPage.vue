@@ -26,9 +26,9 @@
         <v-row align="center">
           <v-col cols="12" md="6" lg="4">
             <div class="d-flex align-center ga-3">
-              <AppTextField v-model="search" label="Search products"
-                placeholder="Search by name..." prepend-inner-icon="mdi-magnify" hide-details clearable
-                style="min-width: 260px" @click:clear="onClearSearch" />
+              <AppTextField v-model="search" label="Search products" placeholder="Search by name..."
+                prepend-inner-icon="mdi-magnify" hide-details clearable style="min-width: 260px"
+                @click:clear="onClearSearch" />
               <v-btn color="primary" variant="tonal" height="40" @click="onSearch">
                 <v-icon start>mdi-magnify</v-icon>
                 Search
@@ -38,8 +38,7 @@
 
           <v-col cols="12" md="6" lg="3">
             <AppSelectField v-model="categoryFilter" :items="categoryOptions" item-title="title" item-value="value"
-              label="Category" clearable hide-details
-              @update:model-value="onCategoryChange" />
+              label="Category" clearable hide-details @update:model-value="onCategoryChange" />
           </v-col>
 
           <v-spacer></v-spacer>
@@ -90,10 +89,10 @@
     </template>
     <template #item.action="{ item }">
       <div class="d-flex align-center ga-1">
-        <v-btn size="small" variant="tonal" class="mr-2" color="primary" @click="onView(item)">
-          Edit Product
+        <v-btn size="small" variant="flat" class="mr-2" color="primary" @click="onView(item)">
+         Details
         </v-btn>
-        <v-btn size="small" variant="tonal" color="error" @click="onDelete(item)">
+        <v-btn size="small" variant="flat" color="error" @click="onDelete(item)">
           Delete
         </v-btn>
       </div>
@@ -132,8 +131,7 @@
                       :key="String(img.id ?? Math.random())">
                       <td class="py-3">
                         <div class="table-image-preview rounded">
-                          <v-img v-if="img.url" :src="String(img.url)" contain
-                            :alt="img.alt_text || 'Image'" />
+                          <v-img v-if="img.url" :src="String(img.url)" contain :alt="img.alt_text || 'Image'" />
                           <div v-else class="d-flex align-center justify-center h-100">
                             <v-icon size="18" color="grey-darken-1">mdi-image-outline</v-icon>
                           </div>
@@ -296,7 +294,7 @@ async function fetchProducts() {
 
 async function fetchCategories() {
   const list = await listProductCategoriesLite();
-  console.log({list});
+  console.log({ list });
   categoryOptions.value = [
     { title: 'All categories', value: null },
     ...list.map((cat: ProductCategoryListItem) => ({

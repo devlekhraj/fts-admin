@@ -16,6 +16,7 @@ final class StoreFileAssignRequest extends FormRequest
             'source' => ['required', 'string', 'in:existing,upload'],
             'image_id' => ['nullable', 'integer', 'exists:files,id', 'required_if:source,existing'],
             'file' => ['nullable', 'image', 'max:10240', 'required_if:source,upload'],
+            'file_name' => ['nullable', 'string', 'max:255'],
             'alt_text' => ['nullable', 'string', 'max:255'],
             'caption' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:5000'],

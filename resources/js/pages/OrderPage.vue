@@ -1,21 +1,15 @@
 <template>
   <AppPageHeader title="Orders" subtitle="All orders" />
-  <AppDataTable
-    :headers="headers"
-    :items="items"
-    :total="total"
-    :loading="loading"
-    :page="options.page"
-    :items-per-page="options.itemsPerPage"
-    @update:options="onOptions">
+  <AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :page="options.page"
+    :items-per-page="options.itemsPerPage" @update:options="onOptions">
     <template #actions>
       <v-container fluid class="py-4">
         <v-row align="center">
           <v-col cols="12" md="6" lg="4">
             <div class="d-flex align-center ga-3">
-              <AppTextField v-model="search" label="Search"
-                placeholder="Search by name..." prepend-inner-icon="mdi-magnify" hide-details clearable
-                style="min-width: 260px" @click:clear="onClearSearch" />
+              <AppTextField v-model="search" label="Search" placeholder="Search by name..."
+                prepend-inner-icon="mdi-magnify" hide-details clearable style="min-width: 260px"
+                @click:clear="onClearSearch" />
               <v-btn color="primary" variant="tonal" height="40">
                 <v-icon start>mdi-magnify</v-icon>
                 Search
@@ -24,8 +18,7 @@
           </v-col>
 
           <v-col cols="12" md="6" lg="3">
-            <AppSelectField  item-title="title" item-value="value"
-              label="Category" clearable hide-details />
+            <AppSelectField item-title="title" item-value="value" label="Category" clearable hide-details />
           </v-col>
 
           <v-spacer></v-spacer>
@@ -38,7 +31,7 @@
         </v-row>
       </v-container>
     </template>
-    
+
     <template #item.order_number="{ item }">
       <span>{{ item.order_number || `#${item.id}` }}</span>
     </template>
@@ -66,7 +59,8 @@
       <span>{{ item.created_at || '-' }}</span>
     </template>
     <template #item.action="{ item }">
-      <v-btn size="small" variant="tonal" color="primary" @click="router.push({ name: 'admin.orders.detail', params: { id: item.id } })">
+      <v-btn size="small" variant="flat" color="primary"
+        @click="router.push({ name: 'admin.orders.detail', params: { id: item.id } })">
         Details
       </v-btn>
     </template>
@@ -93,7 +87,7 @@ const headers = [
   { title: 'Status', key: 'status', sortable: false, minWidth: '130' },
   { title: 'Amount', key: 'total', sortable: false, minWidth: '130' },
   { title: 'Order Date', key: 'created_at', sortable: false, minWidth: '150' },
-  { title: 'Actions', key: 'action', sortable: false, minWidth: '130', align:'end' },
+  { title: 'Actions', key: 'action', sortable: false, minWidth: '130', align: 'end' },
 ];
 
 type Order = {

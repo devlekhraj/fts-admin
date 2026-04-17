@@ -28,11 +28,11 @@ final class AssignFileUsageHandler
                 'usage_id' => $command->usageId,
                 'title' => $caption !== '' ? $caption : null,
                 'alt_text' => $command->altText,
-                'meta' => json_encode([
+                'meta' => json_encode(array_filter([
                     'caption' => $caption !== '' ? $caption : null,
                     'description' => $description !== '' ? $description : null,
-                    'is_default' => $command->isDefault,
-                ], JSON_UNESCAPED_UNICODE),
+                    'is_default' => $command->isDefault ?: null,
+                ], fn($v) => ! is_null($v)), JSON_UNESCAPED_UNICODE),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]],

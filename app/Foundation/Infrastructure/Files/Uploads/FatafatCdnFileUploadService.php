@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Foundation\Infrastructure\Files\Uploads;
 
-use App\Foundation\Infrastructure\Persistence\Eloquent\Models\FileModel;
 use App\Foundation\Shared\Application\Contracts\FileUploadService;
 use App\Foundation\Shared\Application\Contracts\ImageConverter;
 use Illuminate\Http\UploadedFile;
@@ -16,9 +15,11 @@ use Throwable;
 
 final class FatafatCdnFileUploadService implements FileUploadService
 {
-    private const DISK = 'fatafat_cdn';
-    // private const DISK = 'cdn';
+    // private const DISK = 'fatafat_cdn';
+
+    private const DISK = 'cdn';
     private const DEFAULT_DIRECTORY = 'uploads';
+
     private const WEBP_QUALITY = 85;
 
     public function __construct(
@@ -27,58 +28,38 @@ final class FatafatCdnFileUploadService implements FileUploadService
 
     public function uploadImageAsWebp(UploadedFile $file, ?string $directory = null): array
     {
+        $context = $this->parseDirectoryContext((string) ($directory ?? self::DEFAULT_DIRECTORY));
+        $modelType = $context['model_type'];
+        $modelId = $context['model_id'];
 
-        $targetDirectory = $this->normalizeDirectory((string) ($directory ?? self::DEFAULT_DIRECTORY));
-        $sanitizedFileName = $this->sanitizeTargetFileName((string) $file->getClientOriginalName());
-        $safeBaseName = pathinfo($sanitizedFileName, PATHINFO_FILENAME);
-        $safeBaseName = is_string($safeBaseName) ? trim($safeBaseName) : '';
-        if ($safeBaseName === '') {
-            $safeBaseName = 'image';
-        }
-
-        $sourceBytes = $file->get();
-        if (! is_string($sourceBytes) || $sourceBytes === '') {
-            throw new RuntimeException('Unable to read uploaded image bytes.');
-        }
-
-        $contentHash = hash('sha256', $sourceBytes);
-        $existing = $this->findExistingByContentHash($contentHash);
-
-        if ($existing !== null) {
-            return $existing;
-        }
-
-        $storedFileName = $safeBaseName.'.webp';
-        $key = md5($targetDirectory.'/'.$storedFileName);
-        $relativePath = $targetDirectory.'/'.$key.'/'.$storedFileName;
-
+        $originalName = (string) $file->getClientOriginalName();
+        $sanitizedFileName = $this->sanitizeTargetFileName($originalName);
+        $nameOnly = pathinfo($sanitizedFileName, PATHINFO_FILENAME);
+        $extension = strtolower((string) $file->getClientOriginalExtension());
+        $extension = preg_replace('/[^a-z0-9]/', '', $extension) ?: 'jpg';
 
         $disk = Storage::disk(self::DISK);
-        if ($disk->exists($relativePath)) {
-            $result = $this->buildResult($disk, $key, $storedFileName, $relativePath, true);
-            $this->persistFileRow($result, $contentHash);
-            $result['file_data'] = $this->findFileDataByKey($key) ?? $this->fallbackFileData($result);
-            return $result;
+        $targetFileName = $nameOnly . '.' . $extension;
+
+        // Check for duplicates in the target directory
+        $targetPathBase = $this->makeFilePath($modelType, $modelId, '');
+        if ($disk->exists($targetPathBase . $targetFileName)) {
+            $targetFileName = $nameOnly . '-' . strtolower(Str::random(4)) . '.' . $extension;
         }
 
-        $sourceExtension = strtolower((string) $file->getClientOriginalExtension());
-        $sourceExtension = preg_replace('/[^a-z0-9]/', '', $sourceExtension) ?: 'jpg';
-        $tempSourcePath = $targetDirectory.'/tmp/'.$safeBaseName.'_'.Str::uuid().'.'.$sourceExtension;
+        $key = $this->makeKey($modelType, $modelId);
+        $relativePath = $this->makeFilePath($modelType, $modelId, $targetFileName);
 
         try {
-            if (! $disk->put($tempSourcePath, $sourceBytes)) {
-                throw new RuntimeException('Failed to stage source image before conversion.');
+            if (! $disk->put($relativePath, $file->get())) {
+                throw new RuntimeException('Failed to store uploaded file.');
             }
-
-            $this->imageConverter->toWebp(self::DISK, $tempSourcePath, $relativePath, self::WEBP_QUALITY);
         } catch (Throwable $exception) {
             throw new RuntimeException('Failed to upload file.', 0, $exception);
-        } finally {
-            $disk->delete($tempSourcePath);
         }
 
-        $result = $this->buildResult($disk, $key, $storedFileName, $relativePath, false);
-        $this->persistFileRow($result, $contentHash);
+        $result = $this->buildResult($disk, $key, $targetFileName, $relativePath, false, $extension, $file->getMimeType());
+        $this->persistFileRow($result);
         $result['file_data'] = $this->findFileDataByKey($key) ?? $this->fallbackFileData($result);
 
         return $result;
@@ -149,28 +130,33 @@ final class FatafatCdnFileUploadService implements FileUploadService
         string $key,
         string $fileName,
         string $relativePath,
-        bool $alreadyExists
+        bool $alreadyExists,
+        string $extension,
+        ?string $mimeType = null
     ): array {
-        $webpBytes = $disk->get($relativePath);
-        if (! is_string($webpBytes) || $webpBytes === '') {
-            throw new RuntimeException('Failed to read uploaded WebP file.');
+        $contentBytes = $disk->get($relativePath);
+        if (! is_string($contentBytes) || $contentBytes === '') {
+            throw new RuntimeException('Failed to read uploaded file.');
         }
 
-        $imageInfo = @getimagesizefromstring($webpBytes);
         $width = null;
         $height = null;
-        if (is_array($imageInfo)) {
-            $width = isset($imageInfo[0]) ? (float) $imageInfo[0] : null;
-            $height = isset($imageInfo[1]) ? (float) $imageInfo[1] : null;
+
+        if (str_starts_with(strtolower((string) $mimeType), 'image/')) {
+            $imageInfo = @getimagesizefromstring($contentBytes);
+            if (is_array($imageInfo)) {
+                $width = isset($imageInfo[0]) ? (float) $imageInfo[0] : null;
+                $height = isset($imageInfo[1]) ? (float) $imageInfo[1] : null;
+            }
         }
 
         return [
             'key' => $key,
             'file_name' => $fileName,
             'file_path' => $relativePath,
-            'extension' => 'webp',
-            'mime_type' => 'image/webp',
-            'file_size' => strlen($webpBytes),
+            'extension' => $extension,
+            'mime_type' => $mimeType ?? 'application/octet-stream',
+            'file_size' => strlen($contentBytes),
             'height' => $height,
             'width' => $width,
             'meta' => [
@@ -181,15 +167,15 @@ final class FatafatCdnFileUploadService implements FileUploadService
         ];
     }
 
-    private function persistFileRow(array $result, string $contentHash): void
+    private function persistFileRow(array $result): void
     {
         $now = now();
         $filePath = (string) ($result['file_path'] ?? '');
         $segments = explode('/', ltrim($filePath, '/'));
         $directory = trim((string) ($segments[0] ?? ''));
-        $meta = json_encode([
+        $meta = json_encode(array_filter([
             'directory' => $directory !== '' ? $directory : null,
-        ], JSON_UNESCAPED_SLASHES);
+        ], fn($v) => ! is_null($v)), JSON_UNESCAPED_SLASHES);
 
         DB::table('files')->upsert(
             [[
@@ -203,29 +189,15 @@ final class FatafatCdnFileUploadService implements FileUploadService
                 'height' => isset($result['height']) ? (float) $result['height'] : null,
                 'width' => isset($result['width']) ? (float) $result['width'] : null,
                 'disk' => self::DISK,
-                'content_hash' => $contentHash,
                 'meta' => $meta,
                 'created_at' => $now,
                 'updated_at' => $now,
             ]],
             ['key'],
-            ['file_name', 'file_path', 'extension', 'seq_no', 'mime_type', 'file_size', 'height', 'width', 'disk', 'content_hash', 'meta', 'updated_at']
+            ['file_name', 'file_path', 'extension', 'seq_no', 'mime_type', 'file_size', 'height', 'width', 'disk', 'meta', 'updated_at']
         );
     }
 
-    private function findExistingByContentHash(string $contentHash): ?array
-    {
-        $existing = FileModel::where('content_hash', $contentHash)
-            ->first();
-
-        if (! $existing) {
-            return null;
-        }
-        return [
-            'file_data' => $this->normalizeFileData($existing->toArray()),
-            'already_exists' => true,
-        ];
-    }
 
     private function findFileDataByKey(string $key): ?array
     {
@@ -279,9 +251,9 @@ final class FatafatCdnFileUploadService implements FileUploadService
             'key' => (string) ($result['key'] ?? ''),
             'file_name' => (string) ($result['file_name'] ?? ''),
             'file_path' => $filePath,
-            'extension' => (string) ($result['extension'] ?? 'webp'),
+            'extension' => (string) ($result['extension'] ?? ''),
             'seq_no' => null,
-            'mime_type' => (string) ($result['mime_type'] ?? 'image/webp'),
+            'mime_type' => (string) ($result['mime_type'] ?? 'application/octet-stream'),
             'file_size' => isset($result['file_size']) ? (float) $result['file_size'] : null,
             'height' => isset($result['height']) ? (float) $result['height'] : null,
             'width' => isset($result['width']) ? (float) $result['width'] : null,
@@ -290,6 +262,39 @@ final class FatafatCdnFileUploadService implements FileUploadService
             'url' => (string) ($result['url'] ?? $this->buildUrl($filePath)),
             'created_at' => null,
             'updated_at' => null,
+        ];
+    }
+
+    private function makeKey(string $type, string $typeId): string
+    {
+        return $type . '-' . $typeId . '-' . Str::orderedUuid()->toString();
+    }
+
+    private function makeFilePath(string $modelType, string $modelId, string $targetFileName): string
+    {
+        $path = trim($modelType, '/') . '/' . trim($modelId, '/');
+        if ($targetFileName !== '') {
+            $path .= '/' . ltrim($targetFileName, '/');
+        }
+
+        return $path;
+    }
+
+    private function parseDirectoryContext(string $directory): array
+    {
+        $directory = $this->normalizeDirectory($directory);
+        $segments = explode('/', $directory);
+
+        if (count($segments) >= 2) {
+            return [
+                'model_type' => $segments[0],
+                'model_id' => $segments[1],
+            ];
+        }
+
+        return [
+            'model_type' => $segments[0] !== '' ? $segments[0] : self::DEFAULT_DIRECTORY,
+            'model_id' => (string) Str::uuid(),
         ];
     }
 }

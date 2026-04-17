@@ -86,12 +86,12 @@ class AdminCampaignController extends Controller
                 'usage_type' => 'campaigns',
                 'usage_id' => $campaign->id,
                 'alt_text' => $validated['alt_text'] ?? $campaign->title,
-                'meta' => json_encode([
+                'meta' => json_encode(array_filter([
                     'link' => $validated['link'] ?? null,
                     'start_date' => $validated['start_date'] ?? null,
                     'end_date' => $validated['end_date'] ?? null,
                     'is_default' => false,
-                ]),
+                ], fn($v) => ! is_null($v))),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

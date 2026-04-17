@@ -10,6 +10,8 @@ final class AssignUploadedFileCommand
 {
     public function __construct(
         public readonly UploadedFile $file,
-        public readonly ?string $directory = null,
+        public readonly string $usageType,
+        public readonly int $usageId,
+        public readonly ?string $fileName = null,
     ) {}
 }

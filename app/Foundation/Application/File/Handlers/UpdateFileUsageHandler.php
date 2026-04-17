@@ -35,14 +35,14 @@ final class UpdateFileUsageHandler
         $startDate = trim((string) ($command->startDate ?? ''));
         $endDate = trim((string) ($command->endDate ?? ''));
 
-        $meta = [
+        $meta = array_filter([
             'link' => $link !== '' ? $link : null,
             'start_date' => $startDate !== '' ? $startDate : null,
             'end_date' => $endDate !== '' ? $endDate : null,
             'seq_no' => $command->seqNo,
             'is_active' => $command->isActive,
             'is_default' => $command->isDefault,
-        ];
+        ], fn($v) => ! is_null($v));
 
         if ($command->isDefault) {
             DB::table('file_usages')

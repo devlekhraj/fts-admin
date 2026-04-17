@@ -1,6 +1,6 @@
 <template>
-  <v-btn icon size="x-small" variant="tonal" color="error" @click="open">
-    <v-icon size="16">mdi-delete</v-icon>
+  <v-btn size="small" variant="flat" color="error" @click="open">
+    Delete
   </v-btn>
 </template>
 

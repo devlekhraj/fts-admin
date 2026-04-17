@@ -60,11 +60,10 @@
             <div class="d-flex justify-end ga-2">
               <v-btn
                 size="small"
-                variant="tonal"
+                variant="flat"
                 color="primary"
-                class="text-none"
                 @click="onView(item)">
-                Detail
+                Details
               </v-btn>
               <PageDeleteButton :page="item" @deleted="onDeleted" />
             </div>

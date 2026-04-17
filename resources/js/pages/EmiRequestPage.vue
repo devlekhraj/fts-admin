@@ -62,9 +62,9 @@
 				</v-chip>
 			</template>
 			<template #item.action="{ item }">
-				<v-btn variant="tonal" color="primary" size="small"
+				<v-btn variant="flat" color="primary" size="small"
 					:to="{ name: 'admin.emi.requests.detail', params: { id: item.id } }">
-					view
+					Details
 				</v-btn>
 			</template>
 		</AppDataTable>
