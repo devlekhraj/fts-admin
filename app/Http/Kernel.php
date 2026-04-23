@@ -9,6 +9,6 @@ use Illuminate\Foundation\Http\Kernel as HttpKernel;
 class Kernel extends HttpKernel
 {
     protected $middlewareAliases = [
-        'jwt.admin' => \App\Foundation\Interfaces\Http\Middleware\JwtAdminAuthenticate::class,
+        'jwt.admin' => \App\Domains\Admin\Middleware\JwtAdminAuthenticate::class,
     ];
 }

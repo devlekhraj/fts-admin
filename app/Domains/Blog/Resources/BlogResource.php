@@ -1,0 +1,86 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domains\Blog\Resources;
+
+use App\Support\Formatters\ByteSizeFormatter;
+use App\Support\Formatters\FileDimensionFormatter;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class BlogResource extends JsonResource
+{
+    public function toArray($request): array
+    {
+        $defaultFile = null;
+        $categoryName = null;
+
+        if ($this->relationLoaded('defaultFile')) {
+            $defaultFile = $this->defaultFile->first();
+        }
+        if ($this->relationLoaded('category')) {
+            $categoryName = $this->category?->title;
+        }
+
+        if ($request->route()?->getName() === 'admin.blogs.show') {
+            return $this->showResponse($defaultFile, $categoryName);
+        }
+
+        return $this->listResponse($defaultFile, $categoryName);
+    }
+
+    private function listResponse($defaultFile, ?string $categoryName): array
+    {
+        return [
+            'id' => $this->id,
+            'title' => $this->title ?? $this->name,
+            'slug' => $this->slug,
+            'status' => (bool) $this->status,
+            'published_at' => $this->publish_date,
+            'category_name' => $categoryName,
+            'thumb' => $defaultFile?->url,
+        ];
+    }
+
+    private function showResponse($defaultFile, ?string $categoryName): array
+    {
+        $data = $this->resource->toArray();
+        $files = [];
+
+        if ($this->relationLoaded('files')) {
+            $files = $this->files->map(static function ($file) {
+                $meta = $file->pivot?->meta;
+                if (is_string($meta)) {
+                    $decoded = json_decode($meta, true);
+                    $meta = json_last_error() === JSON_ERROR_NONE && is_array($decoded) ? $decoded : [];
+                }
+                if (! is_array($meta)) {
+                    $meta = [];
+                }
+                $meta = [
+                    'is_default' => in_array($meta['is_default'] ?? false, [true, 1, '1', 'true'], true),
+                ];
+
+                $fileSize = ByteSizeFormatter::format($file->file_size ?? null);
+                $fileDimension = FileDimensionFormatter::format($file->width ?? null, $file->height ?? null);
+
+                return [
+                    'id' => $file->pivot?->id,
+                    'url' => $file->url,
+                    'alt_text' => $file->pivot?->alt_text,
+                    'meta' => $meta,
+                    'size_info' => "{$fileSize} | {$fileDimension}",
+                ];
+            })->values()->all();
+        }
+
+        $data['thumb'] = $defaultFile?->url;
+        $data['status'] = (bool) ($data['status'] ?? $this->status);
+        $data['published_at'] = $this->publish_date;
+        $data['category_name'] = $categoryName;
+        $data['default_file'] = $defaultFile?->toArray();
+        $data['files'] = $files;
+
+        return $data;
+    }
+}

@@ -2,13 +2,10 @@
 
 namespace App\Providers;
 
-use App\Foundation\Infrastructure\Persistence\Eloquent\Models\AdminModel;
-use App\Foundation\Infrastructure\Persistence\Eloquent\Models\EmiRequestModel;
-use App\Foundation\Infrastructure\Persistence\Eloquent\Models\OrderModel;
-use App\Foundation\Infrastructure\Persistence\Eloquent\Models\SettingModel;
-use App\Foundation\Infrastructure\Persistence\Eloquent\Models\UserModel;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Config;
+use App\Domains\Admin\Models\Admin;
+use App\Domains\EmiRequest\Models\EmiRequest;
+use App\Domains\Order\Models\Order;
+use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
@@ -29,43 +26,11 @@ class AppServiceProvider extends ServiceProvider
     {
         // Use table names as morph aliases (for ActivityLog entity/actor)
         Relation::morphMap([
-            'orders'       => OrderModel::class,
-            'emi_requests' => EmiRequestModel::class,
-            'users'        => UserModel::class,
-            'admins'       => AdminModel::class,
+            'orders'       => Order::class,
+            'emi_requests' => EmiRequest::class,
+            'users'        => User::class,
+            'admins'       => Admin::class,
         ]);
 
-        // Dynamically override mail configuration from DB settings (cached).
-        $settings = Cache::remember('mail_settings', 300, static function () {
-            return optional(
-                SettingModel::query()->where('module', 'core')->first()
-            )->settings ?? [];
-        });
-
-        if (is_array($settings) && !empty($settings)) {
-            $defaultMailer = config('mail.default', 'smtp');
-
-            Config::set("mail.mailers.{$defaultMailer}", array_merge([
-                'transport' => 'smtp',
-                'host' => 'smtp.mailtrap.io',
-                'port' => 587,
-                'encryption' => 'tls',
-                'username' => null,
-                'password' => null,
-                'timeout' => null,
-                'auth_mode' => null,
-            ], [
-                'host' => $settings['mail_host'] ?? 'smtp.mailtrap.io',
-                'port' => $settings['mail_port'] ?? 587,
-                'encryption' => $settings['mail_encryption'] ?? 'tls',
-                'username' => $settings['mail_username'] ?? null,
-                'password' => $settings['mail_password'] ?? null,
-            ]));
-
-            Config::set('mail.from', [
-                'address' => $settings['mail_from_address'] ?? 'no-reply@example.com',
-                'name' => $settings['mail_from_name'] ?? 'Fatafat Sewa',
-            ]);
-        }
     }
 }

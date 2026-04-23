@@ -1,0 +1,124 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domains\Product\Models;
+
+use App\Domains\ProductBrand\Models\ProductBrand;
+use App\Domains\ProductCategory\Models\ProductCategory;
+use App\Domains\Campaign\Models\CampaignProduct;
+use App\Domains\File\Models\File;
+use App\Domains\Faq\Models\Faq;
+use App\Support\Eloquent\BaseModel;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+
+final class Product extends BaseModel
+{
+    protected $table = 'products';
+
+    public const STATUS_ENABLED = 1;
+
+    public const STATUS_DISABLED = 0;
+
+    public const STATUS_DRAFT = 2;
+
+    protected $fillable = [
+        'name',
+        'slug',
+        'short_description',
+        'description',
+        'sku',
+        'price',
+        'original_price',
+        'brand_id',
+        'vendor_id',
+        'quantity',
+        'pre_order',
+        'pre_order_price',
+        'unit',
+        'highlights',
+        'product_video_url',
+        'weight',
+        'length',
+        'width',
+        'height',
+        'status',
+        'is_featured',
+        'emi_enabled',
+        'attributes',
+        'attribute_class_id',
+        'variant_attributes',
+        'meta_title',
+        'meta_keywords',
+        'meta_description',
+        'custom_code',
+        'warranty_description',
+    ];
+
+    protected $casts = [
+        'status' => 'boolean',
+        'emi_enabled' => 'boolean',
+        'pre_order' => 'boolean',
+        'is_featured' => 'boolean',
+        'attributes' => 'array',
+        'price' => 'float',
+        'original_price' => 'float',
+        'pre_order_price' => 'float',
+    ];
+
+    public function faqs(): MorphMany
+    {
+        return $this->morphMany(Faq::class, 'faqable', 'type', 'type_id');
+    }
+
+    public function brand(): BelongsTo
+    {
+        return $this->belongsTo(ProductBrand::class, 'brand_id');
+    }
+
+    public function variants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class, 'product_id');
+    }
+
+    public function files(): BelongsToMany
+    {
+        return $this->belongsToMany(File::class, 'file_usages', 'usage_id', 'file_id')
+            ->wherePivot('usage_type', 'products')
+            ->withPivot(['id', 'usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
+            ->withTimestamps()
+            ->orderByPivot('id', 'desc');
+    }
+
+    public function defaultFile(): BelongsToMany
+    {
+        return $this->belongsToMany(File::class, 'file_usages', 'usage_id', 'file_id')
+            ->wherePivot('usage_type', 'products')
+            ->whereRaw("JSON_EXTRACT(file_usages.meta, '$.is_default') = true")
+            ->withPivot(['id', 'usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
+            ->orderByPivot('id', 'asc');
+    }
+
+    public function attribute(): BelongsTo
+    {
+        return $this->belongsTo(AttributeClass::class, 'attribute_class_id');
+    }
+
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(ProductCategory::class, 'categories_products', 'product_id', 'product_category_id');
+    }
+
+    public function campaignProducts(): HasMany
+    {
+        return $this->hasMany(CampaignProduct::class, 'product_id');
+    }
+
+    public function getThumbAttribute(): ?string
+    {
+        return $this->defaultFile->first()?->url;
+    }
+}

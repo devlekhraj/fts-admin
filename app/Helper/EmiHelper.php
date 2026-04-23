@@ -2,13 +2,13 @@
 
 namespace App\Helper;
 
-use App\Foundation\Infrastructure\Persistence\Eloquent\Models\EmiRequestModel;
+use App\Domains\EmiRequest\Models\EmiRequest;
 use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Support\Facades\Storage;
 
 class EmiHelper
 {
-    public function generateEmiPdf(EmiRequestModel $emiRequest)
+    public function generateEmiPdf(EmiRequest $emiRequest)
     {
         try {
             $pdf_path = "public/uploads/emi-requests/{$emiRequest->id}/emi-user-quotation.pdf";

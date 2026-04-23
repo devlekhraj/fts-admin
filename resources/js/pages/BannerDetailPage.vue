@@ -1,7 +1,7 @@
 <template>
   <AppPageHeader title="Banner Detail" subtitle="View banner information">
     <template #actions>
-      <v-btn variant="tonal" color="primary" @click="goBack">
+      <v-btn variant="flat" color="primary" @click="goBack">
         <v-icon start>mdi-arrow-left</v-icon>
         Back
       </v-btn>

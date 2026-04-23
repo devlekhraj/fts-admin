@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Foundation\Infrastructure\Persistence\Eloquent\Models\EmiBankModel;
+use App\Domains\EmiBank\Models\EmiBank;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -20,6 +20,6 @@ class EmiRequestCreditCard extends Model
 
     public function cardProvider()
     {
-        return $this->belongsTo(EmiBankModel::class, 'card_provider');
+        return $this->belongsTo(EmiBank::class, 'card_provider');
     }
 }

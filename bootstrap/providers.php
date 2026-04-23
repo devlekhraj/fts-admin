@@ -2,5 +2,5 @@
 
 return [
     App\Providers\AppServiceProvider::class,
-    App\Foundation\Infrastructure\Providers\BindingsServiceProvider::class,
+    App\Domains\Admin\Providers\AdminEventServiceProvider::class,
 ];

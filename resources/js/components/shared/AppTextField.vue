@@ -1,33 +1,36 @@
 <template>
-  <v-text-field
-    class="app-field"
-    v-bind="$attrs"
-    :model-value="modelValue"
-    @update:model-value="emit('update:modelValue', $event)"
-    :density="density"
-    :variant="variant"
-    :hide-details="hideDetails" />
+  <div>
+     <div class="text-medium-emphasis mb-1" style="font-size: 0.875rem;">{{ label }}</div>
+    <v-text-field
+      :model-value="attrs.modelValue"
+      @update:model-value="emit('update:modelValue', $event)"
+      v-bind="fieldAttrs"
+      :placeholder="placeholder"
+      variant="outlined"
+      density="comfortable"
+      hide-details="auto"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
-withDefaults(defineProps<{
-  modelValue?: unknown;
-  density?: string;
-  variant?: string;
-  hideDetails?: boolean | string;
-}>(), {
-  density: 'compact',
-  variant: 'outlined',
-  hideDetails: true,
-});
+import { computed, useAttrs } from 'vue';
+
+defineOptions({ inheritAttrs: false });
+
+defineProps<{
+  label: string;
+  placeholder?: string;
+}>();
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: unknown): void;
 }>();
-</script>
 
-<style scoped>
-.app-field :deep(.v-field__input) {
-  font-size: 0.82rem;
-}
-</style>
+const attrs = useAttrs() as Record<string, unknown>;
+const fieldAttrs = computed(() => {
+  const { label: _label, modelValue: _modelValue, 'onUpdate:modelValue': _onUpdateModelValue, ...rest } = attrs;
+
+  return rest;
+});
+</script>

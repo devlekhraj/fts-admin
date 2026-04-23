@@ -24,7 +24,7 @@
         <v-row align="center">
           <v-col cols="12" md="6" lg="4">
             <div class="d-flex align-center ga-3">
-              <AppTextField label="Search" placeholder="Search by name..." prepend-inner-icon="mdi-magnify" hide-details
+              <v-text-field label="Search" variant="outlined" density="compact" placeholder="Search by name..." prepend-inner-icon="mdi-magnify" hide-details
                 clearable style="min-width: 260px" />
               <v-btn color="primary" variant="tonal" height="40">
                 <v-icon start>mdi-magnify</v-icon>
@@ -33,10 +33,6 @@
             </div>
           </v-col>
 
-          <!-- <v-col cols="12" md="6" lg="3">
-            <AppSelectField  item-title="title" item-value="value" label="Category" clearable
-              hide-details  />
-          </v-col> -->
 
           <v-spacer></v-spacer>
 

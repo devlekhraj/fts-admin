@@ -37,7 +37,7 @@ const activeTab = ref<'basic' | 'email' | 'password'>('basic');
 const tabs = [
 	{ value: 'basic' as const, label: 'Basic Info', component: AdminUpdateBasicTab },
 	{ value: 'password' as const, label: 'Password', component: AdminUpdatePasswordTab },
-	{ value: 'email' as const, label: 'Email', component: AdminUpdateEmailTab },
+	// { value: 'email' as const, label: 'Email', component: AdminUpdateEmailTab },
 ];
 
 function handleSaved(payload?: unknown) {

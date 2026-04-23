@@ -10,7 +10,7 @@
         <v-col cols="12" md="6" lg="4">
           <slot name="search">
             <div class="d-flex align-center ga-3">
-              <AppTextField
+              <v-text-field
                 :model-value="search"
                 :label="searchLabel"
                 :placeholder="searchPlaceholder"
@@ -18,7 +18,7 @@
                 hide-details
                 clearable
                 :style="{ minWidth: '260px' }"
-                density="comfortable"
+                density="compact"
                 variant="outlined"
                 @update:model-value="onUpdateSearch"
                 @click:clear="emit('clear')"
@@ -128,8 +128,8 @@ function onUpdateSearch(value: string) {
   emit('update:search', value);
 }
 
-function onCategoryChange(value: string | number | null) {
-  emit('update:categoryModelValue', value);
-  emit('category-change', value);
+function onCategoryChange(value: unknown) {
+  emit('update:categoryModelValue', value as string | number | null);
+  emit('category-change', value as string | number | null);
 }
 </script>

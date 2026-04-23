@@ -1,7 +1,7 @@
 <template>
-  <v-btn color="primary" variant="flat" height="40" @click="open">
-    <v-icon start>mdi-plus-circle</v-icon>
-    Add Banner
+  <v-btn color="primary" variant="flat" @click="open">
+    <v-icon start>mdi-image-plus-outline</v-icon>
+    New Banner
   </v-btn>
 </template>
 
@@ -16,7 +16,7 @@ function open() {
     BannerCreateModal,
     {},
     {
-      title: 'Add Banner',
+      title: 'New Banner',
       size: 'md',
       onSaved: (payload: unknown) => emit('saved', payload),
     },

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Foundation\Shared\Application\Contracts\ImageConverter;
+use App\Domains\File\Services\WebpImageConverter;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -46,7 +46,7 @@ class CopyMediaToFilesCommand11 extends Command
     protected $description = 'Copy records from media table to files table';
 
     public function __construct(
-        private readonly ImageConverter $imageConverter
+        private readonly WebpImageConverter $imageConverter
     ) {
         parent::__construct();
     }

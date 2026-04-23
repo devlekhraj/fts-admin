@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Foundation\Infrastructure\Persistence\Eloquent\Models\EmiBankModel;
+use App\Domains\EmiBank\Models\EmiBank;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -17,6 +17,6 @@ class EmiRequestBank extends Model
 
     public function bank()
     {
-        return $this->belongsTo(EmiBankModel::class,'bank_id');
+        return $this->belongsTo(EmiBank::class,'bank_id');
     }
 }

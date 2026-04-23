@@ -39,7 +39,6 @@
 							v-model="form.mail_password"
 							density="comfortable"
 							variant="outlined"
-							type="password"
 							hide-details />
 					</v-col>
 				</v-row>

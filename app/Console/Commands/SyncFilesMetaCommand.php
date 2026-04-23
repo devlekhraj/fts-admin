@@ -10,14 +10,15 @@ use Illuminate\Support\Facades\DB;
 class SyncFilesMetaCommand extends Command
 {
     protected $signature = 'files:sync-meta
+        {--seed= : Path to a PHP file returning an array of file rows}
         {--dry-run : Show changes without updating DB}
         {--chunk=500 : Chunk size for processing rows}';
 
-    protected $description = 'Sync only files.meta (and updated_at) from Foundation seed data by id';
+    protected $description = 'Sync only files.meta (and updated_at) from seed data by id';
 
     public function handle(): int
     {
-        $seedFile = app_path('Foundation/Infrastructure/Persistence/SeedData/files.php');
+        $seedFile = (string) ($this->option('seed') ?: storage_path('seed-data/files.php'));
         if (! file_exists($seedFile)) {
             $this->error(sprintf('Seed file not found: %s', $seedFile));
 

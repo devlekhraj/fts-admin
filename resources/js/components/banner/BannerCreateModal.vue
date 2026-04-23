@@ -4,27 +4,21 @@
       {{ error }}
     </v-alert>
     <v-form ref="formRef" @submit.prevent="onSubmit">
-      <v-row>
+        <v-row>
         <v-col cols="12" md="12" class="pb-0">
-          <v-text-field
+          <AppTextField
             v-model="form.name"
             label="Name"
-            variant="outlined"
-            density="comfortable"
             :rules="[rules.required, rules.maxLength]"
             :error-messages="getErrorMessages('name')"
-            prepend-inner-icon="mdi-image-area"
             @update:model-value="onNameInput" />
         </v-col>
         <v-col cols="12" md="12" class="pb-0">
-          <v-text-field
+          <AppTextField
             v-model="form.slug"
             label="Slug"
-            variant="outlined"
-            density="comfortable"
             :rules="[rules.required, rules.noSpaces, rules.maxLength]"
             :error-messages="getErrorMessages('slug')"
-            prepend-inner-icon="mdi-link-variant"
             @update:model-value="onSlugInput" />
         </v-col>
       </v-row>
@@ -46,7 +40,7 @@
       </v-btn>
       <v-btn
         color="primary"
-        variant="tonal"
+        variant="flat"
         class="px-5"
         :loading="loading"
         :disabled="loading"
@@ -63,6 +57,7 @@ import { ref } from 'vue';
 import { create as createBanner } from '@/api/banners.api';
 import { getErrorMessage } from '@/shared/errors';
 import { useSnackbarStore } from '@/stores/snackbar.store';
+import AppTextField from '@/components/shared/AppTextField.vue';
 
 const emit = defineEmits<{ (e: 'close'): void; (e: 'saved', payload?: unknown): void }>();
 
@@ -103,14 +98,14 @@ function toSlug(value: string) {
     .replace(/[^a-z0-9-]/gi, '');
 }
 
-function onNameInput(value: string) {
+function onNameInput(value: unknown) {
   clearFieldError('name');
   if (!slugEdited.value && typeof value === 'string') {
     form.value.slug = toSlug(value);
   }
 }
 
-function onSlugInput(value: string) {
+function onSlugInput(value: unknown) {
   clearFieldError('slug');
   slugEdited.value = true;
   if (typeof value === 'string') {
