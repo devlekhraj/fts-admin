@@ -11,11 +11,11 @@
     </template>
     <template #item.action="{ item }">
       <div class="d-flex align-center justify-end ga-2">
-        <v-btn size="small" variant="flat" color="primary"
+        <v-btn size="small" variant="outlined" color="primary"
           :to="{ name: 'admin.product.attributes.detail', params: { id: item.id } }">
           details
         </v-btn>
-        <v-btn size="small" variant="flat" color="error">
+        <v-btn size="small" variant="outlined" color="error">
           Delete
         </v-btn>
       </div>

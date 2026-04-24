@@ -57,7 +57,7 @@
       <div class="d-flex justify-end">
         <v-btn
           size="small"
-          variant="flat"
+          variant="outlined"
           color="primary"
           class="text-none"
           @click="router.push({ name: 'admin.paymentMethods.detail', params: { id: item.id } })">

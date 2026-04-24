@@ -12,6 +12,7 @@ final class BlogCategoryListAction
     {
         $query = BlogCategory::query()
             ->with(['defaultFile'])
+            ->withCount('blogs')
             ->orderByDesc('created_at');
 
         $search = is_string($search) ? trim($search) : '';
@@ -54,4 +55,3 @@ final class BlogCategoryListAction
         ];
     }
 }
-

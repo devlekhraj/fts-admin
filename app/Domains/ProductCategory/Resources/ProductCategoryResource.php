@@ -31,6 +31,7 @@ class ProductCategoryResource extends JsonResource
             'title' => $this->title,
             'slug' => $this->slug,
             'thumb' => $defaultFile?->url,
+            'products_count' => (int) ($this->products_count ?? 0),
             'status' => (bool) $this->status,
             'created_at' => $this->created_at,
         ];

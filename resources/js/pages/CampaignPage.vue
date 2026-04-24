@@ -1,102 +1,100 @@
 <template>
-  <AppPageHeader title="Campaigns" subtitle="Marketing campaigns" />
+  <AppPageHeader title="Campaigns" subtitle="Marketing campaigns">
+    <template #actions>
+      <v-btn color="primary" variant="flat" @click="openAddModal">
+        <v-icon start>mdi-plus</v-icon>
+        Add Campaign
+      </v-btn>
+      </template>
+    </AppPageHeader>
 
-  <v-container fluid>
-    <v-row>
-      <v-col cols="12">
-        <AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :page="options.page"
-          :items-per-page="options.itemsPerPage" @update:options="onOptions">
+  <AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :page="options.page"
+    :items-per-page="options.itemsPerPage" @update:options="onOptions">
 
-          <template #actions>
-            <v-container fluid class="py-4">
-              <v-row align="center">
-                <v-col cols="12" md="auto">
-                  <div class="d-flex align-center ga-3">
-                    <v-text-field v-model="search" density="compact" variant="outlined" label="Search"
-                      placeholder="Search by name..." prepend-inner-icon="mdi-magnify" hide-details
-                      clearable style="min-width: 300px" @click:clear="handleSearch" @keyup.enter="handleSearch" />
-                    <v-btn color="primary" variant="tonal" height="40" @click="handleSearch">
-                      <v-icon start>mdi-magnify</v-icon>
-                      Search
-                    </v-btn>
-                  </div>
-                </v-col>
-
-                <v-spacer></v-spacer>
-
-                <v-col cols="12" md="auto">
-                  <v-btn variant="flat" color="primary" @click="openAddModal">
-                    <v-icon start>mdi-plus</v-icon>
-                    add campaign
-                  </v-btn>
-                </v-col>
-              </v-row>
-              <v-row class="mt-0">
-                <v-col cols="12">
-                  <div class="text-medium-emphasis">
-                    <span class="text-primary" style="font-size: smaller;">
-                      Total: {{ total }} Items found.
-                    </span>
-                  </div>
-                </v-col>
-              </v-row>
-            </v-container>
-          </template>
-
-          <template #item.title="{ item }">
-            <div class="d-flex align-center ga-2">
-              <v-avatar size="28" color="grey-lighten-3" rounded>
-                <v-img v-if="item.thumb" :src="item.thumb.url" :alt="item.title" cover />
-                <v-icon v-else size="18" color="grey-darken-1">mdi-image-outline</v-icon>
-              </v-avatar>
-              <span class="font-weight-medium">{{ item.title }}</span>
+    <template #actions>
+      <v-container fluid class="py-4">
+        <v-row align="center">
+          <v-col cols="12" md="auto">
+            <div class="d-flex align-center ga-3">
+              <v-text-field v-model="search" density="compact" variant="outlined" label="Search"
+                placeholder="Search by name..." prepend-inner-icon="mdi-magnify" hide-details clearable
+                style="min-width: 300px" @click:clear="handleSearch" @keyup.enter="handleSearch" />
+              <AppSearchButton :loading="fetchingState" @click="handleSearch" />
             </div>
-          </template>
+          </v-col>
 
-          <template #item.status="{ item }">
-            <v-chip size="small" label variant="tonal" :color="item.status === 'active' ? 'success' : 'warning'">
-              <span class="text-capitalize">{{ item.status || 'draft' }}</span>
-            </v-chip>
-          </template>
-          <template #item.is_published="{ item }">
-            <v-chip size="small" label variant="tonal" :color="item.is_published ? 'success' : 'error'">
-              <span class="text-capitalize">{{ item.is_published ?'Yes' :'No' }}</span>
-            </v-chip>
-          </template>
+          <v-spacer></v-spacer>
 
-          <template #item.start_date="{ item }">
-            <div>
-              <div v-if="!item.start_date">-</div>
-              <div v-else>
-                <div>{{ formatLongDate(item.start_date) }} - {{ formatLongDate(item.end_date) }}</div>
-              </div>
+          <!-- <v-col cols="12" md="auto">
+            <v-btn variant="flat" color="primary" @click="openAddModal">
+              <v-icon start>mdi-plus</v-icon>
+              add campaign
+            </v-btn>
+          </v-col> -->
+        </v-row>
+        <v-row class="mt-0">
+          <v-col cols="12">
+            <div class="text-medium-emphasis">
+              <span class="text-primary" style="font-size: smaller;">
+                Total: {{ total }} Items found.
+              </span>
             </div>
-          </template>
+          </v-col>
+        </v-row>
+      </v-container>
+    </template>
 
-          <template #item.products_count="{ item }">
-            <span class="font-weight-medium">{{ item.products_count }} products</span>
-          </template>
+    <template #item.title="{ item }">
+      <div class="d-flex align-center ga-2">
+        <v-avatar size="28" color="grey-lighten-3" rounded>
+          <v-img v-if="item.thumb" :src="item.thumb.url" :alt="item.title" cover />
+          <v-icon v-else size="18" color="grey-darken-1">mdi-image-outline</v-icon>
+        </v-avatar>
+        <span class="">{{ item.title }}</span>
+      </div>
+    </template>
 
-          <template #item.action="{ item }">
-            <div class="d-flex align-center justify-end ga-1">
-              <v-btn  size="small" class="mr-1" variant="flat" color="primary"
-                @click="router.push({ name: 'admin.campaigns.detail', params: { id: item.id } })">
-                Details
-              </v-btn>
-              <v-btn  size="small" class="mr-1" variant="flat" color="warning"
-                @click="openEditModal(item)">
-                Edit
-              </v-btn>
-              <v-btn  size="small" variant="flat" color="error" @click="onDelete(item)">
-                Delete
-              </v-btn>
-            </div>
-          </template>
+    <template #item.status="{ item }">
+      <v-chip size="small" label variant="tonal" :color="item.status === 'active' ? 'success' : 'warning'">
+        <span class="text-capitalize">{{ item.status || 'draft' }}</span>
+      </v-chip>
+    </template>
+    <template #item.is_published="{ item }">
+      <v-chip size="small" label variant="tonal" :color="item.is_published ? 'success' : 'error'">
+        <span class="text-capitalize">{{ item.is_published ? 'Yes' : 'No' }}</span>
+      </v-chip>
+    </template>
 
-        </AppDataTable>
-      </v-col>
-    </v-row>
-  </v-container>
+    <template #item.start_date="{ item }">
+      <div>
+        <div v-if="!item.start_date">-</div>
+        <div v-else>
+          <div>{{ formatLongDate(item.start_date) }} - {{ formatLongDate(item.end_date) }}</div>
+        </div>
+      </div>
+    </template>
+
+    <template #item.products_count="{ item }">
+      <span class="">{{ item.products_count }} products</span>
+    </template>
+
+    <template #item.action="{ item }">
+      <div class="d-flex align-center justify-end ga-1">
+        <v-btn size="small" class="mr-1" variant="outlined" color="primary"
+          @click="router.push({ name: 'admin.campaigns.detail', params: { id: item.id } })">
+          Details
+        </v-btn>
+        <v-btn size="small" class="mr-1" variant="outlined" color="primary" @click="openEditModal(item)">
+          Edit
+        </v-btn>
+        <v-btn size="small" variant="outlined" color="error" @click="onDelete(item)">
+          Delete
+        </v-btn>
+      </div>
+    </template>
+
+  </AppDataTable>
+
 </template>
 
 <script setup lang="ts">
@@ -110,6 +108,8 @@ import { formatLongDate } from '@/shared/utils';
 import { useModalStore } from '@/stores/modal.store';
 import CampaignForm from '@/components/campaign-detail/modal/CampaignForm.vue';
 import CampaignDelete from '@/components/campaign-detail/modal/CampaignDelete.vue';
+import App from '@/app/App.vue';
+import AppSearchButton from '@/components/shared/AppSearchButton.vue';
 
 const headers = [
   { title: 'Name', key: 'title', sortable: false, minWidth: '240' },
@@ -136,6 +136,7 @@ type Campaign = {
 const items = ref<Campaign[]>([]);
 const total = ref(0);
 const loading = ref(false);
+const fetchingState = ref(false);
 const options = ref<DataTableOptions>({
   page: 1,
   itemsPerPage: 10,
@@ -178,6 +179,7 @@ async function openEditModal(item: Campaign) {
 
 function handleSearch() {
   options.value.page = 1;
+  fetchingState.value = true;
   fetchCampaigns();
 }
 
@@ -225,6 +227,7 @@ async function fetchCampaigns() {
   } catch (error) {
     console.error('Failed to fetch campaigns', error);
   } finally {
+    fetchingState.value = false;
     loading.value = false;
   }
 }
@@ -246,6 +249,6 @@ onMounted(() => {
 </script>
 <style scoped lang="scss">
 :deep(.v-toolbar__content) {
-	height: unset !important;
+  height: unset !important;
 }
 </style>

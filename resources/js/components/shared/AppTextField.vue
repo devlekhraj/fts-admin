@@ -1,13 +1,13 @@
 <template>
   <div>
-     <div class="text-medium-emphasis mb-1" style="font-size: 0.875rem;">{{ label }}</div>
+     <div class="text-medium-emphasis" style="font-size: 0.875rem;">{{ label }}</div>
     <v-text-field
       :model-value="attrs.modelValue"
       @update:model-value="emit('update:modelValue', $event)"
       v-bind="fieldAttrs"
       :placeholder="placeholder"
       variant="outlined"
-      density="comfortable"
+      density="compact"
       hide-details="auto"
     />
   </div>

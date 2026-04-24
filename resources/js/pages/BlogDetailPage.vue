@@ -7,58 +7,59 @@
       </v-btn>
     </template>
   </AppPageHeader>
-
-  <v-card class="pa-6">
-    <!-- <div v-if="loading" class="text-body-2 text-medium-emphasis mt-4">Loading blog detail...</div> -->
-    <div class="blog-top-grid">
-      <div class="blog-thumb-cell">
-        <v-avatar size="112" rounded="lg" color="grey-lighten-3">
-          <v-img v-if="blogDetail?.thumb" :src="String(blogDetail.thumb)" cover />
-          <v-icon v-else size="32" color="grey-darken-1">mdi-image-outline</v-icon>
-        </v-avatar>
-      </div>
-      <div>
-        <div class="text-h6">{{ blogDetail?.title || '-' }}</div>
-
-        <div class="d-flex align-center ga-2 mt-2">
-          <span class="text-body-2 text-medium-emphasis">{{ blogUrl || '-' }}</span>
-          <v-btn
-            v-if="blogUrl"
-            :href="blogUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            icon
-            size="x-small"
-            variant="tonal"
-            color="primary">
-            <v-icon size="16">mdi-open-in-new</v-icon>
-          </v-btn>
+  <v-container fluid>
+    <v-card class="pa-6">
+      <!-- <div v-if="loading" class="text-body-2 text-medium-emphasis mt-4">Loading blog detail...</div> -->
+      <div class="blog-top-grid">
+        <div class="blog-thumb-cell">
+          <v-avatar size="112" rounded="lg" color="grey-lighten-3">
+            <v-img v-if="blogDetail?.thumb" :src="String(blogDetail.thumb)" cover />
+            <v-icon v-else size="32" color="grey-darken-1">mdi-image-outline</v-icon>
+          </v-avatar>
+        </div>
+        <div>
+          <div class="text-h6">{{ blogDetail?.title || '-' }}</div>
+  
+          <div class="d-flex align-center ga-2 mt-2">
+            <span class="text-body-2 text-medium-emphasis">{{ blogUrl || '-' }}</span>
+            <v-btn
+              v-if="blogUrl"
+              :href="blogUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              icon
+              size="x-small"
+              variant="tonal"
+              color="primary">
+              <v-icon size="16">mdi-open-in-new</v-icon>
+            </v-btn>
+          </div>
         </div>
       </div>
-    </div>
-
-   
-  </v-card>
-
-  <v-card class="mt-4">
-    <v-tabs v-model="activeTab" color="primary">
-      <v-tab v-for="tab in tabItems" :key="tab.value" :value="tab.value">
-        <v-icon start size="16">{{ tab.icon }}</v-icon>
-        {{ tab.label }}
-      </v-tab>
-    </v-tabs>
-    <v-divider />
-
-    <v-window v-model="activeTab">
-      <v-window-item v-for="tab in tabItems" :key="tab.value" :value="tab.value">
-        <component
-          :is="tab.component"
-          :item="blogDetail"
-          :blog-id="blogId"
-          @updated="fetchBlogDetail" />
-      </v-window-item>
-    </v-window>
-  </v-card>
+  
+     
+    </v-card>
+  
+    <v-card class="mt-4">
+      <v-tabs v-model="activeTab" color="primary">
+        <v-tab v-for="tab in tabItems" :key="tab.value" :value="tab.value">
+          <v-icon start size="16">{{ tab.icon }}</v-icon>
+          {{ tab.label }}
+        </v-tab>
+      </v-tabs>
+      <v-divider />
+  
+      <v-window v-model="activeTab">
+        <v-window-item v-for="tab in tabItems" :key="tab.value" :value="tab.value">
+          <component
+            :is="tab.component"
+            :item="blogDetail"
+            :blog-id="blogId"
+            @updated="fetchBlogDetail" />
+        </v-window-item>
+      </v-window>
+    </v-card>
+  </v-container>
 </template>
 
 <script setup lang="ts">

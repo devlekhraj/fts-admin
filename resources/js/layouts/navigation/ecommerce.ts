@@ -1,13 +1,28 @@
 import type { NavGroup } from './types';
 
 export const ecommerceNav: NavGroup[] = [
+    // {
+    //     group: 'Dashboard',
+    //     icon: 'mdi-hand-wave-outline',
+    //     items: [
+    //         { title: 'Overview', routeName: 'admin.overview', icon: 'mdi-view-dashboard-outline' },
+    //         { title: 'Analytics', routeName: 'admin.analytics', icon: 'mdi-chart-box-outline' },
+    //     ],
+    // },
     {
         group: 'Dashboard',
-        icon: 'mdi-hand-wave-outline',
-        items: [
-            { title: 'Overview', routeName: 'admin.overview', icon: 'mdi-view-dashboard-outline' },
-            { title: 'Analytics', routeName: 'admin.analytics', icon: 'mdi-chart-box-outline' },
-        ],
+        icon: 'mdi-view-dashboard-outline',
+        routeName: 'admin.overview',
+    },
+    {
+        group: 'EMI Requests',
+        icon: 'mdi-cash-multiple',
+        routeName: 'admin.emi.requests',
+    },
+    {
+        group: 'Orders',
+        icon: 'mdi-clipboard-check-outline',
+        routeName: 'admin.orders.list',
     },
     {
         group: 'Cart List',
@@ -20,22 +35,27 @@ export const ecommerceNav: NavGroup[] = [
         routeName: 'admin.orders.wish',
     },
     {
-        group: 'Sales',
-        icon: 'mdi-chart-line',
-        items: [
-            { title: 'Orders', routeName: 'admin.orders.list', icon: 'mdi-cart-outline' },
-            { title: 'Customers', routeName: 'admin.customers.list', icon: 'mdi-account-group-outline' },
-        ],
+        group: 'Customers',
+        icon: 'mdi-account-group-outline',
+        routeName: 'admin.customers.list',
     },
-    {
-        group: 'EMI',
-        icon: 'mdi-bank-outline',
-        items: [
-            { title: 'EMI Requests', routeName: 'admin.emi.requests', icon: 'mdi-cash-multiple' },
-            { title: 'EMI Applications', routeName: 'admin.emi.applications', icon: 'mdi-file-document-edit-outline' },
-            { title: 'EMI Banks', routeName: 'admin.emi.banks', icon: 'mdi-bank-outline' },
-        ],
-    },
+    // {
+    //     group: 'Sales',
+    //     icon: 'mdi-chart-line',
+    //     items: [
+    //         // { title: 'Orders', routeName: 'admin.orders.list', icon: 'mdi-cart-outline' },
+    //         { title: 'Customers', routeName: 'admin.customers.list', icon: 'mdi-account-group-outline' },
+    //     ],
+    // },
+    // {
+    //     group: 'EMI',
+    //     icon: 'mdi-bank-outline',
+    //     items: [
+    //         { title: 'EMI Requests', routeName: 'admin.emi.requests', icon: 'mdi-cash-multiple' },
+    //         { title: 'EMI Applications', routeName: 'admin.emi.applications', icon: 'mdi-file-document-edit-outline' },
+    //         { title: 'EMI Banks', routeName: 'admin.emi.banks', icon: 'mdi-bank-outline' },
+    //     ],
+    // },
     {
         group: 'Catalog',
         icon: 'mdi-archive-outline',
@@ -44,7 +64,7 @@ export const ecommerceNav: NavGroup[] = [
             { title: 'Categories', routeName: 'admin.product.categories', icon: 'mdi-shape-outline' },
             { title: 'Attributes', routeName: 'admin.product.attributes', icon: 'mdi-tune-variant' },
             { title: 'Brands', routeName: 'admin.product.brands', icon: 'mdi-tag-outline' },
-            { title: 'Product Reviews', routeName: 'admin.product.reviews', icon: 'mdi-star-box-outline' },
+            // { title: 'Product Reviews', routeName: 'admin.product.reviews', icon: 'mdi-star-box-outline' },
         ],
     },
     {
@@ -65,21 +85,30 @@ export const ecommerceNav: NavGroup[] = [
         ],
     },
     {
-        group: 'Configurations',
-        icon: 'mdi-cog-outline',
+        group: 'Configuration',
+        icon: 'mdi-wrench-cog',
         items: [
             { title: 'Payment Methods', routeName: 'admin.paymentMethods.list', icon: 'mdi-credit-card-outline' },
-            { title: 'Files', routeName: 'admin.files.list', icon: 'mdi-image-multiple-outline' },
-            { title: 'General Settings', routeName: 'admin.settings', icon: 'mdi-cog-outline' },
+            { title: 'EMI Banks', routeName: 'admin.emi.banks', icon: 'mdi-bank-outline' },
         ],
     },
     {
         group: 'System Admin',
-        icon: 'mdi-shield-crown-outline',
+        icon: 'mdi-shield-account-outline',
         items: [
             { title: 'Admin Users', routeName: 'admin.list', icon: 'mdi-account-group-outline' },
             { title: 'Roles & Permissions', routeName: 'admin.roles.manage', icon: 'mdi-shield-account-outline' },
         ],
+    },
+    {
+        group: 'Media',
+        icon: 'mdi-image-multiple-outline',
+        routeName: 'admin.files.list',
+    },
+    {
+        group: 'Settings',
+        icon: 'mdi-cog-outline',
+        routeName: 'admin.settings',
     },
     {
         group: 'Developer',

@@ -19,7 +19,8 @@ final class OrderListAction
             $search = $data->search;
             $query->where(function ($builder) use ($search) {
                 $builder
-                    ->where('order_number', 'like', "%{$search}%")
+                    ->where('order_no', 'like', "%{$search}%")
+                    ->orWhere('invoice_number', 'like', "%{$search}%")
                     ->orWhere('status', 'like', "%{$search}%")
                     ->orWhereHas('user', function ($userQuery) use ($search) {
                         $userQuery->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%");
@@ -59,4 +60,3 @@ final class OrderListAction
         ];
     }
 }
-

@@ -5,11 +5,17 @@
     </template>
   </AppPageHeader>
 
-  <v-card class="mt-4 pa-4">
-    <v-data-table :headers="headers" :items="items" :loading="loading" item-value="id">
-      <template #item.sn="{ index }">
-        <span>{{ index + 1 }}</span>
-      </template>
+  <AppDataTable
+    :headers="headers"
+    :items="items"
+    :total="total"
+    :loading="loading"
+    :page="options.page"
+    :items-per-page="options.itemsPerPage"
+    @update:options="onOptions">
+    <template #item.sn="{ item }">
+      <span>{{ item.sn }}</span>
+    </template>
 
       <template #item.host="{ item }">
         <span style="font-size: 0.8rem;">{{ item.host || '-' }}</span>
@@ -45,23 +51,24 @@
       </template>
 
       <template #item.action="{ item }">
-        <div class="d-flex justify-end ga-1">
-          <v-btn size="small" variant="flat" color="primary" @click="onConfigure(item)">
+        <div class="d-flex justify-end ga-2">
+          <v-btn size="small" variant="outlined" color="primary" @click="onConfigure(item)">
             Edit
           </v-btn>
-          <v-btn size="small" variant="flat" color="error" @click="onDelete(item)">
+          <v-btn size="small" variant="outlined" color="error" @click="onDelete(item)">
             delete
           </v-btn>
         </div>
       </template>
-    </v-data-table>
-  </v-card>
+  </AppDataTable>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { listApiKeys, type ApiKeyItem } from '@/api/developer.api';
 import AppPageHeader from '@/components/AppPageHeader.vue';
+import AppDataTable from '@/components/datatable/AppDataTable.vue';
+import type { DataTableOptions } from '@/components/datatable/types';
 import { formatLongDate } from '@/shared/utils';
 import { useSnackbarStore } from '@/stores/snackbar.store';
 import ApiKeyCreateButton from '@/components/developer/ApiKeyCreateButton.vue';
@@ -70,18 +77,22 @@ import ApiKeyDeleteModal from '@/components/developer/ApiKeyDeleteModal.vue';
 import { openModal } from '@/shared/modal';
 
 const headers = [
-  { title: 'ID', key: 'sn', value: 'sn', sortable: false, minWidth: '90' },
-  { title: 'Host', key: 'host', value: 'host', sortable: false, minWidth: '260' },
-  { title: 'Mode', key: 'mode', value: 'mode', sortable: false, minWidth: '120' },
-  { title: 'Public Key', key: 'live_public_key', value: 'live_public_key', sortable: false, width: '120' },
-  // { title: 'Description', key: 'description', value: 'description', sortable: false, minWidth: '220' },
-  { title: 'Status', key: 'is_active', value: 'is_active', sortable: false, minWidth: '120' },
-  { title: 'Created At', key: 'created_at', value: 'created_at', sortable: false, minWidth: '180' },
-  { title: 'Action', key: 'action', value: 'action', sortable: false, minWidth: '100', align: 'end' as const },
+  { title: 'SN#', key: 'sn', sortable: false, width: '80' },
+  { title: 'Host', key: 'host', sortable: false, minWidth: '260' },
+  { title: 'Mode', key: 'mode', sortable: false, minWidth: '120' },
+  { title: 'Public Key', key: 'live_public_key', sortable: false, width: '160' },
+  { title: 'Status', key: 'is_active', sortable: false, minWidth: '120' },
+  { title: 'Created At', key: 'created_at', sortable: false, minWidth: '180' },
+  { title: 'Action', key: 'action', sortable: false, minWidth: '120', align: 'end' as const },
 ];
 
-const items = ref<ApiKeyItem[]>([]);
+type ApiKeyRow = ApiKeyItem & { sn: number };
+
+const allItems = ref<ApiKeyItem[]>([]);
+const items = ref<ApiKeyRow[]>([]);
+const total = ref(0);
 const loading = ref(false);
+const options = ref<DataTableOptions>({ page: 1, itemsPerPage: 10, sortBy: [] });
 const snackbar = useSnackbarStore();
 
 function maskKey(value: string | null | undefined): string {
@@ -103,13 +114,39 @@ async function copyLivePublicKey(value: string | null | undefined) {
   }
 }
 
+function applyPagination() {
+  const page = Math.max(1, Number(options.value.page ?? 1));
+  const perPage = Math.max(1, Number(options.value.itemsPerPage ?? 10));
+  const startIndex = (page - 1) * perPage;
+  const paged = allItems.value.slice(startIndex, startIndex + perPage);
+
+  items.value = paged.map((item, index) => ({
+    ...item,
+    sn: startIndex + index + 1,
+  }));
+}
+
 async function fetchApiKeys() {
   loading.value = true;
   try {
-    items.value = await listApiKeys();
+    allItems.value = await listApiKeys();
+    total.value = allItems.value.length;
+
+    const perPage = Math.max(1, Number(options.value.itemsPerPage ?? 10));
+    const lastPage = Math.max(1, Math.ceil(total.value / perPage));
+    if (options.value.page > lastPage) {
+      options.value.page = lastPage;
+    }
+
+    applyPagination();
   } finally {
     loading.value = false;
   }
+}
+
+function onOptions(next: DataTableOptions) {
+  options.value = next;
+  applyPagination();
 }
 
 function onConfigure(item: ApiKeyItem) {

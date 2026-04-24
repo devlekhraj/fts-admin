@@ -3,7 +3,7 @@
         <template #actions>
             <v-menu location="bottom start">
                 <template #activator="{ props }">
-                    <v-btn v-bind="props" variant="outlined" color="primary" prepend-icon="mdi-download-outline">
+                    <v-btn v-bind="props" variant="flat" color="primary" prepend-icon="mdi-download-outline">
                         Export
                     </v-btn>
                 </template>
@@ -13,9 +13,9 @@
                 </v-list>
             </v-menu>
 
-            <v-btn color="primary" variant="flat" prepend-icon="mdi-account-plus-outline">
+            <!-- <v-btn color="primary" variant="flat" prepend-icon="mdi-account-plus-outline">
                 Add Customer
-            </v-btn>
+            </v-btn> -->
         </template>
     </AppPageHeader>
     <AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :page="options.page"
@@ -25,13 +25,12 @@
                 <v-row align="center">
                     <v-col cols="12" md="6" lg="4">
                         <div class="d-flex align-center ga-3">
-                            <AppTextField v-model="search" label="Search" placeholder="Search by name..."
+                            <AppTextField v-model="search" label="" placeholder="Search by name..."
                                 prepend-inner-icon="mdi-magnify" hide-details clearable style="min-width: 260px"
                                 @click:clear="onClearSearch" />
-                            <v-btn color="primary" variant="tonal" height="40">
-                                <v-icon start>mdi-magnify</v-icon>
-                                Search
-                            </v-btn>
+                            <div>
+                                <AppSearchButton :loading="fetchingState" @click="onSearch" />
+                            </div>
                         </div>
                     </v-col>
                     <v-spacer></v-spacer>
@@ -66,7 +65,7 @@
         </template>
         <template #item.action="{ item }">
             <div class="d-flex align-center justify-end ga-1">
-                <v-btn size="small" variant="flat" color="primary"
+                <v-btn size="small" variant="outlined" color="primary"
                     @click="router.push({ name: 'admin.customers.detail', params: { id: item.id } })">
                     detail
                 </v-btn>
@@ -85,6 +84,7 @@ import type { DataTableOptions } from '@/components/datatable/types';
 import { list as listCustomers, type CustomersListItem } from '@/api/customers.api';
 import { formatLongDate, formatPhoneNumber } from '@/shared/utils';
 import AppTextField from '@/components/shared/AppTextField.vue';
+import AppSearchButton from '@/components/shared/AppSearchButton.vue';
 
 type Customer = {
     id: number | string;
@@ -120,6 +120,7 @@ const items = ref<Customer[]>([]);
 const total = ref(0);
 const loading = ref(false);
 const search = ref('');
+const fetchingState = ref(false);
 const options = ref<DataTableOptions>({
     page: 1,
     itemsPerPage: 10,
@@ -164,6 +165,7 @@ async function fetchCustomers() {
             options.value.itemsPerPage = Number(response.meta.per_page);
         }
     } finally {
+        fetchingState.value = false;
         loading.value = false;
     }
 }
@@ -178,6 +180,7 @@ function onOptions(next: DataTableOptions) {
 
 function onSearch() {
     options.value.page = 1;
+    fetchingState.value = true;
     fetchCustomers();
 }
 

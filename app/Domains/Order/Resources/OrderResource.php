@@ -25,7 +25,7 @@ class OrderResource extends JsonResource
 
         return [
             'id' => $this->id,
-            'order_number' => $this->order_number ? $this->order_number: $this->invoice_number,
+            'order_number' => $this->order_no ?: $this->invoice_number,
             'status' => $this->order_status,
             'total' => is_numeric($this->total) ? (float) $this->total : null,
             'customer' => [
@@ -44,7 +44,7 @@ class OrderResource extends JsonResource
 
         $order['summary'] = [
             'id' => $this->id,
-            'order_no' => $this->order_number ?? $this->invoice_number,
+            'order_no' => $this->order_no ?? $this->invoice_number,
             'invoice_no' => $this->invoice_number,
             'order_date' => $this->created_at,
             'status' => $this->order_status,

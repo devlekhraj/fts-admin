@@ -20,8 +20,23 @@
   <AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :page="options.page"
     :items-per-page="options.itemsPerPage" @update:options="onOptions">
     <template #actions>
-      <PageFilter v-model:search="search" search-label="Search brands" search-placeholder="Search by name or slug"
-        :total="total" total-label="Items found." @search="onSearch" @clear="onClearSearch" />
+        <v-container fluid class="py-4">
+        <v-row align="center">
+          <v-col cols="12" md="6" lg="4">
+            <div class="d-flex align-center ga-3">
+              <AppSearchTextField v-model="search" label="Search" placeholder="Type ..."
+                @click:clear="onClearSearch" />
+                <AppSearchButton :loading="fetchingState" @click="onSearch" />
+            </div>
+          </v-col>
+          <v-spacer></v-spacer>
+          <v-col cols="12" md="auto" class="text-right">
+            <div class="text-medium-emphasis">
+              <span class="text-primary" style="font-size: smaller;">Total: {{ total }} Items found.</span>
+            </div>
+          </v-col>
+        </v-row>
+      </v-container>
     </template>
     <template #item.name="{ item }">
       <div class="d-flex align-center ga-2">
@@ -45,7 +60,7 @@
     </template>
     <template #item.action="{ item }">
       <div class="d-flex align-center justify-end ga-1">
-        <v-btn size="small" variant="flat" color="primary" @click="onView(item)">
+        <v-btn size="small" variant="outlined" color="primary" @click="onView(item)">
           Details
         </v-btn>
         <BrandDeleteButton :brand="item" @deleted="onBrandDeleted" />
@@ -65,6 +80,8 @@ import BrandDeleteButton from '@/components/brand/BrandDeleteButton.vue';
 import type { DataTableHeader, DataTableOptions } from '@/components/datatable/types';
 import { listBrands, type ProductBrandListItem } from '@/api/products.api';
 import { formatLongDate } from '@/shared/utils';
+import AppSearchTextField from '@/components/shared/AppSearchTextField.vue';
+import AppSearchButton from '@/components/shared/AppSearchButton.vue';
 
 type ProductBrand = {
   id: number | string;
@@ -86,7 +103,7 @@ const exportOptions: Array<{ type: ExportType; title: string; icon: string }> = 
 
 const headers: DataTableHeader[] = [
   { title: 'Name', key: 'name', sortable: false, minWidth: '220' },
-  { title: 'Slug', key: 'slug', sortable: false, minWidth: '220' },
+  // { title: 'Slug', key: 'slug', sortable: false, minWidth: '220' },
   { title: 'Products', key: 'total_products', sortable: false, minWidth: '160' },
   { title: 'Status', key: 'status', sortable: false, minWidth: '140' },
   { title: 'Created', key: 'created_at', sortable: false, minWidth: '140' },
@@ -104,6 +121,7 @@ const options = ref<DataTableOptions>({
 });
 const hasLoadedOnce = ref(false);
 const router = useRouter();
+const fetchingState = ref(false);
 
 function onExport(type: ExportType) {
   // TODO: replace with real export API/download logic.
@@ -141,6 +159,7 @@ async function fetchBrands() {
       options.value.itemsPerPage = Number(response.meta.per_page);
     }
   } finally {
+    fetchingState.value = false;
     loading.value = false;
   }
 }
@@ -154,6 +173,7 @@ function onOptions(next: DataTableOptions) {
 }
 
 function onSearch() {
+  fetchingState.value = true;
   options.value.page = 1;
   fetchBrands();
 }

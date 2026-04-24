@@ -3,7 +3,7 @@
     <template #actions>
       <v-menu location="bottom start">
         <template #activator="{ props }">
-          <v-btn v-bind="props" variant="tonal" color="primary" prepend-icon="mdi-download-outline">
+          <v-btn v-bind="props" variant="outlined" color="primary" prepend-icon="mdi-download-outline">
             Export
           </v-btn>
         </template>
@@ -26,10 +26,7 @@
             <div class="d-flex align-center ga-3">
               <v-text-field label="Search" variant="outlined" density="compact" placeholder="Search by name..." prepend-inner-icon="mdi-magnify" hide-details
                 clearable style="min-width: 260px" />
-              <v-btn color="primary" variant="tonal" height="40">
-                <v-icon start>mdi-magnify</v-icon>
-                Search
-              </v-btn>
+              <AppSearchButton :loading="fetchingState" @click="onSearch" />
             </div>
           </v-col>
 
@@ -59,12 +56,15 @@
         {{ item.status ? 'Active' : 'Inactive' }}
       </v-chip>
     </template>
+    <template #item.blogs_count="{ item }">
+      <span>{{ item.blogs_count }} Blogs</span>
+    </template>
     <template #item.created_at="{ item }">
       {{ item.created_at }}
     </template>
     <template #item.action="{ item }">
       <div class="d-flex align-center justify-end ga-1">
-        <v-btn size="small" variant="flat" color="primary" @click="onView(item)">
+        <v-btn size="small" variant="outlined" color="primary" @click="onView(item)">
           Details
         </v-btn>
         <BlogCategoryDeleteButton :category="item" @deleted="onCategoryDeleted" />
@@ -89,12 +89,14 @@ import {
 import { formatLongDate } from '@/shared/utils';
 import AppTextField from '@/components/shared/AppTextField.vue';
 import AppSelectField from '@/components/shared/AppSelectField.vue';
+import AppSearchButton from '@/components/shared/AppSearchButton.vue';
 
 type BlogCategory = {
   id: number | string;
   title: string;
   slug: string;
   thumb: string;
+  blogs_count: number;
   created_at: string;
   status: boolean;
 };
@@ -109,9 +111,10 @@ const exportOptions: Array<{ type: ExportType; title: string; icon: string }> = 
 
 const headers = [
   { title: 'Title', key: 'title', sortable: false, minWidth: '260' },
-  { title: 'Slug', key: 'slug', sortable: false, minWidth: '220' },
-  { title: 'Created', key: 'created_at', sortable: false, minWidth: '170' },
+  // { title: 'Slug', key: 'slug', sortable: false, minWidth: '220' },
+  { title: 'Blogs', key: 'blogs_count', sortable: false, minWidth: '120' },
   { title: 'Status', key: 'status', sortable: false, minWidth: '140' },
+  { title: 'Created', key: 'created_at', sortable: false, minWidth: '170' },
   { title: 'Actions', key: 'action', sortable: false, minWidth: '120', align: 'end' as const },
 ];
 
@@ -125,6 +128,7 @@ const options = ref<DataTableOptions>({
 });
 const hasLoadedOnce = ref(false);
 const router = useRouter();
+const fetchingState = ref(false);
 
 function onExport(type: ExportType) {
   // TODO: replace with real export API/download logic.
@@ -145,6 +149,12 @@ function onCategoryCreated(payload?: unknown) {
   fetchCategories();
 }
 
+function onSearch() {
+  fetchingState.value = false
+  options.value.page = 1;
+  fetchCategories();
+}
+
 function onCategoryDeleted() {
   options.value.page = 1;
   fetchCategories();
@@ -158,6 +168,8 @@ async function fetchCategories() {
       per_page: options.value.itemsPerPage,
     });
 
+    fetchingState.value = false;
+
     const isPaginated = !Array.isArray(response);
     const paginated = isPaginated ? (response as BlogCategoryListPaginatedResponse) : null;
     const list = isPaginated ? paginated?.data ?? [] : response;
@@ -167,6 +179,7 @@ async function fetchCategories() {
       title: category.title ?? '-',
       slug: category.slug ?? '-',
       thumb: typeof category.thumb === 'string' ? category.thumb : '',
+      blogs_count: Number(category.blogs_count ?? 0),
       created_at: formatLongDate(category.created_at) ?? '-',
       status: Boolean(category.status),
     }));

@@ -3,7 +3,7 @@
     <template #actions>
       <v-menu location="bottom start">
         <template #activator="{ props }">
-          <v-btn v-bind="props" variant="tonal" color="primary" prepend-icon="mdi-download-outline">
+          <v-btn v-bind="props" variant="outlined" color="primary" prepend-icon="mdi-download-outline">
             Export
           </v-btn>
         </template>
@@ -14,7 +14,7 @@
       </v-menu>
 
       <v-btn color="primary" variant="flat" prepend-icon="mdi-plus" @click="openProductModal()">
-        Create Product
+        New Product
       </v-btn>
     </template>
   </AppPageHeader>
@@ -26,19 +26,18 @@
         <v-row align="center">
           <v-col cols="12" md="6" lg="4">
             <div class="d-flex align-center ga-3">
-              <AppTextField v-model="search" label="Search products" placeholder="Search by name..."
-                prepend-inner-icon="mdi-magnify" hide-details clearable style="min-width: 260px"
+              <AppSearchTextField v-model="search" label="Search products" placeholder="Search by name..."
                 @click:clear="onClearSearch" />
-              <v-btn color="primary" variant="tonal" height="40" @click="onSearch">
-                <v-icon start>mdi-magnify</v-icon>
-                Search
-              </v-btn>
+
+                <AppSelectField v-model="categoryFilter" :items="categoryOptions" item-title="title" 
+                style="width: 260px;"
+                item-value="value"
+                  label="Category" clearable hide-details @update:model-value="onCategoryChange" />
+                <AppSearchButton :loading="fetchingState" @click="onSearch" />
             </div>
           </v-col>
 
           <v-col cols="12" md="6" lg="3">
-            <AppSelectField v-model="categoryFilter" :items="categoryOptions" item-title="title" item-value="value"
-              label="Category" clearable hide-details @update:model-value="onCategoryChange" />
           </v-col>
 
           <v-spacer></v-spacer>
@@ -89,10 +88,10 @@
     </template>
     <template #item.action="{ item }">
       <div class="d-flex align-center ga-1">
-        <v-btn size="small" variant="flat" class="mr-2" color="primary" @click="onView(item)">
+        <v-btn size="small" variant="outlined" class="mr-2" color="primary" @click="onView(item)">
          Details
         </v-btn>
-        <v-btn size="small" variant="flat" color="error" @click="onDelete(item)">
+        <v-btn size="small" variant="outlined" color="error" @click="onDelete(item)">
           Delete
         </v-btn>
       </div>
@@ -181,6 +180,9 @@ import { listProductCategoriesLite, type ProductCategoryListItem } from '@/api/p
 import { formatLongDate } from '@/shared/utils';
 import { openModal } from '@/shared/modal';
 import ProductCreateModal from '@/components/product/ProductCreateModal.vue';
+import AppSearchTextField from '@/components/shared/AppSearchTextField.vue';
+import App from '@/app/App.vue';
+import AppSearchButton from '@/components/shared/AppSearchButton.vue';
 
 type Product = {
   id: number | string;
@@ -228,6 +230,7 @@ const search = ref('');
 const categoryFilter = ref<number | string | null>(null);
 const categoryOptions = ref<Array<{ title: string; value: number | string | null }>>([]);
 const router = useRouter();
+const fetchingState = ref(false);
 
 function onExport(type: ExportType) {
   // TODO: replace with real export API/download logic.
@@ -267,6 +270,7 @@ async function fetchProducts() {
       search: search.value.trim() || undefined,
       category_id: categoryFilter.value || undefined,
     });
+    
 
     const list = Array.isArray(response) ? response : response?.data ?? [];
     items.value = list.map((product: ProductListItem) => ({
@@ -288,6 +292,7 @@ async function fetchProducts() {
       options.value.itemsPerPage = Number(response.meta.per_page);
     }
   } finally {
+    fetchingState.value = false;
     loading.value = false;
   }
 }
@@ -360,6 +365,7 @@ async function ensureProductImages(productId: string | number) {
 }
 
 function onSearch() {
+  fetchingState.value = true;
   options.value.page = 1;
   fetchProducts();
 }

@@ -1,73 +1,75 @@
 <template>
   <AppPageHeader title="Product Detail" subtitle="View product information">
     <template #actions>
-      <v-btn variant="tonal" color="primary" @click="goBack">
+      <v-btn variant="flat" color="primary" @click="goBack">
         <v-icon start>mdi-arrow-left</v-icon>
         Back
       </v-btn>
     </template>
   </AppPageHeader>
 
-  <v-card class="pa-6">
-    <div class="product-top-grid">
-      <div class="product-thumb-cell">
-        <v-avatar size="112" rounded="lg" color="grey-lighten-3">
-          <v-img v-if="productDetail?.overview?.thumb" :src="String(productDetail.overview.thumb)" cover />
-          <v-icon v-else size="32" color="grey-darken-1">mdi-image-outline</v-icon>
-        </v-avatar>
-      </div>
-      <div>
-        <div class="text-h6">{{ productDetail?.overview?.name || '-' }}</div>
-
-        <div class="d-flex align-center ga-2 mt-2">
-          <span class="text-body-2 text-medium-emphasis">{{ productUrl || '-' }}</span>
-          <v-btn
-            v-if="productUrl"
-            :href="productUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            icon
-            size="x-small"
-            variant="tonal"
-            color="primary">
-            <v-icon size="16">mdi-open-in-new</v-icon>
-          </v-btn>
+  <v-container fluid>
+    <v-card class="pa-6">
+      <div class="product-top-grid">
+        <div class="product-thumb-cell">
+          <v-avatar size="112" rounded="lg" color="grey-lighten-3">
+            <v-img v-if="productDetail?.overview?.thumb" :src="String(productDetail.overview.thumb)" cover />
+            <v-icon v-else size="32" color="grey-darken-1">mdi-image-outline</v-icon>
+          </v-avatar>
         </div>
-
-        <div class="d-flex align-center ga-2 mt-3">
-          <v-chip size="small" label variant="tonal" :color="productDetail?.overview?.status ? 'primary' : 'warning'">
-            {{ productDetail?.overview?.status ? 'Active' : 'Inactive' }}
-          </v-chip>
-          <v-chip size="small" label variant="tonal" :color="productDetail?.overview?.emi_enabled ? 'success' : 'grey'">
-            <v-icon start size="14">{{ productDetail?.overview?.emi_enabled ? 'mdi-check-circle' : 'mdi-close-circle' }}</v-icon>
-            {{ productDetail?.overview?.emi_enabled ? 'EMI Enabled' : 'EMI Disabled' }}
-          </v-chip>
+        <div>
+          <div class="text-h6">{{ productDetail?.overview?.name || '-' }}</div>
+  
+          <div class="d-flex align-center ga-2 mt-2">
+            <span class="text-body-2 text-medium-emphasis">{{ productUrl || '-' }}</span>
+            <v-btn
+              v-if="productUrl"
+              :href="productUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              icon
+              size="x-small"
+              variant="tonal"
+              color="primary">
+              <v-icon size="16">mdi-open-in-new</v-icon>
+            </v-btn>
+          </div>
+  
+          <div class="d-flex align-center ga-2 mt-3">
+            <v-chip size="small" label variant="tonal" :color="productDetail?.overview?.status ? 'primary' : 'warning'">
+              {{ productDetail?.overview?.status ? 'Active' : 'Inactive' }}
+            </v-chip>
+            <v-chip size="small" label variant="tonal" :color="productDetail?.overview?.emi_enabled ? 'success' : 'grey'">
+              <v-icon start size="14">{{ productDetail?.overview?.emi_enabled ? 'mdi-check-circle' : 'mdi-close-circle' }}</v-icon>
+              {{ productDetail?.overview?.emi_enabled ? 'EMI Enabled' : 'EMI Disabled' }}
+            </v-chip>
+          </div>
         </div>
       </div>
-    </div>
-
-    <div v-if="loading" class="text-body-2 text-medium-emphasis mt-4">Loading product detail...</div>
-  </v-card>
-
-  <v-card class="mt-4">
-    <v-tabs v-model="activeTab" color="primary">
-      <v-tab v-for="tab in tabItems" :key="tab.value" :value="tab.value">
-        <v-icon start size="16">{{ tab.icon }}</v-icon>
-        {{ tab.label }}
-      </v-tab>
-    </v-tabs>
-    <v-divider />
-
-    <v-window v-model="activeTab">
-      <v-window-item v-for="tab in tabItems" :key="tab.value" :value="tab.value">
-        <component
-          :is="tab.component"
-          :item="productDetail"
-          :product-id="productId"
-          @updated="fetchProductDetail" />
-      </v-window-item>
-    </v-window>
-  </v-card>
+  
+      <div v-if="loading" class="text-body-2 text-medium-emphasis mt-4">Loading product detail...</div>
+    </v-card>
+  
+    <v-card class="mt-4">
+      <v-tabs v-model="activeTab" color="primary">
+        <v-tab v-for="tab in tabItems" :key="tab.value" :value="tab.value">
+          <v-icon start size="16">{{ tab.icon }}</v-icon>
+          {{ tab.label }}
+        </v-tab>
+      </v-tabs>
+      <v-divider />
+  
+      <v-window v-model="activeTab">
+        <v-window-item v-for="tab in tabItems" :key="tab.value" :value="tab.value">
+          <component
+            :is="tab.component"
+            :item="productDetail"
+            :product-id="productId"
+            @updated="fetchProductDetail" />
+        </v-window-item>
+      </v-window>
+    </v-card>
+  </v-container>
 </template>
 
 <script setup lang="ts">

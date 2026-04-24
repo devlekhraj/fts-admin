@@ -1,6 +1,6 @@
 <template>
-  <v-btn color="primary" variant="flat" height="40" @click="open">
-    <v-icon start>mdi-plus-circle</v-icon>
+  <v-btn color="primary" variant="flat" @click="open">
+    <v-icon start>mdi-plus</v-icon>
     Add Bank
   </v-btn>
 </template>

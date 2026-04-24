@@ -8,57 +8,46 @@
     </template>
   </AppPageHeader>
 
-  <v-card class="pa-6">
-    <div class="banner-top-grid">
-      <div class="banner-thumb-cell">
-        <div class="banner-thumb-rect rounded">
-          <v-img
-            v-if="bannerDetail?.thumb"
-            :src="bannerDetail.thumb"
-            contain
-            width="180"
-            height="112"
-            class="banner-thumb-image"
-          />
-          <v-icon v-else size="32" color="grey-darken-1">mdi-image-outline</v-icon>
+  <v-container fluid>
+    <v-card class="pa-6">
+      <div class="banner-top-grid">
+        <div class="banner-thumb-cell">
+          <div class="banner-thumb-rect rounded">
+            <v-img v-if="bannerDetail?.thumb" :src="bannerDetail.thumb" contain width="180" height="112"
+              class="banner-thumb-image" />
+            <v-icon v-else size="32" color="grey-darken-1">mdi-image-outline</v-icon>
+          </div>
+        </div>
+        <div>
+          <!-- <div class="text-overline text-medium-emphasis">Banner Name</div> -->
+          <div class="text-h6">{{ bannerDetail?.name || '-' }}</div>
+
+          <!-- <div class="text-overline text-medium-emphasis mt-3">Banner URL</div> -->
+          <div class="d-flex align-center ga-2">
+            <span class="text-body-2 text-medium-emphasis">{{ bannerUrl || '-' }}</span>
+            <v-btn v-if="bannerUrl" :href="bannerUrl" target="_blank" rel="noopener noreferrer" icon size="x-small"
+              variant="tonal" color="primary">
+              <v-icon size="16">mdi-open-in-new</v-icon>
+            </v-btn>
+          </div>
         </div>
       </div>
-      <div>
-        <!-- <div class="text-overline text-medium-emphasis">Banner Name</div> -->
-        <div class="text-h6">{{ bannerDetail?.name || '-' }}</div>
 
-        <!-- <div class="text-overline text-medium-emphasis mt-3">Banner URL</div> -->
-        <div class="d-flex align-center ga-2">
-          <span class="text-body-2 text-medium-emphasis">{{ bannerUrl || '-' }}</span>
-          <v-btn
-            v-if="bannerUrl"
-            :href="bannerUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            icon
-            size="x-small"
-            variant="tonal"
-            color="primary">
-            <v-icon size="16">mdi-open-in-new</v-icon>
-          </v-btn>
-        </div>
-      </div>
-    </div>
+      <div v-if="loading" class="text-body-2 text-medium-emphasis mt-4">Loading banner detail...</div>
+    </v-card>
 
-    <div v-if="loading" class="text-body-2 text-medium-emphasis mt-4">Loading banner detail...</div>
-  </v-card>
-
-  <v-card class="mt-4">
-    <v-tabs v-model="activeTab" color="primary">
-      <v-tab v-for="tab in tabItems" :key="tab.value" :value="tab.value">{{ tab.label }}</v-tab>
-    </v-tabs>
-    <v-divider />
-    <v-window v-model="activeTab">
-      <v-window-item v-for="tab in tabItems" :key="tab.value" :value="tab.value">
-        <component :is="tab.component" :item="bannerDetail" @changed="fetchBannerDetail" />
-      </v-window-item>
-    </v-window>
-  </v-card>
+    <v-card class="mt-4">
+      <v-tabs v-model="activeTab" color="primary">
+        <v-tab v-for="tab in tabItems" :key="tab.value" :value="tab.value">{{ tab.label }}</v-tab>
+      </v-tabs>
+      <v-divider />
+      <v-window v-model="activeTab">
+        <v-window-item v-for="tab in tabItems" :key="tab.value" :value="tab.value">
+          <component :is="tab.component" :item="bannerDetail" @changed="fetchBannerDetail" />
+        </v-window-item>
+      </v-window>
+    </v-card>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -145,5 +134,4 @@ onMounted(fetchBannerDetail);
     justify-content: flex-start;
   }
 }
-
 </style>

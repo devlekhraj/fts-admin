@@ -1,62 +1,64 @@
 <template>
   <AppPageHeader title="Payment Method Detail" subtitle="View payment method information">
     <template #actions>
-      <v-btn variant="tonal" color="primary" @click="goBack">
+      <v-btn variant="flat" color="primary" @click="goBack">
         <v-icon start>mdi-arrow-left</v-icon>
         Back
       </v-btn>
     </template>
   </AppPageHeader>
 
-  <v-card class="pa-6">
-    <div class="top-grid">
-      <div class="thumb-cell">
-        <v-avatar size="112" rounded="lg" color="grey-lighten-3">
-          <v-img v-if="paymentMethodDetail?.thumb" :src="String(paymentMethodDetail.thumb)" contain />
-          <v-icon v-else size="32" color="grey-darken-1">mdi-credit-card-outline</v-icon>
-        </v-avatar>
-      </div>
-      <div>
-        <div class="text-h6">{{ paymentMethodDetail?.name || '-' }}</div>
-        <div class="d-flex align-center ga-2 mt-2">
-          <span class="text-body-2 text-medium-emphasis">{{ paymentMethodDetail?.slug || '-' }}</span>
+  <v-container fluid>
+    <v-card class="pa-6">
+      <div class="top-grid">
+        <div class="thumb-cell">
+          <v-avatar size="112" rounded="lg" color="grey-lighten-3">
+            <v-img v-if="paymentMethodDetail?.thumb" :src="String(paymentMethodDetail.thumb)" contain />
+            <v-icon v-else size="32" color="grey-darken-1">mdi-credit-card-outline</v-icon>
+          </v-avatar>
         </div>
-        <div class="d-flex align-center ga-2 mt-3">
-          <v-chip size="small" label variant="tonal" :color="paymentMethodDetail?.status ? 'success' : 'warning'">
-            {{ paymentMethodDetail?.status ? 'Active' : 'Inactive' }}
-          </v-chip>
-          <v-chip size="small" label variant="tonal" :color="paymentMethodDetail?.test_mode ? 'grey' : 'primary'">
-            <v-icon
-              v-if="!paymentMethodDetail?.test_mode"
-              start
-              size="10"
-              color="success"
-              class="live-blink">
-              mdi-circle
-            </v-icon>
-            {{ paymentMethodDetail?.test_mode ? 'Test Mode' : 'Live Mode' }}
-          </v-chip>
-          <v-chip size="small" label variant="tonal" :color="paymentMethodDetail?.is_international ? 'info' : 'grey'">
-            {{ paymentMethodDetail?.is_international ? 'International' : 'Domestic' }}
-          </v-chip>
+        <div>
+          <div class="text-h6">{{ paymentMethodDetail?.name || '-' }}</div>
+          <div class="d-flex align-center ga-2 mt-2">
+            <span class="text-body-2 text-medium-emphasis">{{ paymentMethodDetail?.slug || '-' }}</span>
+          </div>
+          <div class="d-flex align-center ga-2 mt-3">
+            <v-chip size="small" label variant="tonal" :color="paymentMethodDetail?.status ? 'success' : 'warning'">
+              {{ paymentMethodDetail?.status ? 'Active' : 'Inactive' }}
+            </v-chip>
+            <v-chip size="small" label variant="tonal" :color="paymentMethodDetail?.test_mode ? 'grey' : 'primary'">
+              <v-icon
+                v-if="!paymentMethodDetail?.test_mode"
+                start
+                size="10"
+                color="success"
+                class="live-blink">
+                mdi-circle
+              </v-icon>
+              {{ paymentMethodDetail?.test_mode ? 'Test Mode' : 'Live Mode' }}
+            </v-chip>
+            <v-chip size="small" label variant="tonal" :color="paymentMethodDetail?.is_international ? 'info' : 'grey'">
+              {{ paymentMethodDetail?.is_international ? 'International' : 'Domestic' }}
+            </v-chip>
+          </div>
         </div>
       </div>
-    </div>
-
-    <div v-if="loading" class="text-body-2 text-medium-emphasis mt-4">Loading payment method detail...</div>
-  </v-card>
-
-  <v-card class="mt-4">
-    <v-tabs v-model="activeTab" color="primary">
-      <v-tab v-for="tab in tabItems" :key="tab.value" :value="tab.value">{{ tab.label }}</v-tab>
-    </v-tabs>
-    <v-divider />
-    <v-window v-model="activeTab">
-      <v-window-item v-for="tab in tabItems" :key="tab.value" :value="tab.value">
-        <component :is="tab.component" :item="paymentMethodDetail" @updated="fetchPaymentMethodDetail" />
-      </v-window-item>
-    </v-window>
-  </v-card>
+  
+      <div v-if="loading" class="text-body-2 text-medium-emphasis mt-4">Loading payment method detail...</div>
+    </v-card>
+  
+    <v-card class="mt-4">
+      <v-tabs v-model="activeTab" color="primary">
+        <v-tab v-for="tab in tabItems" :key="tab.value" :value="tab.value">{{ tab.label }}</v-tab>
+      </v-tabs>
+      <v-divider />
+      <v-window v-model="activeTab">
+        <v-window-item v-for="tab in tabItems" :key="tab.value" :value="tab.value">
+          <component :is="tab.component" :item="paymentMethodDetail" @updated="fetchPaymentMethodDetail" />
+        </v-window-item>
+      </v-window>
+    </v-card>
+  </v-container>
 </template>
 
 <script setup lang="ts">

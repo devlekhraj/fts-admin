@@ -13,7 +13,6 @@
             density="comfortable"
             :rules="[rules.required, rules.maxLength]"
             :error-messages="getErrorMessages('title')"
-            prepend-inner-icon="mdi-text"
             @update:model-value="onTitleInput" />
         </v-col>
         <v-col cols="12" md="12" class="pb-0">
@@ -24,7 +23,6 @@
             density="comfortable"
             :rules="[rules.required, rules.noSpaces, rules.maxLength]"
             :error-messages="getErrorMessages('slug')"
-            prepend-inner-icon="mdi-link-variant"
             @update:model-value="onSlugInput" />
         </v-col>
       </v-row>
@@ -46,7 +44,7 @@
       </v-btn>
       <v-btn
         color="primary"
-        variant="tonal"
+        variant="flat"
         class="px-5"
         :loading="loading"
         :disabled="loading"

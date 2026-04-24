@@ -1,116 +1,119 @@
 <template>
-  <AppPageHeader title="Files" subtitle="Browse media files" />
+  <AppPageHeader title="Media Files" subtitle="Browse media files" />
 
-  <v-card class="mt-4 pa-4">
-    <div class="d-flex align-center ga-3 mb-3">
-      <v-text-field v-model="search" label="Search files" variant="outlined" density="comfortable" hide-details
-        clearable prepend-inner-icon="mdi-magnify" class="search-input" @click:clear="onClearSearch" />
-    </div>
+  <v-container fluid>
+    <v-card class="pa-4">
+      <div class="d-flex align-center ga-3 mb-3">
+        <v-text-field v-model="search" label="Search files" variant="outlined" density="comfortable" hide-details
+          clearable prepend-inner-icon="mdi-magnify" class="search-input" @click:clear="onClearSearch" />
+      </div>
 
-    <div v-if="tags.length" class="d-flex flex-wrap ga-2 mb-3">
-      <v-chip color="primary" label size="small" class="text-capitalize" :variant="selectedTag === null ? 'flat' : 'tonal'"
-        @click="onTagClick(null)">
-        All
-      </v-chip>
-      <v-chip v-for="tag in tags" :key="tag" size="small" label color="primary" class="text-capitalize"
-        :variant="selectedTag === tag ? 'flat' : 'tonal'" @click="onTagClick(tag)">
-        {{ dashToSpace(tag) }}
-      </v-chip>
-    </div>
+      <div v-if="tags.length" class="d-flex flex-wrap ga-2 mb-3">
+        <v-chip color="primary" label size="small" class="text-capitalize"
+          :variant="selectedTag === null ? 'flat' : 'tonal'" @click="onTagClick(null)">
+          All
+        </v-chip>
+        <v-chip v-for="tag in tags" :key="tag" size="small" label color="primary" class="text-capitalize"
+          :variant="selectedTag === tag ? 'flat' : 'tonal'" @click="onTagClick(tag)">
+          {{ dashToSpace(tag) }}
+        </v-chip>
+      </div>
 
-    <v-data-table-server :headers="headers" :items="items" :items-length="total" :loading="loading" item-value="id"
-      v-model:expanded="expandedRows" :page="options.page" :items-per-page="options.itemsPerPage"
-      @update:options="(opts) => onOptions(opts as DataTableOptions)">
-      <template #item.preview="{ item }">
-        <div class="table-image-preview rounded">
-          <v-img v-if="item.url" :src="String(item.url)" contain />
-          <div v-else class="d-flex align-center justify-center h-100">
-            <v-icon size="18" color="grey-darken-1">mdi-image-outline</v-icon>
+      <v-data-table-server :headers="headers" :items="items" :items-length="total" :loading="loading" item-value="id"
+        v-model:expanded="expandedRows" :page="options.page" :items-per-page="options.itemsPerPage"
+        @update:options="(opts) => onOptions(opts as DataTableOptions)">
+        <template #item.preview="{ item }">
+          <div class="table-image-preview rounded">
+            <v-img v-if="item.url" :src="String(item.url)" contain />
+            <div v-else class="d-flex align-center justify-center h-100">
+              <v-icon size="18" color="grey-darken-1">mdi-image-outline</v-icon>
+            </div>
           </div>
-        </div>
-      </template>
+        </template>
 
-      <template #item.file_name="{ item }">
-        <span>{{ item.file_name || item.title || `File #${item.id}` }}</span>
-        <div class="text-caption text-medium-emphasis">
-          {{ formatBytes(item.file_size ?? item.size) }} | {{ Number(item.width ?? 0) }} x
-          {{ Number(item.height ?? 0) }}
-        </div>
-      </template>
+        <template #item.file_name="{ item }">
+          <span>{{ item.file_name || item.title || `File #${item.id}` }}</span>
+          <div class="text-caption text-medium-emphasis">
+            {{ formatBytes(item.file_size ?? item.size) }} | {{ Number(item.width ?? 0) }} x
+            {{ Number(item.height ?? 0) }}
+          </div>
+        </template>
 
-      <template #item.tags="{ item }">
-        <div v-if="Array.isArray(item.tags) && item.tags.length" class="d-flex flex-wrap ga-1">
-          <v-chip v-for="tag in item.tags" :key="String(tag)" size="small" class="text-capitalize" label variant="tonal"
-            color="primary">
-            {{ dashToSpace(String(tag)) }}
-          </v-chip>
-        </div>
-        <span v-else>-</span>
-      </template>
+        <template #item.tags="{ item }">
+          <div v-if="Array.isArray(item.tags) && item.tags.length" class="d-flex flex-wrap ga-1">
+            <v-chip v-for="tag in item.tags" :key="String(tag)" size="small" class="text-capitalize" label
+              variant="tonal" color="primary">
+              {{ dashToSpace(String(tag)) }}
+            </v-chip>
+          </div>
+          <span v-else>-</span>
+        </template>
 
-      <template #item.usages="{ item }">
-        <div class="d-flex align-center ga-1 flex-wrap">
-          <v-chip size="small" label variant="tonal" color="info" class="usage-count-chip"
-            @click="toggleUsageDetails(item)">
-            {{ Number(item.usage_count ?? 0) }}
-            <v-icon end size="14">{{ isUsageExpanded(item) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-          </v-chip>
-          <v-chip v-for="usageType in (Array.isArray(item.usage_types) ? item.usage_types : []).slice(0, 2)"
-            :key="String(usageType)" size="small" label variant="tonal" color="primary" class="text-lowercase">
-            {{ dashToSpace(String(usageType)) }}
-          </v-chip>
-        </div>
-      </template>
+        <template #item.usages="{ item }">
+          <div class="d-flex align-center ga-1 flex-wrap">
+            <v-chip size="small" label variant="tonal" color="info" class="usage-count-chip"
+              @click="toggleUsageDetails(item)">
+              {{ Number(item.usage_count ?? 0) }}
+              <v-icon end size="14">{{ isUsageExpanded(item) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+            </v-chip>
+            <v-chip v-for="usageType in (Array.isArray(item.usage_types) ? item.usage_types : []).slice(0, 2)"
+              :key="String(usageType)" size="small" label variant="tonal" color="primary" class="text-lowercase">
+              {{ dashToSpace(String(usageType)) }}
+            </v-chip>
+          </div>
+        </template>
 
-      <template #item.created_at="{ item }">
-        <span>{{ formatLongDate(item.created_at) ?? '-' }}</span>
-      </template>
+        <template #item.created_at="{ item }">
+          <span>{{ formatLongDate(item.created_at) ?? '-' }}</span>
+        </template>
 
-      <template #item.action="{ item }">
-        <v-btn v-if="item.url" :href="String(item.url)" target="_blank" rel="noopener noreferrer" size="small"
-          variant="flat" color="primary">
-          view image 
-        </v-btn>
-        <v-btn v-else icon size="x-small" variant="flat" color="primary" disabled>
-           view image
-        </v-btn>
-      </template>
+        <template #item.action="{ item }">
+          <v-btn v-if="item.url" :href="String(item.url)" target="_blank" rel="noopener noreferrer" size="small"
+            variant="outlined" color="primary">
+            view image
+          </v-btn>
+          <v-btn v-else icon size="x-small" variant="outlined" color="primary" disabled>
+            view image
+          </v-btn>
+        </template>
 
-      <template #expanded-row="{ item, columns }">
-        <tr>
-          <td :colspan="columns.length">
-            <v-container>
-              <v-col cols="12" md="8" offset-md="2">
-                <div>
-                  <div class="usage-details-box my-2">
-                    <template v-if="Array.isArray(item.usages) && item.usages.length">
-                      
-                      <div v-for="usage in item.usages" :key="String(usage.id)" class="usage-details-item border rounded pa-4">
-                      
-                        <div class="text-caption">
-                          Usage Type: {{ usage.usage_type || '-' }}
+        <template #expanded-row="{ item, columns }">
+          <tr>
+            <td :colspan="columns.length">
+              <v-container>
+                <v-col cols="12" md="8" offset-md="2">
+                  <div>
+                    <div class="usage-details-box my-2">
+                      <template v-if="Array.isArray(item.usages) && item.usages.length">
+
+                        <div v-for="usage in item.usages" :key="String(usage.id)"
+                          class="usage-details-item border rounded pa-4">
+
+                          <div class="text-caption">
+                            Usage Type: {{ usage.usage_type || '-' }}
+                          </div>
+                          <div class="text-caption text-medium-emphasis text-truncate">
+                            Usage ID: {{ usage.usage_id ?? '-' }}
+                          </div>
+                          <div class="text-caption text-medium-emphasis text-truncate">
+                            Title: {{ usage.title || '-' }}
+                          </div>
+                          <div class="text-caption text-medium-emphasis text-truncate">
+                            Alt Text: {{ usage.alt_text || '-' }}
+                          </div>
                         </div>
-                        <div class="text-caption text-medium-emphasis text-truncate">
-                          Usage ID: {{ usage.usage_id ?? '-' }}
-                        </div>
-                        <div class="text-caption text-medium-emphasis text-truncate">
-                          Title: {{ usage.title || '-' }}
-                        </div>
-                        <div class="text-caption text-medium-emphasis text-truncate">
-                          Alt Text: {{ usage.alt_text || '-' }}
-                        </div>
-                      </div>
-                    </template>
-                    <div v-else class="text-caption text-medium-emphasis">No usage details found.</div>
+                      </template>
+                      <div v-else class="text-caption text-medium-emphasis">No usage details found.</div>
+                    </div>
                   </div>
-                </div>
-              </v-col>
-            </v-container>
-          </td>
-        </tr>
-      </template>
-    </v-data-table-server>
-  </v-card>
+                </v-col>
+              </v-container>
+            </td>
+          </tr>
+        </template>
+      </v-data-table-server>
+    </v-card>
+  </v-container>
 </template>
 
 <script setup lang="ts">

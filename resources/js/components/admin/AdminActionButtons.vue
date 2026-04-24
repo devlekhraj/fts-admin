@@ -1,8 +1,8 @@
 <template>
-	<v-btn variant="flat" color="primary" size="small"  @click="onEdit">
+	<v-btn variant="outlined" color="primary" size="small"  @click="onEdit">
 		Edit
 	</v-btn>
-	<v-btn variant="flat" class="ml-2" color="error" size="small"  @click="onDelete">
+	<v-btn variant="outlined" class="ml-2" color="error" size="small"  @click="onDelete">
 		Delete
 	</v-btn>
 </template>

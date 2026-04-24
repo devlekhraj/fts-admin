@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<!-- <AppPageHeader title="EMI Requests" subtitle="Manage EMI requests" /> -->
+		<AppPageHeader title="EMI Requests" subtitle="Manage EMI requests" />
 		<AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :searchable="false"
 			:items-per-page="options.itemsPerPage" @update:options="onOptions">
 			<template #actions>
@@ -62,7 +62,7 @@
 				</v-chip>
 			</template>
 			<template #item.action="{ item }">
-				<v-btn variant="flat" color="primary" size="small"
+				<v-btn variant="outlined" color="primary" size="small"
 					:to="{ name: 'admin.emi.requests.detail', params: { id: item.id } }">
 					Details
 				</v-btn>
@@ -79,11 +79,12 @@ import { list as listEmiRequests } from '@/api/emi-requests.api';
 import { formatDateTime, formatNPR } from '@/shared/formatters';
 import { getEmiIconColor, getEmiIconTextColor, getEmiTypeIcon, statusColor } from '@/shared/emi';
 import { timeAgo } from '@/shared/utils';
+import AppPageHeader from '@/components/AppPageHeader.vue';
 
 type EmiRequest = Record<string, unknown>;
 
 const headers = [
-	{ title: 'Product', key: 'product', sortable: false, maxWidth:'300' },
+	{ title: 'Product', key: 'product', sortable: false, width:'300' },
 	// { title: 'Per Month', key: 'emi_per_month', minWidth: '120', sortable: false },
 	{ title: 'EMI Type', key: 'emi_type', sortable: false, width:'120' },
 	// { title: 'User', key: 'user', sortable: false,minWidth:'200' },

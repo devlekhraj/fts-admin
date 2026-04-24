@@ -6,6 +6,7 @@
     @update:model-value="emit('update:modelValue', $event)"
     :items="items"
     density="compact"
+    style="min-width: 260px;"
     variant="outlined"
     hide-details="auto"
     :clearable="clearable" />

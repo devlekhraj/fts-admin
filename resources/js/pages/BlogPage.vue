@@ -24,20 +24,16 @@
         <v-row align="center">
           <v-col cols="12" md="6" lg="4">
             <div class="d-flex align-center ga-3">
-              <AppTextField v-model="search" label="Search" placeholder="Search by name..."
-                prepend-inner-icon="mdi-magnify" hide-details clearable style="min-width: 260px"
+              <AppSearchTextField v-model="search" label="Search" placeholder="Search by name..."
                 @click:clear="onClearSearch" />
-              <v-btn color="primary" variant="tonal" height="40">
-                <v-icon start>mdi-magnify</v-icon>
-                Search
-              </v-btn>
+                <div>
+                  <AppSelectField :items="categoryOptions" item-title="title" item-value="value" label="Category" clearable
+                    hide-details @update:model-value="onCategoryChange" />
+                </div>
+              <AppSearchButton color="primary" variant="flat" @click="onSearch" :loading="fetchingState"/>
             </div>
           </v-col>
 
-          <v-col cols="12" md="6" lg="3">
-            <AppSelectField :items="categoryOptions" item-title="title" item-value="value" label="Category" clearable
-              hide-details @update:model-value="onCategoryChange" />
-          </v-col>
 
           <v-spacer></v-spacer>
 
@@ -74,8 +70,8 @@
       </span>
     </template>
     <template #item.action="{ item }">
-      <div class="d-flex align-center justify-end ga-1">
-        <v-btn size="small" variant="flat" color="primary" @click="onView(item)">
+      <div class="d-flex align-center justify-end ga-2">
+        <v-btn size="small" variant="outlined" color="primary" @click="onView(item)">
           details
         </v-btn>
         <BlogDeleteButton :blog="item" @deleted="onBlogDeleted" />
@@ -89,14 +85,14 @@ import { onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
-import PageFilter from '@/components/filters/PageFilter.vue';
 import BlogCreateButton from '@/components/blog/BlogCreateButton.vue';
 import BlogDeleteButton from '@/components/blog/BlogDeleteButton.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
 import { listBlogs, type BlogListItem } from '@/api/blogs.api';
 import { listBlogCategories, type BlogCategoryListItem } from '@/api/blog-categories.api';
-import AppTextField from '@/components/shared/AppTextField.vue';
 import AppSelectField from '@/components/shared/AppSelectField.vue';
+import AppSearchTextField from '@/components/shared/AppSearchTextField.vue';
+import AppSearchButton from '@/components/shared/AppSearchButton.vue';
 
 type Blog = {
   id: number | string;
@@ -118,7 +114,7 @@ const exportOptions: Array<{ type: ExportType; title: string; icon: string }> = 
 
 const headers = [
   { title: 'Title', key: 'title', sortable: false, minWidth: '260' },
-  { title: 'Slug', key: 'slug', sortable: false, minWidth: '220' },
+  // { title: 'Slug', key: 'slug', sortable: false, minWidth: '220' },
   { title: 'Category', key: 'category_name', sortable: false, minWidth: '180' },
   { title: 'Published', key: 'published_at', sortable: false, minWidth: '170' },
   { title: 'Status', key: 'status', sortable: false, minWidth: '140' },
@@ -129,6 +125,8 @@ const items = ref<Blog[]>([]);
 const total = ref(0);
 const loading = ref(false);
 const search = ref('');
+const fetchingState = ref(false);
+
 const selectedCategory = ref<number | string | null>(null);
 const categoryOptions = ref<Array<{ title: string; value: number | string | null }>>([
   { title: 'All categories', value: null },
@@ -149,6 +147,11 @@ const CATEGORY_COLORS: Record<string, string> = {
   default: 'info',
 };
 
+function onSearch() {
+  fetchingState.value = false;
+  options.value.page = 1;
+  fetchBlogs();
+}
 function onExport(type: ExportType) {
   // TODO: replace with real export API/download logic.
   console.log(`Export clicked: ${type}`);
@@ -205,6 +208,8 @@ async function fetchBlogs() {
       search: search.value.trim() || undefined,
       category_id: selectedCategory.value || undefined,
     });
+
+    fetchingState.value = false;
 
     const list = Array.isArray(response) ? response : response?.data ?? [];
     items.value = list.map((blog: BlogListItem) => ({
@@ -305,6 +310,6 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-weight: 500;
+  font-weight: 400;
 }
 </style>

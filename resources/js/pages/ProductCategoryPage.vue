@@ -20,8 +20,33 @@
   <AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :page="options.page"
     :items-per-page="options.itemsPerPage" @update:options="onOptions">
     <template #actions>
-      <PageFilter v-model:search="search" search-label="Search categories" search-placeholder="Search by title or slug"
-        :total="total" total-label="Items found." @search="onSearch" @clear="onClearSearch" />
+      <!-- <PageFilter v-model:search="search" search-label="Search categories" search-placeholder="Search by title or slug"
+        :total="total" total-label="Items found." @search="onSearch" @clear="onClearSearch" /> -->
+        <v-container fluid class="py-4">
+        <v-row align="center">
+          <v-col cols="12" md="6" lg="4">
+            <div class="d-flex align-center ga-3">
+              <AppSearchTextField v-model="search" label="Search products" placeholder="Search by name..."
+                @click:clear="onClearSearch" />
+
+                <AppSelectField v-model="categoryFilter" :items="categoryOptions" item-title="title"
+                  style="width: 260px;"
+                  item-value="value"
+                  label="Category" clearable hide-details @update:model-value="onSearch" />
+                <AppSearchButton :loading="fetchingState" @click="onSearch" />
+            </div>
+          </v-col>
+
+
+          <v-spacer></v-spacer>
+
+          <v-col cols="12" md="auto" class="text-right">
+            <div class="text-medium-emphasis">
+              <span class="text-primary" style="font-size: smaller;">Total: {{ total }} Items found.</span>
+            </div>
+          </v-col>
+        </v-row>
+      </v-container>
     </template>
     <template #item.title="{ item }">
       <div class="d-flex align-center ga-2">
@@ -32,6 +57,9 @@
         <span>{{ item.title }}</span>
       </div>
     </template>
+    <template #item.products_count="{ item }">
+      <span>{{ item.products_count ?? 0 }} products</span>
+    </template>
     <template #item.created_at="{ item }">
       <span>{{ formatLongDate(item.created_at) ?? '-' }}</span>
     </template>
@@ -41,8 +69,8 @@
       </v-chip>
     </template>
     <template #item.action="{ item }">
-      <div class="d-flex align-center justify-end ga-1">
-        <v-btn size="small" variant="flat" color="primary" @click="onView(item)">
+      <div class="d-flex align-center justify-end ga-2">
+        <v-btn size="small" variant="outlined" color="primary" @click="onView(item)">
           Details
         </v-btn>
         <ProductCategoryDeleteButton :category="item" @deleted="onCategoryDeleted" />
@@ -65,12 +93,16 @@ import {
   type ProductCategoryListItem,
 } from '@/api/product-categories.api';
 import { formatLongDate } from '@/shared/utils';
+import AppSearchTextField from '@/components/shared/AppSearchTextField.vue';
+import AppSelectField from '@/components/shared/AppSelectField.vue';
+import AppSearchButton from '@/components/shared/AppSearchButton.vue';
 
 type ProductCategory = {
   id: number;
   title: string;
   slug: string;
   thumb: string;
+  products_count: number;
   status: boolean;
   created_at: string;
 };
@@ -85,7 +117,8 @@ const exportOptions: Array<{ type: ExportType; title: string; icon: string }> = 
 
 const headers = [
   { title: 'Title', key: 'title', sortable: false, minWidth: '240' },
-  { title: 'Slug', key: 'slug', sortable: false, minWidth: '240' },
+  // { title: 'Slug', key: 'slug', sortable: false, minWidth: '240' },
+  { title: 'Products', key: 'products_count', sortable: false, minWidth: '120' },
   { title: 'Status', key: 'status', sortable: false, minWidth: '140' },
   { title: 'Created', key: 'created_at', sortable: false, minWidth: '140' },
   { title: 'Actions', key: 'action', sortable: false, minWidth: '120', align: "end" as const },
@@ -95,6 +128,8 @@ const items = ref<ProductCategory[]>([]);
 const total = ref(0);
 const loading = ref(false);
 const search = ref('');
+const categoryFilter = ref('');
+
 const options = ref<DataTableOptions>({
   page: 1,
   itemsPerPage: 10,
@@ -102,6 +137,8 @@ const options = ref<DataTableOptions>({
 });
 const hasLoadedOnce = ref(false);
 const router = useRouter();
+const categoryOptions = ref<Array<{ title: string; value: number | string | null }>>([]);
+const fetchingState = ref(false);
 
 function onExport(type: ExportType) {
   // TODO: replace with real export API/download logic.
@@ -129,6 +166,7 @@ async function fetchCategories() {
       status: Boolean(category.status),
       created_at: category.created_at ?? '-',
       thumb: typeof category.thumb === 'string' ? category.thumb : '',
+      products_count: Number(category.products_count ?? 0),
     }));
     total.value = Number(response?.total ?? response?.meta?.total ?? list.length);
     if (response?.meta?.current_page) {
@@ -138,6 +176,7 @@ async function fetchCategories() {
       options.value.itemsPerPage = Number(response.meta.per_page);
     }
   } finally {
+    fetchingState.value = false;
     loading.value = false;
   }
 }
@@ -154,6 +193,7 @@ function onSearch() {
   options.value.page = 1;
   fetchCategories();
 }
+
 
 function onClearSearch() {
   search.value = '';

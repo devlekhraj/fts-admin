@@ -18,6 +18,23 @@ final class Order extends BaseModel
     use HasActivityLogs;
     protected $table = 'orders';
 
+    protected $fillable = [
+        'order_no',
+        'user_id',
+        'cart_id',
+        'shipping_address_id',
+        'invoice_number',
+        'status',
+        'discount_coupon',
+        'shipping_cost',
+        'cancel_reason',
+        'discounts_total',
+        'order_total',
+        'total',
+        'payment_type',
+        'created_at',
+        'updated_at'
+    ];
     protected $casts = [
         'subtotal' => 'decimal:2',
         'discounts_total' => 'decimal:2',
@@ -83,5 +100,4 @@ final class Order extends BaseModel
     {
         return $this->hasOne(OrderReceipent::class, 'order_id', 'id');
     }
-
 }

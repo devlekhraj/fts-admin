@@ -5,44 +5,60 @@
     </template>
   </AppPageHeader>
 
-  <v-container fluid>
-    <v-row>
-      <v-col cols="12">
-        <AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :page="options.page"
-          :items-per-page="options.itemsPerPage" @update:options="onOptions">
-          <template #item.name="{ item }">
-            <div class="d-flex align-center ga-2">
-              <v-avatar size="28" color="grey-lighten-3" rounded>
-                <v-img v-if="item.thumb" :src="item.thumb" :alt="item.name" class="banner-thumb" />
-                <v-icon v-else size="18" color="grey-darken-1">mdi-image-outline</v-icon>
-              </v-avatar>
-              <span>{{ item.name }}</span>
+
+  <AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :page="options.page"
+    :items-per-page="options.itemsPerPage" @update:options="onOptions">
+     <template #actions>
+        <v-container fluid class="py-4">
+        <v-row align="center">
+          <v-col cols="12" md="6" lg="4">
+            <div class="d-flex align-center ga-3">
+              <AppSearchTextField v-model="search" label="Search" placeholder="Type ..."
+                @click:clear="onClearSearch" />
+                <AppSearchButton :loading="fetchingState" @click="onSearch" />
             </div>
-          </template>
-          <template #item.status="{ item }">
-            <v-chip size="small" label variant="tonal" :color="item.status ? 'success' : 'warning'">
-              {{ item.status ? 'Active' : 'Inactive' }}
-            </v-chip>
-          </template>
-          <template #item.total_images="{ item }">
-            <span class="text-primary cursor-pointer">{{ item.total_images }} images</span>
-          </template>
-          <template #item.created_at="{ item }">
-            <span>{{ formatLongDate(item.created_at) ?? '-' }}</span>
-          </template>
-          <template #item.action="{ item }">
-            <div class="d-flex align-center justify-end ga-1">
-              <v-btn size="small" variant="flat" color="primary"
-                @click="router.push({ name: 'admin.banners.detail', params: { id: item.id } })">
-                Details
-              </v-btn>
-              <BannerDeleteButton :banner="item" @deleted="onBannerDeleted" />
+          </v-col>
+          <v-spacer></v-spacer>
+          <v-col cols="12" md="auto" class="text-right">
+            <div class="text-medium-emphasis">
+              <span class="text-primary" style="font-size: smaller;">Total: {{ total }} Items found.</span>
             </div>
-          </template>
-        </AppDataTable>
-      </v-col>
-    </v-row>
-  </v-container>
+          </v-col>
+        </v-row>
+      </v-container>
+    </template>
+
+    <template #item.name="{ item }">
+      <div class="d-flex align-center ga-2">
+        <v-avatar size="28" color="grey-lighten-3" rounded>
+          <v-img v-if="item.thumb" :src="item.thumb" :alt="item.name" class="banner-thumb" />
+          <v-icon v-else size="18" color="grey-darken-1">mdi-image-outline</v-icon>
+        </v-avatar>
+        <span>{{ item.name }}</span>
+      </div>
+    </template>
+    <template #item.status="{ item }">
+      <v-chip size="small" label variant="tonal" :color="item.status ? 'success' : 'warning'">
+        {{ item.status ? 'Active' : 'Inactive' }}
+      </v-chip>
+    </template>
+    <template #item.total_images="{ item }">
+      <span class="text-primary cursor-pointer">{{ item.total_images }} images</span>
+    </template>
+    <template #item.created_at="{ item }">
+      <span>{{ formatLongDate(item.created_at) ?? '-' }}</span>
+    </template>
+    <template #item.action="{ item }">
+      <div class="d-flex align-center justify-end ga-1">
+        <v-btn size="small" variant="outlined" color="primary"
+          @click="router.push({ name: 'admin.banners.detail', params: { id: item.id } })">
+          Details
+        </v-btn>
+        <BannerDeleteButton :banner="item" @deleted="onBannerDeleted" />
+      </div>
+    </template>
+  </AppDataTable>
+
 </template>
 
 <script setup lang="ts">
@@ -55,6 +71,8 @@ import BannerDeleteButton from '@/components/banner/BannerDeleteButton.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
 import { listBanners, type BannerListItem } from '@/api/banners.api';
 import { formatLongDate } from '@/shared/utils';
+import AppSearchTextField from '@/components/shared/AppSearchTextField.vue';
+import AppSearchButton from '@/components/shared/AppSearchButton.vue';
 
 const headers = [
   { title: 'Name', key: 'name', sortable: false, minWidth: '240' },
@@ -85,6 +103,8 @@ const options = ref<DataTableOptions>({
 });
 const hasLoadedOnce = ref(false);
 const router = useRouter();
+const search = ref('');
+const fetchingState = ref(false);
 
 function onBannerCreated(payload?: unknown) {
   const created: any = payload ?? {};
@@ -100,6 +120,18 @@ function onBannerDeleted() {
   options.value.page = 1;
   fetchBanners();
 }
+function onSearch() {
+  fetchingState.value = true;
+  options.value.page = 1;
+  fetchBanners();
+}
+
+function onClearSearch() {
+  search.value = '';
+  options.value.page = 1;
+  fetchBanners();
+}
+
 
 async function fetchBanners() {
   loading.value = true;
@@ -107,6 +139,7 @@ async function fetchBanners() {
     const response = await listBanners({
       page: options.value.page,
       per_page: options.value.itemsPerPage,
+      search: search.value.trim() || '',
     });
 
     const list = Array.isArray(response) ? response : response?.data ?? [];
@@ -127,6 +160,7 @@ async function fetchBanners() {
       options.value.itemsPerPage = Number(response.meta.per_page);
     }
   } finally {
+    fetchingState.value = false;
     loading.value = false;
   }
 }

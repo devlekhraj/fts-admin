@@ -1,5 +1,5 @@
 <template>
-	<v-btn color="primary" variant="flat" height="40" @click="open">
+	<v-btn color="primary" variant="flat" @click="open">
 		<v-icon start>mdi-account-plus</v-icon>
 		Add Admin
 	</v-btn>

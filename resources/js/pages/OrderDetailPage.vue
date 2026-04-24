@@ -8,7 +8,7 @@
       <StatusUpdateAction :order-id="summary?.id ?? ''" :current-status="orderStatus"
           @selected="handleStatusSelected" />
 
-      <v-btn variant="tonal" color="primary" @click="goBack">
+      <v-btn variant="flat" color="primary" @click="goBack">
         <v-icon start>mdi-arrow-left</v-icon>
         Back
       </v-btn>
@@ -16,7 +16,7 @@
   </AppPageHeader>
 
   <!-- <v-card class="pa-6 pb-0"> -->
-  <v-container fluid class="order-overview pa-0">
+  <v-container fluid class="order-overview">
     <v-row>
       <v-col cols="12" lg="4">
         <v-card class="mb-4">
@@ -299,7 +299,7 @@ function handleStatusSelected(payload: { status: string; orderId: string | numbe
 }
 
 function goBack() {
-  router.push({ name: 'admin.orders.list' });
+  router.back();
 }
 </script>
 

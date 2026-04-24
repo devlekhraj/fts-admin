@@ -11,6 +11,7 @@ export type BlogCategoryListItem = {
   title?: string | null;
   slug?: string | null;
   thumb?: string | null;
+  blogs_count?: number | null;
   created_at?: string | null;
   status: boolean;
   [key: string]: unknown;

@@ -37,7 +37,7 @@ final class OrderUpdateStatusAction
         try {
             $customer = $order->user;
             if ($customer && $customer->email) {
-                $orderNumber = $order->order_number ?? ($order->order_no ?? $order->id);
+                $orderNumber = $order->order_no ?? $order->invoice_number ?? $order->id;
                 $statusLabel = $order->order_status;
                 $timestamp = now()->timezone(config('app.timezone'))->format('Y-m-d H:i:s');
                 Mail::to($customer->email)->send(new OrderStatusUpdatedMail(orderNumber: (string) $orderNumber, status: $statusLabel, customerName: $customer->name ?? null, updatedAt: $timestamp));
@@ -53,4 +53,3 @@ final class OrderUpdateStatusAction
         return $order;
     }
 }
-

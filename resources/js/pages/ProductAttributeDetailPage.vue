@@ -1,134 +1,137 @@
 <template>
 	<AppPageHeader title="Attribute Detail" subtitle="View product attribute information">
 		<template #actions>
-			<v-btn variant="tonal" color="primary" @click="goBack">
+			<v-btn variant="flat" color="primary" @click="goBack">
 				<v-icon start>mdi-arrow-left</v-icon>
 				Back
 			</v-btn>
 		</template>
 	</AppPageHeader>
 
-	<v-card class="pa-6">
-		<div class="text-h6">{{ detail?.name || `Attribute #${attributeId || '-'}` }}</div>
-		<div class="d-flex align-center ga-2 mt-2">
-			<v-chip size="small" variant="tonal" color="primary" label>
-				{{ Number(detail?.attributes_count ?? 0) }} attributes
-			</v-chip>
-			<span class="text-body-2 text-medium-emphasis">
-				Created: {{ formatLongDate(detail?.created_at) ?? '-' }}
-			</span>
-		</div>
-
-		<div v-if="loading" class="text-body-2 text-medium-emphasis mt-4">
-			Loading attribute detail...
-		</div>
-
-		<v-table v-else-if="attributeRows.length" class="mt-4" density="comfortable">
-			<thead>
-				<tr>
-					<th style="min-width: 200px;">Name</th>
-					<th style="min-width: 150px;">Type</th>
-					<th style="min-width: 150px;">For Variant</th>
-					<th style="min-width: 150px;">In Filter</th>
-					<th style="min-width: 180px;">Values</th>
-					<th style="min-width: 100px;">Action</th>
-				</tr>
-			</thead>
-			<tbody>
-				<template v-for="row in attributeRows" :key="String(row.id)">
+	<v-container fluid>
+		<v-card class="pa-6">
+			<div class="text-h6">{{ detail?.name || `Attribute #${attributeId || '-'}` }}</div>
+			<div class="d-flex align-center ga-2 mt-2">
+				<v-chip size="small" variant="tonal" color="primary" label>
+					{{ Number(detail?.attributes_count ?? 0) }} attributes
+				</v-chip>
+				<span class="text-body-2 text-medium-emphasis">
+					Created: {{ formatLongDate(detail?.created_at) ?? '-' }}
+				</span>
+			</div>
+	
+			<div v-if="loading" class="text-body-2 text-medium-emphasis mt-4">
+				Loading attribute detail...
+			</div>
+	
+			<v-table v-else-if="attributeRows.length" class="mt-4" density="comfortable">
+				<thead>
 					<tr>
-						<td><span style="font-size: 0.8rem;">{{ row.name || '-' }}</span></td>
-						<td>
-							<v-chip size="small" label variant="tonal" :color="typeMeta(row.type).color">
-								{{ typeMeta(row.type).label }}
-							</v-chip>
-						</td>
-						<td>
-							<v-chip v-if="row.use_for_variant" size="small" label variant="tonal"
-								color="success">Yes</v-chip>
-							<v-chip v-else size="small" label variant="tonal" color="error">No</v-chip>
-						</td>
-						<td>
-							<v-chip v-if="row.use_in_filter" size="small" label variant="tonal"
-								color="success">Yes</v-chip>
-							<v-chip v-else size="small" label variant="tonal" color="error">No</v-chip>
-						</td>
-						<td>
-							<v-btn size="small" variant="tonal" color="primary" @click="toggleExpanded(row)">
-								<v-icon size="16">{{ isExpanded(row) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-								{{ valuesCountForRow(row) }} values
-							</v-btn>
-						</td>
-						<td>
-							<v-btn class="mr-3" size="x-small" variant="tonal" color="primary" icon
-								@click="toggleExpanded(row)">
-								<v-icon size="16">{{ isExpanded(row) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-							</v-btn>
-							<v-btn class="mr-3" size="x-small" variant="tonal" color="primary" icon
-								@click="openEditModal(row)">
-								<v-icon size="16">mdi-square-edit-outline</v-icon>
-							</v-btn>
-							<v-btn size="x-small" variant="tonal" color="error" icon>
-								<v-icon size="16">mdi-delete-outline</v-icon>
-							</v-btn>
-						</td>
+						<th style="min-width: 200px;">Name</th>
+						<th style="min-width: 150px;">Type</th>
+						<th style="min-width: 150px;">For Variant</th>
+						<th style="min-width: 150px;">In Filter</th>
+						<th style="min-width: 180px;">Values</th>
+						<th style="min-width: 100px;">Action</th>
 					</tr>
-					<tr v-if="isExpanded(row)">
-						<td colspan="6" class="py-6 pb-14">
-							<v-container>
-								<v-row>
-									<v-col cols="12" md="8" offset-md="2">
-										<div>
-											<div class="text-caption text-medium-emphasis mb-2">Values</div>
-											<template v-if="isOptionType(row.type)">
-												<div class="d-flex align-center ga-2">
-													<v-text-field :model-value="getOptionInput(row)"
-														@update:model-value="setOptionInput(row, $event)"
-														variant="outlined" density="comfortable" hide-details
-														placeholder="Add value" @keyup.enter="addOptionValue(row)" />
-													<v-btn color="primary" icon variant="tonal"
-														@click="addOptionValue(row)">
-														<v-icon>mdi-plus</v-icon>
+				</thead>
+				<tbody>
+					<template v-for="row in attributeRows" :key="String(row.id)">
+						<tr>
+							<td><span style="font-size: 0.8rem;">{{ row.name || '-' }}</span></td>
+							<td>
+								<v-chip size="small" label variant="tonal" :color="typeMeta(row.type).color">
+									{{ typeMeta(row.type).label }}
+								</v-chip>
+							</td>
+							<td>
+								<v-chip v-if="row.use_for_variant" size="small" label variant="tonal"
+									color="success">Yes</v-chip>
+								<v-chip v-else size="small" label variant="tonal" color="error">No</v-chip>
+							</td>
+							<td>
+								<v-chip v-if="row.use_in_filter" size="small" label variant="tonal"
+									color="success">Yes</v-chip>
+								<v-chip v-else size="small" label variant="tonal" color="error">No</v-chip>
+							</td>
+							<td>
+								<v-btn size="small" variant="tonal" color="primary" @click="toggleExpanded(row)">
+									<v-icon size="16">{{ isExpanded(row) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+									{{ valuesCountForRow(row) }} values
+								</v-btn>
+							</td>
+							<td>
+								<v-btn class="mr-3" size="small" variant="outlined" color="primary"
+									@click="toggleExpanded(row)">
+									Details
+									<v-icon size="16">{{ isExpanded(row) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+								</v-btn>
+								<v-btn class="mr-3" size="small" variant="outlined" color="primary"
+									@click="openEditModal(row)">
+									edit
+								</v-btn>
+								<v-btn size="small" variant="outlined" color="error">
+									Delete
+								</v-btn>
+							</td>
+						</tr>
+						<tr v-if="isExpanded(row)">
+							<td colspan="6" class="py-6 pb-14">
+								<v-container>
+									<v-row>
+										<v-col cols="12" md="8" offset-md="2">
+											<div>
+												<div class="text-caption text-medium-emphasis mb-2">Values</div>
+												<template v-if="isOptionType(row.type)">
+													<div class="d-flex align-center ga-2">
+														<v-text-field :model-value="getOptionInput(row)"
+															@update:model-value="setOptionInput(row, $event)"
+															variant="outlined" density="comfortable" hide-details
+															placeholder="Add value" @keyup.enter="addOptionValue(row)" />
+														<v-btn color="primary" icon variant="tonal"
+															@click="addOptionValue(row)">
+															<v-icon>mdi-plus</v-icon>
+														</v-btn>
+													</div>
+													<div class="d-flex flex-wrap ga-2 mt-4">
+														<v-chip v-for="(value, index) in getOptionValues(row)"
+															:key="`${row.id}-${value}-${index}`" size="small" label closable
+															color="primary" variant="tonal"
+															@click:close="removeOptionValue(row, index)">
+															{{ value }}
+														</v-chip>
+														<span v-if="!getOptionValues(row).length"
+															class="text-body-2 text-medium-emphasis">-</span>
+													</div>
+												</template>
+												<template v-else-if="isTextType(row.type)">
+													<v-textarea :model-value="getTextValue(row)"
+														@update:model-value="setTextValue(row, $event)" rows="2"
+														variant="outlined" density="comfortable" auto-grow maxlength="100"
+														counter="100" hide-details />
+												</template>
+												<template v-else>
+													<div class="text-body-2">{{ formatValues(row.values) }}</div>
+												</template>
+												<div class="d-flex justify-end mt-4">
+													<v-btn color="primary" variant="flat" :loading="isSavingRow(row)"
+														:disabled="isSavingRow(row)" @click="saveRowValues(row)">
+														<v-icon start size="16">mdi-content-save-outline</v-icon>
+														Save Values
 													</v-btn>
 												</div>
-												<div class="d-flex flex-wrap ga-2 mt-4">
-													<v-chip v-for="(value, index) in getOptionValues(row)"
-														:key="`${row.id}-${value}-${index}`" size="small" label closable
-														color="primary" variant="tonal"
-														@click:close="removeOptionValue(row, index)">
-														{{ value }}
-													</v-chip>
-													<span v-if="!getOptionValues(row).length"
-														class="text-body-2 text-medium-emphasis">-</span>
-												</div>
-											</template>
-											<template v-else-if="isTextType(row.type)">
-												<v-textarea :model-value="getTextValue(row)"
-													@update:model-value="setTextValue(row, $event)" rows="2"
-													variant="outlined" density="comfortable" auto-grow maxlength="100"
-													counter="100" hide-details />
-											</template>
-											<template v-else>
-												<div class="text-body-2">{{ formatValues(row.values) }}</div>
-											</template>
-											<div class="d-flex justify-end mt-4">
-												<v-btn color="primary" variant="flat" :loading="isSavingRow(row)"
-													:disabled="isSavingRow(row)" @click="saveRowValues(row)">
-													<v-icon start size="16">mdi-content-save-outline</v-icon>
-													Save Values
-												</v-btn>
 											</div>
-										</div>
-									</v-col>
-								</v-row>
-							</v-container>
-						</td>
-					</tr>
-				</template>
-			</tbody>
-		</v-table>
-		<div v-else class="text-body-2 text-medium-emphasis mt-4">No attribute items found.</div>
-	</v-card>
+										</v-col>
+									</v-row>
+								</v-container>
+							</td>
+						</tr>
+					</template>
+				</tbody>
+			</v-table>
+			<div v-else class="text-body-2 text-medium-emphasis mt-4">No attribute items found.</div>
+		</v-card>
+	</v-container>
 
 </template>
 

@@ -1,4 +1,11 @@
 <template>
+	<AppPageHeader title="Admin Users" subtitle="Manage admin users">
+		<template #actions>
+			<AdminCreateButton @saved="onAdminCreated" />
+		</template>
+	</AppPageHeader>
+
+
 	<AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :page="options.page"
 		:items-per-page="options.itemsPerPage" @update:options="onOptions">
 		<template #actions>
@@ -15,14 +22,15 @@
 							style="min-width: 200px" @update:model-value="onRoleChange" />
 					</v-col>
 					<v-col cols="12" md="2" class="d-flex align-center">
-						<v-btn color="primary" variant="tonal" height="40" @click="onSearch">
+						<!-- <v-btn color="primary" variant="tonal" height="40" @click="onSearch">
 							<v-icon start>mdi-magnify</v-icon>
 							Search
-						</v-btn>
+						</v-btn> -->
+						<AppSearchButton :loading="fetchingState" @click="onSearch" />
 					</v-col>
-					<v-col cols="12" md="4" class="d-flex align-center justify-end">
+					<!-- <v-col cols="12" md="4" class="d-flex align-center justify-end">
 						<AdminCreateButton @saved="onAdminCreated" />
-					</v-col>
+					</v-col> -->
 				</v-row>
 				<v-row>
 					<v-col cols="12">
@@ -56,17 +64,18 @@
 				{{ item.role }}
 			</v-chip> -->
 			<!-- <span v-else>-</span> -->
-			 <v-chip class="small" variant="tonal" size="small" label :color="item.role ? roleColor(item.role) : 'grey-lighten-2'">
-				 {{ item.role ?? '-' }}
-			 </v-chip>
+			<v-chip class="small" variant="tonal" size="small" label
+				:color="item.role ? roleColor(item.role) : 'grey-lighten-2'">
+				{{ item.role ?? '-' }}
+			</v-chip>
 		</template>
-		
+
 		<template #item.action="{ item }" class="justify-end">
 			<AdminActionButtons :admin="item" @saved="onAdminUpdated" @deleted="onAdminDeleted" />
 		</template>
 		<template #item.created_at="{ item }">
 			<span class="text-medium-emphasis" style="font-size: 0.8rem;">
-				{{ item.created_at ? formatLongDate(item.created_at) :  '-' }}
+				{{ item.created_at ? formatLongDate(item.created_at) : '-' }}
 			</span>
 		</template>
 	</AppDataTable>
@@ -81,6 +90,8 @@ import type { DataTableOptions } from '@/components/datatable/types';
 import { list as listAdmins, type AdminListItem, type AdminListResponse } from '@/api/admins.api';
 import { list as listRoles } from '@/api/roles.api';
 import { formatLongDate } from '@/shared/utils';
+import AppPageHeader from '@/components/AppPageHeader.vue';
+import AppSearchButton from '@/components/shared/AppSearchButton.vue';
 
 // RoleOption interface
 interface RoleOption {
@@ -111,6 +122,7 @@ const headers = [
 const items = ref<Admin[]>([]);
 const total = ref(0);
 const loading = ref(false);
+const fetchingState = ref(false);
 const options = ref<DataTableOptions>({
 	page: 1,
 	itemsPerPage: 12,
@@ -152,6 +164,7 @@ async function fetchAdmins() {
 			options.value.itemsPerPage = Number(response.meta.per_page);
 		}
 	} finally {
+		fetchingState.value = false;
 		loading.value = false;
 	}
 }
@@ -165,6 +178,7 @@ function onOptions(next: DataTableOptions) {
 }
 
 function onSearch() {
+	fetchingState.value = true;
 	options.value.page = 1;
 	fetchAdmins();
 }

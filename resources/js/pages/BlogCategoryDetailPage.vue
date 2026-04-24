@@ -1,63 +1,65 @@
 <template>
   <AppPageHeader title="Blog Category Detail" subtitle="View blog category information">
     <template #actions>
-      <v-btn variant="tonal" color="primary" @click="goBack">
+      <v-btn variant="flat" color="primary" @click="goBack">
         <v-icon start>mdi-arrow-left</v-icon>
         Back
       </v-btn>
     </template>
   </AppPageHeader>
 
-  <v-card class="pa-6">
-    <div class="category-top-grid">
-      <div class="category-thumb-cell">
-        <v-avatar size="112" rounded="lg" color="grey-lighten-3">
-          <v-img v-if="categoryDetail?.thumb" :src="String(categoryDetail.thumb)" cover />
-          <v-icon v-else size="32" color="grey-darken-1">mdi-folder-outline</v-icon>
-        </v-avatar>
-      </div>
-      <div>
-        <div class="text-h6">{{ categoryDetail?.title || '-' }}</div>
-
-        <div class="d-flex align-center ga-2 mt-2">
-          <span class="text-body-2 text-medium-emphasis">{{ categorySlugUrl || '-' }}</span>
-          <v-btn
-            v-if="categorySlugUrl"
-            :href="categorySlugUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            icon
-            size="x-small"
-            variant="tonal"
-            color="primary">
-            <v-icon size="16">mdi-open-in-new</v-icon>
-          </v-btn>
+  <v-container fluid>
+    <v-card class="pa-6">
+      <div class="category-top-grid">
+        <div class="category-thumb-cell">
+          <v-avatar size="112" rounded="lg" color="grey-lighten-3">
+            <v-img v-if="categoryDetail?.thumb" :src="String(categoryDetail.thumb)" cover />
+            <v-icon v-else size="32" color="grey-darken-1">mdi-folder-outline</v-icon>
+          </v-avatar>
+        </div>
+        <div>
+          <div class="text-h6">{{ categoryDetail?.title || '-' }}</div>
+  
+          <div class="d-flex align-center ga-2 mt-2">
+            <span class="text-body-2 text-medium-emphasis">{{ categorySlugUrl || '-' }}</span>
+            <v-btn
+              v-if="categorySlugUrl"
+              :href="categorySlugUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              icon
+              size="x-small"
+              variant="tonal"
+              color="primary">
+              <v-icon size="16">mdi-open-in-new</v-icon>
+            </v-btn>
+          </div>
         </div>
       </div>
-    </div>
-
+  
+    </v-card>
+  
+    <v-card class="mt-4">
+      <v-tabs v-model="activeTab" color="primary">
+        <v-tab v-for="tab in tabItems" :key="tab.value" :value="tab.value">
+          <v-icon start size="16">{{ tab.icon }}</v-icon>
+          {{ tab.label }}
+        </v-tab>
+      </v-tabs>
+      <v-divider />
+  
+      <v-window v-model="activeTab">
+        <v-window-item v-for="tab in tabItems" :key="tab.value" :value="tab.value">
+          <component
+            :is="tab.component"
+            :item="categoryDetail"
+            :category-id="categoryId"
+            @updated="fetchCategoryDetail" />
+        </v-window-item>
+      </v-window>
+    </v-card>
+  </v-container>
     <div v-if="loading" class="text-body-2 text-medium-emphasis mt-4">Loading blog category detail...</div>
-  </v-card>
-
-  <v-card class="mt-4">
-    <v-tabs v-model="activeTab" color="primary">
-      <v-tab v-for="tab in tabItems" :key="tab.value" :value="tab.value">
-        <v-icon start size="16">{{ tab.icon }}</v-icon>
-        {{ tab.label }}
-      </v-tab>
-    </v-tabs>
-    <v-divider />
-
-    <v-window v-model="activeTab">
-      <v-window-item v-for="tab in tabItems" :key="tab.value" :value="tab.value">
-        <component
-          :is="tab.component"
-          :item="categoryDetail"
-          :category-id="categoryId"
-          @updated="fetchCategoryDetail" />
-      </v-window-item>
-    </v-window>
-  </v-card>
 </template>
 
 <script setup lang="ts">

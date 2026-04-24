@@ -44,7 +44,6 @@ const routes: RouteRecordRaw[] = [
       { path: 'cart-items', name: 'admin.orders.cart', component: () => import('@/pages/CartPage.vue'), meta: { title: 'Cart Items' } },
       { path: 'cart-items/:id', name: 'admin.orders.cart.detail', component: () => import('@/pages/CartDetailPage.vue'), meta: { title: 'Cart Detail' } },
       { path: 'wish-pot', name: 'admin.orders.wish', component: () => import('@/pages/WishPotPage.vue'), meta: { title: 'Wish Pot' } },
-      { path: 'wish-pot/:id', name: 'admin.orders.wish.detail', component: () => import('@/pages/WishPotDetailPage.vue'), meta: { title: 'Wish Detail' } },
       // customers
       { path: 'customers', name: 'admin.customers.list', component: () => import('@/pages/CustomerPage.vue'), meta: { title: 'Customers' } },
       { path: 'customers/:id', name: 'admin.customers.detail', component: () => import('@/pages/CustomerDetailPage.vue'), meta: { title: 'Customer Detail' } },

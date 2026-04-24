@@ -5,73 +5,47 @@
     </template>
   </AppPageHeader>
 
-  <v-container fluid class="px-0">
-    <v-row>
-      <v-col cols="12">
-        <AppDataTable
-          :headers="headers"
-          :items="items"
-          :total="total"
-          :loading="loading"
-          :page="options.page"
-          :items-per-page="options.itemsPerPage"
-          :search="search"
-          @update:options="onOptions">
 
-          <template #actions>
-            <v-container fluid class="py-4">
-              <v-row align="center">
-                <v-col cols="12" md="auto">
-                  <div class="d-flex align-center ga-3">
-                    <v-text-field
-                      v-model="search"
-                      density="compact"
-                      variant="outlined"
-                      label="Search"
-                      placeholder="Search title or slug..."
-                      prepend-inner-icon="mdi-magnify"
-                      hide-details
-                      clearable
-                      style="min-width: 320px"
-                      @click:clear="handleSearch"
-                      @keyup.enter="handleSearch">
-                    </v-text-field>
-                    <v-btn color="primary" variant="tonal" height="40" @click="handleSearch">
-                      <v-icon start>mdi-magnify</v-icon>
-                      Search
-                    </v-btn>
-                  </div>
-                </v-col>
-              </v-row>
-            </v-container>
-          </template>
+  <AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :page="options.page"
+    :items-per-page="options.itemsPerPage" :search="search" @update:options="onOptions">
 
-          <template #item.status="{ item }">
-            <v-chip size="small" label variant="tonal" :color="item.status ? 'success' : 'warning'">
-              {{ item.status ? 'Published' : 'Draft' }}
-            </v-chip>
-          </template>
+    <template #actions>
+      <v-container fluid class="py-4">
+        <v-row align="center">
+          <v-col cols="12" md="auto">
+            <div class="d-flex align-center ga-3">
+              <v-text-field v-model="search" density="compact" variant="outlined" label="Search"
+                placeholder="Search title or slug..." prepend-inner-icon="mdi-magnify" hide-details clearable
+                style="min-width: 320px" @click:clear="handleSearch">
+              </v-text-field>
 
-          <template #item.updated_at="{ item }">
-            <span class="caption-text">{{ formatLongDate(item.updated_at) ?? '-' }}</span>
-          </template>
-
-          <template #item.action="{ item }">
-            <div class="d-flex justify-end ga-2">
-              <v-btn
-                size="small"
-                variant="flat"
-                color="primary"
-                @click="onView(item)">
-                Details
-              </v-btn>
-              <PageDeleteButton :page="item" @deleted="onDeleted" />
+              <AppSearchButton :loading="fetchingState" @click="handleSearch" />
             </div>
-          </template>
-        </AppDataTable>
-      </v-col>
-    </v-row>
-  </v-container>
+          </v-col>
+        </v-row>
+      </v-container>
+    </template>
+
+    <template #item.status="{ item }">
+      <v-chip size="small" label variant="tonal" :color="item.status ? 'success' : 'warning'">
+        {{ item.status ? 'Published' : 'Draft' }}
+      </v-chip>
+    </template>
+
+    <template #item.updated_at="{ item }">
+      <span class="caption-text">{{ formatLongDate(item.updated_at) ?? '-' }}</span>
+    </template>
+
+    <template #item.action="{ item }">
+      <div class="d-flex justify-end ga-2">
+        <v-btn size="small" variant="outlined" color="primary" @click="onView(item)">
+          Details
+        </v-btn>
+        <PageDeleteButton :page="item" @deleted="onDeleted" />
+      </div>
+    </template>
+  </AppDataTable>
+
 </template>
 
 <script setup lang="ts">
@@ -84,6 +58,7 @@ import { formatLongDate } from '@/shared/utils';
 import { useRouter } from 'vue-router';
 import PageDeleteButton from '@/components/page/PageDeleteButton.vue';
 import PageCreateButton from '@/components/page/PageCreateButton.vue';
+import AppSearchButton from '@/components/shared/AppSearchButton.vue';
 
 const headers = [
   { title: 'Title', key: 'title', sortable: false, minWidth: '240' },
@@ -92,7 +67,7 @@ const headers = [
   { title: 'Updated At', key: 'updated_at', sortable: false, minWidth: '180' },
   { title: 'Actions', key: 'action', sortable: false, minWidth: '160', align: 'end' as const },
 ];
-
+const fetchingState = ref(false);
 const items = ref<PageListItem[]>([]);
 const total = ref(0);
 const loading = ref(false);
@@ -145,13 +120,15 @@ function onOptions(next: DataTableOptions) {
   });
 }
 
-function handleSearch() {
+async function handleSearch() {
+  fetchingState.value = true;
   options.value.page = 1;
-  fetchPages({
+  await fetchPages({
     page: 1,
     per_page: options.value.itemsPerPage,
     search: search.value,
   });
+  fetchingState.value = false;
 }
 
 function onView(item: PageListItem) {
@@ -165,6 +142,7 @@ function onDeleted() {
     per_page: options.value.itemsPerPage,
     search: search.value,
   });
+
 }
 
 onMounted(() => {

@@ -26,6 +26,10 @@ final class CartListAction
             });
         }
 
+        $activeTotal = (clone $query)
+            ->where('is_processed', false)
+            ->count();
+
         if ($data->perPageParam === -1) {
             $items = $query->get();
 
@@ -35,6 +39,7 @@ final class CartListAction
                     'current_page' => 1,
                     'per_page' => $items->count(),
                     'total' => $items->count(),
+                    'active_total' => $activeTotal,
                     'last_page' => 1,
                     'from' => $items->count() > 0 ? 1 : null,
                     'to' => $items->count() > 0 ? $items->count() : null,
@@ -51,6 +56,7 @@ final class CartListAction
                 'current_page' => $paginator->currentPage(),
                 'per_page' => $paginator->perPage(),
                 'total' => $paginator->total(),
+                'active_total' => $activeTotal,
                 'last_page' => $paginator->lastPage(),
                 'from' => $paginator->firstItem(),
                 'to' => $paginator->lastItem(),
@@ -58,4 +64,3 @@ final class CartListAction
         ];
     }
 }
-

@@ -27,116 +27,184 @@
 		</template>
 	</AppPageHeader>
 
-	<v-card class="pa-6 mb-6">
-		<div class="summary">
-			<div class="summary__left">
-				<v-avatar size="76" color="primary" variant="tonal" class="mr-4" rounded>
-					<v-icon size="36">mdi-clipboard-text</v-icon>
-				</v-avatar>
-				<div>
-					<div class="text-subtitle-1 font-weight-bold">{{ referenceId }}</div>
-					<div class="chips">
-						<v-chip size="small" color="primary" label variant="tonal">{{ emiType }}</v-chip>
-						<v-chip size="small" color="info" label variant="tonal">{{ statusLabel }}</v-chip>
-					</div>
-					<div class="text-body-2 text-primary mt-2 font-weight-medium">{{ productName }}</div>
-
-					<div class="text-body-2 text-medium-emphasis mt-1 dot-line">
-						{{ applicantInfo.name }} · {{ applicantInfo.phone }} · {{ applicantInfo.email }}
+	<v-container fluid>
+		<v-card class="pa-6 mb-6">
+			<div class="summary">
+				<div class="summary__left">
+					<v-avatar size="76" color="primary" variant="tonal" class="mr-4" rounded>
+						<v-icon size="36">mdi-clipboard-text</v-icon>
+					</v-avatar>
+					<div>
+						<div class="text-subtitle-1 font-weight-bold">{{ referenceId }}</div>
+						<div class="chips">
+							<v-chip size="small" color="primary" label variant="tonal">{{ emiType }}</v-chip>
+							<v-chip size="small" color="info" label variant="tonal">{{ statusLabel }}</v-chip>
+						</div>
+						<div class="text-body-2 text-primary mt-2 font-weight-medium">{{ productName }}</div>
+	
+						<div class="text-body-2 text-medium-emphasis mt-1 dot-line">
+							{{ applicantInfo.name }} · {{ applicantInfo.phone }} · {{ applicantInfo.email }}
+						</div>
 					</div>
 				</div>
+				<div class="summary__right">
+					<div class="text-body-2 text-medium-emphasis">Submitted On</div>
+					<div class="text-body-1">{{ submittedAt }}</div>
+				</div>
 			</div>
-			<div class="summary__right">
-				<div class="text-body-2 text-medium-emphasis">Submitted On</div>
-				<div class="text-body-1">{{ submittedAt }}</div>
-			</div>
-		</div>
-	</v-card>
-
-	<v-row class="mb-4">
-		<v-col cols="12" md="7">
-			<v-card class="mb-6">
-				<v-card-title><v-icon size="18" class="mr-2">mdi-card-account-details-outline</v-icon> Applicant
-					Information</v-card-title>
-				<v-divider></v-divider>
-				<div class="pa-4">
-					<div>
+		</v-card>
+	
+		<v-row class="mb-4">
+			<v-col cols="12" md="7">
+				<v-card class="mb-6">
+					<v-card-title><v-icon size="18" class="mr-2">mdi-card-account-details-outline</v-icon> Applicant
+						Information</v-card-title>
+					<v-divider></v-divider>
+					<div class="pa-4">
+						<div>
+							<v-row>
+								<v-col cols="12" md="6">
+									<v-table>
+										<tbody>
+											<tr>
+												<td class="text-medium-emphasis">Full Name</td>
+												<td class="font-weight-medium text-body-2 text-right">{{ applicantInfo.name
+												}}
+												</td>
+											</tr>
+											<tr>
+												<td class="text-medium-emphasis">Email</td>
+												<td class="font-weight-medium text-body-2 text-right">{{ applicantInfo.email
+												}}
+												</td>
+											</tr>
+											<tr>
+												<td class="text-medium-emphasis">Phone</td>
+												<td class="font-weight-medium text-body-2 text-right">{{ applicantInfo.phone
+												}}
+												</td>
+											</tr>
+											<tr>
+												<td class="text-medium-emphasis">Gender</td>
+												<td class="font-weight-medium text-body-2 text-right">{{
+													applicantInfo.gender }}
+												</td>
+											</tr>
+											<tr>
+												<td class="text-medium-emphasis">Address</td>
+												<td class="font-weight-medium text-body-2 text-right">{{
+													applicantInfo.address
+												}}
+												</td>
+											</tr>
+	
+										</tbody>
+									</v-table>
+	
+								</v-col>
+	
+								<v-col cols="12" md="6" class="with-divider">
+									<div>
+										<v-table>
+											<tbody>
+	
+												<tr>
+													<td class="text-medium-emphasis">Date of Birth (AD)</td>
+													<td class="font-weight-medium text-body-2 text-right">{{
+														applicantInfo.dobAd
+													}}
+													</td>
+												</tr>
+												<tr>
+													<td class="text-medium-emphasis">Date of Birth (BS)</td>
+													<td class="font-weight-medium text-body-2 text-right">{{
+														applicantInfo.dobBs
+													}}
+													</td>
+												</tr>
+												<tr>
+													<td class="text-medium-emphasis">Marital Status</td>
+													<td class="font-weight-medium text-body-2 text-right">
+														{{ applicantInfo.maritalStatus }}
+													</td>
+												</tr>
+												<tr>
+													<td class="text-medium-emphasis">Citizenship Number</td>
+													<td class="font-weight-medium text-body-2 text-right">
+														{{ applicantInfo.citizenshipNumber }}
+													</td>
+												</tr>
+												<tr>
+													<td class="text-medium-emphasis">Agreed to Terms</td>
+													<td class="font-weight-medium text-body-2 text-right">{{
+														applicantInfo.agreed
+													}}
+													</td>
+												</tr>
+											</tbody>
+										</v-table>
+									</div>
+								</v-col>
+	
+							</v-row>
+						</div>
+						<DocGrid class="mt-4" :items="applicantInfo?.documents || []" />
+					</div>
+				</v-card>
+	
+				<v-card class="mb-6">
+					<v-card-title><v-icon size="18" class="mr-2">mdi-wallet-outline</v-icon> Finance
+						Information</v-card-title>
+					<v-divider></v-divider>
+					<div class="px-4">
 						<v-row>
 							<v-col cols="12" md="6">
-								<v-table>
-									<tbody>
-										<tr>
-											<td class="text-medium-emphasis">Full Name</td>
-											<td class="font-weight-medium text-body-2 text-right">{{ applicantInfo.name
-											}}
-											</td>
-										</tr>
-										<tr>
-											<td class="text-medium-emphasis">Email</td>
-											<td class="font-weight-medium text-body-2 text-right">{{ applicantInfo.email
-											}}
-											</td>
-										</tr>
-										<tr>
-											<td class="text-medium-emphasis">Phone</td>
-											<td class="font-weight-medium text-body-2 text-right">{{ applicantInfo.phone
-											}}
-											</td>
-										</tr>
-										<tr>
-											<td class="text-medium-emphasis">Gender</td>
-											<td class="font-weight-medium text-body-2 text-right">{{
-												applicantInfo.gender }}
-											</td>
-										</tr>
-										<tr>
-											<td class="text-medium-emphasis">Address</td>
-											<td class="font-weight-medium text-body-2 text-right">{{
-												applicantInfo.address
-											}}
-											</td>
-										</tr>
-
-									</tbody>
-								</v-table>
-
-							</v-col>
-
-							<v-col cols="12" md="6" class="with-divider">
 								<div>
 									<v-table>
 										<tbody>
-
 											<tr>
-												<td class="text-medium-emphasis">Date of Birth (AD)</td>
+												<td class="text-medium-emphasis">Product Name</td>
 												<td class="font-weight-medium text-body-2 text-right">{{
-													applicantInfo.dobAd
+													financialInfo.productPrice }}
+												</td>
+											</tr>
+											<tr>
+												<td class="text-medium-emphasis">Down Payment</td>
+												<td class="font-weight-medium text-body-2 text-right">{{
+													financialInfo.downPayment }}
+												</td>
+											</tr>
+											<tr>
+												<td class="text-medium-emphasis">Finance Amount</td>
+												<td class="font-weight-medium text-body-2 text-right">{{
+													financialInfo.loanAmount }}
+												</td>
+											</tr>
+										</tbody>
+									</v-table>
+								</div>
+							</v-col>
+							<v-col cols="12" md="6">
+								<div>
+									<v-table>
+										<tbody>
+											<tr>
+												<td class="text-medium-emphasis">Duration</td>
+												<td class="font-weight-medium text-body-2 text-right">{{
+													financialInfo.duration
 												}}
 												</td>
 											</tr>
 											<tr>
-												<td class="text-medium-emphasis">Date of Birth (BS)</td>
+												<td class="text-medium-emphasis">EMI Per Month</td>
 												<td class="font-weight-medium text-body-2 text-right">{{
-													applicantInfo.dobBs
+													financialInfo.emiAmount
 												}}
 												</td>
 											</tr>
 											<tr>
-												<td class="text-medium-emphasis">Marital Status</td>
-												<td class="font-weight-medium text-body-2 text-right">
-													{{ applicantInfo.maritalStatus }}
-												</td>
-											</tr>
-											<tr>
-												<td class="text-medium-emphasis">Citizenship Number</td>
-												<td class="font-weight-medium text-body-2 text-right">
-													{{ applicantInfo.citizenshipNumber }}
-												</td>
-											</tr>
-											<tr>
-												<td class="text-medium-emphasis">Agreed to Terms</td>
-												<td class="font-weight-medium text-body-2 text-right">{{
-													applicantInfo.agreed
+												<td class="text-medium-emphasis">Preferred Bank</td>
+												<td class="font-weight-medium text-body-2 text-right">{{ financialInfo.bank
 												}}
 												</td>
 											</tr>
@@ -144,267 +212,201 @@
 									</v-table>
 								</div>
 							</v-col>
-
 						</v-row>
 					</div>
-					<DocGrid class="mt-4" :items="applicantInfo?.documents || []" />
-				</div>
-			</v-card>
-
-			<v-card class="mb-6">
-				<v-card-title><v-icon size="18" class="mr-2">mdi-wallet-outline</v-icon> Finance
-					Information</v-card-title>
-				<v-divider></v-divider>
-				<div class="px-4">
-					<v-row>
-						<v-col cols="12" md="6">
-							<div>
+				</v-card>
+				<v-card class="mb-6">
+					<v-card-title><v-icon size="18" class="mr-2">mdi-credit-card-outline</v-icon> Credit Card
+						Info</v-card-title>
+					<v-divider></v-divider>
+					<div class="px-4">
+						<v-row>
+							<v-col cols="12" md="6">
 								<v-table>
 									<tbody>
 										<tr>
-											<td class="text-medium-emphasis">Product Name</td>
+											<td class="text-medium-emphasis">Card Holder</td>
 											<td class="font-weight-medium text-body-2 text-right">{{
-												financialInfo.productPrice }}
-											</td>
+												creditCardInfo.card_holder
+											}}</td>
 										</tr>
 										<tr>
-											<td class="text-medium-emphasis">Down Payment</td>
+											<td class="text-medium-emphasis">Card Number</td>
 											<td class="font-weight-medium text-body-2 text-right">{{
-												financialInfo.downPayment }}
-											</td>
+												creditCardInfo.card_number
+											}}</td>
 										</tr>
 										<tr>
-											<td class="text-medium-emphasis">Finance Amount</td>
+											<td class="text-medium-emphasis">Expiry Date</td>
 											<td class="font-weight-medium text-body-2 text-right">{{
-												financialInfo.loanAmount }}
-											</td>
+												creditCardInfo.expiry_date
+											}}</td>
+										</tr>
+										<tr>
+											<td class="text-medium-emphasis">Credit Limit</td>
+											<td class="font-weight-medium text-body-2 text-right">{{
+												creditCardInfo.credit_limit
+											}}</td>
 										</tr>
 									</tbody>
 								</v-table>
-							</div>
-						</v-col>
-						<v-col cols="12" md="6">
-							<div>
+							</v-col>
+							<v-col cols="12" md="6" class="with-divider">
 								<v-table>
 									<tbody>
 										<tr>
-											<td class="text-medium-emphasis">Duration</td>
+											<td class="text-medium-emphasis">Provider</td>
 											<td class="font-weight-medium text-body-2 text-right">{{
-												financialInfo.duration
-											}}
-											</td>
+												creditCardInfo.provider.name }}</td>
 										</tr>
 										<tr>
-											<td class="text-medium-emphasis">EMI Per Month</td>
+											<td class="text-medium-emphasis">Bank Code</td>
 											<td class="font-weight-medium text-body-2 text-right">{{
-												financialInfo.emiAmount
-											}}
-											</td>
+												creditCardInfo.provider.bank_code }}</td>
+										</tr>
+										<!-- <tr>
+											<td class="text-medium-emphasis">Provider ID</td>
+											<td class="font-weight-medium text-body-2 text-right">{{ creditCardInfo.provider.id }}</td>
+										</tr> -->
+									</tbody>
+								</v-table>
+							</v-col>
+						</v-row>
+					</div>
+				</v-card>
+				<v-card class="mb-6">
+					<v-card-title><v-icon size="18" class="mr-2">mdi-bank</v-icon> Preferred
+						Bank</v-card-title>
+					<v-divider></v-divider>
+					<div class="px-4">
+						<v-row>
+							<v-col cols="12" md="6">
+								<v-table>
+									<tbody>
+										<tr>
+											<td class="text-medium-emphasis">Bank Name</td>
+											<td class="font-weight-medium text-body-2 text-right">{{
+												preferredBank.bank_name
+											}}</td>
 										</tr>
 										<tr>
-											<td class="text-medium-emphasis">Preferred Bank</td>
-											<td class="font-weight-medium text-body-2 text-right">{{ financialInfo.bank
-											}}
-											</td>
+											<td class="text-medium-emphasis">Bank Code</td>
+											<td class="font-weight-medium text-body-2 text-right">{{
+												preferredBank.bank_code
+											}}</td>
+										</tr>
+	
+									</tbody>
+								</v-table>
+							</v-col>
+							<v-col cols="12" md="6" class="with-divider">
+								<v-table>
+									<tbody>
+										<tr>
+											<td class="text-medium-emphasis">Branch Name</td>
+											<td class="font-weight-medium text-body-2 text-right">{{
+												preferredBank.branch
+											}}</td>
+										</tr>
+										<tr>
+											<td class="text-medium-emphasis">Account Number</td>
+											<td class="font-weight-medium text-body-2 text-right">{{
+												preferredBank.account_number
+											}}</td>
 										</tr>
 									</tbody>
 								</v-table>
+							</v-col>
+						</v-row>
+					</div>
+				</v-card>
+	
+				<v-card class="mb-6">
+					<v-card-title><v-icon size="18" class="mr-2">mdi-account-check-outline</v-icon> Guarantor
+						Details</v-card-title>
+					<v-divider></v-divider>
+	
+					<div class="pa-4">
+						<div v-for="(guerantor, index) in guarantorList" :key="index">
+							<div>
+								<v-row>
+									<v-col cols="12" md="6">
+										<div>
+											<v-table>
+												<tbody>
+													<tr>
+														<td class="text-medium-emphasis">Full Name</td>
+														<td class="font-weight-medium text-body-2 text-right">{{
+															guerantor.name
+														}}
+														</td>
+													</tr>
+													<tr>
+														<td class="text-medium-emphasis">Phone</td>
+														<td class="font-weight-medium text-body-2 text-right">{{
+															guerantor.phone
+														}}
+														</td>
+													</tr>
+													<tr>
+														<td class="text-medium-emphasis">Gender</td>
+														<td class="font-weight-medium text-body-2 text-right">{{
+															guerantor.gender
+														}}
+														</td>
+													</tr>
+												</tbody>
+											</v-table>
+										</div>
+									</v-col>
+									<v-col cols="12" md="6">
+										<div>
+											<v-table>
+												<tbody>
+													<tr>
+														<td class="text-medium-emphasis">Marital Status</td>
+														<td class="font-weight-medium text-body-2 text-right">{{
+															guerantor.maritalStatus }}
+														</td>
+													</tr>
+													<tr>
+														<td class="text-medium-emphasis">Citizenship</td>
+														<td class="font-weight-medium text-body-2 text-right">{{
+															guerantor.citizenshipNumber }}
+														</td>
+													</tr>
+												</tbody>
+											</v-table>
+										</div>
+									</v-col>
+								</v-row>
 							</div>
-						</v-col>
-					</v-row>
-				</div>
-			</v-card>
-			<v-card class="mb-6">
-				<v-card-title><v-icon size="18" class="mr-2">mdi-credit-card-outline</v-icon> Credit Card
-					Info</v-card-title>
-				<v-divider></v-divider>
-				<div class="px-4">
-					<v-row>
-						<v-col cols="12" md="6">
-							<v-table>
-								<tbody>
-									<tr>
-										<td class="text-medium-emphasis">Card Holder</td>
-										<td class="font-weight-medium text-body-2 text-right">{{
-											creditCardInfo.card_holder
-										}}</td>
-									</tr>
-									<tr>
-										<td class="text-medium-emphasis">Card Number</td>
-										<td class="font-weight-medium text-body-2 text-right">{{
-											creditCardInfo.card_number
-										}}</td>
-									</tr>
-									<tr>
-										<td class="text-medium-emphasis">Expiry Date</td>
-										<td class="font-weight-medium text-body-2 text-right">{{
-											creditCardInfo.expiry_date
-										}}</td>
-									</tr>
-									<tr>
-										<td class="text-medium-emphasis">Credit Limit</td>
-										<td class="font-weight-medium text-body-2 text-right">{{
-											creditCardInfo.credit_limit
-										}}</td>
-									</tr>
-								</tbody>
-							</v-table>
-						</v-col>
-						<v-col cols="12" md="6" class="with-divider">
-							<v-table>
-								<tbody>
-									<tr>
-										<td class="text-medium-emphasis">Provider</td>
-										<td class="font-weight-medium text-body-2 text-right">{{
-											creditCardInfo.provider.name }}</td>
-									</tr>
-									<tr>
-										<td class="text-medium-emphasis">Bank Code</td>
-										<td class="font-weight-medium text-body-2 text-right">{{
-											creditCardInfo.provider.bank_code }}</td>
-									</tr>
-									<!-- <tr>
-										<td class="text-medium-emphasis">Provider ID</td>
-										<td class="font-weight-medium text-body-2 text-right">{{ creditCardInfo.provider.id }}</td>
-									</tr> -->
-								</tbody>
-							</v-table>
-						</v-col>
-					</v-row>
-				</div>
-			</v-card>
-			<v-card class="mb-6">
-				<v-card-title><v-icon size="18" class="mr-2">mdi-bank</v-icon> Preferred
-					Bank</v-card-title>
-				<v-divider></v-divider>
-				<div class="px-4">
-					<v-row>
-						<v-col cols="12" md="6">
-							<v-table>
-								<tbody>
-									<tr>
-										<td class="text-medium-emphasis">Bank Name</td>
-										<td class="font-weight-medium text-body-2 text-right">{{
-											preferredBank.bank_name
-										}}</td>
-									</tr>
-									<tr>
-										<td class="text-medium-emphasis">Bank Code</td>
-										<td class="font-weight-medium text-body-2 text-right">{{
-											preferredBank.bank_code
-										}}</td>
-									</tr>
-
-								</tbody>
-							</v-table>
-						</v-col>
-						<v-col cols="12" md="6" class="with-divider">
-							<v-table>
-								<tbody>
-									<tr>
-										<td class="text-medium-emphasis">Branch Name</td>
-										<td class="font-weight-medium text-body-2 text-right">{{
-											preferredBank.branch
-										}}</td>
-									</tr>
-									<tr>
-										<td class="text-medium-emphasis">Account Number</td>
-										<td class="font-weight-medium text-body-2 text-right">{{
-											preferredBank.account_number
-										}}</td>
-									</tr>
-								</tbody>
-							</v-table>
-						</v-col>
-					</v-row>
-				</div>
-			</v-card>
-
-			<v-card class="mb-6">
-				<v-card-title><v-icon size="18" class="mr-2">mdi-account-check-outline</v-icon> Guarantor
-					Details</v-card-title>
-				<v-divider></v-divider>
-
-				<div class="pa-4">
-					<div v-for="(guerantor, index) in guarantorList" :key="index">
-						<div>
-							<v-row>
-								<v-col cols="12" md="6">
-									<div>
-										<v-table>
-											<tbody>
-												<tr>
-													<td class="text-medium-emphasis">Full Name</td>
-													<td class="font-weight-medium text-body-2 text-right">{{
-														guerantor.name
-													}}
-													</td>
-												</tr>
-												<tr>
-													<td class="text-medium-emphasis">Phone</td>
-													<td class="font-weight-medium text-body-2 text-right">{{
-														guerantor.phone
-													}}
-													</td>
-												</tr>
-												<tr>
-													<td class="text-medium-emphasis">Gender</td>
-													<td class="font-weight-medium text-body-2 text-right">{{
-														guerantor.gender
-													}}
-													</td>
-												</tr>
-											</tbody>
-										</v-table>
-									</div>
-								</v-col>
-								<v-col cols="12" md="6">
-									<div>
-										<v-table>
-											<tbody>
-												<tr>
-													<td class="text-medium-emphasis">Marital Status</td>
-													<td class="font-weight-medium text-body-2 text-right">{{
-														guerantor.maritalStatus }}
-													</td>
-												</tr>
-												<tr>
-													<td class="text-medium-emphasis">Citizenship</td>
-													<td class="font-weight-medium text-body-2 text-right">{{
-														guerantor.citizenshipNumber }}
-													</td>
-												</tr>
-											</tbody>
-										</v-table>
-									</div>
-								</v-col>
-							</v-row>
-						</div>
-						<div>
-							<DocGrid class="mt-4" :items="guerantor?.documents || []" />
+							<div>
+								<DocGrid class="mt-4" :items="guerantor?.documents || []" />
+							</div>
 						</div>
 					</div>
-				</div>
-			</v-card>
-		</v-col>
-
-		<v-col cols="12" md="5">
-			<v-card class="mb-4">
-				<v-card-title><v-icon size="18" class="mr-2">mdi-timeline-clock-outline</v-icon>Generate
-					Application</v-card-title>
-				<v-divider></v-divider>
-				<div>
-					<EmiBankApplicationList :data="application"> </EmiBankApplicationList>
-				</div>
-			</v-card>
-			<v-card class="mb-4">
-				<v-card-title><v-icon size="18" class="mr-2">mdi-timeline-clock-outline</v-icon> Activity
-					Timeline</v-card-title>
-				<v-divider></v-divider>
-				<ActivityTimeline :items="timelineItems" dot-color="primary" class="pa-4" />
-			</v-card>
-		</v-col>
-    </v-row>
+				</v-card>
+			</v-col>
+	
+			<v-col cols="12" md="5">
+				<v-card class="mb-4">
+					<v-card-title><v-icon size="18" class="mr-2">mdi-timeline-clock-outline</v-icon>Generate
+						Application</v-card-title>
+					<v-divider></v-divider>
+					<div>
+						<EmiBankApplicationList :data="application"> </EmiBankApplicationList>
+					</div>
+				</v-card>
+				<v-card class="mb-4">
+					<v-card-title><v-icon size="18" class="mr-2">mdi-timeline-clock-outline</v-icon> Activity
+						Timeline</v-card-title>
+					<v-divider></v-divider>
+					<ActivityTimeline :items="timelineItems" dot-color="primary" class="pa-4" />
+				</v-card>
+			</v-col>
+		</v-row>
+	</v-container>
 
     <v-alert v-if="loading" type="info" variant="tonal">Loading EMI request detail...</v-alert>
 </template>

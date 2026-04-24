@@ -12,6 +12,7 @@ final class CategoryListAction
     {
         $query = ProductCategory::query()
             ->with('defaultFile')
+            ->withCount('products')
             ->orderByDesc('created_at');
 
         $search = is_string($search) ? trim($search) : '';

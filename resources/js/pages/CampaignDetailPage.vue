@@ -1,36 +1,38 @@
 <template>
   <AppPageHeader title="Campaigns" subtitle="Marketing campaigns">
     <template #actions>
-      <v-btn variant="tonal" color="primary" @click="goBack">
+      <v-btn variant="flat" color="primary" @click="goBack">
         <v-icon start>mdi-arrow-left</v-icon>
         Back
       </v-btn>
     </template>
   </AppPageHeader>
 
-  <v-card class="pa-6 mt-4" variant="flat">
-    <div v-if="loading" class="text-body-2 text-medium-emphasis">Loading campaign detail...</div>
-    <div v-else-if="campaign" class="d-flex flex-column ga-4">
-      <div class="campaign-top-grid">
-        <div class="campaign-thumb-cell">
-          <div class="campaign-thumb-rect rounded">
-            <v-img v-if="campaign.thumb" :src="campaign.thumb.url" :alt="campaign.title" contain width="180" height="112"
-              class="campaign-thumb-image" />
-            <v-icon v-else size="32" color="grey-darken-1">mdi-image-outline</v-icon>
+  <v-container fluid>
+    <v-card class="pa-6" variant="flat">
+      <div v-if="loading" class="text-body-2 text-medium-emphasis">Loading campaign detail...</div>
+      <div v-else-if="campaign" class="d-flex flex-column ga-4">
+        <div class="campaign-top-grid">
+          <div class="campaign-thumb-cell">
+            <div class="campaign-thumb-rect rounded">
+              <v-img v-if="campaign.thumb" :src="campaign.thumb.url" :alt="campaign.title" contain width="180"
+                height="112" class="campaign-thumb-image" />
+              <v-icon v-else size="32" color="grey-darken-1">mdi-image-outline</v-icon>
+            </div>
           </div>
-        </div>
-        <div>
-          <div class="text-h5 font-weight-bold">{{ campaign.title || '-' }}
-            <v-chip size="small" label variant="tonal" :color="Boolean(campaign.is_published) ? 'success' : 'warning'">
-              {{ Boolean(campaign.is_published) ? 'Published' : 'Draft' }}
-            </v-chip>
+          <div>
+            <div class="text-h5 font-weight-bold">{{ campaign.title || '-' }}
+              <v-chip size="small" label variant="tonal"
+                :color="Boolean(campaign.is_published) ? 'success' : 'warning'">
+                {{ Boolean(campaign.is_published) ? 'Published' : 'Draft' }}
+              </v-chip>
+            </div>
+            <div class="text-body-1">{{ formatLongDate(campaign.start_date) || '-' }} - {{
+              formatLongDate(campaign.end_date) || '-' }}</div>
           </div>
-          <div class="text-body-1">{{ formatLongDate(campaign.start_date) || '-' }} - {{
-            formatLongDate(campaign.end_date) || '-' }}</div>
         </div>
       </div>
-    </div>
-  </v-card>
+    </v-card>
     <v-card class="mt-4" variant="flat">
       <v-tabs v-model="activeTab" color="primary" bg-color="transparent">
         <v-tab v-for="tab in tabItems" :key="tab.value" :value="tab.value">
@@ -44,6 +46,7 @@
         </v-window-item>
       </v-window>
     </v-card>
+  </v-container>
 </template>
 
 <script setup lang="ts">

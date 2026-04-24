@@ -13,6 +13,7 @@ require __DIR__ . '/admin/route_settings.php';
 require __DIR__ . '/admin/route_customers.php';
 require __DIR__ . '/admin/route_page.php';
 require __DIR__ . '/admin/route_cart.php';
+require __DIR__ . '/admin/route_wishlist.php';
 require __DIR__ . '/admin/route_faqs.php';
 
 require __DIR__ . '/admin/route_products.php';

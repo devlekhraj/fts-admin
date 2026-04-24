@@ -31,6 +31,7 @@ class BlogCategoryResource extends JsonResource
             'title' => $this->title,
             'slug' => $this->slug,
             'thumb' => $defaultFile?->url,
+            'blogs_count' => (int) ($this->blogs_count ?? 0),
             'created_at' => $this->created_at,
             'status' => (bool) $this->status,
         ];
