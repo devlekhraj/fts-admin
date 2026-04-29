@@ -1,25 +1,13 @@
 <template>
-  <BaseDetailTabImages
-    :files="files"
-    usage-type="logo"
-    usage-id="1"
-    directory="logo"
-    :edit-modal="LogoImageEditModal"
-    :edit-modal-props="editModalProps"
-    edit-modal-title="Edit Logo Metadata"
-    empty-state-message="No logo images found."
-    @updated="fetchFiles"
-  >
+  <BaseDetailTabImages :files="files" usage-type="logo" usage-id="1" :edit-modal="LogoImageEditModal"
+    :edit-modal-props="editModalProps" edit-modal-title="Edit Logo Metadata" empty-state-message="No logo images found."
+    @updated="fetchFiles">
     <template #headers>
       <th>Label / Type</th>
     </template>
     <template #rows="{ file }">
       <td class="py-3">
-        <v-chip
-          size="small"
-          label
-          variant="tonal"
-          color="primary">
+        <v-chip size="small" label variant="tonal" color="primary">
           {{ file.title || 'N/A' }}
         </v-chip>
       </td>

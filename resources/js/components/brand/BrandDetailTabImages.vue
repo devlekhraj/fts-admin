@@ -1,15 +1,8 @@
 <template>
-  <BaseDetailTabImages
-    :files="brandFiles"
-    usage-type="product_brands"
-    :usage-id="item?.id ?? null"
-    directory="brands"
-    :edit-modal="BrandImageEditModal"
-    :edit-modal-props="(file) => ({ brandId: item?.id ?? null, file })"
-    edit-modal-title="Edit Brand Image"
-    empty-state-message="No files attached to this brand."
-    @updated="emit('updated')"
-  >
+  <BaseDetailTabImages :files="brandFiles" usage-type="product_brands" :usage-id="item?.id ?? null"
+    :edit-modal="BrandImageEditModal" :edit-modal-props="(file) => ({ brandId: item?.id ?? null, file })"
+    edit-modal-title="Edit Brand Image" empty-state-message="No files attached to this brand."
+    @updated="emit('updated')">
     <template #headers>
       <th>Primary Image</th>
     </template>

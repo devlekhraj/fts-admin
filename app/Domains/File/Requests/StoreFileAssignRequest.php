@@ -20,8 +20,21 @@ final class StoreFileAssignRequest extends FormRequest
             'alt_text' => ['nullable', 'string', 'max:255'],
             'caption' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:5000'],
-            'directory' => ['nullable', 'string', 'max:120'],
             'is_default' => ['nullable', 'boolean'],
+            'meta' => ['nullable', 'array'], // After prepareForValidation, meta should be array
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $meta = $this->input('meta');
+
+        // Convert JSON string to array if needed
+        if (is_string($meta)) {
+            $decodedMeta = json_decode($meta, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $this->merge(['meta' => $decodedMeta]);
+            }
+        }
     }
 }

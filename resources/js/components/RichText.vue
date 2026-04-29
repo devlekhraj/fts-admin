@@ -99,9 +99,6 @@ onMounted(async () => {
                     }
                     formData.append('usage_type', String(usageType))
                     formData.append('usage_id', String(usageId))
-                    if (props.usage?.directory !== undefined && props.usage?.directory !== null) {
-                        formData.append('directory', String(props.usage.directory))
-                    }
                     if (props.usage?.meta && typeof props.usage.meta === 'object') {
                         formData.append('meta', JSON.stringify(props.usage.meta))
                     }

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Domains\File\Controllers;
 
 use App\Domains\File\Requests\StoreFileAssignRequest;
-use App\Domains\File\DTOs\FileAssignData;
 use App\Domains\File\DTOs\ListFilesData;
 use App\Domains\File\Services\FileService;
 use App\Http\Controllers\Controller;
@@ -65,10 +64,10 @@ final class FileController extends Controller
             ], 422);
         }
 
-        $payload = $this->fileService->assign(FileAssignData::fromArray(
+        $payload = $this->fileService->assign(
             $validated,
             $request->file('file')
-        ));
+        );
 
         $status = (int) ($payload['status'] ?? 500);
         $body = is_array($payload['body'] ?? null) ? $payload['body'] : [];

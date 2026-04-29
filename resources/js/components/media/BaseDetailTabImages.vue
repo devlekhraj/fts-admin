@@ -106,13 +106,18 @@ function onEditFile(file: any) {
 }
 
 function onAddImage() {
+  const modalProps: any = {
+    usage_type: props.usageType,
+    usage_id: props.usageId,
+  };
+
+  if (!props.usageType || !props.usageId) {
+    modalProps.directory = props.directory || props.usageType;
+  }
+
   openModal(
     ImageUploadModel,
-    {
-      usage_type: props.usageType,
-      usage_id: props.usageId,
-      directory: props.directory || props.usageType,
-    },
+    modalProps,
     {
       title: `Add ${props.usageType.charAt(0).toUpperCase() + props.usageType.slice(0, -1)} Image`,
       size: 'lg',

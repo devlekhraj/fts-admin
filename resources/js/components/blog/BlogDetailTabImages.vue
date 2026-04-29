@@ -1,25 +1,13 @@
 <template>
-  <BaseDetailTabImages
-    :files="blogFiles"
-    usage-type="blogs"
-    :usage-id="item?.id ?? null"
-    directory="blogs"
-    :edit-modal="BlogImageEditModal"
-    :edit-modal-props="(file) => ({ blogId: item?.id ?? null, file })"
-    edit-modal-title="Edit Blog Image"
-    empty-state-message="No files attached to this blog."
-    @updated="emit('updated')"
-  >
+  <BaseDetailTabImages :files="blogFiles" usage-type="blogs" :usage-id="item?.id ?? null"
+    :edit-modal="BlogImageEditModal" :edit-modal-props="(file) => ({ blogId: item?.id ?? null, file })"
+    edit-modal-title="Edit Blog Image" empty-state-message="No files attached to this blog." @updated="emit('updated')">
     <template #headers>
       <th>Primary Image</th>
     </template>
     <template #rows="{ file }">
       <td class="py-3">
-        <v-chip
-          size="small"
-          label
-          variant="tonal"
-          :color="file.meta?.is_default ? 'primary' : 'default'">
+        <v-chip size="small" label variant="tonal" :color="file.meta?.is_default ? 'primary' : 'default'">
           {{ file.meta?.is_default ? 'Yes' : 'No' }}
         </v-chip>
       </td>

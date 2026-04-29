@@ -1,15 +1,7 @@
 <template>
-  <BaseDetailTabImages
-    :files="bannerFiles"
-    usage-type="banners"
-    :usage-id="item?.id ?? null"
-    directory="banners"
-    :edit-modal="BannerImageEditModel"
-    edit-modal-title="Edit Banner Image"
-    edit-button-text="Edit Banner"
-    empty-state-message="Add an image to get started."
-    @updated="emit('changed')"
-  >
+  <BaseDetailTabImages :files="bannerFiles" usage-type="banners" :usage-id="item?.id ?? null"
+    :edit-modal="BannerImageEditModel" edit-modal-title="Edit Banner Image" edit-button-text="Edit Banner"
+    empty-state-message="Add an image to get started." @updated="emit('changed')">
     <template #details="{ file }">
       <div class="text-body-2" style="font-size: 0.8rem;">
         {{ file.alt_text || `File #${file.file_id ?? file.id}` }}
@@ -18,16 +10,8 @@
         <div class="text-caption text-medium-emphasis">
           Redirect: {{ String(file.meta?.link ?? '').trim() || 'Not available' }}
         </div>
-        <v-btn
-          v-if="String(file.meta?.link ?? '').trim()"
-          :href="String(file.meta?.link ?? '').trim()"
-          target="_blank"
-          rel="noopener noreferrer"
-          icon
-          size="x-small"
-          variant="tonal"
-          color="primary"
-        >
+        <v-btn v-if="String(file.meta?.link ?? '').trim()" :href="String(file.meta?.link ?? '').trim()" target="_blank"
+          rel="noopener noreferrer" icon size="x-small" variant="tonal" color="primary">
           <v-icon size="14">mdi-open-in-new</v-icon>
         </v-btn>
       </div>
@@ -43,12 +27,7 @@
 
     <template #rows="{ file }">
       <td class="py-3">
-        <v-chip
-          size="small"
-          label
-          variant="tonal"
-          :color="file.status === true ? 'success' : 'warning'"
-        >
+        <v-chip size="small" label variant="tonal" :color="file.status === true ? 'success' : 'warning'">
           {{ file.status === true ? 'Active' : 'Inactive' }}
         </v-chip>
       </td>

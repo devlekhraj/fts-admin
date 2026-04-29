@@ -3,7 +3,7 @@
     <template #actions>
       <v-menu location="bottom start">
         <template #activator="{ props }">
-          <v-btn v-bind="props" variant="tonal" color="primary" prepend-icon="mdi-download-outline">
+          <v-btn v-bind="props" variant="outlined" color="primary" prepend-icon="mdi-download-outline">
             Export
           </v-btn>
         </template>

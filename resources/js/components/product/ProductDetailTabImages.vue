@@ -1,16 +1,8 @@
 <template>
-  <BaseDetailTabImages
-    :files="productFiles"
-    usage-type="products"
-    :usage-id="productId"
-    directory="products"
-    :edit-modal="ProductImageEditModal"
-    :edit-modal-props="(file) => ({ productId, file })"
-    edit-modal-title="Edit Product Image"
-    empty-state-message="No images attached to this product."
-    show-file-id
-    @updated="emit('updated')"
-  >
+  <BaseDetailTabImages :files="productFiles" usage-type="products" :usage-id="productId"
+    :edit-modal="ProductImageEditModal" :edit-modal-props="(file) => ({ productId, file })"
+    edit-modal-title="Edit Product Image" empty-state-message="No images attached to this product." show-file-id
+    @updated="emit('updated')">
     <template #headers>
       <th>Primary Image</th>
     </template>

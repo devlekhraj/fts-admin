@@ -60,8 +60,8 @@ const form = reactive({
 const richTextUsage = computed(() => ({
   usage_type: 'blogs',
   usage_id: String(props.blogId ?? ''),
-  directory: 'blog-content',
-  meta: { type: 'blog_content', is_default: false },
+  directory: 'blogs',
+  meta: { type: 'blog_content' },
 }));
 
 watch(

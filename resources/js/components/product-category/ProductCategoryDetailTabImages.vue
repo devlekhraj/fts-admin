@@ -1,26 +1,14 @@
 <template>
-  <BaseDetailTabImages
-    :files="categoryFiles"
-    usage-type="product_categories"
-    :usage-id="item?.id ?? null"
-    directory="product-category"
-    :edit-modal="ProductCategoryImageEditModal"
-    :edit-modal-props="(file) => ({ categoryId: item?.id ?? null, file })"
-    edit-modal-title="Edit Product Category Image"
-    empty-state-message="No files attached to this category."
-    show-file-id
-    @updated="emit('updated')"
-  >
+  <BaseDetailTabImages :files="categoryFiles" usage-type="product_categories" :usage-id="item?.id ?? null"
+    :edit-modal="ProductCategoryImageEditModal" :edit-modal-props="(file) => ({ categoryId: item?.id ?? null, file })"
+    edit-modal-title="Edit Product Category Image" empty-state-message="No files attached to this category."
+    show-file-id @updated="emit('updated')">
     <template #headers>
       <th>Primary Image</th>
     </template>
     <template #rows="{ file }">
       <td class="py-3">
-        <v-chip
-          size="small"
-          label
-          variant="tonal"
-          :color="file.meta?.is_default ? 'primary' : 'default'">
+        <v-chip size="small" label variant="tonal" :color="file.meta?.is_default ? 'primary' : 'default'">
           {{ file.meta?.is_default ? 'Yes' : 'No' }}
         </v-chip>
       </td>
