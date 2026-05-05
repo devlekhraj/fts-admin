@@ -1,7 +1,7 @@
 <template>
   <div class="pa-6">
     <v-row>
-     <v-col cols="12" lg="8" offset-lg="2">
+      <v-col cols="12" lg="8" offset-lg="2">
         <div class="d-flex align-center justify-space-between mb-6">
           <div>
             <div class="text-h6">Blog Detail</div>
@@ -17,46 +17,30 @@
         <v-form ref="overviewFormRef">
           <div class="mt-4">
             <app-field-label label="Title" />
-            <v-textarea
-              v-model="form.title"
-              variant="outlined"
-              density="comfortable"
-              rows="2"
-              auto-grow
-              maxlength="200"
-              :rules="[v => !!v || 'Title is required']"
-            />
+            <v-textarea v-model="form.title" variant="outlined" density="comfortable" rows="2" auto-grow maxlength="200"
+              :rules="[v => !!v || 'Title is required']" />
           </div>
 
           <div class="mb-4">
             <app-field-label label="Slug" />
-            <v-text-field
-              v-model="form.slug"
-              variant="outlined"
-              density="comfortable"
-              :rules="[v => !!v || 'Slug is required']"
-            />
+            <v-text-field v-model="form.slug" variant="outlined" density="comfortable"
+              :rules="[v => !!v || 'Slug is required']" />
           </div>
 
           <v-row>
-            <v-col cols="12" md="8">
+            <v-col cols="12" md="4">
               <app-field-label label="Author" />
-              <v-text-field
-                v-model="form.author"
-                variant="outlined"
-                density="comfortable"
-              />
+              <v-text-field v-model="form.author" variant="outlined" density="comfortable" />
             </v-col>
             <v-col cols="12" md="4">
               <app-field-label label="Status" />
-              <v-select
-                v-model="form.status"
-                :items="statusOptions"
-                item-title="label"
-                item-value="value"
-                variant="outlined"
-                density="comfortable"
-              />
+              <v-select v-model="form.status" :items="statusOptions" item-title="label" item-value="value"
+                variant="outlined" density="comfortable" />
+            </v-col>
+            <v-col cols="12" md="4">
+              <app-field-label label="Category" />
+              <v-select v-model="form.category_id" :items="categoryOptions" item-title="text" item-value="value"
+                variant="outlined" density="comfortable" clearable placeholder="Select category" />
             </v-col>
           </v-row>
         </v-form>
@@ -66,10 +50,16 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, watch } from 'vue';
+import { reactive, ref, watch, onMounted } from 'vue';
 import { update as updateBlog, type BlogDetailResponse } from '@/api/blogs.api';
+import { listBlogCategories, type BlogCategoryListItem } from '@/api/blog-categories.api';
 import AppFieldLabel from '@/components/shared/AppFieldLabel.vue';
 import { useSnackbarStore } from '@/stores/snackbar.store';
+
+type CategoryOption = {
+  value: number;
+  text: string;
+};
 
 const props = defineProps<{
   item: BlogDetailResponse | null;
@@ -86,11 +76,13 @@ const form = reactive({
   slug: '',
   author: '',
   status: '0',
+  category_id: null as number | null,
 });
 const statusOptions = [
   { label: 'Active', value: '1' },
   { label: 'Inactive', value: '0' },
 ];
+const categoryOptions = ref<CategoryOption[]>([]);
 const snackbar = useSnackbarStore();
 const saving = ref(false);
 
@@ -101,9 +93,48 @@ watch(
     form.slug = item?.slug ? String(item.slug) : '';
     form.author = item?.author ? String(item.author) : '';
     form.status = item?.status ? '1' : '0';
+    form.category_id = item?.category_id ? Number(item.category_id) : null;
+    console.log('Form category_id set to:', form.category_id, 'from item:', item?.category_id);
   },
   { immediate: true },
 );
+
+async function fetchCategories() {
+  try {
+    const response = await listBlogCategories();
+    const categories: BlogCategoryListItem[] = Array.isArray(response)
+      ? response
+      : Array.isArray(response?.data)
+        ? response.data
+        : [];
+
+    categoryOptions.value = categories
+      .filter((cat) => cat.status)
+      .map((cat) => ({
+        value: Number(cat.id),
+        text: String(cat.title ?? ''),
+      }))
+      .filter((cat) => !!cat.value && !!cat.text);
+  } catch (error) {
+    console.error('Failed to fetch blog categories:', error);
+  }
+}
+
+watch(
+  categoryOptions,
+  () => {
+    // Re-set the category_id when categories are loaded to ensure proper display
+    if (props.item?.category_id) {
+      form.category_id = Number(props.item.category_id);
+      console.log('Re-setting category_id after categories loaded:', form.category_id);
+    }
+  },
+  { immediate: false }
+);
+
+onMounted(() => {
+  fetchCategories();
+});
 
 async function onUpdate() {
   const id = String(props.blogId ?? '').trim();
@@ -119,13 +150,14 @@ async function onUpdate() {
       slug: form.slug.trim(),
       author: form.author.trim(),
       status: Number(form.status) === 1,
+      category_id: form.category_id || null,
     });
-    
+
     snackbar.show({
       message: 'Blog overview updated successfully',
       color: 'success',
     });
-    
+
     emit('updated');
   } catch (error: any) {
     snackbar.show({

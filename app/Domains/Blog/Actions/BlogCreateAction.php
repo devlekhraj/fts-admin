@@ -28,7 +28,7 @@ final class BlogCreateAction
                 'slug' => 'unlisted',
                 'short_desc' => '',
                 'content' => '',
-                'status' => false,
+                'status' => true,
             ]);
         }
 

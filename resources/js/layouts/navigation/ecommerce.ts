@@ -81,7 +81,7 @@ export const ecommerceNav: NavGroup[] = [
         items: [
             { title: 'Campaigns', routeName: 'admin.campaigns.list', icon: 'mdi-bullhorn-outline' },
             { title: 'Banners', routeName: 'admin.banners.list', icon: 'mdi-image-outline' },
-            { title: 'Coupons', routeName: 'admin.coupons.list', icon: 'mdi-ticket-percent-outline' },
+            // { title: 'Coupons', routeName: 'admin.coupons.list', icon: 'mdi-ticket-percent-outline' },
         ],
     },
     {
