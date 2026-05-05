@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\EmiRequest\Actions;
 
-use App\DTO\PdfResultDto;
+use App\Domains\EmiRequest\DTOs\PdfResultDto;
 use App\Domains\EmiRequest\Pdf\Bank\GlobalPdfGenerator;
 use App\Domains\EmiRequest\Pdf\Bank\NabilPdfGenerator;
 use App\Domains\EmiRequest\Pdf\Bank\SiddarthaPdfGenerator;
@@ -105,4 +105,3 @@ final class GenerateEmiApplicationPdfAction
         );
     }
 }
-

@@ -8,7 +8,7 @@ use App\Domains\PaymentMethod\Models\PaymentMethod;
 use App\Domains\User\Models\ShippingAddress;
 use App\Domains\User\Models\User;
 use App\Support\Eloquent\BaseModel;
-use App\Models\Concerns\HasActivityLogs;
+use App\Traits\HasActivityLogs;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;

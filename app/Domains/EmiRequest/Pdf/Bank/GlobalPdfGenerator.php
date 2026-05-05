@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\EmiRequest\Pdf\Bank;
 
-use App\DTO\PdfResultDto;
+use App\Domains\EmiRequest\DTOs\PdfResultDto;
 use App\Domains\EmiRequest\Pdf\Contracts\BankPdfGenerator;
 use App\Domains\EmiRequest\Pdf\Renderer\PdfRenderer;
 
@@ -32,4 +32,3 @@ final class GlobalPdfGenerator implements BankPdfGenerator
         return new PdfResultDto($filename, $bytes);
     }
 }
-

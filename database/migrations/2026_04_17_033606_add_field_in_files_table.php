@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('files', function (Blueprint $table) {
             if(!Schema::hasColumn('files', 'is_public')) {
-                $table->boolean('is_public')->default(true)->after('file_name');
+                $table->boolean('is_public')->default(false)->after('file_name');
             }
         });
     }

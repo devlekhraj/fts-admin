@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Admin\Models;
 
-use App\Models\Concerns\HasActivityLogs;
+use App\Traits\HasActivityLogs;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;

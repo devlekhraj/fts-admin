@@ -6,7 +6,7 @@ namespace App\Domains\Order\Actions;
 
 use App\Domains\Order\DTOs\OrderStatusUpdateData;
 use App\Domains\Order\Models\Order;
-use App\Mail\OrderStatusUpdatedMail;
+use App\Domains\Order\Mail\OrderStatusUpdatedMail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -31,7 +31,7 @@ final class OrderUpdateStatusAction
                 'new_status_label' => $newLabel,
                 'order_no' => $order->order_no,
             ],
-            actor: auth()->user()
+            actor: auth()->user() ?? null
         );
 
         try {

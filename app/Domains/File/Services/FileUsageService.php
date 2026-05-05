@@ -7,7 +7,7 @@ namespace App\Domains\File\Services;
 use App\Domains\File\Actions\UpdateFileUsageAction;
 use App\Domains\File\DTOs\UpdateFileUsageData;
 use App\Domains\File\Models\FileUsage;
-use App\DTO\ActionResultDto;
+use App\Domains\Shared\DTOs\ActionResultDto;
 
 final class FileUsageService
 {
@@ -61,4 +61,3 @@ final class FileUsageService
         return true;
     }
 }
-

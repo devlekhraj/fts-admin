@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\File\Actions;
 
 use App\Domains\File\DTOs\UpdateFileUsageData;
-use App\DTO\ActionResultDto;
+use App\Domains\Shared\DTOs\ActionResultDto;
 use App\Support\Exceptions\FieldValidationException;
 use Illuminate\Support\Facades\DB;
 

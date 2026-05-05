@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\EmiRequest\Pdf\Contracts;
 
-use App\DTO\PdfResultDto;
+use App\Domains\EmiRequest\DTOs\PdfResultDto;
 
 interface BankPdfGenerator
 {
@@ -12,4 +12,3 @@ interface BankPdfGenerator
 
     public function generate(object $bankData, mixed $requestModel): PdfResultDto;
 }
-

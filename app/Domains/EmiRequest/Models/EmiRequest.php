@@ -9,7 +9,7 @@ use App\Domains\File\Models\File;
 use App\Domains\Product\Models\Product;
 use App\Domains\User\Models\User;
 use App\Support\Eloquent\BaseModel;
-use App\Models\Concerns\HasActivityLogs;
+use App\Traits\HasActivityLogs;
 use App\Models\EmiRequestBank;
 use App\Models\EmiRequestCreditCard;
 use App\Models\EmiRequestGuarantor;
@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 final class EmiRequest extends BaseModel
 {
     use HasActivityLogs;
-    
+
     protected $table = 'emi_requests';
 
 

@@ -79,6 +79,7 @@ export function formatDate(date: string | number | Date) {
   return `${year}/${month}/${day}`
 }
 
+
 export function formatDateLong(date: string | number | Date) {
   if (!date) return 'N/A'
   const d = new Date(date)
