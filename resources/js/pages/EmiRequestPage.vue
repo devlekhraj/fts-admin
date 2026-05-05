@@ -11,12 +11,12 @@
 								hide-details clearable style="min-width: 220px" />
 						</v-col>
 						<v-col cols="12" md="3">
-							<v-select v-model="filters.emiType" :items="emiTypeOptions" density="compact" variant="outlined"
-								label="EMI Type" hide-details clearable style="min-width: 200px" />
+							<v-select v-model="filters.emiType" :items="emiTypeOptions" density="compact"
+								variant="outlined" label="EMI Type" hide-details clearable style="min-width: 200px" />
 						</v-col>
 						<v-col cols="12" md="3">
-							<v-select v-model="filters.status" :items="statusOptions" density="compact" variant="outlined"
-								label="Status" hide-details clearable style="min-width: 200px" />
+							<v-select v-model="filters.status" :items="statusOptions" density="compact"
+								variant="outlined" label="Status" hide-details clearable style="min-width: 200px" />
 						</v-col>
 					</v-row>
 				</v-container>
@@ -61,7 +61,7 @@
 					{{ item.status_label ?? item.status ?? '-' }}
 				</v-chip>
 			</template>
-			<template #item.action="{ item }">
+			<template #item.action="{ item }" class="text-right">
 				<v-btn variant="outlined" color="primary" size="small"
 					:to="{ name: 'admin.emi.requests.detail', params: { id: item.id } }">
 					Details
@@ -80,17 +80,18 @@ import { formatDateTime, formatNPR } from '@/shared/formatters';
 import { getEmiIconColor, getEmiIconTextColor, getEmiTypeIcon, statusColor } from '@/shared/emi';
 import { timeAgo } from '@/shared/utils';
 import AppPageHeader from '@/components/AppPageHeader.vue';
+import type { DataTableHeader } from '@/components/datatable/types';
 
 type EmiRequest = Record<string, unknown>;
 
-const headers = [
-	{ title: 'Product', key: 'product', sortable: false, width:'300' },
+const headers: DataTableHeader[] = [
+	{ title: 'Product', key: 'product', sortable: false, width: '300' },
 	// { title: 'Per Month', key: 'emi_per_month', minWidth: '120', sortable: false },
-	{ title: 'EMI Type', key: 'emi_type', sortable: false, width:'120' },
+	{ title: 'EMI Type', key: 'emi_type', sortable: false, width: '120' },
 	// { title: 'User', key: 'user', sortable: false,minWidth:'200' },
-	{ title: 'Status', key: 'status_label', sortable: false, width:'100' },
-	{ title: 'Time', key: 'time', width:'200', sortable: false },
-	{ title: 'Actions', key: 'action', sortable: false, width:'100'  },
+	{ title: 'Status', key: 'status_label', sortable: false, width: '100' },
+	{ title: 'Time', key: 'time', width: '200', sortable: false },
+	{ title: 'Actions', key: 'action', sortable: false, width: '100', align: 'end' },
 ];
 
 const items = ref<EmiRequest[]>([]);
