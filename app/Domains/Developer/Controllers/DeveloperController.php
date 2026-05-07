@@ -8,15 +8,14 @@ use App\Domains\Developer\DTOs\ApiKeyCreateData;
 use App\Domains\Developer\DTOs\ApiKeyUpdateData;
 use App\Domains\Developer\Resources\ApiKeyResource;
 use App\Domains\Developer\Services\ApiKeyService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 final class DeveloperController extends Controller
 {
-    public function __construct(private readonly ApiKeyService $apiKeyService)
-    {
-    }
+    public function __construct(private readonly ApiKeyService $apiKeyService) {}
 
     public function index(): JsonResponse
     {
@@ -70,4 +69,3 @@ final class DeveloperController extends Controller
         ]);
     }
 }
-

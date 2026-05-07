@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Domains\Product\Controllers;
 
 use App\Domains\Product\Models\Product;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

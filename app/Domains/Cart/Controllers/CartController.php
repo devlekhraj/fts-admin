@@ -8,15 +8,14 @@ use App\Domains\Cart\DTOs\CartListData;
 use App\Domains\Cart\Resources\CartDetailResource;
 use App\Domains\Cart\Resources\CartResource;
 use App\Domains\Cart\Services\CartService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 final class CartController extends Controller
 {
-    public function __construct(private readonly CartService $cartService)
-    {
-    }
+    public function __construct(private readonly CartService $cartService) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -37,4 +36,3 @@ final class CartController extends Controller
         ]);
     }
 }
-

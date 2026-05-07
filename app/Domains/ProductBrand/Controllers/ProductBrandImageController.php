@@ -7,7 +7,8 @@ namespace App\Domains\ProductBrand\Controllers;
 use App\Domains\ProductBrand\Requests\UpdateProductBrandImageRequest;
 use App\Domains\ProductBrand\DTOs\BrandImageUpdateData;
 use App\Domains\ProductBrand\Services\ProductBrandImageService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 
 class ProductBrandImageController extends Controller

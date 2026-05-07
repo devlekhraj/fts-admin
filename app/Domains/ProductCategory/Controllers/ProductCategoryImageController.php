@@ -7,7 +7,8 @@ namespace App\Domains\ProductCategory\Controllers;
 use App\Domains\ProductCategory\Requests\UpdateProductCategoryImageRequest;
 use App\Domains\ProductCategory\DTOs\CategoryImageUpdateData;
 use App\Domains\ProductCategory\Services\ProductCategoryImageService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 
 class ProductCategoryImageController extends Controller

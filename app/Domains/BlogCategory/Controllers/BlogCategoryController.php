@@ -10,9 +10,9 @@ use App\Domains\BlogCategory\Requests\StoreBlogCategoryRequest;
 use App\Domains\BlogCategory\Requests\UpdateBlogCategoryRequest;
 use App\Domains\BlogCategory\Resources\BlogCategoryResource;
 use App\Domains\BlogCategory\Services\BlogCategoryService;
-use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 
 final class BlogCategoryController extends Controller
 {
@@ -75,4 +75,3 @@ final class BlogCategoryController extends Controller
         ], 200);
     }
 }
-

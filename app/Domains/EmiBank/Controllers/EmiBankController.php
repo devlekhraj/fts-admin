@@ -11,7 +11,8 @@ use App\Domains\EmiBank\Requests\UpdateEmiBankRequest;
 use App\Domains\EmiBank\Resources\EmiBankListResource;
 use App\Domains\EmiBank\Resources\EmiBankResource;
 use App\Domains\EmiBank\Services\EmiBankService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -66,4 +67,3 @@ final class EmiBankController extends Controller
         return response()->json(['id' => $id]);
     }
 }
-

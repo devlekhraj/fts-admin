@@ -7,15 +7,14 @@ namespace App\Domains\Customer\Controllers;
 use App\Domains\Customer\DTOs\CustomerListData;
 use App\Domains\Customer\Resources\CustomerResource;
 use App\Domains\Customer\Services\CustomerService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 final class CustomerController extends Controller
 {
-    public function __construct(private readonly CustomerService $customerService)
-    {
-    }
+    public function __construct(private readonly CustomerService $customerService) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -37,4 +36,3 @@ final class CustomerController extends Controller
         ], 200);
     }
 }
-

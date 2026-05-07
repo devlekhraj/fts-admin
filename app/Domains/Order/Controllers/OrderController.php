@@ -8,7 +8,8 @@ use App\Domains\Order\DTOs\OrderListData;
 use App\Domains\Order\DTOs\OrderStatusUpdateData;
 use App\Domains\Order\Resources\OrderResource;
 use App\Domains\Order\Services\OrderService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -60,4 +61,3 @@ final class OrderController extends Controller
         ], 200);
     }
 }
-

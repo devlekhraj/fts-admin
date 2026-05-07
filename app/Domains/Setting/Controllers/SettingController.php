@@ -7,15 +7,14 @@ namespace App\Domains\Setting\Controllers;
 use App\Domains\Setting\DTOs\SettingUpdateData;
 use App\Domains\Setting\Resources\SettingResource;
 use App\Domains\Setting\Services\SettingService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 final class SettingController extends Controller
 {
-    public function __construct(private readonly SettingService $settingService)
-    {
-    }
+    public function __construct(private readonly SettingService $settingService) {}
 
     public function index(): JsonResponse
     {
@@ -41,4 +40,3 @@ final class SettingController extends Controller
         ]);
     }
 }
-

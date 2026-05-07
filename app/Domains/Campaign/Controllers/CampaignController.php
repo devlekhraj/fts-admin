@@ -8,15 +8,14 @@ use App\Domains\Campaign\DTOs\CampaignCreateData;
 use App\Domains\Campaign\DTOs\CampaignUpdateData;
 use App\Domains\Campaign\Resources\CampaignResource;
 use App\Domains\Campaign\Services\CampaignService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 final class CampaignController extends Controller
 {
-    public function __construct(private readonly CampaignService $campaignService)
-    {
-    }
+    public function __construct(private readonly CampaignService $campaignService) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -80,7 +79,7 @@ final class CampaignController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => $title.' is deleted',
+            'message' => $title . ' is deleted',
         ], 200);
     }
 
@@ -99,11 +98,10 @@ final class CampaignController extends Controller
     {
         return $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:255|unique:discount_campaigns,slug,'.$id,
+            'slug' => 'nullable|string|max:255|unique:discount_campaigns,slug,' . $id,
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
             'is_published' => 'nullable|boolean',
         ]);
     }
 }
-

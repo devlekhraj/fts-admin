@@ -8,15 +8,13 @@ use App\Domains\Campaign\DTOs\CampaignAssignProductsData;
 use App\Domains\Campaign\DTOs\CampaignDiscountUpdateData;
 use App\Domains\Campaign\DTOs\CampaignProductUpdateData;
 use App\Domains\Campaign\Services\CampaignProductService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 final class CampaignProductController extends Controller
 {
-    public function __construct(private readonly CampaignProductService $campaignProductService)
-    {
-    }
+    public function __construct(private readonly CampaignProductService $campaignProductService) {}
 
     public function index(Request $request, string $id): JsonResponse
     {
@@ -99,4 +97,3 @@ final class CampaignProductController extends Controller
         ], 200);
     }
 }
-

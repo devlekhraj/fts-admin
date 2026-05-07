@@ -6,7 +6,8 @@ namespace App\Domains\Rbac\Controllers;
 
 use App\Domains\Rbac\Resources\RoleResource;
 use App\Domains\Rbac\Services\RbacService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 
 final class RbacController extends Controller
@@ -30,4 +31,3 @@ final class RbacController extends Controller
         return response()->json([]);
     }
 }
-

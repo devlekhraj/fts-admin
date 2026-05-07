@@ -7,7 +7,8 @@ namespace App\Domains\EmiRequest\Controllers;
 use App\Domains\EmiRequest\Requests\GenerateEmiApplicationPdfRequest;
 use App\Domains\EmiRequest\Resources\EmiApplicationResource;
 use App\Domains\EmiRequest\Services\EmiApplicationService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -50,4 +51,3 @@ final class EmiApplicationController extends Controller
         return response()->json($result['payload'], $result['status']);
     }
 }
-

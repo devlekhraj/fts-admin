@@ -9,15 +9,14 @@ use App\Domains\Page\Requests\PageStoreRequest;
 use App\Domains\Page\Resources\PageResource;
 use App\Domains\Page\Services\PageService;
 use App\Support\Exceptions\FieldValidationException;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 final class PageController extends Controller
 {
-    public function __construct(private readonly PageService $pageService)
-    {
-    }
+    public function __construct(private readonly PageService $pageService) {}
 
     public function index(Request $request): JsonResponse
     {

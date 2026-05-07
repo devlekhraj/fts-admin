@@ -9,7 +9,8 @@ use App\Domains\Product\Models\ProductAttribute;
 use App\Domains\Product\Requests\UpdateProductAttributeItemRequest;
 use App\Domains\Product\Requests\UpdateProductAttributeValuesRequest;
 use App\Domains\Product\Resources\AttributeResource;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -47,8 +48,8 @@ class ProductAttributeController extends Controller
             ->findOrFail($attributeId);
 
         $values = collect((array) $request->validated('values', []))
-            ->map(static fn ($value): string => trim((string) $value))
-            ->filter(static fn (string $value): bool => $value !== '')
+            ->map(static fn($value): string => trim((string) $value))
+            ->filter(static fn(string $value): bool => $value !== '')
             ->values();
 
         if (strtolower((string) $attribute->type) === 'text') {

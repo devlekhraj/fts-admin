@@ -9,7 +9,8 @@ use App\Domains\Product\Actions\ProductVariantUpdateAction;
 use App\Domains\Product\Requests\StoreProductVariantRequest;
 use App\Domains\Product\Requests\UpdateProductVariantRequest;
 use App\Support\Exceptions\FieldValidationException;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 
 class ProductVariantController extends Controller

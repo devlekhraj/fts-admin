@@ -18,7 +18,8 @@ use App\Domains\Admin\Requests\UpdateAdminProfileRequest;
 use App\Domains\Admin\Requests\UpdateAdminRoleRequest;
 use App\Domains\Admin\Resources\AdminResource;
 use App\Domains\Admin\Services\AdminService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -82,7 +83,7 @@ final class AdminController extends Controller
     {
         try {
             $dto = CreateAdminData::fromArray($request->validated());
-            
+
             $admin = $this->adminService->create($dto);
 
             return response()->json([
@@ -212,4 +213,3 @@ final class AdminController extends Controller
         return $exception->getMessage();
     }
 }
-

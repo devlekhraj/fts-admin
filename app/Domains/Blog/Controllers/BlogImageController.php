@@ -7,7 +7,8 @@ namespace App\Domains\Blog\Controllers;
 use App\Domains\Blog\DTOs\BlogImageUpdateData;
 use App\Domains\Blog\Requests\UpdateBlogImageRequest;
 use App\Domains\Blog\Services\BlogImageService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 
 final class BlogImageController extends Controller
@@ -49,4 +50,3 @@ final class BlogImageController extends Controller
         ]);
     }
 }
-

@@ -22,9 +22,10 @@ require __DIR__ . '/admin/route_file.php';
 require __DIR__ . '/admin/route_developer.php';
 require __DIR__ . '/admin/route_campaign.php';
 
+require __DIR__ . '/admin/route_dashboard.php';
+
 require __DIR__ . '/admin/route_rbac.php';
 require __DIR__ . '/admin/route_emi_requests.php';
 require __DIR__ . '/admin/route_emi_banks.php';
 require __DIR__ . '/admin/route_emi_users.php';
 require __DIR__ . '/admin/route_orders.php';
-

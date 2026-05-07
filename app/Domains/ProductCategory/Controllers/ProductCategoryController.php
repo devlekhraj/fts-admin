@@ -12,7 +12,8 @@ use App\Domains\ProductCategory\Requests\StoreProductCategoryRequest;
 use App\Domains\Faq\Resources\FaqResource;
 use App\Domains\ProductCategory\Resources\ProductCategoryResource;
 use App\Domains\ProductCategory\Services\ProductCategoryService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use App\Domains\Faq\Models\Faq;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

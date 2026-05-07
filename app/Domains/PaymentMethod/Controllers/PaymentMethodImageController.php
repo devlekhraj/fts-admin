@@ -7,14 +7,13 @@ namespace App\Domains\PaymentMethod\Controllers;
 use App\Domains\PaymentMethod\DTOs\PaymentMethodImageUpdateData;
 use App\Domains\PaymentMethod\Requests\UpdatePaymentMethodImageRequest;
 use App\Domains\PaymentMethod\Services\PaymentMethodImageService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 
 final class PaymentMethodImageController extends Controller
 {
-    public function __construct(private readonly PaymentMethodImageService $paymentMethodImageService)
-    {
-    }
+    public function __construct(private readonly PaymentMethodImageService $paymentMethodImageService) {}
 
     public function update(UpdatePaymentMethodImageRequest $request, string $id, string $fileUsageId): JsonResponse
     {
@@ -53,4 +52,3 @@ final class PaymentMethodImageController extends Controller
         ]);
     }
 }
-

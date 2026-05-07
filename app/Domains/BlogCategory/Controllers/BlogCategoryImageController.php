@@ -7,7 +7,8 @@ namespace App\Domains\BlogCategory\Controllers;
 use App\Domains\BlogCategory\DTOs\BlogCategoryImageUpdateData;
 use App\Domains\BlogCategory\Requests\UpdateBlogCategoryImageRequest;
 use App\Domains\BlogCategory\Services\BlogCategoryImageService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 
 final class BlogCategoryImageController extends Controller
@@ -49,4 +50,3 @@ final class BlogCategoryImageController extends Controller
         ]);
     }
 }
-

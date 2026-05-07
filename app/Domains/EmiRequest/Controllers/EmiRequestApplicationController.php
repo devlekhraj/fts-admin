@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Domains\EmiRequest\Controllers;
 
 use App\Domains\EmiRequest\Models\EmiRequest;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use App\Support\Formatters\NumberToWords;
 use App\Support\Formatters\PriceFormatter;
 use Barryvdh\DomPDF\Facade\Pdf;

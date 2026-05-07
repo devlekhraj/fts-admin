@@ -8,10 +8,10 @@
             <div>
               <div class="text-caption mb-1">Total Orders</div>
               <div class="text-h4 font-weight-bold text-primary">{{ formatNumber(metrics.totalOrders) }}</div>
-              <div class="text-caption mt-1">
+              <!-- <div class="text-caption mt-1">
                 <v-icon size="small" color="success">mdi-trending-up</v-icon>
                 <span class="text-success">+8.2%</span> from last month
-              </div>
+              </div> -->
             </div>
             <v-avatar size="48" color="primary" variant="tonal">
               <v-icon size="24">mdi-shopping-outline</v-icon>
@@ -26,10 +26,10 @@
             <div>
               <div class="text-caption mb-1">Total EMI Requests</div>
               <div class="text-h4 font-weight-bold">{{ formatNumber(metrics.totalEmiRequests) }}</div>
-              <div class="text-caption mt-1">
+              <!-- <div class="text-caption mt-1">
                 <v-icon size="small" color="success">mdi-trending-up</v-icon>
                 <span class="text-success">+12.5%</span> from last month
-              </div>
+              </div> -->
             </div>
             <v-avatar size="48" color="success" variant="tonal">
               <v-icon size="24">mdi-cash-multiple</v-icon>
@@ -44,10 +44,10 @@
             <div>
               <div class="text-caption mb-1">Total Products</div>
               <div class="text-h4 font-weight-bold">{{ formatNumber(metrics.totalProducts) }}</div>
-              <div class="text-caption mt-1">
+              <!-- <div class="text-caption mt-1">
                 <v-icon size="small" color="warning">mdi-trending-neutral</v-icon>
                 <span class="text-warning">+2.1%</span> from last month
-              </div>
+              </div> -->
             </div>
             <v-avatar size="48" color="warning" variant="tonal">
               <v-icon size="24">mdi-package-variant-closed</v-icon>
@@ -62,10 +62,10 @@
             <div>
               <div class="text-caption mb-1">Total Customers</div>
               <div class="text-h4 font-weight-bold">{{ formatNumber(metrics.totalCustomers) }}</div>
-              <div class="text-caption mt-1">
+              <!-- <div class="text-caption mt-1">
                 <v-icon size="small" color="success">mdi-trending-up</v-icon>
                 <span class="text-success">+15.3%</span> from last month
-              </div>
+              </div> -->
             </div>
             <v-avatar size="48" color="info" variant="tonal">
               <v-icon size="24">mdi-account-group</v-icon>
@@ -76,7 +76,7 @@
     </v-row>
 
     <!-- Charts Section -->
-    <v-row>
+    <!-- <v-row>
       <v-col cols="12" lg="8">
         <v-card>
           <v-card-title class="d-flex align-center justify-space-between">
@@ -117,46 +117,45 @@
           </v-card-text>
         </v-card>
       </v-col>
-    </v-row>
+    </v-row> -->
 
     <!-- Recent Orders & EMI Requests Section -->
     <v-row>
-      <v-col cols="12" md="6">
-        <v-card>
-          <v-card-title class="d-flex align-center justify-space-between">
-            <div class="text-h6 font-weight-bold">Recent Orders</div>
-            <v-btn variant="text" size="small" :to="{ name: 'admin.orders.list' }">
-              View All
-              <v-icon end>mdi-chevron-right</v-icon>
-            </v-btn>
-          </v-card-title>
-          <v-divider></v-divider>
-          <v-card-text class="pa-4">
-            <v-list density="compact">
-              <v-list-item v-for="(order, index) in recentOrders" :key="order.id"
-                :class="{ 'border-b': index < recentOrders.length - 1 }">
-                <template #prepend>
-                  <v-avatar size="32" color="primary" variant="tonal">
-                    <v-icon size="16">mdi-shopping-outline</v-icon>
-                  </v-avatar>
-                </template>
-                <v-list-item-title class="d-flex align-center justify-space-between">
-                  <span>{{ order.order_number }}</span>
-                  <v-chip size="x-small" :color="getOrderStatusColor(order.status)" variant="tonal">
-                    {{ order.status }}
-                  </v-chip>
-                </v-list-item-title>
-                <v-list-item-subtitle class="d-flex align-center justify-space-between mt-1">
-                  <span>{{ order.customer?.name }}</span>
-                  <span class="text-primary font-weight-medium">{{ formatAmount(order.total) }}</span>
-                </v-list-item-subtitle>
-              </v-list-item>
-            </v-list>
-          </v-card-text>
-        </v-card>
-      </v-col>
-
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="7">
+        <div class="mb-6">
+          <v-card>
+            <v-card-title class="d-flex align-center justify-space-between">
+              <div class="text-h6 font-weight-bold">Recent Orders</div>
+              <v-btn variant="text" size="small" :to="{ name: 'admin.orders.list' }">
+                View All
+                <v-icon end>mdi-chevron-right</v-icon>
+              </v-btn>
+            </v-card-title>
+            <v-divider></v-divider>
+            <v-card-text class="pa-4">
+              <v-list density="compact">
+                <v-list-item v-for="(order, index) in recentOrders" :key="order.id"
+                  :class="{ 'border-b': index < recentOrders.length - 1 }">
+                  <template #prepend>
+                    <v-avatar size="32" color="primary" variant="tonal">
+                      <v-icon size="16">mdi-shopping-outline</v-icon>
+                    </v-avatar>
+                  </template>
+                  <v-list-item-title class="d-flex align-center justify-space-between">
+                    <span>{{ order.order_number }}</span>
+                    <v-chip size="x-small" :color="getOrderStatusColor(order.status)" variant="tonal">
+                      {{ order.status }}
+                    </v-chip>
+                  </v-list-item-title>
+                  <v-list-item-subtitle class="d-flex align-center justify-space-between mt-1">
+                    <span>{{ order.customer?.name }}</span>
+                    <span class="text-primary font-weight-medium">{{ formatAmount(order.total) }}</span>
+                  </v-list-item-subtitle>
+                </v-list-item>
+              </v-list>
+            </v-card-text>
+          </v-card>
+        </div>
         <v-card>
           <v-card-title class="d-flex align-center justify-space-between">
             <div class="text-h6 font-weight-bold">Recent EMI Requests</div>
@@ -190,11 +189,8 @@
           </v-card-text>
         </v-card>
       </v-col>
-    </v-row>
 
-    <!-- Recent Activity & Top Products Section -->
-    <v-row>
-      <v-col cols="12" lg="6">
+      <v-col cols="12" md="5">
         <v-card>
           <v-card-title class="d-flex align-center justify-space-between">
             <div class="text-h6 font-weight-bold">Recent Activity</div>
@@ -222,6 +218,12 @@
             </v-list>
           </v-card-text>
         </v-card>
+      </v-col>
+    </v-row>
+
+    <!-- Recent Activity & Top Products Section -->
+    <!-- <v-row>
+      <v-col cols="12" lg="6">
       </v-col>
 
       <v-col cols="12" lg="6">
@@ -256,18 +258,17 @@
           </v-card-text>
         </v-card>
       </v-col>
-    </v-row>
+    </v-row> -->
   </v-container>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useAuthStore } from '../stores/auth.store';
 import { formatAmount } from '@/shared/utils';
-import AppPageHeader from '@/components/AppPageHeader.vue';
+import { getDashboardMetrics } from '@/api/dashboard.api';
 
 const authStore = useAuthStore();
-const admin = computed(() => authStore.admin);
 
 const chartPeriod = ref('month');
 
@@ -356,15 +357,33 @@ const recentActivity = ref([
   { id: 2, title: 'Product Updated', description: 'MacBook Pro 16" price updated', time: '4 hours ago', icon: 'mdi-package-variant-closed', color: 'success' },
   { id: 3, title: 'EMI Request Approved', description: 'iPhone 15 Pro EMI for Priya Sharma', time: '6 hours ago', icon: 'mdi-cash-multiple', color: 'info' },
   { id: 4, title: 'New Customer Registered', description: 'Anita Verma joined the platform', time: '8 hours ago', icon: 'mdi-account-plus', color: 'warning' },
-  { id: 5, title: 'Payment Received', description: formatAmount(45999) + ' from Order #ORD-2024-005', time: '12 hours ago', icon: 'mdi-currency-usd', color: 'success' }
+  { id: 5, title: 'Payment Received', description: formatAmount(45999) + ' from Order #ORD-2024-005', time: '12 hours ago', icon: 'mdi-currency-usd', color: 'success' },
+  { id: 6, title: 'Order Status Updated', description: 'Order #ORD-2024-004 marked as Shipped', time: '14 hours ago', icon: 'mdi-truck-fast', color: 'primary' },
+  { id: 7, title: 'New EMI Request', description: 'EMI request submitted for iPad Air by Sunita Sharma', time: '16 hours ago', icon: 'mdi-cash-plus', color: 'info' },
+  { id: 8, title: 'Product Added', description: 'New product "Samsung Galaxy S24" added', time: '18 hours ago', icon: 'mdi-plus-box', color: 'success' },
+  { id: 9, title: 'Customer Profile Updated', description: 'Customer "Rahul Verma" updated phone number', time: '20 hours ago', icon: 'mdi-account-edit', color: 'warning' },
+  { id: 10, title: 'Refund Processed', description: formatAmount(12999) + ' refunded for Order #ORD-2024-002', time: '22 hours ago', icon: 'mdi-cash-refund', color: 'error' },
+  { id: 11, title: 'Low Stock Alert', description: 'iPhone 15 Pro stock is below threshold', time: '1 day ago', icon: 'mdi-alert-circle-outline', color: 'warning' },
+  { id: 12, title: 'Banner Updated', description: 'Homepage banner image updated', time: '1 day ago', icon: 'mdi-image-edit', color: 'primary' },
+  { id: 13, title: 'New Review Received', description: 'New 5-star review for "AirPods Pro"', time: '1 day ago', icon: 'mdi-star-outline', color: 'success' },
+  { id: 14, title: 'Coupon Applied', description: 'Discount coupon applied on Order #ORD-2024-006', time: '2 days ago', icon: 'mdi-ticket-percent-outline', color: 'info' },
+  { id: 15, title: 'Payment Pending', description: 'Payment pending for Order #ORD-2024-007', time: '2 days ago', icon: 'mdi-timer-sand', color: 'warning' },
+  { id: 16, title: 'Product Disabled', description: 'Product "Apple Watch Ultra" marked inactive', time: '2 days ago', icon: 'mdi-package-variant-remove', color: 'error' },
+  { id: 17, title: 'EMI Request Completed', description: 'EMI request for MacBook Pro 16" marked Finished', time: '3 days ago', icon: 'mdi-check-circle-outline', color: 'success' },
+  { id: 18, title: 'New Campaign Created', description: 'Campaign "Summer Sale" created and scheduled', time: '3 days ago', icon: 'mdi-bullhorn-outline', color: 'primary' },
+  { id: 19, title: 'New Customer Registered', description: 'Customer "Deepa Rai" joined the platform', time: '4 days ago', icon: 'mdi-account-plus', color: 'info' },
+  { id: 20, title: 'Payment Received', description: formatAmount(75999) + ' from Order #ORD-2024-003', time: '5 days ago', icon: 'mdi-currency-usd', color: 'success' }
 ]);
 
 const metrics = ref({
-  totalOrders: 1847,
-  totalEmiRequests: 342,
-  totalProducts: 387,
-  totalCustomers: 1256
+  totalOrders: 0,
+  totalEmiRequests: 0,
+  totalProducts: 0,
+  totalCustomers: 0,
 });
+
+const metricsLoading = ref(false);
+const metricsError = ref<string | null>(null);
 
 function formatNumber(num: number): string {
   return new Intl.NumberFormat('en-IN').format(num);
@@ -392,10 +411,33 @@ function getEmiStatusColor(status?: string | null): string {
   return statusColors[status?.toLowerCase() || ''] || 'grey';
 }
 
-function refreshData() {
-  // Static data - no refresh needed
-  console.log('Dashboard uses static data');
+async function fetchMetrics() {
+  metricsLoading.value = true;
+  metricsError.value = null;
+
+  try {
+    const data = await getDashboardMetrics();
+    metrics.value = {
+      totalOrders: Number(data.totalOrders ?? 0),
+      totalEmiRequests: Number(data.totalEmiRequests ?? 0),
+      totalProducts: Number(data.totalProducts ?? 0),
+      totalCustomers: Number(data.totalCustomers ?? 0),
+    };
+  } catch (error) {
+    console.error('Failed to load dashboard metrics', error);
+    metricsError.value = 'Failed to load metrics';
+  } finally {
+    metricsLoading.value = false;
+  }
 }
+
+function refreshData() {
+  void fetchMetrics();
+}
+
+onMounted(() => {
+  void fetchMetrics();
+});
 </script>
 
 <style scoped>

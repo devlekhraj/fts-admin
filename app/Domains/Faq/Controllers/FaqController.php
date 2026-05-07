@@ -7,15 +7,14 @@ namespace App\Domains\Faq\Controllers;
 use App\Domains\Faq\DTOs\FaqListData;
 use App\Domains\Faq\Resources\FaqResource;
 use App\Domains\Faq\Services\FaqService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 final class FaqController extends Controller
 {
-    public function __construct(private readonly FaqService $faqService)
-    {
-    }
+    public function __construct(private readonly FaqService $faqService) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -27,4 +26,3 @@ final class FaqController extends Controller
         ]);
     }
 }
-

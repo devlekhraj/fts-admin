@@ -6,15 +6,14 @@ namespace App\Domains\Campaign\Controllers;
 
 use App\Domains\Campaign\DTOs\CampaignImageStoreData;
 use App\Domains\Campaign\Services\CampaignImageService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 final class CampaignImageController extends Controller
 {
-    public function __construct(private readonly CampaignImageService $campaignImageService)
-    {
-    }
+    public function __construct(private readonly CampaignImageService $campaignImageService) {}
 
     public function store(Request $request, string $id): JsonResponse
     {
@@ -39,9 +38,8 @@ final class CampaignImageController extends Controller
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to upload image: '.$e->getMessage(),
+                'message' => 'Failed to upload image: ' . $e->getMessage(),
             ], 500);
         }
     }
 }
-

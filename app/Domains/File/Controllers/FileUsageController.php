@@ -8,7 +8,8 @@ use App\Domains\File\Requests\UpdateFileUsageRequest;
 use App\Domains\File\DTOs\UpdateFileUsageData;
 use App\Domains\File\Services\FileUsageService;
 use App\Support\Exceptions\FieldValidationException;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

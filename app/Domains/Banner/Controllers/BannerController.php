@@ -11,7 +11,8 @@ use App\Domains\Banner\Requests\StoreBannerRequest;
 use App\Domains\Banner\Requests\UpdateBannerRequest;
 use App\Domains\Banner\Resources\BannerResource;
 use App\Domains\Banner\Services\BannerService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

@@ -7,7 +7,8 @@ namespace App\Domains\File\Controllers;
 use App\Domains\File\Requests\StoreFileAssignRequest;
 use App\Domains\File\DTOs\ListFilesData;
 use App\Domains\File\Services\FileService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Throwable;

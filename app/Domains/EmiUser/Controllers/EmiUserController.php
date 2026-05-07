@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\EmiUser\Controllers;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 
 final class EmiUserController extends Controller
@@ -15,4 +16,3 @@ final class EmiUserController extends Controller
         return response()->json([]);
     }
 }
-

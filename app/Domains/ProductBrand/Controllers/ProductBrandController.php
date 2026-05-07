@@ -12,7 +12,8 @@ use App\Domains\ProductBrand\DTOs\BrandCreateData;
 use App\Domains\ProductBrand\DTOs\BrandUpdateData;
 use App\Domains\ProductBrand\Resources\ProductBrandResource;
 use App\Domains\ProductBrand\Services\ProductBrandService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use App\Domains\Faq\Models\Faq;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

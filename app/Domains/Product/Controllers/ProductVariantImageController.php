@@ -6,7 +6,8 @@ namespace App\Domains\Product\Controllers;
 
 use App\Domains\File\Models\FileUsage;
 use App\Domains\Product\Requests\UpdateProductImageRequest;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 

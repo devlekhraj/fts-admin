@@ -9,15 +9,14 @@ use App\Domains\PaymentMethod\DTOs\PaymentMethodUpdateData;
 use App\Domains\PaymentMethod\Requests\UpdatePaymentMethodRequest;
 use App\Domains\PaymentMethod\Resources\PaymentMethodResource;
 use App\Domains\PaymentMethod\Services\PaymentMethodService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 final class PaymentMethodController extends Controller
 {
-    public function __construct(private readonly PaymentMethodService $paymentMethodService)
-    {
-    }
+    public function __construct(private readonly PaymentMethodService $paymentMethodService) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -59,4 +58,3 @@ final class PaymentMethodController extends Controller
         return response()->json(null, 204);
     }
 }
-

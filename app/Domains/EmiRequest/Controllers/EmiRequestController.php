@@ -10,7 +10,8 @@ use App\Domains\EmiRequest\Requests\StoreEmiRequestRequest;
 use App\Domains\EmiRequest\Requests\UpdateEmiRequestRequest;
 use App\Domains\EmiRequest\Resources\EmiRequestListResource;
 use App\Domains\EmiRequest\Services\EmiRequestService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -58,4 +59,3 @@ final class EmiRequestController extends Controller
         return response()->json(['id' => $id]);
     }
 }
-

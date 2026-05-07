@@ -10,7 +10,8 @@ use App\Domains\Blog\Requests\StoreBlogPostRequest;
 use App\Domains\Blog\Requests\UpdateBlogPostRequest;
 use App\Domains\Blog\Resources\BlogResource;
 use App\Domains\Blog\Services\BlogService;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -75,4 +76,3 @@ final class BlogController extends Controller
         ], 200);
     }
 }
-
