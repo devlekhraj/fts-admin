@@ -19,7 +19,7 @@ class CopyMediaToFilesCommand extends Command
         // 'Jed\\Ecommerce\\App\\ProductBrand',
         // 'Jed\\Ecommerce\\App\\ProductCategory',
         // "Jed\\Blogs\\App\\Blog",
-        'Jed\\Ecommerce\\App\\Product',
+        // 'Jed\\Ecommerce\\App\\Product',
     ];
 
     private const MODEL_TYPE_TABLE_MAP = [
@@ -71,6 +71,8 @@ class CopyMediaToFilesCommand extends Command
 
             return self::FAILURE;
         }
+
+        $hasIsPublic = Schema::hasColumn('files', 'is_public');
 
         $chunkSize = max(1, (int) $this->option('chunk'));
         $modelTypes = $this->option('model-type');
@@ -140,7 +142,8 @@ class CopyMediaToFilesCommand extends Command
             &$missing,
             &$usageCreatedOrUpdated,
             $dryRun,
-            $cdnRoot
+            $cdnRoot,
+            $hasIsPublic
         ): void {
             $fileUpserts = [];
             $usageRegistry = [];
@@ -199,7 +202,7 @@ class CopyMediaToFilesCommand extends Command
                 $dimensions = $this->extractDimensions($row->custom_properties, $sourcePath);
                 $metaPayload = ['directory' => $targetFolder];
 
-                $fileUpserts[] = [
+                $filePayload = [
                     'key' => $key,
                     'file_name' => $targetFileName,
                     'file_path' => $filePath,
@@ -213,6 +216,10 @@ class CopyMediaToFilesCommand extends Command
                     'created_at' => $row->created_at ?? now(),
                     'updated_at' => $row->updated_at ?? now(),
                 ];
+                if ($hasIsPublic) {
+                    $filePayload['is_public'] = true;
+                }
+                $fileUpserts[] = $filePayload;
 
                 $usageRegistry[] = [
                     'target_file_name' => $targetFileName,
@@ -228,20 +235,25 @@ class CopyMediaToFilesCommand extends Command
             }
 
             if (! $dryRun && ! empty($fileUpserts)) {
+                $fileUpdateColumns = [
+                    'file_path',
+                    'extension',
+                    'seq_no',
+                    'mime_type',
+                    'file_size',
+                    'height',
+                    'width',
+                    'meta',
+                    'updated_at',
+                ];
+                if ($hasIsPublic) {
+                    $fileUpdateColumns[] = 'is_public';
+                }
+
                 DB::table('files')->upsert(
                     $fileUpserts,
                     ['file_name'],
-                    [
-                        'file_path',
-                        'extension',
-                        'seq_no',
-                        'mime_type',
-                        'file_size',
-                        'height',
-                        'width',
-                        'meta',
-                        'updated_at',
-                    ]
+                    $fileUpdateColumns
                 );
 
                 $filesByName = DB::table('files')

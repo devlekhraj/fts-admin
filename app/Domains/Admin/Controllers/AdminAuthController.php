@@ -6,8 +6,8 @@ namespace App\Domains\Admin\Controllers;
 
 use App\Domains\Admin\Requests\AdminLoginRequest;
 use App\Domains\Admin\Resources\AdminResource;
-use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Routing\Controller;
 use Tymon\JWTAuth\JWTGuard;
 
 final class AdminAuthController extends Controller

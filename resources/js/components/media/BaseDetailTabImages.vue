@@ -4,7 +4,7 @@
       <div class="text-body-2 text-medium-emphasis">
         Total images: {{ files.length }}
       </div>
-      <v-btn color="primary" variant="tonal" @click="onAddImage">
+      <v-btn color="primary" variant="flat" @click="onAddImage">
         <v-icon start size="16">mdi-image-plus</v-icon>
         Add Image
       </v-btn>
@@ -41,7 +41,7 @@
           <slot name="rows" :file="file"></slot>
           <td class="py-3">
             <div class="d-flex align-center ga-1">
-              <v-btn v-if="editModal" size="small" variant="tonal" color="primary" @click="onEditFile(file)">
+              <v-btn v-if="editModal"  variant="outlined" color="primary" @click="onEditFile(file)">
                 <v-icon size="16">mdi-cog</v-icon> {{ editButtonText }}
               </v-btn>
               <slot name="actions" :file="file"></slot>

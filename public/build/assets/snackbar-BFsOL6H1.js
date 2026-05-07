@@ -1,1 +1,0 @@
-import{T as r}from"./main-D5Opytir.js";function t(){const s=r();return{showSuccess:o=>{s.show({message:o,color:"success"})},showError:o=>{s.show({message:o,color:"error"})},showInfo:o=>{s.show({message:o,color:"info"})},showWarning:o=>{s.show({message:o,color:"warning"})}}}export{t as u};

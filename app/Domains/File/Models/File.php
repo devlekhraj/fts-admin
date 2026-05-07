@@ -23,12 +23,14 @@ final class File extends BaseModel
         'width',
         'disk',
         'content_hash',
+        'is_public',
         'meta',
     ];
 
     protected $appends = ['url'];
     protected $casts = [
         'meta' => 'array',
+        'is_public' => 'boolean',
     ];
 
     public function usages(): HasMany

@@ -64,6 +64,8 @@ class CopyBannerImageToFilesCommand extends Command
             return self::FAILURE;
         }
 
+        $hasIsPublic = Schema::hasColumn('files', 'is_public');
+
         $chunkSize = max(1, (int) $this->option('chunk'));
         $modelTypes = self::DEFAULT_MODEL_TYPES;
         $dryRun = (bool) $this->option('dry-run');
@@ -131,7 +133,8 @@ class CopyBannerImageToFilesCommand extends Command
             &$usageCreatedOrUpdated,
             &$missingBannerImageMapping,
             $dryRun,
-            $cdnRoot
+            $cdnRoot,
+            $hasIsPublic
         ): void {
             $targetFileNames = [];
             foreach ($rows as $row) {
@@ -214,7 +217,7 @@ class CopyBannerImageToFilesCommand extends Command
                 $dimensions = $this->extractDimensions($row->custom_properties, $sourcePath);
                 $metaPayload = ['directory' => $targetFolder];
 
-                $fileUpserts[] = [
+                $filePayload = [
                     'key' => $key,
                     'file_name' => $targetFileName,
                     'file_path' => $filePath,
@@ -228,6 +231,10 @@ class CopyBannerImageToFilesCommand extends Command
                     'created_at' => $row->created_at ?? now(),
                     'updated_at' => $row->updated_at ?? now(),
                 ];
+                if ($hasIsPublic) {
+                    $filePayload['is_public'] = true;
+                }
+                $fileUpserts[] = $filePayload;
 
                 $usageRegistry[] = [
                     'target_file_name' => $targetFileName,
@@ -244,20 +251,25 @@ class CopyBannerImageToFilesCommand extends Command
             }
 
             if (! $dryRun && ! empty($fileUpserts)) {
+                $fileUpdateColumns = [
+                    'file_path',
+                    'extension',
+                    'seq_no',
+                    'mime_type',
+                    'file_size',
+                    'height',
+                    'width',
+                    'meta',
+                    'updated_at',
+                ];
+                if ($hasIsPublic) {
+                    $fileUpdateColumns[] = 'is_public';
+                }
+
                 DB::table('files')->upsert(
                     $fileUpserts,
                     ['file_name'],
-                    [
-                        'file_path',
-                        'extension',
-                        'seq_no',
-                        'mime_type',
-                        'file_size',
-                        'height',
-                        'width',
-                        'meta',
-                        'updated_at',
-                    ]
+                    $fileUpdateColumns
                 );
 
                 $filesByName = DB::table('files')
