@@ -17,7 +17,7 @@ final class FileUploadAction
 
     public function __construct()
     {
-        $this->disk = env('APP_ENV') === 'local' ? 'media' : 'cdn';
+        $this->disk = (string) config('filesystems.default');
     }
     private const DEFAULT_DIRECTORY = 'uploads';
 

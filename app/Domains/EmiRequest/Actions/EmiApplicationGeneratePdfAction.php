@@ -13,8 +13,8 @@ use Illuminate\Support\Str;
 
 final class EmiApplicationGeneratePdfAction
 {
-    // private const STORAGE_DISK = 'fatafat_cdn';
-    private const STORAGE_DISK = 'cdn';
+    private const STORAGE_DISK = 'fatafat_cdn';
+    // private const STORAGE_DISK = 'cdn';
 
     public function __construct(
         private readonly GenerateEmiApplicationPdfAction $generateEmiApplicationPdfAction,

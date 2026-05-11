@@ -6,6 +6,7 @@ namespace App\Domains\File\Models;
 
 use App\Support\Eloquent\BaseModel;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 final class File extends BaseModel
 {
@@ -50,13 +51,9 @@ final class File extends BaseModel
             return $path;
         }
 
-        $baseUrl = trim((string) config('filesystems.disks.fatafat_cdn.url', ''), '/');
         $relativePath = ltrim($path, '/');
+        $disk = is_string($this->disk) && trim($this->disk) !== '' ? trim($this->disk) : (string) config('filesystems.default');
 
-        if ($baseUrl === '') {
-            return '/' . $relativePath;
-        }
-
-        return $baseUrl . '/' . $relativePath;
+        return Storage::disk($disk)->url($relativePath);
     }
 }

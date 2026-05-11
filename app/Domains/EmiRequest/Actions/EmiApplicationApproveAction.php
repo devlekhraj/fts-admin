@@ -12,8 +12,12 @@ use Throwable;
 
 final class EmiApplicationApproveAction
 {
-    // private const STORAGE_DISK = 'fatafat_cdn';
-    private const STORAGE_DISK = 'cdn';
+    private string $disk;
+
+    public function __construct()
+    {
+        $this->disk = (string) config('filesystems.default');
+    }
 
     /**
      * @param array{
@@ -51,7 +55,9 @@ final class EmiApplicationApproveAction
         }
 
         try {
-            Mail::send([], [], function ($message) use ($validated, $to, $cc, $bcc, $filePath, $fileName): void {
+            $disk = $this->disk;
+
+            Mail::send([], [], function ($message) use ($validated, $to, $cc, $bcc, $filePath, $fileName, $disk): void {
                 $message
                     ->to($to)
                     ->subject((string) $validated['subject'])
@@ -65,8 +71,8 @@ final class EmiApplicationApproveAction
                     $message->bcc($bcc);
                 }
 
-                if ($filePath !== '' && Storage::disk(self::STORAGE_DISK)->exists($filePath)) {
-                    $content = Storage::disk(self::STORAGE_DISK)->get($filePath);
+                if ($filePath !== '' && Storage::disk($disk)->exists($filePath)) {
+                    $content = Storage::disk($disk)->get($filePath);
 
                     $message->attachData($content, $fileName !== '' ? $fileName : 'emi-application.pdf', [
                         'mime' => 'application/pdf',
@@ -113,4 +119,3 @@ final class EmiApplicationApproveAction
         }));
     }
 }
-
