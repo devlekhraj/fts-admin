@@ -50,7 +50,7 @@ final class File extends BaseModel
             return $path;
         }
 
-        $baseUrl = trim((string) config('filesystems.disks.cdn.url', ''), '/');
+        $baseUrl = trim((string) config('filesystems.disks.fatafat_cdn.url', ''), '/');
         $relativePath = ltrim($path, '/');
 
         if ($baseUrl === '') {
