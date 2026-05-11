@@ -56,16 +56,30 @@ final class FileService
                 } else {
                     // Always use usage_type/usage_id directory pattern when both are present
                     if ($usageType && $usageId) {
-                        $directory = $usageType . '/' . $usageId; // Always use usage_type/{usage_id} pattern
+                        $directory = $usageType; // Always use usage_type/{usage_id} pattern
                     } else {
                         $directory = isset($data['directory']) ? $data['directory'] : 'uploads'; // Use directory field or default uploads
                     }
 
+        
                     $uploadResult = $this->fileUploadAction->execute(
                         $file,
                         $directory,
                         $data['file_name'] ?? null
                     );
+                    $fileModel = $uploadResult['fileModel'];
+                    if (in_array($usageType, [
+                        'banners',
+                        'blog_categories',
+                        'blogs',
+                        'product_brands',
+                        'product_categories',
+                        'products'
+                    ])) {
+                        $fileModel->update([
+                            'is_public' => true, // Override directory in meta to usage_type for these contexts
+                        ]);
+                    }
                     $fileId = $uploadResult['file_id'];
                     $fileData = $uploadResult['file_data'];
                 }

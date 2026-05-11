@@ -24,7 +24,6 @@ final class FileUploadAction
     public function execute(UploadedFile $file, string $directory, ?string $preferredFileName = null): array
     {
         $directory = $this->normalizeDirectory($directory);
-
         $bytes = $file->get();
         if (! is_string($bytes) || $bytes === '') {
             throw new RuntimeException('Unable to read uploaded image bytes.');
@@ -57,7 +56,7 @@ final class FileUploadAction
             if ($attempts > 25) {
                 throw new RuntimeException('Unable to generate a unique file name.');
             }
-        } while (\App\Domains\File\Models\File::where('file_name', $targetFileName)->exists() || $disk->exists($relativePath));
+        } while (File::where('file_name', $targetFileName)->exists() || $disk->exists($relativePath));
 
         try {
             if (! $disk->put($relativePath, $bytes)) {
@@ -82,7 +81,7 @@ final class FileUploadAction
             $meta = '{}';
         }
 
-        $fileId = \App\Domains\File\Models\File::insertGetId([
+        $fileId = File::insertGetId([
             'key' => $key,
             'file_name' => $targetFileName,
             'file_path' => $relativePath,
@@ -98,12 +97,13 @@ final class FileUploadAction
             'updated_at' => $now,
         ]);
 
-        $fileModel = \App\Domains\File\Models\File::query()->find((int) $fileId);
+        $fileModel = File::query()->find((int) $fileId);
         if (! $fileModel) {
             throw new RuntimeException('Uploaded file could not be resolved.');
         }
 
         return [
+            'fileModel' => $fileModel,
             'file_id' => (int) $fileModel->id,
             'file_data' => $fileModel->toArray(),
         ];
