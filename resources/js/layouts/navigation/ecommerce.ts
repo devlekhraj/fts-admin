@@ -11,12 +11,12 @@ export const ecommerceNav: NavGroup[] = [
     // },
     {
         group: 'Dashboard',
-        icon: 'mdi-view-dashboard-outline',
+        icon: 'mdi-chart-bell-curve-cumulative',
         routeName: 'admin.overview',
     },
     {
         group: 'EMI Requests',
-        icon: 'mdi-cash-multiple',
+        icon: 'mdi-ticket-percent-outline',
         routeName: 'admin.emi.requests',
     },
     {
@@ -58,7 +58,7 @@ export const ecommerceNav: NavGroup[] = [
     // },
     {
         group: 'Catalog',
-        icon: 'mdi-archive-outline',
+        icon: 'mdi-storefront-outline',
         items: [
             { title: 'Products', routeName: 'admin.product.list', icon: 'mdi-package-variant-closed' },
             { title: 'Categories', routeName: 'admin.product.categories', icon: 'mdi-shape-outline' },
@@ -102,7 +102,7 @@ export const ecommerceNav: NavGroup[] = [
     },
     {
         group: 'Media',
-        icon: 'mdi-image-multiple-outline',
+        icon: 'mdi-image-outline',
         routeName: 'admin.files.list',
     },
     {
