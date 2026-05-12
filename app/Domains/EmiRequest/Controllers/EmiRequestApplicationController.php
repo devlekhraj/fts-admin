@@ -16,6 +16,13 @@ use Illuminate\Support\Facades\Storage;
 
 final class EmiRequestApplicationController extends Controller
 {
+    private string $disk;
+
+    public function __construct()
+    {
+        $this->disk = (string) config('filesystems.default');
+    }
+
     public function generateApplication(string $id): Response|JsonResponse
     {
         $application = EmiRequest::query()
@@ -91,10 +98,10 @@ final class EmiRequestApplicationController extends Controller
         $fileName = 'emi-application-' . $application->id . '.pdf';
         $relativePath = 'applications/' . $fileName;
 
-        Storage::disk('cdn')->put($relativePath, $pdf->output());
+        Storage::disk($this->disk)->put($relativePath, $pdf->output());
 
         return response()->json([
-            'path' => Storage::disk('cdn')->path($relativePath),
+            'path' => Storage::disk($this->disk)->path($relativePath),
         ]);
     }
 }

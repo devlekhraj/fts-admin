@@ -12,8 +12,13 @@ use Throwable;
 
 final class FileUploadService
 {
-    private const DISK = 'cdn';
+    private string $disk;
     private const DEFAULT_DIRECTORY = 'uploads';
+
+    public function __construct()
+    {
+        $this->disk = (string) config('filesystems.default');
+    }
 
     public function uploadFile(UploadedFile $file, ?string $directory = null): array
     {
@@ -30,7 +35,7 @@ final class FileUploadService
         $extension = preg_replace('/[^a-z0-9]/', '', $extension) ?: 'jpg';
 
         $targetDirectory = $this->normalizeDirectory((string) ($directory ?? self::DEFAULT_DIRECTORY));
-        $disk = Storage::disk(self::DISK);
+        $disk = Storage::disk($this->disk);
 
         $targetFileName = $nameOnly . '.' . $extension;
         $alreadyExists = false;
@@ -42,7 +47,7 @@ final class FileUploadService
         }
 
         try {
-            $storedPath = $file->storeAs($targetDirectory, $targetFileName, self::DISK);
+            $storedPath = $file->storeAs($targetDirectory, $targetFileName, $this->disk);
         } catch (Throwable $exception) {
             throw new RuntimeException('Failed to upload file.', 0, $exception);
         }
@@ -58,7 +63,7 @@ final class FileUploadService
         }
 
         return [
-            'disk' => self::DISK,
+            'disk' => $this->disk,
             'directory' => $targetDirectory,
             'file_name' => $targetFileName,
             'file_path' => $storedPath,
@@ -123,7 +128,7 @@ final class FileUploadService
 
     private function buildUrl(string $relativePath): string
     {
-        $baseUrl = trim((string) config('filesystems.disks.' . self::DISK . '.url', ''), '/');
+        $baseUrl = trim((string) config('filesystems.disks.' . $this->disk . '.url', ''), '/');
 
         return $baseUrl !== ''
             ? $baseUrl . '/' . ltrim($relativePath, '/')

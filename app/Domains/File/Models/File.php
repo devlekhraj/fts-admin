@@ -6,6 +6,7 @@ namespace App\Domains\File\Models;
 
 use App\Support\Eloquent\BaseModel;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Storage;
 
 final class File extends BaseModel
@@ -54,6 +55,9 @@ final class File extends BaseModel
         $relativePath = ltrim($path, '/');
         $disk = is_string($this->disk) && trim($this->disk) !== '' ? trim($this->disk) : (string) config('filesystems.default');
 
-        return Storage::disk($disk)->url($relativePath);
+        /** @var FilesystemAdapter $storage */
+        $storage = Storage::disk($this->disk);
+
+        return $storage->url($relativePath);
     }
 }

@@ -6,19 +6,19 @@ namespace App\Domains\EmiRequest\Actions;
 
 use App\Domains\EmiBank\Models\EmiBank;
 use App\Domains\EmiRequest\Models\EmiApplication;
-use App\Domains\EmiRequest\Models\EmiRequest;
 use App\Domains\EmiRequest\Requests\GenerateEmiApplicationPdfRequest;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 final class EmiApplicationGeneratePdfAction
 {
-    private const STORAGE_DISK = 'fatafat_cdn';
-    // private const STORAGE_DISK = 'cdn';
+    private string $disk;
 
     public function __construct(
         private readonly GenerateEmiApplicationPdfAction $generateEmiApplicationPdfAction,
-    ) {}
+    ) {
+        $this->disk = (string) config('filesystems.default');
+    }
 
     /**
      * @return array{status:int,payload:array}
@@ -36,7 +36,7 @@ final class EmiApplicationGeneratePdfAction
             ? $nameWithoutExtension . '-' . $uniqueSuffix . '.' . $extension
             : $filename . '-' . $uniqueSuffix;
         $relativePath = "emi-requests/{$emiRequestId}/applications/{$uniqueFilename}";
-        Storage::disk(self::STORAGE_DISK)->put($relativePath, $pdf->bytes);
+        Storage::disk($this->disk)->put($relativePath, $pdf->bytes);
 
         if ($pdf->emiBankId === null) {
             return [
@@ -66,7 +66,7 @@ final class EmiApplicationGeneratePdfAction
             $signature = $request->file('signature_file');
             $signatureName = 'signature-' . (string) Str::uuid() . '.' . $signature->getClientOriginalExtension();
             $signaturePath = "emi/applications/{$emiRequestId}/signatures/{$signatureName}";
-            Storage::disk(self::STORAGE_DISK)->put($signaturePath, $signature->get());
+            Storage::disk($this->disk)->put($signaturePath, $signature->get());
             $applicationData['signature_file_path'] = $signaturePath;
         }
 
@@ -106,7 +106,7 @@ final class EmiApplicationGeneratePdfAction
 
     private function buildDiskUrl(string $relativePath): string
     {
-        $baseUrl = trim((string) config('filesystems.disks.' . self::STORAGE_DISK . '.url', ''), '/');
+        $baseUrl = trim((string) config('filesystems.disks.' . $this->disk . '.url', ''), '/');
 
         return $baseUrl !== '' ? $baseUrl . '/' . ltrim($relativePath, '/') : '/' . ltrim($relativePath, '/');
     }
