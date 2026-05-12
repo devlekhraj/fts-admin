@@ -54,9 +54,8 @@ final class File extends BaseModel
 
         $relativePath = ltrim($path, '/');
         $disk = is_string($this->disk) && trim($this->disk) !== '' ? trim($this->disk) : (string) config('filesystems.default');
-
         /** @var FilesystemAdapter $storage */
-        $storage = Storage::disk($this->disk);
+        $storage = Storage::disk($disk);
 
         return $storage->url($relativePath);
     }
