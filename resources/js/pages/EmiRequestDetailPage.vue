@@ -1,22 +1,12 @@
 <template>
 	<AppPageHeader title="EMI Request Detail" subtitle="View EMI request information">
 		<template #actions>
-            <v-btn
-                color="success"
-                variant="flat"
-                prepend-icon="mdi-check-bold"
-                @click="openConfirm('approved')"
-            >
-                Approve Request
-            </v-btn>
-            <v-btn
-                color="error"
-                variant="flat"
-                prepend-icon="mdi-close-thick"
-                @click="openConfirm('rejected')"
-            >
-                Reject Request
-            </v-btn>
+			<v-btn color="success" variant="flat" prepend-icon="mdi-check-bold" @click="openConfirm('approved')">
+				Approve Request
+			</v-btn>
+			<v-btn color="error" variant="flat" prepend-icon="mdi-close-thick" @click="openConfirm('rejected')">
+				Reject Request
+			</v-btn>
 
 			<v-btn color="error" variant="outlined" prepend-icon="mdi-delete-outline">Delete</v-btn>
 
@@ -31,8 +21,8 @@
 		<v-card class="pa-6 mb-6">
 			<div class="summary">
 				<div class="summary__left">
-					<v-avatar size="76" color="primary" variant="tonal" class="mr-4" rounded>
-						<v-icon size="36">mdi-clipboard-text</v-icon>
+					<v-avatar size="130" color="primary" variant="tonal" class="mr-4" rounded>
+						<v-img :src="application.product?.thumb"></v-img>
 					</v-avatar>
 					<div>
 						<div class="text-subtitle-1 font-weight-bold">{{ referenceId }}</div>
@@ -41,7 +31,7 @@
 							<v-chip size="small" color="info" label variant="tonal">{{ statusLabel }}</v-chip>
 						</div>
 						<div class="text-body-2 text-primary mt-2 font-weight-medium">{{ productName }}</div>
-	
+
 						<div class="text-body-2 text-medium-emphasis mt-1 dot-line">
 							{{ applicantInfo.name }} · {{ applicantInfo.phone }} · {{ applicantInfo.email }}
 						</div>
@@ -49,11 +39,11 @@
 				</div>
 				<div class="summary__right">
 					<div class="text-body-2 text-medium-emphasis">Submitted On</div>
-					<div class="text-body-1">{{ submittedAt }}</div>
+					<div class="text-body-1">{{ formatDateTime(application.created_at || '') }}</div>
 				</div>
 			</div>
 		</v-card>
-	
+
 		<v-row class="mb-4">
 			<v-col cols="12" md="7">
 				<v-card class="mb-6">
@@ -68,19 +58,22 @@
 										<tbody>
 											<tr>
 												<td class="text-medium-emphasis">Full Name</td>
-												<td class="font-weight-medium text-body-2 text-right">{{ applicantInfo.name
+												<td class="font-weight-medium text-body-2 text-right">{{
+													applicantInfo.name
 												}}
 												</td>
 											</tr>
 											<tr>
 												<td class="text-medium-emphasis">Email</td>
-												<td class="font-weight-medium text-body-2 text-right">{{ applicantInfo.email
+												<td class="font-weight-medium text-body-2 text-right">{{
+													applicantInfo.email
 												}}
 												</td>
 											</tr>
 											<tr>
 												<td class="text-medium-emphasis">Phone</td>
-												<td class="font-weight-medium text-body-2 text-right">{{ applicantInfo.phone
+												<td class="font-weight-medium text-body-2 text-right">{{
+													applicantInfo.phone
 												}}
 												</td>
 											</tr>
@@ -97,17 +90,17 @@
 												}}
 												</td>
 											</tr>
-	
+
 										</tbody>
 									</v-table>
-	
+
 								</v-col>
-	
+
 								<v-col cols="12" md="6" class="with-divider">
 									<div>
 										<v-table>
 											<tbody>
-	
+
 												<tr>
 													<td class="text-medium-emphasis">Date of Birth (AD)</td>
 													<td class="font-weight-medium text-body-2 text-right">{{
@@ -145,13 +138,13 @@
 										</v-table>
 									</div>
 								</v-col>
-	
+
 							</v-row>
 						</div>
 						<DocGrid class="mt-4" :items="applicantInfo?.documents || []" />
 					</div>
 				</v-card>
-	
+
 				<v-card class="mb-6">
 					<v-card-title><v-icon size="18" class="mr-2">mdi-wallet-outline</v-icon> Finance
 						Information</v-card-title>
@@ -204,7 +197,8 @@
 											</tr>
 											<tr>
 												<td class="text-medium-emphasis">Preferred Bank</td>
-												<td class="font-weight-medium text-body-2 text-right">{{ financialInfo.bank
+												<td class="font-weight-medium text-body-2 text-right">{{
+													financialInfo.bank
 												}}
 												</td>
 											</tr>
@@ -295,7 +289,7 @@
 												preferredBank.bank_code
 											}}</td>
 										</tr>
-	
+
 									</tbody>
 								</v-table>
 							</v-col>
@@ -320,12 +314,12 @@
 						</v-row>
 					</div>
 				</v-card>
-	
+
 				<v-card class="mb-6">
 					<v-card-title><v-icon size="18" class="mr-2">mdi-account-check-outline</v-icon> Guarantor
 						Details</v-card-title>
 					<v-divider></v-divider>
-	
+
 					<div class="pa-4">
 						<div v-for="(guerantor, index) in guarantorList" :key="index">
 							<div>
@@ -388,7 +382,7 @@
 					</div>
 				</v-card>
 			</v-col>
-	
+
 			<v-col cols="12" md="5">
 				<v-card class="mb-4">
 					<v-card-title><v-icon size="18" class="mr-2">mdi-timeline-clock-outline</v-icon>Generate
@@ -408,7 +402,7 @@
 		</v-row>
 	</v-container>
 
-    <v-alert v-if="loading" type="info" variant="tonal">Loading EMI request detail...</v-alert>
+	<v-alert v-if="loading" type="info" variant="tonal">Loading EMI request detail...</v-alert>
 </template>
 
 <script setup lang="ts">
@@ -423,6 +417,7 @@ import EmiBankApplicationList from '@/components/emi/EmiBankApplicationList.vue'
 import { openModal } from '@/shared/modal';
 import EmiRequestApproveModal from '@/components/emi/EmiRequestApproveModal.vue';
 import EmiRequestRejectModal from '@/components/emi/EmiRequestRejectModal.vue';
+import { formatTime12h, formatDateTime } from '@/shared/utils';
 interface ApplicationUser {
 	name?: string;
 	email?: string;
@@ -445,6 +440,7 @@ interface Application {
 	emi_per_month?: number | string;
 	product_attributes?: unknown;
 	status?: string;
+	created_at?: string;
 }
 
 const application = ref<Application>({
@@ -483,7 +479,7 @@ const referenceId = computed(() => {
 	return id ? `#EMIR-${id}` : 'EMIR-7001';
 });
 const statusLabel = computed(() => (application.value.status ? String(application.value.status) : 'under review'));
-const submittedAt = computed(() => String((application.value as any)?.submitted_at ?? 'April 8, 2024 at 10:15 AM'));
+const submittedAt = computed(() => String((application.value as any)?.created_at ? formatTime12h((application.value as any).created_at) : 'April 8, 2024 at 10:15 AM'));
 
 const emiType = computed(() => {
 	const raw = String((application.value as any)?.emi_type ?? 'n/a');
@@ -503,7 +499,8 @@ const applicantInfo = computed(() => ({
 	citizenshipNumber: String((application.value as any)?.citizenship_number ?? '45-01-78-12345'),
 	address: String((application.value as any)?.address ?? 'Kathmandu, Bagmati Pradesh, Nepal'),
 	agreed: (application.value as any)?.agreed_to_terms ? 'Yes' : 'Yes',
-	documents: (application.value as any).documents
+	documents: (application.value as any).documents,
+	created_at: application.value.created_at,
 }));
 
 
