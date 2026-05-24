@@ -32,20 +32,11 @@ return [
 
         'local' => [
             'driver' => 'local',
-            'root' => storage_path('app/private'),
-            'serve' => true,
-            'throw' => false,
-            'report' => false,
-        ],
-
-        'public' => [
-            'driver' => 'local',
-            'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            'root' => env('CDN_ROOT'),
+            'url' => env('CDN_URL'),
             'visibility' => 'public',
-            'throw' => false,
-            'report' => false,
         ],
+        
         'cdn' => [
             'driver' => 'local',
             'root' => env('CDN_ROOT'),
@@ -64,8 +55,8 @@ return [
             'ssl' => false,      // usually false unless using FTPS
             'timeout' => 30,
 
-            'root' => env('IMG_FTP_ROOT','/public_html'),
-            'url' => env('IMG_BASE_URL','https://img.fatafatsewa.com')
+            'root' => env('IMG_FTP_ROOT', '/public_html'),
+            'url' => env('IMG_BASE_URL', 'https://img.fatafatsewa.com')
         ],
 
         's3' => [

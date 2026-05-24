@@ -5,15 +5,21 @@ declare(strict_types=1);
 namespace App\Domains\EmiRequest\Controllers;
 
 use App\Domains\EmiRequest\DTOs\EmiRequestListData;
+use App\Domains\EmiRequest\Mail\EmiApprovedMail;
+use App\Domains\EmiRequest\Mail\EmiRejectedMail;
+use App\Domains\EmiRequest\Models\EmiRequest;
 use App\Domains\EmiRequest\Requests\ApproveEmiRequestRequest;
+use App\Domains\EmiRequest\Requests\EmiRequestRejectRequest;
 use App\Domains\EmiRequest\Requests\StoreEmiRequestRequest;
 use App\Domains\EmiRequest\Requests\UpdateEmiRequestRequest;
 use App\Domains\EmiRequest\Resources\EmiRequestListResource;
 use App\Domains\EmiRequest\Services\EmiRequestService;
-use Illuminate\Routing\Controller;
-
+use App\Domains\Shared\Helpers\EmiHelper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 final class EmiRequestController extends Controller
 {
@@ -55,7 +61,83 @@ final class EmiRequestController extends Controller
 
     public function approve(string $id, ApproveEmiRequestRequest $request): JsonResponse
     {
-        // TODO: Approve EMI request.
-        return response()->json(['id' => $id]);
+        $emiRequest = EmiRequest::find($id);
+        if (! $emiRequest) {
+            return response()->json(['success' => false, 'message' => 'EMI request not found.'], 404);
+        }
+
+        
+        $emiHelper = new EmiHelper();
+        try {
+            $pdfResult = $emiHelper->generateEmiPdf($emiRequest);
+
+        } catch (Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+
+        $emiRequest->update([
+            'status' => EmiRequest::STATUS_APPROVED,
+        ]);
+
+        $actor = auth('admin_api')->user();
+        $actorName = is_object($actor) && isset($actor->name) ? (string) $actor->name : 'admin';
+
+        $emiRequest->logActivity(
+            action: 'emi_request_approved',
+            label: 'EMI request approved',
+            description: "EMI request was approved by {$actorName}.",
+            actor: $actor
+        );
+
+        $toEmail = config('app.env') === 'production' ? $emiRequest->email : "devlekhraj88@gmail.com";
+
+        try {
+            Mail::to($toEmail)->send(new EmiApprovedMail($emiRequest, $pdfResult));
+            
+        } catch (Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Emi requests successfully approved.',
+            'quotation_pdf' => $pdfResult,
+        ]);
+    }
+    public function reject(string $id, EmiRequestRejectRequest $request): JsonResponse
+    {
+        $emiRequest = EmiRequest::find($id);
+        if (! $emiRequest) {
+            return response()->json(['success' => false, 'message' => 'EMI request not found.'], 404);
+        }
+
+        $reason = (string) $request->validated('reason');
+
+        $emiRequest->update([
+            'status' => EmiRequest::STATUS_CANCELLED,
+        ]);
+
+        $actor = auth('admin_api')->user();
+        $actorName = is_object($actor) && isset($actor->name) ? (string) $actor->name : 'admin';
+
+        $emiRequest->logActivity(
+            action: 'emi_request_rejected',
+            label: 'EMI request rejected',
+            description: "EMI request was rejected by {$actorName}.",
+            actor: $actor,
+            meta: ['reason' => $reason]
+        );
+
+        $toEmail = config('app.env') === 'production' ? $emiRequest->email : "devlekhraj88@gmail.com";
+
+        try {
+            Mail::to($toEmail)->send(new EmiRejectedMail($emiRequest, $reason));
+        } catch (Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Emi request successfully rejected.',
+        ]);
     }
 }

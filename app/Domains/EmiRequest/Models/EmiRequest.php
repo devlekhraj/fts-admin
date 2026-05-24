@@ -7,23 +7,25 @@ namespace App\Domains\EmiRequest\Models;
 use App\Domains\EmiBank\Models\EmiBank;
 use App\Domains\File\Models\File;
 use App\Domains\Product\Models\Product;
+use App\Domains\Shared\Models\ActivityLog;
 use App\Domains\User\Models\User;
 use App\Support\Eloquent\BaseModel;
-use App\Traits\HasActivityLogs;
 use App\Domains\EmiRequest\Models\EmiRequestBank;
 use App\Domains\EmiRequest\Models\EmiRequestCreditCard;
 use App\Domains\EmiRequest\Models\EmiRequestGuarantor;
+use App\Traits\HasActivityLogs;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 final class EmiRequest extends BaseModel
 {
     use HasActivityLogs;
 
     protected $table = 'emi_requests';
-
+    protected $guarded = [];
 
     protected $casts = [
         'product_attributes' => 'array',
@@ -62,7 +64,7 @@ final class EmiRequest extends BaseModel
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function bank(): BelongsTo
+    public function emiBank(): BelongsTo
     {
         return $this->belongsTo(EmiBank::class, 'bank');
     }
@@ -88,5 +90,10 @@ final class EmiRequest extends BaseModel
     public function requestBank(): HasOne
     {
         return $this->hasOne(EmiRequestBank::class, 'emi_request_id', 'id');
+    }
+
+    public function activityLog(): MorphMany
+    {
+        return $this->morphMany(ActivityLog::class, 'entity')->latest('created_at');
     }
 }

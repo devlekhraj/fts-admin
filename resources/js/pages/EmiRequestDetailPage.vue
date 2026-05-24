@@ -1,19 +1,20 @@
 <template>
 	<AppPageHeader title="EMI Request Detail" subtitle="View EMI request information">
 		<template #actions>
-			<v-btn color="success" variant="flat" prepend-icon="mdi-check-bold" @click="openConfirm('approved')">
+			<v-btn color="success" v-if="statusLabel === 'Pending'" variant="flat" prepend-icon="mdi-check-bold" @click="openConfirm('approved')">
 				Approve Request
 			</v-btn>
-			<v-btn color="error" variant="flat" prepend-icon="mdi-close-thick" @click="openConfirm('rejected')">
+			<v-btn color="error" v-if="statusLabel === 'Pending'" variant="flat" prepend-icon="mdi-close-thick" @click="openConfirm('rejected')">
 				Reject Request
 			</v-btn>
 
-			<v-btn color="error" variant="outlined" prepend-icon="mdi-delete-outline">Delete</v-btn>
+			<v-btn color="error" v-if="statusLabel === 'Pending' || statusLabel === 'Cancelled'" variant="outlined" prepend-icon="mdi-delete-outline">Delete</v-btn>
 
 			<v-btn variant="flat" color="primary" @click="goBack">
 				<v-icon start>mdi-arrow-left</v-icon>
 				Back
 			</v-btn>
+			<!-- {{ statusLabel }} -->
 		</template>
 	</AppPageHeader>
 
@@ -28,7 +29,7 @@
 						<div class="text-subtitle-1 font-weight-bold">{{ referenceId }}</div>
 						<div class="chips">
 							<v-chip size="small" color="primary" label variant="tonal">{{ emiType }}</v-chip>
-							<v-chip size="small" color="info" label variant="tonal">{{ statusLabel }}</v-chip>
+							<v-chip size="small" :color="getStatusColor(statusLabel)" label variant="tonal">{{ statusLabel }}</v-chip>
 						</div>
 						<div class="text-body-2 text-primary mt-2 font-weight-medium">{{ productName }}</div>
 
@@ -417,7 +418,7 @@ import EmiBankApplicationList from '@/components/emi/EmiBankApplicationList.vue'
 import { openModal } from '@/shared/modal';
 import EmiRequestApproveModal from '@/components/emi/EmiRequestApproveModal.vue';
 import EmiRequestRejectModal from '@/components/emi/EmiRequestRejectModal.vue';
-import { formatTime12h, formatDateTime } from '@/shared/utils';
+import { formatTime12h, formatDateTime, getStatusColor } from '@/shared/utils';
 interface ApplicationUser {
 	name?: string;
 	email?: string;

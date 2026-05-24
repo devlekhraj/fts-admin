@@ -146,3 +146,28 @@ export function formatDateTime(date: string | number | Date) {
   return `${datePart} ${hours}:${minutes} ${ampm}`
 }
 
+export function getStatusColor(statusLabel: unknown): string {
+  const normalized = String(statusLabel ?? '')
+    .trim()
+    .toLowerCase()
+    .replace(/[_-]+/g, ' ');
+
+  switch (normalized) {
+    case 'approved':
+      return 'success';
+    case 'rejected':
+    case 'cancelled':
+    case 'canceled':
+      return 'error';
+    case 'pending':
+      return 'warning';
+    case 'processing':
+    case 'under review':
+      return 'info';
+    case 'finished':
+    case 'completed':
+      return 'primary';
+    default:
+      return 'secondary';
+  }
+}

@@ -111,6 +111,10 @@ export function approve(id: string, payload?: Record<string, unknown>) {
   return http.post(`/admin/emi-requests/${id}/approve`, payload ?? {});
 }
 
+export function reject(id: string, payload: { reason: string }) {
+  return http.post(`/admin/emi-requests/${id}/reject`, payload);
+}
+
 export async function generateApplication(
   id: string,
   payload?: FormData | Record<string, unknown>

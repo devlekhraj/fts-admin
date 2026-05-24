@@ -13,6 +13,7 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::post('emi-requests', [EmiRequestController::class, 'store'])->name('admin.emi-requests.store');
     Route::put('emi-requests/{id}', [EmiRequestController::class, 'update'])->name('admin.emi-requests.update');
     Route::post('emi-requests/{id}/approve', [EmiRequestController::class, 'approve'])->name('admin.emi-requests.approve');
+    Route::post('emi-requests/{id}/reject', [EmiRequestController::class, 'reject'])->name('admin.emi-requests.reject');
 
     Route::post('emi-requests/{id}/generate-application', [EmiRequestApplicationController::class, 'generateApplication'])->name('admin.emi-requests.generate-application');
     Route::get('emi-requests/{id}/application-list', [EmiApplicationController::class, 'index'])->name('admin.emi-requests.application-list');

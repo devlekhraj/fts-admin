@@ -23,6 +23,7 @@ final class FileUploadAction
 
     public function execute(UploadedFile $file, string $directory, ?string $preferredFileName = null): array
     {
+
         $directory = $this->normalizeDirectory($directory);
         $bytes = $file->get();
         if (! is_string($bytes) || $bytes === '') {

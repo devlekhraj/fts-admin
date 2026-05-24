@@ -7,17 +7,42 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
 </head>
+@php
+    $letterPadPath = public_path('images/letter-pad.jpg');
+    $letterPadDataUri = '';
+    if (is_string($letterPadPath) && $letterPadPath !== '' && file_exists($letterPadPath)) {
+        $bytes = @file_get_contents($letterPadPath);
+        if (is_string($bytes) && $bytes !== '') {
+            $letterPadDataUri = 'data:image/jpeg;base64,' . base64_encode($bytes);
+        }
+    }
+
+    $stampPath = public_path('images/fatafat-stamp.png');
+    $stampDataUri = '';
+    if (is_string($stampPath) && $stampPath !== '' && file_exists($stampPath)) {
+        $stampBytes = @file_get_contents($stampPath);
+        if (is_string($stampBytes) && $stampBytes !== '') {
+            $stampDataUri = 'data:image/png;base64,' . base64_encode($stampBytes);
+        }
+    }
+@endphp
 <style>
     @page {
         margin: 0px;
         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-size: 16px
+        font-size: 14px
     }
 
+    html,
     body {
-        background-image: url("{{ asset('/website/images/letter-pad.jpg') }}");
-        background-size: cover; 
-
+        margin: 0;
+        padding: 0;
+        font-size: 14px;
+        background-image: url("{{ $letterPadDataUri !== '' ? $letterPadDataUri : '' }}");
+        background-repeat: no-repeat;
+        background-position: top left;
+        /* Fit the letter pad exactly to the PDF page */
+        background-size: 100% 100%;
     }
     .pdf-wrapper {
         position: relative;
@@ -56,11 +81,11 @@
 
 <body>
     <div class="pdf-wrapper">
-        {{-- <img src="{{ asset('/website/images/letter-pad-header.png') }}" alt="" style="width:100%"> --}}
+        {{-- <img src="{{ asset('/website/images/letter-pad.jpg') }}" alt="" style="width:100%"> --}}
         <div class="pdf--content" style="margin-top:200px">
             <div>
                 <p><strong>To</strong></p>
-                <p><strong>{{ $emiRequest->bankDetail->name }}</strong></p>
+                <p><strong>{{ $emiRequest->emiBank?->name ?? $emiRequest->requestBank?->bank?->name ?? '' }}</strong></p>
                 <p>Card Department</p>
             </div>
 
@@ -87,7 +112,7 @@
                     </tr>
                     <tr>
                         <th>Product Price</th>
-                        <td>Rs. {{ $emiRequest->product->discounted_price }} /- </td>
+                        <td>Rs. {{ $emiRequest->product_price }} /- </td>
                     </tr>
                     <tr>
                         <th>Down Payment</th>
@@ -118,7 +143,9 @@
                   <span><strong>Email</strong>: {{ $emiRequest->email }}</span><br>
                   <span><strong>Current Address</strong>: {{ $emiRequest->address }}</span><br>
                   <span><strong>Date</strong>: {{ $emiRequest->created_at->format('jS \\of F Y h:i:s A') }}</span><br><br>
-                  <img src="{{ asset('website/images/fatafat-stamp.png') }}" width="130px" alt="">
+                  @if($stampDataUri !== '')
+                      <img src="{{ $stampDataUri }}" width="130px" alt="">
+                  @endif
                 </div>
                 <hr>
 
