@@ -90,19 +90,6 @@ final class EmiRequestController extends Controller
 
         $toEmail = config('app.env') === 'production' ? $emiRequest->email : "devlekhraj88@gmail.com";
 
-        dd([
-            'default_mailer' => config('mail.default'),
-            'from' => config('mail.from'),
-            'mailer_config' => config('mail.mailers.' . config('mail.default')),
-            'env' => [
-                'MAIL_MAILER' => env('MAIL_MAILER'),
-                'MAIL_HOST' => env('MAIL_HOST'),
-                'MAIL_PORT' => env('MAIL_PORT'),
-                'MAIL_USERNAME' => env('MAIL_USERNAME'),
-                'MAIL_PASSWORD' => env('MAIL_PASSWORD'),
-            ],
-        ]);
-
         try {
             Mail::to($toEmail)->send(new EmiApprovedMail($emiRequest, $pdfResult));
         } catch (Throwable $e) {
