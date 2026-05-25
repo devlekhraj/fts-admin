@@ -209,9 +209,14 @@ class ProductsController extends Controller
         ], 200);
     }
 
-    public function destroy(string $id): JsonResponse
+    public function deleteProduct(string $id): JsonResponse
     {
-        // TODO: Delete product.
-        return response()->json(null, 204);
+        $product = Product::query()->findOrFail($id);
+        $product->delete();
+
+        return response()->json([
+            'message' => 'Product deleted successfully.',
+            'success' => true,
+        ], 200);
     }
 }

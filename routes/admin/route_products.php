@@ -52,7 +52,7 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::put('products/{id}', [ProductsController::class, 'update'])->name('admin.products.update');
     Route::put('products/{id}/images/{fileUsageId}', [ProductImageController::class, 'update'])->name('admin.products.images.update');
     Route::delete('products/{id}/images/{fileUsageId}', [ProductImageController::class, 'delete'])->name('admin.products.images.delete');
-    Route::delete('products/{id}', [ProductsController::class, 'destroy'])->name('admin.products.destroy');
+    Route::delete('products/{id}/delete', [ProductsController::class, 'deleteProduct'])->name('admin.products.delete');
     Route::put('product-variants/{variant_id}/images/{fileUsageId}', [ProductVariantImageController::class, 'update'])->name('admin.products.variants.images.update');
     Route::delete('product-variants/{variant_id}/images/{fileUsageId}', [ProductVariantImageController::class, 'delete'])->name('admin.products.variants.images.delete');
 

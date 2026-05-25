@@ -183,6 +183,7 @@ import ProductCreateModal from '@/components/product/ProductCreateModal.vue';
 import AppSearchTextField from '@/components/shared/AppSearchTextField.vue';
 import App from '@/app/App.vue';
 import AppSearchButton from '@/components/shared/AppSearchButton.vue';
+import ProductDeleteModal from '@/components/product/ProductDeleteModal.vue';
 
 type Product = {
   id: number | string;
@@ -242,8 +243,15 @@ function onView(product: Product) {
 }
 
 function onDelete(product: Product) {
-  // TODO: replace with delete confirmation + API call.
-  console.log('Delete product:', product.slug);
+  openModal(
+    ProductDeleteModal,
+    { product },
+    {
+      title: 'Confirm Product Deletion',
+      size: 'sm',
+      onSaved: () => fetchProducts(),
+    },
+  );
 }
 
 function openProductModal() {

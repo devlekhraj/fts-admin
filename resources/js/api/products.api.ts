@@ -295,3 +295,7 @@ export async function updateVariant(
 export function remove(id: string) {
   return http.delete(`/admin/products/${id}`);
 }
+
+export function deleteProduct(id: number | string) {
+  return http.delete(`/admin/products/${id}/delete`);
+}
