@@ -8,7 +8,15 @@
 				Reject Request
 			</v-btn>
 
-			<v-btn color="error" v-if="statusLabel === 'Pending' || statusLabel === 'Cancelled'" variant="outlined" prepend-icon="mdi-delete-outline">Delete</v-btn>
+			<v-btn
+				color="error"
+				v-if="statusLabel === 'Pending' || statusLabel === 'Cancelled'"
+				variant="outlined"
+				prepend-icon="mdi-delete-outline"
+				@click="openDeleteConfirm"
+			>
+				Delete
+			</v-btn>
 
 			<v-btn variant="flat" color="primary" @click="goBack">
 				<v-icon start>mdi-arrow-left</v-icon>
@@ -418,6 +426,7 @@ import EmiBankApplicationList from '@/components/emi/EmiBankApplicationList.vue'
 import { openModal } from '@/shared/modal';
 import EmiRequestApproveModal from '@/components/emi/EmiRequestApproveModal.vue';
 import EmiRequestRejectModal from '@/components/emi/EmiRequestRejectModal.vue';
+import EmiRequestDeleteModal from '@/components/emi/EmiRequestDeleteModal.vue';
 import { formatTime12h, formatDateTime, getStatusColor } from '@/shared/utils';
 interface ApplicationUser {
 	name?: string;
@@ -588,6 +597,23 @@ function openConfirm(decision: 'approved' | 'rejected') {
 			title: decision === 'approved' ? 'Approve EMI Request' : 'Reject EMI Request',
 			size: 'sm',
 			onSaved: fetchDetail,
+		}
+	);
+}
+
+function openDeleteConfirm() {
+	const id = String(route.params.id ?? '');
+	if (!id) return;
+	openModal(
+		EmiRequestDeleteModal,
+		{ id },
+		{
+			title: 'Delete EMI Request',
+			size: 'sm',
+			onSaved: () => {
+				// The record is gone; go back to list.
+				router.push({ name: 'admin.emi.requests' });
+			},
 		}
 	);
 }

@@ -115,6 +115,11 @@ export function reject(id: string, payload: { reason: string }) {
   return http.post(`/admin/emi-requests/${id}/reject`, payload);
 }
 
+export function deleteRequest(id: string) {
+  // Backend route is implemented as POST .../{id}/delete (not HTTP DELETE) to match existing route patterns.
+  return http.post(`/admin/emi-requests/${id}/delete`, {});
+}
+
 export async function generateApplication(
   id: string,
   payload?: FormData | Record<string, unknown>

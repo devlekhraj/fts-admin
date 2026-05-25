@@ -12,7 +12,9 @@ final class EmiRequestShowAction
     {
         return EmiRequest::query()
             ->with(['product.defaultFile', 'user', 'guarantors.files', 'creditCard.cardProvider'])
+            ->where(function ($builder) {
+                $builder->whereNull('is_deleted')->orWhere('is_deleted', false);
+            })
             ->findOrFail($id);
     }
 }
-

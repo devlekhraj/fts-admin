@@ -18,6 +18,7 @@ use App\Domains\Shared\Helpers\EmiHelper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Throwable;
 
@@ -136,6 +137,60 @@ final class EmiRequestController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Emi request successfully rejected.',
+        ]);
+    }
+
+    public function delete(string $id): JsonResponse
+    {
+        $emiRequest = EmiRequest::find($id);
+        if (! $emiRequest) {
+            return response()->json(['success' => false, 'message' => 'EMI request not found.'], 404);
+        }
+
+        $allowedStatuses = [EmiRequest::STATUS_PENDING, EmiRequest::STATUS_CANCELLED];
+        if (! in_array((int) $emiRequest->status, $allowedStatuses, true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only pending or cancelled EMI requests can be deleted.',
+            ], 422);
+        }
+
+        $actor = auth('admin_api')->user();
+        $actorName = is_object($actor) && isset($actor->name) ? (string) $actor->name : 'admin';
+        $actorId = is_object($actor) && isset($actor->id) ? (int) $actor->id : null;
+
+
+        try {
+            DB::transaction(function () use ($emiRequest, $actorId, $actorName, $actor) {
+                // emi_applications FK does not cascade, so clean up first.
+                // DB::table('emi_applications')->where('emi_request_id', $emiRequest->id)->delete();
+
+                // // file_usages has no FK to usage_id; remove the pivot rows.
+                // DB::table('file_usages')
+                //     ->where('usage_type', 'emi_requests')
+                //     ->where('usage_id', $emiRequest->id)
+                //     ->delete();
+
+                $emiRequest->update([
+                    'is_deleted' => true,
+                    'deleted_at' => now(),
+                    'deleted_by' => $actorId,
+                ]);
+
+                $emiRequest->logActivity(
+                    action: 'emi_request_deleted',
+                    label: 'EMI request deleted',
+                    description: "EMI request was deleted by {$actorName}.",
+                    actor: $actor
+                );
+            });
+        } catch (Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'EMI request deleted successfully.',
         ]);
     }
 }

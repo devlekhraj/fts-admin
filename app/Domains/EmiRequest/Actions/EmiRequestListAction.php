@@ -15,6 +15,11 @@ final class EmiRequestListAction
         $query = EmiRequest::query()
             ->with(['product.defaultFile', 'user']);
 
+        // Treat NULL as "not deleted" since the field is nullable.
+        $query->where(function ($builder) {
+            $builder->whereNull('is_deleted')->orWhere('is_deleted', false);
+        });
+
         if ($data->search !== '') {
             $search = $data->search;
             $query->where(function ($builder) use ($search) {
@@ -44,4 +49,3 @@ final class EmiRequestListAction
         return $query->orderByDesc('created_at')->paginate($data->perPage);
     }
 }
-
