@@ -8,7 +8,6 @@ use App\Support\Eloquent\BaseModel;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Storage;
-use Throwable;
 
 final class File extends BaseModel
 {
@@ -54,35 +53,11 @@ final class File extends BaseModel
         }
 
         $relativePath = ltrim($path, '/');
-        $defaultDisk = (string) config('filesystems.default');
-        $fallbackDisk = 'cdn';
-
-        $storedDisk = is_string($this->disk) && trim($this->disk) !== '' ? trim($this->disk) : null;
-
-        // Prefer the disk where the file actually exists, to avoid broken URLs when disk config changes.
-        if (is_string($storedDisk) && $this->diskHasFile($storedDisk, $relativePath)) {
-            $disk = $storedDisk;
-        } elseif ($this->diskHasFile($defaultDisk, $relativePath)) {
-            $disk = $defaultDisk;
-        } elseif ($this->diskHasFile($fallbackDisk, $relativePath)) {
-            $disk = $fallbackDisk;
-        } else {
-            // Last resort: keep existing behaviour so we still return some URL.
-            $disk = $storedDisk ?? $defaultDisk;
-        }
+        $disk =  config('filesystems.default');
 
         /** @var FilesystemAdapter $storage */
         $storage = Storage::disk($disk);
 
         return $storage->url($relativePath);
-    }
-
-    private function diskHasFile(string $disk, string $relativePath): bool
-    {
-        try {
-            return Storage::disk($disk)->exists($relativePath);
-        } catch (Throwable) {
-            return false;
-        }
     }
 }
