@@ -1,9 +1,10 @@
 <template>
   <AppPageHeader title="Products" subtitle="Product list">
     <template #actions>
+
       <v-menu location="bottom start">
         <template #activator="{ props }">
-          <v-btn v-bind="props" variant="outlined" color="primary" prepend-icon="mdi-download-outline">
+          <v-btn v-bind="props" variant="outlined" color="primary" prepend-icon="mdi-arrow-up-bold">
             Export
           </v-btn>
         </template>
@@ -12,7 +13,9 @@
             :prepend-icon="option.icon" @click="onExport(option.type)" />
         </v-list>
       </v-menu>
-
+	      <v-btn color="primary" variant="flat" prepend-icon="mdi-download-outline" @click="goToProductImport()">
+	        Import Product
+	      </v-btn>
       <v-btn color="primary" variant="flat" prepend-icon="mdi-plus" @click="openProductModal()">
         New Product
       </v-btn>
@@ -29,11 +32,9 @@
               <AppSearchTextField v-model="search" label="Search products" placeholder="Search by name..."
                 @click:clear="onClearSearch" />
 
-                <AppSelectField v-model="categoryFilter" :items="categoryOptions" item-title="title" 
-                style="width: 260px;"
-                item-value="value"
-                  label="Category" clearable hide-details @update:model-value="onCategoryChange" />
-                <AppSearchButton :loading="fetchingState" @click="onSearch" />
+              <AppSelectField v-model="categoryFilter" :items="categoryOptions" item-title="title" style="width: 260px;"
+                item-value="value" label="Category" clearable hide-details @update:model-value="onCategoryChange" />
+              <AppSearchButton :loading="fetchingState" @click="onSearch" />
             </div>
           </v-col>
 
@@ -89,7 +90,7 @@
     <template #item.action="{ item }">
       <div class="d-flex align-center ga-1">
         <v-btn size="small" variant="outlined" class="mr-2" color="primary" @click="onView(item)">
-         Details
+          Details
         </v-btn>
         <v-btn size="small" variant="outlined" color="error" @click="onDelete(item)">
           Delete
@@ -254,9 +255,9 @@ function onDelete(product: Product) {
   );
 }
 
-function openProductModal() {
-  openModal(ProductCreateModal, {
-    onSaved: (product: any) => {
+	function openProductModal() {
+	  openModal(ProductCreateModal, {
+	    onSaved: (product: any) => {
       console.log({ product });
       if (product?.id) {
         router.push({ name: 'admin.product.detail', params: { id: product.id } });
@@ -266,19 +267,23 @@ function openProductModal() {
     }
   }, {
     title: 'New Product'
-  });
-}
+	  });
+	}
 
-async function fetchProducts() {
-  loading.value = true;
-  try {
+	function goToProductImport() {
+	  router.push({ name: 'admin.product.imports' });
+	}
+
+	async function fetchProducts() {
+	  loading.value = true;
+	  try {
     const response = await listProducts({
       page: options.value.page,
       per_page: options.value.itemsPerPage,
       search: search.value.trim() || undefined,
       category_id: categoryFilter.value || undefined,
     });
-    
+
 
     const list = Array.isArray(response) ? response : response?.data ?? [];
     items.value = list.map((product: ProductListItem) => ({

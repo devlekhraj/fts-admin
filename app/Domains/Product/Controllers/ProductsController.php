@@ -101,7 +101,7 @@ class ProductsController extends Controller
     public function show(string $id): JsonResponse
     {
         $product = Product::query()
-            ->with(['defaultFile', 'files', 'variants.files', 'attribute.attributes', 'brand.defaultFile'])
+            ->with(['defaultFile', 'files', 'variants.files', 'attribute.attributes', 'brand.defaultFile','giftItems.defaultFile'])
             ->findOrFail($id);
 
         return response()->json([

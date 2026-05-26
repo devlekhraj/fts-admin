@@ -119,6 +119,13 @@ final class Product extends BaseModel
         return $this->hasMany(CampaignProduct::class, 'product_id');
     }
 
+    public function giftItems(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'product_gifts', 'product_id', 'gift_id')
+            ->withPivot(['is_active'])
+            ->withTimestamps();
+    }
+
     public function getThumbAttribute(): ?string
     {
         return $this->defaultFile->first()?->url;

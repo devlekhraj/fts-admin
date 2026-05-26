@@ -199,6 +199,9 @@ class ProductResource extends JsonResource
             'attribute' => $attribute,
             'attributes' => $this->attributes,
             'schema_jsonld' => $this->custom_code,
+            'free_gift' => $this->whenLoaded('giftItems', function () {
+                return ProductGiftResource::collection($this->giftItems);
+            }),
         ];
     }
 }

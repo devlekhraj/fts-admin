@@ -47,10 +47,11 @@ const routes: RouteRecordRaw[] = [
       // customers
       { path: 'customers', name: 'admin.customers.list', component: () => import('@/pages/CustomerPage.vue'), meta: { title: 'Customers' } },
       { path: 'customers/:id', name: 'admin.customers.detail', component: () => import('@/pages/CustomerDetailPage.vue'), meta: { title: 'Customer Detail' } },
-      // catalog
-      { path: 'product-list', name: 'admin.product.list', component: () => import('@/pages/ProductPage.vue'), meta: { title: 'Products' } },
-      { path: 'product-reviews', name: 'admin.product.reviews', component: () => import('@/pages/ProductReviewsPage.vue'), meta: { title: 'Product Reviews' } },
-      { path: 'product-create', name: 'admin.product.create', component: () => import('@/pages/ProductCreatePage.vue'), meta: { title: 'Create Product' } },
+	      // catalog
+	      { path: 'product-list', name: 'admin.product.list', component: () => import('@/pages/ProductPage.vue'), meta: { title: 'Products' } },
+	      { path: 'product-imports', name: 'admin.product.imports', component: () => import('@/pages/ProductImportPage.vue'), meta: { title: 'Import Products' } },
+	      { path: 'product-reviews', name: 'admin.product.reviews', component: () => import('@/pages/ProductReviewsPage.vue'), meta: { title: 'Product Reviews' } },
+	      { path: 'product-create', name: 'admin.product.create', component: () => import('@/pages/ProductCreatePage.vue'), meta: { title: 'Create Product' } },
       { path: 'product/:id', name: 'admin.product.detail', component: () => import('@/pages/ProductDetailPage.vue'), meta: { title: 'Product Detail' } },
       { path: 'product/:id/edit', name: 'admin.product.edit', component: () => import('@/pages/ProductEditPage.vue'), meta: { title: 'Edit Product' } },
       { path: 'product-categories', name: 'admin.product.categories', component: () => import('@/pages/ProductCategoryPage.vue'), meta: { title: 'Categories' } },

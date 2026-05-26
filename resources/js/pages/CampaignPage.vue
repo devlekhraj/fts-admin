@@ -24,13 +24,6 @@
           </v-col>
 
           <v-spacer></v-spacer>
-
-          <!-- <v-col cols="12" md="auto">
-            <v-btn variant="flat" color="primary" @click="openAddModal">
-              <v-icon start>mdi-plus</v-icon>
-              add campaign
-            </v-btn>
-          </v-col> -->
         </v-row>
         <v-row class="mt-0">
           <v-col cols="12">
@@ -103,17 +96,15 @@ import { useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
-import { show, list } from '@/api/campaigns.api';
+import { list } from '@/api/campaigns.api';
 import { formatLongDate } from '@/shared/utils';
 import { useModalStore } from '@/stores/modal.store';
 import CampaignForm from '@/components/campaign-detail/modal/CampaignForm.vue';
 import CampaignDelete from '@/components/campaign-detail/modal/CampaignDelete.vue';
-import App from '@/app/App.vue';
 import AppSearchButton from '@/components/shared/AppSearchButton.vue';
 
 const headers = [
   { title: 'Name', key: 'title', sortable: false, minWidth: '240' },
-  // { title: 'Slug', key: 'slug', sortable: false, minWidth: '220' },
   { title: 'Status', key: 'status', sortable: false, minWidth: '120' },
   { title: 'Published', key: 'is_published', sortable: false, minWidth: '120' },
   { title: 'Duration', key: 'start_date', sortable: false, minWidth: '160' },

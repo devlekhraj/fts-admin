@@ -15,6 +15,10 @@ pest()->extend(Tests\TestCase::class)
  // ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
     ->in('Feature');
 
+beforeAll(function () {
+    @unlink(base_path('bootstrap/cache/config.php'));
+});
+
 /*
 |--------------------------------------------------------------------------
 | Expectations

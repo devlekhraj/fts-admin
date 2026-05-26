@@ -14,6 +14,7 @@ use App\Domains\Product\Controllers\ProductVariantController;
 use App\Domains\Product\Controllers\ProductImageController;
 use App\Domains\Product\Controllers\ProductListController;
 use App\Domains\Product\Controllers\ProductVariantImageController;
+use App\Domains\Product\Controllers\ProductGiftController;
 
 // Product Attributes 
 use App\Domains\Product\Controllers\ProductAttributeController;
@@ -55,6 +56,11 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::delete('products/{id}/delete', [ProductsController::class, 'deleteProduct'])->name('admin.products.delete');
     Route::put('product-variants/{variant_id}/images/{fileUsageId}', [ProductVariantImageController::class, 'update'])->name('admin.products.variants.images.update');
     Route::delete('product-variants/{variant_id}/images/{fileUsageId}', [ProductVariantImageController::class, 'delete'])->name('admin.products.variants.images.delete');
+
+    Route::get('products/{id}/gifts', [ProductGiftController::class, 'index'])->name('admin.products.gifts.index');
+    Route::post('products/{id}/gifts', [ProductGiftController::class, 'sync'])->name('admin.products.gifts.store');
+    Route::put('products/{id}/gifts', [ProductGiftController::class, 'sync'])->name('admin.products.gifts.sync');
+    Route::delete('products/{id}/gifts/{giftId}', [ProductGiftController::class, 'destroy'])->name('admin.products.gifts.destroy');
 
     Route::get('product-list', [ProductListController::class, 'getList'])
     ->name('product.list');
