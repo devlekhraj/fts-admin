@@ -1,8 +1,5 @@
 <template>
   <v-card-text class="py-6">
-    <div class="text-body-1 font-weight-medium mb-2">
-      Confirm approval of this EMI request
-    </div>
     <div class="text-body-2 text-medium-emphasis">
       This will mark the request as <strong>approved</strong>. Continue?
     </div>
@@ -13,10 +10,13 @@
     <v-btn
       color="primary"
       variant="flat"
-      :loading="loading"
       :disabled="loading"
       @click="submit"
     >
+      <template #prepend>
+        <v-progress-circular v-if="loading" indeterminate size="16" width="2" color="white" />
+        <v-icon v-else>mdi-check-bold</v-icon>
+      </template>
       Yes, Approve
     </v-btn>
   </v-card-actions>

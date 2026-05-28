@@ -34,7 +34,7 @@ class EmiRequestListResource extends JsonResource
             'time' => $this->created_at,
             'emi_per_month' => $this->emi_per_month,
             'emi_type' => $this->emi_type ?? null,
-            'emi_mode' => $this->emi_mode ? ($this->emi_mode.' months') : 'n/a',
+            'emi_mode' => $this->emi_mode ? ($this->emi_mode . ' months') : 'n/a',
             'status' => $this->status,
             'status_label' => EmiRequest::getStatusLabels()[$this->status] ?? 'Unknown',
             'created_at' => $this->created_at,
@@ -137,6 +137,16 @@ class EmiRequestListResource extends JsonResource
                 'branch' => $this->requestBank->branch,
                 'account_number' => $this->requestBank->account_number,
             ] : null,
+            'activities' => $this->activities()->latest()->get()->map(function ($activity) {
+                return [
+                    'id' => $activity->id,
+                    'label' => $activity->label,
+                    'description' => $activity->description,
+                    'created_at' => $activity->created_at,
+                    'actor' => $activity->actor->name,
+                    'note' => $activity->meta['notes'] ?? null,
+                ];
+            })
         ];
         // id, emi_request_id, bank_id, account_number, branch, deleted_at, created_at, updated_at
     }

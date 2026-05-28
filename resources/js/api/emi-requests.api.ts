@@ -120,6 +120,25 @@ export function deleteRequest(id: string) {
   return http.post(`/admin/emi-requests/${id}/delete`, {});
 }
 
+export async function updateStatus(
+  id: string | number,
+  status: number,
+  notes?: string | null
+): Promise<{ success: boolean; status?: number; status_label?: string }> {
+  const payload: Record<string, unknown> = { status };
+  if (notes !== undefined) payload.notes = notes;
+  const response = await http.post(`/admin/emi-requests/${id}/status`, payload);
+  return response as unknown as { success: boolean; status?: number; status_label?: string };
+}
+
+export async function submitEmiRequestComment(
+  id: string | number,
+  comment: string
+): Promise<{ success: boolean; activity_id?: number | string }> {
+  const response = await http.post(`/admin/emi-requests/${id}/comment`, { comment });
+  return response as unknown as { success: boolean; activity_id?: number | string };
+}
+
 export async function generateApplication(
   id: string,
   payload?: FormData | Record<string, unknown>

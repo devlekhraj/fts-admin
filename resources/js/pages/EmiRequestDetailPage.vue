@@ -1,28 +1,7 @@
 <template>
 	<AppPageHeader title="EMI Request Detail" subtitle="View EMI request information">
 		<template #actions>
-			<v-btn color="success" v-if="statusLabel === 'Pending'" variant="flat" prepend-icon="mdi-check-bold" @click="openConfirm('approved')">
-				Approve Request
-			</v-btn>
-			<v-btn color="error" v-if="statusLabel === 'Pending'" variant="flat" prepend-icon="mdi-close-thick" @click="openConfirm('rejected')">
-				Reject Request
-			</v-btn>
-
-			<v-btn
-				color="error"
-				v-if="statusLabel === 'Pending' || statusLabel === 'Cancelled'"
-				variant="outlined"
-				prepend-icon="mdi-delete-outline"
-				@click="openDeleteConfirm"
-			>
-				Delete
-			</v-btn>
-
-			<v-btn variant="flat" color="primary" @click="goBack">
-				<v-icon start>mdi-arrow-left</v-icon>
-				Back
-			</v-btn>
-			<!-- {{ statusLabel }} -->
+			<EmiRequestStatusUpdateAction :id="String(route.params.id ?? '')" :status-label="statusLabel" @success="fetchDetail" />
 		</template>
 	</AppPageHeader>
 
@@ -405,7 +384,14 @@
 					<v-card-title><v-icon size="18" class="mr-2">mdi-timeline-clock-outline</v-icon> Activity
 						Timeline</v-card-title>
 					<v-divider></v-divider>
-					<ActivityTimeline :items="timelineItems" dot-color="primary" class="pa-4" />
+					<ActivityTimeline
+						:items="application.activities || []"
+						:emi-request-id="application.id"
+						:status-label="statusLabel"
+						dot-color="primary"
+						class="pa-4"
+						@commented="fetchDetail"
+					/>
 				</v-card>
 			</v-col>
 		</v-row>
@@ -423,10 +409,7 @@ import { formatNPR } from '@/shared/formatters';
 import ActivityTimeline from '@/components/emi/ActivityTimeline.vue';
 import DocGrid from '@/components/emi/DocGrid.vue';
 import EmiBankApplicationList from '@/components/emi/EmiBankApplicationList.vue';
-import { openModal } from '@/shared/modal';
-import EmiRequestApproveModal from '@/components/emi/EmiRequestApproveModal.vue';
-import EmiRequestRejectModal from '@/components/emi/EmiRequestRejectModal.vue';
-import EmiRequestDeleteModal from '@/components/emi/EmiRequestDeleteModal.vue';
+import EmiRequestStatusUpdateAction from '@/components/emi/EmiRequestStatusUpdateAction.vue';
 import { formatTime12h, formatDateTime, getStatusColor } from '@/shared/utils';
 interface ApplicationUser {
 	name?: string;
@@ -451,6 +434,14 @@ interface Application {
 	product_attributes?: unknown;
 	status?: string;
 	created_at?: string;
+	activities?: Array<{
+		id?: number | string;
+		label?: string;
+		description?: string;
+		created_at?: string;
+		actor?: string;
+		note?: string | null;
+	}>; 
 }
 
 const application = ref<Application>({
@@ -473,14 +464,6 @@ const loading = ref(false);
 const route = useRoute();
 const router = useRouter();
 
-
-const timeline = [
-	{ title: 'Request submitted by System', subtitle: 'Customer submitted EMI request via product page', time: 'Apr 8, 10:15 AM' },
-	{ title: 'Documents uploaded by Raj Kumar', subtitle: '4 documents uploaded for verification', time: 'Apr 8, 10:20 AM' },
-	{ title: 'Under review by System', subtitle: 'Assigned to verification team', time: 'Apr 8, 11:00 AM' },
-	{ title: 'Identity verified by Sarah M.', subtitle: 'Citizenship verified successfully', time: 'Apr 9, 9:30 AM' },
-];
-const timelineItems = computed(() => [...timeline].reverse());
 
 const productName = computed(() => String(application.value.product?.name ?? '').trim() || 'N/A');
 
@@ -579,6 +562,8 @@ async function fetchDetail() {
 			...application.value,
 			...detail,
 		} as any;
+
+		console.log(detail)
 	} catch {
 		// keep demo data on error
 	} finally {
@@ -586,37 +571,7 @@ async function fetchDetail() {
 	}
 }
 
-function openConfirm(decision: 'approved' | 'rejected') {
-	const id = String(route.params.id ?? '');
-	if (!id) return;
-	const component = decision === 'approved' ? EmiRequestApproveModal : EmiRequestRejectModal;
-	openModal(
-		component,
-		{ id },
-		{
-			title: decision === 'approved' ? 'Approve EMI Request' : 'Reject EMI Request',
-			size: 'sm',
-			onSaved: fetchDetail,
-		}
-	);
-}
-
-function openDeleteConfirm() {
-	const id = String(route.params.id ?? '');
-	if (!id) return;
-	openModal(
-		EmiRequestDeleteModal,
-		{ id },
-		{
-			title: 'Delete EMI Request',
-			size: 'sm',
-			onSaved: () => {
-				// The record is gone; go back to list.
-				router.push({ name: 'admin.emi.requests' });
-			},
-		}
-	);
-}
+// Approve/Reject/Delete/Status transitions are handled by EmiRequestStatusUpdateAction
 
 function goBack() {
 	router.back();

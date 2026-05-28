@@ -14,6 +14,8 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::put('emi-requests/{id}', [EmiRequestController::class, 'update'])->name('admin.emi-requests.update');
     Route::post('emi-requests/{id}/approve', [EmiRequestController::class, 'approve'])->name('admin.emi-requests.approve');
     Route::post('emi-requests/{id}/reject', [EmiRequestController::class, 'reject'])->name('admin.emi-requests.reject');
+    Route::post('emi-requests/{id}/status', [EmiRequestController::class, 'updateStatus'])->name('admin.emi-requests.status.update');
+    Route::post('emi-requests/{id}/comment', [EmiRequestController::class, 'comment'])->name('admin.emi-requests.comment');
     Route::post('emi-requests/{id}/delete', [EmiRequestController::class, 'delete'])->name('admin.emi-requests.delete');
 
     Route::post('emi-requests/{id}/generate-application', [EmiRequestApplicationController::class, 'generateApplication'])->name('admin.emi-requests.generate-application');

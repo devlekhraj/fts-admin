@@ -36,21 +36,31 @@ final class EmiRequest extends BaseModel
     public const STATUS_PENDING = 0;
 
     public const STATUS_PROCESSING = 1;
-
-    public const STATUS_APPROVED = 2;
-
-    public const STATUS_FINISHED = 3;
-
     public const STATUS_CANCELLED = 4;
+    public const STATUS_FINISHED = 3;
+    public const STATUS_BANK_APPROVAL = 5;
+    public const STATUS_APPROVED = 2;
+    public const STATUS_DISPATCHED = 6;
+    public const STATUS_DELIVERED = 7;
+    public const STATUS_COMPLETED = 8;
+
+
+
+
+
 
     public static function getStatusLabels(): array
     {
         return [
             self::STATUS_PENDING => 'Pending',
-            self::STATUS_PROCESSING => 'Processing',
-            self::STATUS_APPROVED => 'Approved',
             self::STATUS_FINISHED => 'Finished',
             self::STATUS_CANCELLED => 'Cancelled',
+            self::STATUS_PROCESSING => 'Processing',
+            self::STATUS_BANK_APPROVAL => 'Bank Approval',
+            self::STATUS_APPROVED => 'Approved',
+            self::STATUS_DISPATCHED => 'Dispatched',
+            self::STATUS_DELIVERED => 'Delivered',
+            self::STATUS_COMPLETED => 'Completed',
         ];
     }
 

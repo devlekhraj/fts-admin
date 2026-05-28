@@ -1,8 +1,6 @@
 <template>
   <v-card-text class="py-6">
-    <div class="text-body-1 font-weight-medium mb-2">
-      Confirm deletion of this EMI request
-    </div>
+  
     <div class="text-body-2 text-medium-emphasis">
       This action cannot be undone. Continue?
     </div>
@@ -13,10 +11,13 @@
     <v-btn
       color="error"
       variant="flat"
-      :loading="loading"
       :disabled="loading"
       @click="submit"
     >
+      <template #prepend>
+        <v-progress-circular v-if="loading" indeterminate size="16" width="2" color="white" />
+        <v-icon v-else>mdi-delete-outline</v-icon>
+      </template>
       Yes, Delete
     </v-btn>
   </v-card-actions>
@@ -49,4 +50,3 @@ async function submit() {
   }
 }
 </script>
-

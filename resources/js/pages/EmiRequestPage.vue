@@ -57,7 +57,7 @@
 				<span class="text-capitalize">{{ item.emi_mode ?? '-' }}</span>
 			</template>
 			<template #item.status_label="{ item }">
-				<v-chip size="small" :color="statusColor(item.status)" variant="tonal" label>
+				<v-chip size="small" :color="getStatusColor(item.status_label)" variant="tonal" label>
 					{{ item.status_label ?? item.status ?? '-' }}
 				</v-chip>
 			</template>
@@ -78,7 +78,7 @@ import type { DataTableOptions } from '@/components/datatable/types';
 import { list as listEmiRequests } from '@/api/emi-requests.api';
 import { formatDateTime, formatNPR } from '@/shared/formatters';
 import { getEmiIconColor, getEmiIconTextColor, getEmiTypeIcon, statusColor } from '@/shared/emi';
-import { timeAgo } from '@/shared/utils';
+import { getStatusColor, timeAgo } from '@/shared/utils';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import type { DataTableHeader } from '@/components/datatable/types';
 

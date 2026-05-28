@@ -75,9 +75,6 @@ final class OrderController extends Controller
             action: 'order_comment',
             label: 'Comment added',
             description: $validated['comment'],
-            // meta: [
-            //     'notes' => $validated['comment'],
-            // ],
             actor: $actor,
         );
 
