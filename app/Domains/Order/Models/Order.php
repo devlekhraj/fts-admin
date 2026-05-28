@@ -73,6 +73,8 @@ final class Order extends BaseModel
 
     const STATUS_CANCELED = 5;
 
+    const STATUS_DELIVERED = 6;
+
     protected $appends = ['order_status'];
 
     public function getOrderStatusAttribute(): string
@@ -83,6 +85,7 @@ final class Order extends BaseModel
             self::STATUS_DISPATCHED => 'Dispatched',
             self::STATUS_COMPLETED => 'Completed',
             self::STATUS_CANCELED => 'Canceled',
+            self::STATUS_DELIVERED => 'Delivered',
             default => 'Draft',
         };
     }

@@ -183,11 +183,12 @@
         <div class="mb-6">
           <v-card>
             <v-card-title>
-              Order Progress / Comments
+             Activity Timeline / Comments
             </v-card-title>
             <v-divider></v-divider>
             <OrderTimeline
               :order-id="summary?.id ?? ''"
+              :order-status="orderStatus"
               :order-activities="orderActivities"
               @commented="handleCommented"
             />

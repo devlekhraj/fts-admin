@@ -38,20 +38,24 @@ final class OrderUpdateStatusAction
         $description = "";
         $label = "";
         if($data->status === $order::STATUS_CONFIRMED){
-            $label = "Order Confirmed";
+            $label = "Confirmed";
             $description = "Order confirmed.";
         }
         if($data->status === $order::STATUS_DISPATCHED){
-            $label = "Order Dispatched";
+            $label = "Dispatched";
             $description = "Order has been dispatched.";
         }
         if($data->status === $order::STATUS_COMPLETED){
-            $label = "Order Completed";
+            $label = "Completed";
             $description = "Order has been completed.";
         }
         if($data->status === $order::STATUS_CANCELED){
-            $label = "Order Canceled";
+            $label = "Canceled";
             $description = "Order canceled.";
+        }
+        if($data->status === $order::STATUS_DELIVERED){
+            $label = "Delivered";
+            $description = "Order has been delivered.";
         }
         $order->activities()->create([
             'action' => 'order_status_updated',

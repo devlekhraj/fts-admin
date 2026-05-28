@@ -18,6 +18,15 @@
     Dispatch
   </v-btn>
   <v-btn
+    v-if="showDeliver"
+    color="info"
+    variant="flat"
+    prepend-icon="mdi-package-variant-closed"
+    @click="openDeliverModal"
+  >
+    Delivered
+  </v-btn>
+  <v-btn
     v-if="showComplete"
     color="success"
     variant="flat"
@@ -58,13 +67,15 @@ const emit = defineEmits<{
 const normalizedStatus = computed(() => String(props.currentStatus ?? '').trim());
 const showConfirm = computed(() => ['Draft', 'Placed'].includes(normalizedStatus.value));
 const showDispatch = computed(() => normalizedStatus.value === 'Confirmed');
-const showComplete = computed(() => normalizedStatus.value === 'Dispatched');
+const showDeliver = computed(() => normalizedStatus.value === 'Dispatched');
+const showComplete = computed(() => normalizedStatus.value === 'Delivered');
 const showCancel = computed(() => !['Completed', 'Canceled'].includes(normalizedStatus.value));
 
-async function submitAction(action: 'confirm' | 'dispatch' | 'complete' | 'cancel', notes?: string): Promise<boolean> {
+async function submitAction(action: 'confirm' | 'dispatch' | 'deliver' | 'complete' | 'cancel', notes?: string): Promise<boolean> {
   const statusCodeMap: Record<typeof action, number> = {
     confirm: 2,
     dispatch: 3,
+    deliver: 6,
     complete: 4,
     cancel: 5,
   };
@@ -75,6 +86,7 @@ async function submitAction(action: 'confirm' | 'dispatch' | 'complete' | 'cance
     const successMap: Record<typeof action, string> = {
       confirm: 'Order confirmed',
       dispatch: 'Order dispatched',
+      deliver: 'Order delivered',
       complete: 'Order completed',
       cancel: 'Order canceled',
     };
@@ -97,6 +109,21 @@ function openConfirmModal(action: 'confirm' | 'dispatch') {
     },
     {
       title: action === 'confirm' ? 'Confirm Order' : 'Dispatch Order',
+      size: 'sm',
+    },
+  );
+}
+
+function openDeliverModal() {
+  openModal(
+    OrderActionConfirmModal,
+    {
+      orderId: props.orderId,
+      action: 'deliver',
+      onSubmit: (payload: { action: 'deliver' }) => submitAction(payload.action),
+    },
+    {
+      title: 'Mark as Delivered',
       size: 'sm',
     },
   );

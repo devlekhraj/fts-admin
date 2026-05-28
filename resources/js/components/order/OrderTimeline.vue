@@ -1,6 +1,7 @@
 <template>
-  <div class="px-4 py-6">
+  <div v-if="canComment" class="px-4 py-6">
     <v-textarea
+      
       v-model="comment"
       variant="outlined"
       hide-details
@@ -78,6 +79,7 @@ type OrderActivity = {
 const props = defineProps<{
   orderActivities?: OrderActivity[];
   orderId?: string | number;
+  orderStatus?: string;
 }>();
 
 const emit = defineEmits<{
@@ -88,6 +90,12 @@ const activities = computed(() => (Array.isArray(props.orderActivities) ? props.
 
 const comment = ref('');
 const isSubmitting = ref(false);
+
+const canComment = computed(() => {
+  const status = String(props.orderStatus ?? '').trim().toLowerCase();
+  if (!status) return true;
+  return !['completed', 'canceled', 'cancelled', 'rejected'].includes(status);
+});
 
 async function submitComment() {
   if (isSubmitting.value) return;

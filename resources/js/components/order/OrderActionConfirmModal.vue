@@ -32,24 +32,38 @@ import { ref } from 'vue';
 
 const props = defineProps<{
   orderId: string | number;
-  action: 'confirm' | 'dispatch';
-  onSubmit: (payload: { action: 'confirm' | 'dispatch' }) => Promise<boolean>;
+  action: 'confirm' | 'dispatch' | 'deliver';
+  onSubmit: (payload: { action: 'confirm' | 'dispatch' | 'deliver' }) => Promise<boolean>;
 }>();
 
 const emit = defineEmits<{
   (e: 'close'): void;
 }>();
 
-const heading = computed(() => (props.action === 'confirm' ? 'Confirm this order?' : 'Dispatch this order?'));
-const message = computed(() =>
-  props.action === 'confirm'
-    ? 'This will mark the order as confirmed. Continue?'
-    : 'This will mark the order as dispatched. Continue?',
-);
+const heading = computed(() => {
+  if (props.action === 'confirm') return 'Confirm this order?';
+  if (props.action === 'dispatch') return 'Dispatch this order?';
+  return 'Mark this order as delivered?';
+});
 
-const confirmLabel = computed(() => (props.action === 'confirm' ? 'Yes, Confirm' : 'Yes, Dispatch'));
+const message = computed(() => {
+  if (props.action === 'confirm') return 'This will mark the order as confirmed. Continue?';
+  if (props.action === 'dispatch') return 'This will mark the order as dispatched. Continue?';
+  return 'This will mark the order as delivered. Continue?';
+});
+
+const confirmLabel = computed(() => {
+  if (props.action === 'confirm') return 'Yes, Confirm';
+  if (props.action === 'dispatch') return 'Yes, Dispatch';
+  return 'Yes, Delivered';
+});
+
 const confirmColor = computed(() => (props.action === 'confirm' ? 'success' : 'info'));
-const confirmIcon = computed(() => (props.action === 'confirm' ? 'mdi-check-circle' : 'mdi-truck'));
+const confirmIcon = computed(() => {
+  if (props.action === 'confirm') return 'mdi-check-circle';
+  if (props.action === 'dispatch') return 'mdi-truck';
+  return 'mdi-package-variant-closed';
+});
 
 const isSubmitting = ref(false);
 

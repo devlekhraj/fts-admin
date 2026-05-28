@@ -48,7 +48,7 @@ final class OrderController extends Controller
     public function updateStatus(Request $request, string $id): JsonResponse
     {
         $validated = $request->validate([
-            'status' => ['required', 'integer', 'in:0,1,2,3,4,5'],
+            'status' => ['required', 'integer', 'in:0,1,2,3,4,5,6'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
 

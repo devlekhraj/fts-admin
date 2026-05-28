@@ -1,0 +1,1 @@
+import{U as a}from"./main-DKQk8mXk.js";async function o(e){return await a.get("/admin/customer-list",{params:e})}async function r(e){const s=await a.get(`/admin/customers/${e}`),t=s;return t&&typeof t=="object"&&"data"in t&&t.data?t.data:s}export{r as g,o as l};
