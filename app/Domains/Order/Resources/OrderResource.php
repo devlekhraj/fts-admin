@@ -97,6 +97,16 @@ class OrderResource extends JsonResource
             'sub_total' => $this->order_total,
             'total' => $this->paymentMethod?->total,
         ];
+        $order['activities'] = $this->activities()->latest()->get()->map(function ($activity) {
+            return [
+                'id' => $activity->id,
+                'label' => $activity->label,
+                'description' => $activity->description,
+                'created_at' => $activity->created_at,
+                'actor' => $activity->actor->name,
+                'note' => $activity->meta['notes'] ?? null,
+            ];
+        });
 
         return $order;
     }

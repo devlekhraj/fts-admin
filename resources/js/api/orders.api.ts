@@ -111,9 +111,15 @@ export async function generateWarrantySerial(id: number | string): Promise<{ war
   return response as unknown as { warranty_token: string };
 }
 
-export async function updateOrderStatus(id: number | string, status: number): Promise<{ status: string; status_code: number }> {
-  const response = await http.post(`/admin/orders/${id}/status`, { status });
-  const wrapped = response as { status?: string; status_code?: number };
+export async function updateOrderStatus(
+  id: number | string,
+  status: number,
+  notes?: string | null
+): Promise<{ status: string; status_code: number }> {
+  const payload: Record<string, unknown> = { status };
+  if (notes !== undefined) payload.notes = notes;
+  const response = await http.post(`/admin/orders/${id}/status`, payload);
+  const wrapped = response as unknown as { status?: string; status_code?: number };
   if (wrapped && typeof wrapped === 'object') {
     return {
       status: String(wrapped.status ?? ''),
@@ -121,4 +127,12 @@ export async function updateOrderStatus(id: number | string, status: number): Pr
     };
   }
   return response as unknown as { status: string; status_code: number };
+}
+
+export async function submitOrderComment(
+  id: number | string,
+  comment: string
+): Promise<{ success: boolean; activity_id?: number | string }> {
+  const response = await http.post(`/admin/orders/${id}/comment`, { comment });
+  return response as unknown as { success: boolean; activity_id?: number | string };
 }

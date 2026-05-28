@@ -1,33 +1,59 @@
 <template>
+  <div class="px-4 py-6">
+    <v-textarea
+      v-model="comment"
+      variant="outlined"
+      hide-details
+      density="comfortable"
+      block
+      label="Add a comment"
+      maxlength="220"
+      rows="2"
+      auto-grow
+      @keydown.enter.exact.prevent="submitComment"
+    />
+    <div class="text-right mt-3">
+      <v-btn
+        color="primary"
+        variant="flat"
+        :disabled="isSubmitting || comment.trim().length === 0"
+        @click="submitComment"
+      >
+        <template #prepend>
+          <v-progress-circular
+            v-if="isSubmitting"
+            indeterminate
+            size="16"
+            width="2"
+            color="white"
+          />
+          <v-icon v-else>mdi-comment-plus-outline</v-icon>
+        </template>
+        Add Comment
+      </v-btn>
+    </div>
+  </div>
   <div class="card customer-card">
-    <ul class="timeline">
-      <li v-for="(step, index) in steps" :key="step" :class="[
-        'timeline-item',
-        {
-          active: index <= activeIndex && !isCanceledActive(index, step),
-          completed: step === 'Completed' && index <= activeIndex,
-          canceled: isCanceledActive(index, step),
-          pending: index > activeIndex && !isCanceledActive(index, step),
-        },
-      ]">
-        <div class="timeline-marker" :class="{
-          active: index <= activeIndex && !isCanceledActive(index, step),
-          completed: step === 'Completed' && index <= activeIndex,
-          canceled: isCanceledActive(index, step),
-          pending: index > activeIndex && !isCanceledActive(index, step),
-        }"></div>
+    <div v-if="activities.length === 0" class="empty-state text-medium-emphasis">
+      No activities yet.
+    </div>
+
+    <ul v-else class="timeline">
+      <li
+        v-for="(activity, index) in activities"
+        :key="String(activity.id ?? index)"
+        class="timeline-item"
+      >
+        <div class="timeline-marker" :class="{ latest: index === 0 }"></div>
         <div class="timeline-content">
-          <div class="timeline-title">{{ step }}</div>
-          <div class="timeline-meta" v-if="index === 0 && orderDateInfo">{{ orderDateInfo }}</div>
-          <div class="timeline-meta" v-else-if="index === activeIndex">
-            <span>Current status</span>
-            <span v-if="updatedAt" class="meta-date"> · {{ updatedAt }}</span>
+          <div class="timeline-title">{{ activity.description || '-' }}</div>
+          <div v-if="activity.note" class="timeline-desc">
+            {{ activity.note }}
           </div>
-          <div class="timeline-meta" v-else-if="index < activeIndex">
-            Completed
-          </div>
-          <div class="timeline-meta" v-else>
-            Pending
+          <div class="timeline-meta">
+            <span v-if="activity.actor">By {{ activity.actor }}</span>
+            <span v-if="activity.actor && activity.created_at" class="meta-sep"> · </span>
+            <span v-if="activity.created_at">{{ timeAgo(activity.created_at) }}</span>
           </div>
         </div>
       </li>
@@ -36,23 +62,48 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import { timeAgo } from '@/shared/utils';
+import { submitOrderComment } from '@/api/orders.api';
+
+type OrderActivity = {
+  id?: number | string;
+  label?: string;
+  description?: string;
+  created_at?: string;
+  actor?: string;
+  note?: string;
+};
 
 const props = defineProps<{
-  statusLabel?: string;
-  orderDateInfo?: string;
-  updatedAt?: string;
+  orderActivities?: OrderActivity[];
+  orderId?: string | number;
 }>();
 
-const steps = ['Draft', 'Placed', 'Confirmed', 'Dispatched', 'Completed', 'Canceled'];
+const emit = defineEmits<{
+  (e: 'commented', payload: { message: string }): void;
+}>();
 
-const activeIndex = computed(() => {
-  const label = String(props.statusLabel ?? '').toLowerCase();
-  const idx = steps.findIndex((s) => s.toLowerCase() === label);
-  return idx >= 0 ? idx : 0;
-});
+const activities = computed(() => (Array.isArray(props.orderActivities) ? props.orderActivities : []));
 
-const isCanceledActive = (index: number, step: string) => step === 'Canceled' && index === activeIndex.value;
+const comment = ref('');
+const isSubmitting = ref(false);
+
+async function submitComment() {
+  if (isSubmitting.value) return;
+  const text = comment.value.trim();
+  if (!text) return;
+  if (props.orderId === undefined || props.orderId === null || props.orderId === '') return;
+
+  isSubmitting.value = true;
+  try {
+    const result = await submitOrderComment(props.orderId, text);
+    if (result?.success) emit('commented', { message: 'Comment added' });
+    comment.value = '';
+  } finally {
+    isSubmitting.value = false;
+  }
+}
 </script>
 
 <style scoped>
@@ -85,27 +136,14 @@ const isCanceledActive = (index: number, step: string) => step === 'Canceled' &&
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  border: 2px solid rgb(var(--v-theme-outline));
-  background: rgb(var(--v-theme-surface));
+  border: 2px solid rgb(var(--v-theme-primary));
+  background: rgb(var(--v-theme-primary));
   position: relative;
   top: 4px;
 }
 
-.timeline-item.active .timeline-marker,
-.timeline-item.completed .timeline-marker {
-  background: rgb(var(--v-theme-primary));
-  border-color: rgb(var(--v-theme-primary));
-}
-
-.timeline-item.canceled .timeline-marker {
-  background: rgb(var(--v-theme-error));
-  border-color: rgb(var(--v-theme-error));
-}
-
-.timeline-item.pending .timeline-marker,
-.timeline-marker.pending {
-  background: rgb(var(--v-theme-surface-variant, '#c5c5c5'));
-  border-color: rgb(var(--v-theme-outline-variant));
+.timeline-marker.latest {
+  box-shadow: 0 0 0 4px rgba(var(--v-theme-primary), 0.18);
 }
 
 .timeline-item::before {
@@ -118,19 +156,6 @@ const isCanceledActive = (index: number, step: string) => step === 'Canceled' &&
   background: #c5c5c5;
 }
 
-.timeline-item.active::before,
-.timeline-item.completed::before {
-  background: rgb(var(--v-theme-primary));
-}
-
-.timeline-item.canceled::before {
-  background: rgb(var(--v-theme-error));
-}
-
-.timeline-item.pending::before {
-  background: #c5c5c5;
-}
-
 .timeline-item:last-child::before {
   display: none;
 }
@@ -140,12 +165,18 @@ const isCanceledActive = (index: number, step: string) => step === 'Canceled' &&
   font-size: 0.8rem;
 }
 
-.timeline-item.active .timeline-title {
-  color: rgb(var(--v-theme-primary));
+.timeline-desc {
+  margin-top: 2px;
+  font-size: 0.8rem;
 }
 
 .timeline-meta {
   font-size: 0.82rem;
   color: #656565;
+  margin-top: 4px;
+}
+
+.empty-state {
+  font-size: 0.85rem;
 }
 </style>

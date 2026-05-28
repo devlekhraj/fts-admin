@@ -14,7 +14,7 @@
         </v-btn>
       </v-card-title>
       <v-divider></v-divider>
-      <component :is="modal.component" v-bind="modal.props" @close="modal.close()" @saved="handleSaved" @deleted="handleDeleted" />
+      <component :is="modal.component" v-bind="modal.props" v-on="componentListeners" />
     </v-card>
   </v-dialog>
 </template>
@@ -24,6 +24,14 @@ import { computed } from 'vue';
 import { useModalStore } from '@/stores/modal.store';
 
 const modal = useModalStore();
+
+const componentListeners = computed(() => {
+  return {
+    close: () => modal.close(),
+    ...(modal.onSaved ? { saved: (payload: unknown) => handleSaved(payload) } : {}),
+    ...(modal.onDeleted ? { deleted: (payload: unknown) => handleDeleted(payload) } : {}),
+  };
+});
 
 const dialogWidth = computed(() => {
   switch (modal.size) {

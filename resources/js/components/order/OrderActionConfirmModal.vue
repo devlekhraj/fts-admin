@@ -1,0 +1,63 @@
+<template>
+  <v-card-text class="py-6">
+    <div class="text-body-1 font-weight-medium mb-2">
+      {{ heading }}
+    </div>
+    <div class="text-body-2 text-medium-emphasis">
+      {{ message }}
+    </div>
+  </v-card-text>
+
+  <v-card-actions class="pb-4 d-flex justify-end ga-2">
+    <v-btn variant="text" :disabled="isSubmitting" @click="emit('close')">Cancel</v-btn>
+    <v-btn :color="confirmColor" variant="flat" :disabled="isSubmitting" @click="confirm">
+      <template #prepend>
+        <v-progress-circular
+          v-if="isSubmitting"
+          indeterminate
+          size="16"
+          width="2"
+          color="white"
+        />
+        <v-icon v-else>{{ confirmIcon }}</v-icon>
+      </template>
+      {{ confirmLabel }}
+    </v-btn>
+  </v-card-actions>
+</template>
+
+<script setup lang="ts">
+import { computed } from 'vue';
+import { ref } from 'vue';
+
+const props = defineProps<{
+  orderId: string | number;
+  action: 'confirm' | 'dispatch';
+  onSubmit: (payload: { action: 'confirm' | 'dispatch' }) => Promise<boolean>;
+}>();
+
+const emit = defineEmits<{
+  (e: 'close'): void;
+}>();
+
+const heading = computed(() => (props.action === 'confirm' ? 'Confirm this order?' : 'Dispatch this order?'));
+const message = computed(() =>
+  props.action === 'confirm'
+    ? 'This will mark the order as confirmed. Continue?'
+    : 'This will mark the order as dispatched. Continue?',
+);
+
+const confirmLabel = computed(() => (props.action === 'confirm' ? 'Yes, Confirm' : 'Yes, Dispatch'));
+const confirmColor = computed(() => (props.action === 'confirm' ? 'success' : 'info'));
+const confirmIcon = computed(() => (props.action === 'confirm' ? 'mdi-check-circle' : 'mdi-truck'));
+
+const isSubmitting = ref(false);
+
+async function confirm() {
+  if (isSubmitting.value) return;
+  isSubmitting.value = true;
+  const ok = await props.onSubmit({ action: props.action });
+  if (ok) emit('close');
+  isSubmitting.value = false;
+}
+</script>

@@ -10,4 +10,5 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::get('orders/{id}/details', [OrderController::class, 'show'])->name('admin.orders.api.details');
     Route::post('orders/{id}/warranty', [OrderController::class, 'warranty'])->name('admin.orders.api.warranty.generate');
     Route::post('orders/{id}/status', [OrderController::class, 'updateStatus'])->name('admin.orders.api.status.update');
+    Route::post('orders/{id}/comment', [OrderController::class, 'comment'])->name('admin.orders.api.comment.store');
 });

@@ -5,52 +5,19 @@
       <!-- <WarrantySerialCard :order-id="summary?.id ?? ''" :serial="summary?.warranty_token ?? null"
           @generated="handleWarrantyGenerated" /> -->
 
-      <StatusUpdateAction :order-id="summary?.id ?? ''" :current-status="orderStatus"
-          @selected="handleStatusSelected" />
+      <StatusUpdateAction :order-id="summary?.id ?? ''" :current-status="orderStatus" @success="handleStatusSuccess" />
 
-      <v-btn variant="flat" color="primary" @click="goBack">
-        <v-icon start>mdi-arrow-left</v-icon>
-        Back
-      </v-btn>
     </template>
   </AppPageHeader>
 
   <!-- <v-card class="pa-6 pb-0"> -->
   <v-container fluid class="order-overview">
     <v-row>
-      <v-col cols="12" lg="4">
-        <v-card class="mb-4">
-          <v-card-title>
-            Customer Detail
-          </v-card-title>
-          <v-divider></v-divider>
 
-          <div class="card customer-card">
-            <div class="card-head">
-              <v-avatar size="44" rounded="lg" color="grey-lighten-3">
-                <v-img v-if="customerAvatar" :src="customerAvatar" cover />
-                <v-icon v-else size="24" color="grey-darken-1">mdi-account-circle</v-icon>
-              </v-avatar>
-              <div>
-                <div class="text-caption text-medium-emphasis">Customer</div>
-                <h3 class="mb-1">{{ customerName }}</h3>
-                <div class="text-body-2 text-medium-emphasis">Email: {{ customerEmail }}</div>
-                <div class="text-body-2 text-medium-emphasis">Phone: {{ customerMobile }}</div>
-              </div>
-            </div>
-          </div>
-        </v-card>
-        <v-card>
-          <v-card-title>
-            Order Progress
-          </v-card-title>
-          <v-divider></v-divider>
-          <OrderTimeline :status-label="orderStatusLabel" :order-date-info="orderDateInfo" :updated-at="orderDateInfo" />
-        </v-card>
-      </v-col>
       <v-col cols="12" lg="8">
         <div>
           <v-row class="equal-cards" align="stretch">
+
             <v-col cols="12" md="6">
               <div class="card-wrapper">
                 <v-card class="h-100 d-flex flex-column">
@@ -138,14 +105,14 @@
                         </tr>
                       </tbody>
                     </v-table>
-  
+
                     <v-divider class="my-5" />
-  
+
                     <!-- <div class="section-head mb-3">
                       <h3>Payment Details</h3>
                       <v-chip size="small" color="success" variant="tonal">Paid</v-chip>
                     </div> -->
-  
+
                     <div class="summary-table">
                       <div class="summary-row">
                         <span>Sub Total</span>
@@ -178,16 +145,54 @@
                           </p>
                         </div>
                       </div>
-  
+
                     </div>
                   </section>
                 </div>
-              
+
               </v-card>
             </v-col>
           </v-row>
         </div>
 
+      </v-col>
+      <v-col cols="12" lg="4">
+        <div class="mb-6">
+          <v-card>
+            <v-card-title>
+              Customer Detail
+            </v-card-title>
+            <v-divider></v-divider>
+
+            <div class="card customer-card">
+              <div class="card-head">
+                <v-avatar size="44" rounded="lg" color="grey-lighten-3">
+                  <v-img v-if="customerAvatar" :src="customerAvatar" cover />
+                  <v-icon v-else size="24" color="grey-darken-1">mdi-account-circle</v-icon>
+                </v-avatar>
+                <div>
+                  <div class="text-caption text-medium-emphasis">Customer</div>
+                  <h3 class="mb-1">{{ customerName }}</h3>
+                  <div class="text-body-2 text-medium-emphasis">Email: {{ customerEmail }}</div>
+                  <div class="text-body-2 text-medium-emphasis">Phone: {{ customerMobile }}</div>
+                </div>
+              </div>
+            </div>
+          </v-card>
+        </div>
+        <div class="mb-6">
+          <v-card>
+            <v-card-title>
+              Order Progress / Comments
+            </v-card-title>
+            <v-divider></v-divider>
+            <OrderTimeline
+              :order-id="summary?.id ?? ''"
+              :order-activities="orderActivities"
+              @commented="handleCommented"
+            />
+          </v-card>
+        </div>
       </v-col>
     </v-row>
   </v-container>
@@ -203,6 +208,7 @@ import AppPageHeader from '@/components/AppPageHeader.vue';
 import { formatDateLong } from '@/shared/utils';
 import { getOrderDetails } from '@/api/orders.api';
 import type { OrderDetailResponse } from '@/api/orders.api';
+import { useSnackbar } from '@/composables/snackbar';
 import WarrantySerialCard from '@/components/order/WarrantySerialCard.vue';
 import StatusUpdateAction from '@/components/order/StatusUpdateAction.vue';
 import OrderTimeline from '@/components/order/OrderTimeline.vue';
@@ -210,15 +216,17 @@ import OrderTimeline from '@/components/order/OrderTimeline.vue';
 const route = useRoute();
 const isLoading = ref(false);
 const orderDetail = ref<OrderDetailResponse | null>(null);
+const { showError } = useSnackbar();
 
 async function loadOrder() {
   const id = route.params.id;
-  if (!id) return;
+  if (id === undefined || id === null || id === '') return;
   isLoading.value = true;
   try {
     orderDetail.value = await getOrderDetails(id as string);
   } catch (e) {
     console.error('Failed to load order details', e);
+    showError('Failed to load order details');
   } finally {
     isLoading.value = false;
   }
@@ -247,7 +255,10 @@ const totalItems = computed(() => {
 });
 
 const orderDateInfo = computed(() => (summary.value?.order_date ? formatDateLong(summary.value.order_date) : '-'));
-const orderStatusLabel = computed(() => String(orderStatus.value || '').toLowerCase());
+const orderActivities = computed(() => {
+  const activities = (orderDetail.value as Record<string, unknown> | null)?.activities;
+  return Array.isArray(activities) ? activities : [];
+});
 
 
 const shippingAddress = computed(() => {
@@ -290,17 +301,14 @@ function handleWarrantyGenerated(token: string) {
   }
 }
 
-function handleStatusSelected(payload: { status: string; orderId: string | number }) {
-  if (orderDetail.value?.summary) {
-    orderDetail.value.summary.status = payload.status;
-  }
-  // refresh full order to sync timeline and summary
-  loadOrder();
+async function handleStatusSuccess() {
+  await loadOrder();
 }
 
-function goBack() {
-  router.back();
+async function handleCommented() {
+  await loadOrder();
 }
+
 </script>
 
 <style scoped>
@@ -459,8 +467,8 @@ function goBack() {
   justify-content: space-between;
 }
 
-.equal-cards .v-col > .card-wrapper,
-.equal-cards .v-col > .card-wrapper > .v-card {
+.equal-cards .v-col>.card-wrapper,
+.equal-cards .v-col>.card-wrapper>.v-card {
   height: 100%;
 }
 
@@ -468,7 +476,7 @@ function goBack() {
   display: flex;
 }
 
-.equal-cards .card-wrapper > .v-card {
+.equal-cards .card-wrapper>.v-card {
   flex: 1;
 }
 
@@ -545,9 +553,10 @@ function goBack() {
   }
 
 }
+
 .v-card .v-card-title {
-    line-height: 1.6;
-    font-weight: 600 !important;
-    font-size: medium !important;
+  line-height: 1.6;
+  font-weight: 600 !important;
+  font-size: medium !important;
 }
 </style>

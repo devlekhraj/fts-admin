@@ -42,7 +42,7 @@
       <span>{{ Number(item.items_count ?? 0) }} {{ Number(item.items_count ?? 0) === 1 ? 'item' : 'items' }}</span>
     </template>
     <template #item.status="{ item }">
-      <v-chip size="small" variant="tonal" label :color="statusColor(item.status)">
+      <v-chip size="small" variant="tonal" label :color="getStatusColor(item.status)">
         {{ item.status || '-' }}
       </v-chip>
     </template>
@@ -69,7 +69,7 @@ import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
 import { listOrders, type OrderListItem } from '@/api/orders.api';
 import { formatNPR } from '@/shared/formatters';
-import { timeAgo } from '@/shared/utils';
+import { getStatusColor, timeAgo } from '@/shared/utils';
 import AppSearchButton from '@/components/shared/AppSearchButton.vue';
 import AppSearchTextField from '@/components/shared/AppSearchTextField.vue';
 
@@ -107,13 +107,13 @@ const options = ref<DataTableOptions>({
 const hasLoadedOnce = ref(false);
 const router = useRouter();
 
-function statusColor(status: string): string {
-  const normalized = String(status ?? '').toLowerCase();
-  if (normalized === 'paid' || normalized === 'completed' || normalized === 'success') return 'success';
-  if (normalized === 'pending' || normalized === 'processing') return 'warning';
-  if (normalized === 'cancelled' || normalized === 'failed') return 'error';
-  return 'primary';
-}
+// function statusColor(status: string): string {
+//   const normalized = String(status ?? '').toLowerCase();
+//   if (normalized === 'paid' || normalized === 'completed' || normalized === 'success') return 'success';
+//   if (normalized === 'pending' || normalized === 'processing') return 'warning';
+//   if (normalized === 'cancelled' || normalized === 'failed') return 'error';
+//   return 'primary';
+// }
 
 async function fetchOrders() {
   loading.value = true;

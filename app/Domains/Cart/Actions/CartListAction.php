@@ -14,6 +14,7 @@ final class CartListAction
         $query = Cart::query()
             ->with(['user'])
             ->withCount('items')
+            ->has('items')
             ->latest('id');
 
         if (is_string($data->search) && trim($data->search) !== '') {

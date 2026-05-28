@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Order\Models;
 
 use App\Domains\PaymentMethod\Models\PaymentMethod;
+use App\Domains\Shared\Models\ActivityLog;
 use App\Domains\User\Models\ShippingAddress;
 use App\Domains\User\Models\User;
 use App\Support\Eloquent\BaseModel;
@@ -99,5 +100,11 @@ final class Order extends BaseModel
     public function receipent(): HasOne
     {
         return $this->hasOne(OrderReceipent::class, 'order_id', 'id');
+    }
+
+    public function activities()
+    {
+        return $this->morphMany(ActivityLog::class, 'entity')
+            ->latest('created_at');
     }
 }

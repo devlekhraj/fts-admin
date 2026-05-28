@@ -155,18 +155,26 @@ export function getStatusColor(statusLabel: unknown): string {
   switch (normalized) {
     case 'approved':
       return 'success';
+
     case 'rejected':
     case 'cancelled':
     case 'canceled':
       return 'error';
+    
+    case 'dispatched':
+      return 'secondary';
+
     case 'pending':
       return 'warning';
+
     case 'processing':
     case 'under review':
       return 'info';
+
     case 'finished':
     case 'completed':
       return 'primary';
+      
     default:
       return 'secondary';
   }

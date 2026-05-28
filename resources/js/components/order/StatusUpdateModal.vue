@@ -48,12 +48,12 @@ const emit = defineEmits<{
 }>();
 
 const statuses = [
-  { label: 'Draft', code: 0, subtitle: 'Created but not placed' },
-  { label: 'Placed', code: 1, subtitle: 'Order submitted by customer' },
+  // { label: 'Draft', code: 0, subtitle: 'Created but not placed' },
+  // { label: 'Placed', code: 1, subtitle: 'Order submitted by customer' },
   { label: 'Confirmed', code: 2, subtitle: 'Validated by admin' },
   { label: 'Dispatched', code: 3, subtitle: 'Out for delivery/shipping' },
   { label: 'Completed', code: 4, subtitle: 'Delivered to customer' },
-  { label: 'Canceled', code: 5, subtitle: 'Canceled by admin/customer' },
+  // { label: 'Canceled', code: 5, subtitle: 'Canceled by admin/customer' },
 ];
 
 const currentCode = computed(() => {
@@ -86,7 +86,7 @@ async function save() {
   if (isSubmitting.value) return;
   isSubmitting.value = true;
   try {
-    await updateOrderStatus(props.orderId, statusCode.value);
+    await updateOrderStatus(props.orderId, statusCode.value, null);
     emit('saved', selected.value);
     closeModal();
   } finally {

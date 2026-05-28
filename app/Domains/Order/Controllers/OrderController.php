@@ -49,6 +49,7 @@ final class OrderController extends Controller
     {
         $validated = $request->validate([
             'status' => ['required', 'integer', 'in:0,1,2,3,4,5'],
+            'notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $data = OrderStatusUpdateData::fromArray($validated);
@@ -58,6 +59,31 @@ final class OrderController extends Controller
             'success' => true,
             'status' => $order->order_status,
             'status_code' => $order->status,
+        ], 200);
+    }
+
+    public function comment(Request $request, string $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'comment' => ['required', 'string', 'max:220'],
+        ]);
+
+        $order = $this->orderService->show($id);
+        $actor = auth('admin_api')->user();
+
+        $activity = $order->logActivity(
+            action: 'order_comment',
+            label: 'Comment added',
+            description: $validated['comment'],
+            // meta: [
+            //     'notes' => $validated['comment'],
+            // ],
+            actor: $actor,
+        );
+
+        return response()->json([
+            'success' => true,
+            'activity_id' => $activity->getKey(),
         ], 200);
     }
 }

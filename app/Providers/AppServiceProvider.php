@@ -30,6 +30,9 @@ class AppServiceProvider extends ServiceProvider
             'emi_requests' => EmiRequest::class,
             'users'        => User::class,
             'admins'       => Admin::class,
+            // Legacy morph types (backward compatibility)
+            'App\\Models\\User'  => User::class,
+            'App\\Models\\Admin' => Admin::class,
         ]);
 
     }
