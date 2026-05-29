@@ -2,10 +2,10 @@
   <v-card>
     <v-card-title class="d-flex align-center justify-space-between">
       <div class="text-h6">Recent Activity</div>
-      <v-btn variant="text" size="small">
+      <!-- <v-btn variant="text" size="small">
         View All
         <v-icon end>mdi-chevron-right</v-icon>
-      </v-btn>
+      </v-btn> -->
     </v-card-title>
     <v-divider />
     <v-card-text class="pa-4">
