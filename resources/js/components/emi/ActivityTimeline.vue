@@ -1,11 +1,25 @@
 <template>
   <div class="my-4">
     <div v-if="canComment" class="px-4 pb-6">
-      <v-textarea v-model="comment" variant="outlined" hide-details density="comfortable" block label="Add a comment"
-        maxlength="220" rows="2" auto-grow @keydown.enter.exact.prevent="submitComment" />
+      <v-textarea
+        v-model="comment"
+        variant="outlined"
+        hide-details
+        density="comfortable"
+        block
+        label="Add a comment"
+        maxlength="220"
+        rows="2"
+        auto-grow
+        @keydown.enter.exact.prevent="submitComment"
+      />
       <div class="text-right mt-3">
-        <v-btn color="primary" variant="flat" :disabled="isSubmitting || comment.trim().length === 0"
-          @click="submitComment">
+        <v-btn
+          color="primary"
+          variant="flat"
+          :disabled="isSubmitting || comment.trim().length === 0"
+          @click="submitComment"
+        >
           <template #prepend>
             <v-progress-circular v-if="isSubmitting" indeterminate size="16" width="2" color="white" />
             <v-icon v-else>mdi-comment-plus-outline</v-icon>
@@ -14,16 +28,14 @@
         </v-btn>
       </div>
     </div>
-  </div>
-  <div>
+
     <ul class="timeline pa-4">
       <li v-for="(item, idx) in items" :key="String(item.id ?? idx)" class="timeline__item">
-        <v-icon size="16" class="dot" color="primary">mdi-check-circle</v-icon>
+        <v-icon size="16" class="dot" :color="dotColor">mdi-check-circle</v-icon>
         <div>
           <div class="font-weight-medium" style="font-size: 0.8rem; font-weight: 400; color: #2467c0;">
             {{ item.description ?? 'Activity' }}
           </div>
-          <!-- <div v-if="item.description" class="text-caption text-medium-emphasis">{{ item.note }}</div> -->
           <div v-if="item.note" class="text-caption py-1 text-black">{{ item.note }}</div>
           <div class="text-caption text-medium-emphasis">
             <span v-if="item.actor">By {{ item.actor }}</span>
@@ -54,6 +66,7 @@ const props = defineProps<{
   }>;
   emiRequestId?: string | number;
   statusLabel?: string;
+  dotColor?: string;
 }>();
 
 const emit = defineEmits<{ (e: 'commented'): void }>();
@@ -65,6 +78,8 @@ const canComment = computed(() => {
   const raw = String(props.statusLabel ?? '').trim().toLowerCase();
   return raw !== 'completed' && raw !== 'cancelled' && raw !== 'canceled' && raw !== 'rejected';
 });
+
+const dotColor = computed(() => String(props.dotColor ?? 'primary'));
 
 async function submitComment() {
   if (isSubmitting.value) return;

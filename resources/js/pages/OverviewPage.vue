@@ -7,7 +7,7 @@
           <div class="d-flex align-center justify-space-between">
             <div>
               <div class="text-caption mb-1">Total Orders</div>
-              <div class="text-h4 font-weight-bold text-primary">{{ formatNumber(metrics.totalOrders) }}</div>
+              <div class="text-h4 font-weight-bold">{{ formatNumber(metrics.totalOrders) }}</div>
             
             </div>
             <v-avatar size="48" color="primary" variant="tonal">
@@ -70,7 +70,7 @@
         <div class="mb-6">
           <v-card>
             <v-card-title class="d-flex align-center justify-space-between">
-              <div class="text-h6 font-weight-bold">Recent Orders</div>
+              <div class="text-h6">Recent Orders</div>
               <v-btn variant="text" size="small" :to="{ name: 'admin.orders.list' }">
                 View All
                 <v-icon end>mdi-chevron-right</v-icon>
@@ -78,32 +78,69 @@
             </v-card-title>
             <v-divider></v-divider>
             <v-card-text class="pa-4">
-              <v-list density="compact">
-                <v-list-item v-for="(order, index) in recentOrders" :key="order.id"
-                  :class="{ 'border-b': index < recentOrders.length - 1 }">
-                  <template #prepend>
-                    <v-avatar size="32" color="primary" variant="tonal">
-                      <v-icon size="16">mdi-shopping-outline</v-icon>
-                    </v-avatar>
-                  </template>
-                  <v-list-item-title class="d-flex align-center justify-space-between">
-                    <span>{{ order.order_number }}</span>
-                    <v-chip size="x-small" :color="getOrderStatusColor(order.status)" variant="tonal">
-                      {{ order.status }}
-                    </v-chip>
-                  </v-list-item-title>
-                  <v-list-item-subtitle class="d-flex align-center justify-space-between mt-1">
-                    <span>{{ order.customer?.name }}</span>
-                    <span class="text-primary font-weight-medium">{{ formatAmount(order.total) }}</span>
-                  </v-list-item-subtitle>
-                </v-list-item>
-              </v-list>
+              <template v-if="latestLoading">
+                <v-skeleton-loader type="table" />
+              </template>
+              <v-alert v-else-if="latestError" type="error" variant="tonal" density="comfortable">
+                {{ latestError }}
+              </v-alert>
+              <v-alert v-else-if="recentOrders.length === 0" type="info" variant="tonal" density="comfortable">
+                No recent orders.
+              </v-alert>
+              <v-table v-else density="comfortable">
+                <thead>
+                  <tr>
+                    <th class="text-left">Order</th>
+                    <th class="text-left">Status</th>
+                    <th class="">Time</th>
+                    <th class="text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="order in recentOrders" :key="order.id">
+                    <td class="text-left">
+                      <div class="d-flex align-center ga-2">
+                        <v-avatar size="28" color="grey-lighten-3">
+                          <v-img v-if="order.customer?.avatar" :src="String(order.customer.avatar)" cover />
+                          <v-icon v-else size="16" color="grey-darken-1">mdi-account</v-icon>
+                        </v-avatar>
+                        <div class="min-w-0">
+                          <div class="text-caption text-primary text-truncate">
+                            {{ order.order_number ?? '-' }}
+                          </div>
+                          <div class="text-medium-emphasis text-truncate">
+                            {{ order.customer?.name ?? '-' }}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="">
+                      <v-chip size="small" label :color="getOrderStatusColor(order.status)" variant="tonal">
+                        {{ order.status ?? '-' }}
+                      </v-chip>
+                    </td>
+                    <td class="text-caption text-medium-emphasis">
+                      {{ order.created_at ? timeAgo(order.created_at) : '-' }}
+                    </td>
+                    <td class="text-right">
+                      <v-btn
+                        variant="outlined"
+                        size="small"
+                        color="primary"
+                        :to="{ name: 'admin.orders.detail', params: { id: order.id } }"
+                      >
+                        Details 
+                      </v-btn>  
+                    </td>
+                  </tr>
+                </tbody>
+              </v-table>
             </v-card-text>
           </v-card>
         </div>
         <v-card>
           <v-card-title class="d-flex align-center justify-space-between">
-            <div class="text-h6 font-weight-bold">Recent EMI Requests</div>
+            <div class="text-h6">Recent EMI Requests</div>
             <v-btn variant="text" size="small" :to="{ name: 'admin.emi.requests' }">
               View All
               <v-icon end>mdi-chevron-right</v-icon>
@@ -111,58 +148,69 @@
           </v-card-title>
           <v-divider></v-divider>
           <v-card-text class="pa-4">
-            <v-list density="compact">
-              <v-list-item v-for="(emi, index) in recentEmiRequests" :key="emi.id"
-                :class="{ 'border-b': index < recentEmiRequests.length - 1 }">
-                <template #prepend>
-                  <v-avatar size="32" color="success" variant="tonal">
-                    <v-icon size="16">mdi-cash-multiple</v-icon>
-                  </v-avatar>
-                </template>
-                <v-list-item-title class="d-flex align-center justify-space-between">
-                  <span>{{ emi.product_name }}</span>
-                  <v-chip size="x-small" :color="getEmiStatusColor(emi.status)" variant="tonal">
-                    {{ emi.status }}
-                  </v-chip>
-                </v-list-item-title>
-                <v-list-item-subtitle class="d-flex align-center justify-space-between mt-1">
-                  <span>{{ emi.customer_name }}</span>
-                  <span class="text-primary font-weight-medium">{{ formatAmount(emi.amount) }}/month</span>
-                </v-list-item-subtitle>
-              </v-list-item>
-            </v-list>
+            <template v-if="latestLoading">
+              <v-skeleton-loader type="table" />
+            </template>
+            <v-alert v-else-if="latestError" type="error" variant="tonal" density="comfortable">
+              {{ latestError }}
+            </v-alert>
+            <v-alert v-else-if="recentEmiRequests.length === 0" type="info" variant="tonal" density="comfortable">
+              No recent EMI requests.
+            </v-alert>
+            <v-table v-else density="compact">
+              <thead>
+                <tr>
+                  <th class="text-left">Product</th>
+                  <th class="text-left">Status</th>
+                  <th class="">Time</th>
+                  <th class="text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="emi in recentEmiRequests" :key="emi.id">
+                  <td class="text-left">
+                    <div class="d-flex align-center ga-2">
+                      <v-avatar size="28" color="grey-lighten-3">
+                        <v-img v-if="emi.customer_avatar" :src="String(emi.customer_avatar)" cover />
+                        <v-icon v-else size="16" color="grey-darken-1">mdi-account</v-icon>
+                      </v-avatar>
+                      <div class="min-w-0">
+                        <div class="text-caption text-truncate text-primary">
+                          {{ emi.product_name ?? '-' }}
+                        </div>
+                        <div class="text-caption text-medium-emphasis text-truncate">
+                          {{ emi.customer_name ?? '-' }}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-left">
+                    <v-chip size="small" label :color="getStatusColor(emi.status)" variant="tonal">
+                      {{ emi.status ?? '-' }}
+                    </v-chip>
+                  </td>
+                  <td class="text-caption text-medium-emphasis">
+                    {{ emi.created_at ? timeAgo(emi.created_at) : '-' }}
+                  </td>
+                  <td class="text-right">
+                    <v-btn
+                      variant="outlined"
+                      size="small"
+                      color="primary"
+                      :to="{ name: 'admin.emi.requests.detail', params: { id: emi.id } }"
+                    >
+                      Details
+                    </v-btn>
+                  </td>
+                </tr>
+              </tbody>
+            </v-table>
           </v-card-text>
         </v-card>
       </v-col>
 
       <v-col cols="12" md="5">
-        <v-card>
-          <v-card-title class="d-flex align-center justify-space-between">
-            <div class="text-h6 font-weight-bold">Recent Activity</div>
-            <v-btn variant="text" size="small">
-              View All
-              <v-icon end>mdi-chevron-right</v-icon>
-            </v-btn>
-          </v-card-title>
-          <v-divider></v-divider>
-          <v-card-text class="pa-4">
-            <v-list density="compact">
-              <v-list-item v-for="(activity, index) in recentActivity" :key="activity.id"
-                :class="{ 'border-b': index < recentActivity.length - 1 }">
-                <template #prepend>
-                  <v-avatar size="32" :color="activity.color" variant="tonal">
-                    <v-icon size="16">{{ activity.icon }}</v-icon>
-                  </v-avatar>
-                </template>
-                <v-list-item-title>{{ activity.title }}</v-list-item-title>
-                <v-list-item-subtitle class="d-flex align-center justify-space-between mt-1">
-                  <span>{{ activity.description }}</span>
-                  <span class="text-caption text-medium-emphasis">{{ activity.time }}</span>
-                </v-list-item-subtitle>
-              </v-list-item>
-            </v-list>
-          </v-card-text>
-        </v-card>
+        <RecentActivityCard :items="recentActivity" />
       </v-col>
     </v-row>
 
@@ -173,76 +221,18 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { useAuthStore } from '../stores/auth.store';
-import { formatAmount } from '@/shared/utils';
-import { getDashboardMetrics } from '@/api/dashboard.api';
+import { formatAmount, getStatusColor, timeAgo } from '@/shared/utils';
+import { getDashboardLatest, getDashboardMetrics, type DashboardLatestActivityLog, type DashboardLatestEmiRequest, type DashboardLatestOrder } from '@/api/dashboard.api';
+import RecentActivityCard, { type RecentActivityItem } from '@/components/dashboard/RecentActivityCard.vue';
 
 const authStore = useAuthStore();
 
 const chartPeriod = ref('month');
 
-// Static data for dashboard
-const recentOrders = ref([
-  {
-    id: 1,
-    order_number: 'ORD-2024-001',
-    status: 'completed',
-    total: 45999,
-    customer: {
-      id: 1,
-      name: 'Rajesh Kumar',
-      email: 'rajesh@email.com',
-      avatar: null
-    }
-  },
-  {
-    id: 2,
-    order_number: 'ORD-2024-002',
-    status: 'processing',
-    total: 28999,
-    customer: {
-      id: 2,
-      name: 'Priya Sharma',
-      email: 'priya@email.com',
-      avatar: null
-    }
-  },
-  {
-    id: 3,
-    order_number: 'ORD-2024-003',
-    status: 'pending',
-    total: 75999,
-    customer: {
-      id: 3,
-      name: 'Amit Singh',
-      email: 'amit@email.com',
-      avatar: null
-    }
-  },
-  {
-    id: 4,
-    order_number: 'ORD-2024-004',
-    status: 'shipped',
-    total: 12999,
-    customer: {
-      id: 4,
-      name: 'Neha Patel',
-      email: 'neha@email.com',
-      avatar: null
-    }
-  },
-  {
-    id: 5,
-    order_number: 'ORD-2024-005',
-    status: 'cancelled',
-    total: 35999,
-    customer: {
-      id: 5,
-      name: 'Vikram Reddy',
-      email: 'vikram@email.com',
-      avatar: null
-    }
-  }
-]);
+const recentOrders = ref<DashboardLatestOrder[]>([]);
+const recentEmiRequests = ref<DashboardLatestEmiRequest[]>([]);
+const latestLoading = ref(false);
+const latestError = ref<string | null>(null);
 
 const topProducts = ref([
   { id: 1, name: 'MacBook Pro 16"', status: true, emi_enabled: true, variants_count: 3, thumb: null },
@@ -252,36 +242,7 @@ const topProducts = ref([
   { id: 5, name: 'Apple Watch Ultra', status: false, emi_enabled: true, variants_count: 2, thumb: null }
 ]);
 
-const recentEmiRequests = ref([
-  { id: 1, product_name: 'MacBook Pro 16"', customer_name: 'Rajesh Kumar', status: 'pending', amount: 8999 },
-  { id: 2, product_name: 'iPhone 15 Pro', customer_name: 'Priya Sharma', status: 'approved', amount: 3499 },
-  { id: 3, product_name: 'iPad Air', customer_name: 'Amit Singh', status: 'processing', amount: 2499 },
-  { id: 4, product_name: 'AirPods Pro', customer_name: 'Neha Patel', status: 'completed', amount: 899 },
-  { id: 5, product_name: 'Apple Watch Ultra', customer_name: 'Vikram Reddy', status: 'pending', amount: 4499 }
-]);
-
-const recentActivity = ref([
-  { id: 1, title: 'New Order Received', description: 'Order #ORD-2024-006 from Suresh Kumar', time: '2 hours ago', icon: 'mdi-shopping-outline', color: 'primary' },
-  { id: 2, title: 'Product Updated', description: 'MacBook Pro 16" price updated', time: '4 hours ago', icon: 'mdi-package-variant-closed', color: 'success' },
-  { id: 3, title: 'EMI Request Approved', description: 'iPhone 15 Pro EMI for Priya Sharma', time: '6 hours ago', icon: 'mdi-cash-multiple', color: 'info' },
-  { id: 4, title: 'New Customer Registered', description: 'Anita Verma joined the platform', time: '8 hours ago', icon: 'mdi-account-plus', color: 'warning' },
-  { id: 5, title: 'Payment Received', description: formatAmount(45999) + ' from Order #ORD-2024-005', time: '12 hours ago', icon: 'mdi-currency-usd', color: 'success' },
-  { id: 6, title: 'Order Status Updated', description: 'Order #ORD-2024-004 marked as Shipped', time: '14 hours ago', icon: 'mdi-truck-fast', color: 'primary' },
-  { id: 7, title: 'New EMI Request', description: 'EMI request submitted for iPad Air by Sunita Sharma', time: '16 hours ago', icon: 'mdi-cash-plus', color: 'info' },
-  { id: 8, title: 'Product Added', description: 'New product "Samsung Galaxy S24" added', time: '18 hours ago', icon: 'mdi-plus-box', color: 'success' },
-  { id: 9, title: 'Customer Profile Updated', description: 'Customer "Rahul Verma" updated phone number', time: '20 hours ago', icon: 'mdi-account-edit', color: 'warning' },
-  { id: 10, title: 'Refund Processed', description: formatAmount(12999) + ' refunded for Order #ORD-2024-002', time: '22 hours ago', icon: 'mdi-cash-refund', color: 'error' },
-  { id: 11, title: 'Low Stock Alert', description: 'iPhone 15 Pro stock is below threshold', time: '1 day ago', icon: 'mdi-alert-circle-outline', color: 'warning' },
-  { id: 12, title: 'Banner Updated', description: 'Homepage banner image updated', time: '1 day ago', icon: 'mdi-image-edit', color: 'primary' },
-  { id: 13, title: 'New Review Received', description: 'New 5-star review for "AirPods Pro"', time: '1 day ago', icon: 'mdi-star-outline', color: 'success' },
-  { id: 14, title: 'Coupon Applied', description: 'Discount coupon applied on Order #ORD-2024-006', time: '2 days ago', icon: 'mdi-ticket-percent-outline', color: 'info' },
-  { id: 15, title: 'Payment Pending', description: 'Payment pending for Order #ORD-2024-007', time: '2 days ago', icon: 'mdi-timer-sand', color: 'warning' },
-  { id: 16, title: 'Product Disabled', description: 'Product "Apple Watch Ultra" marked inactive', time: '2 days ago', icon: 'mdi-package-variant-remove', color: 'error' },
-  { id: 17, title: 'EMI Request Completed', description: 'EMI request for MacBook Pro 16" marked Finished', time: '3 days ago', icon: 'mdi-check-circle-outline', color: 'success' },
-  { id: 18, title: 'New Campaign Created', description: 'Campaign "Summer Sale" created and scheduled', time: '3 days ago', icon: 'mdi-bullhorn-outline', color: 'primary' },
-  { id: 19, title: 'New Customer Registered', description: 'Customer "Deepa Rai" joined the platform', time: '4 days ago', icon: 'mdi-account-plus', color: 'info' },
-  { id: 20, title: 'Payment Received', description: formatAmount(75999) + ' from Order #ORD-2024-003', time: '5 days ago', icon: 'mdi-currency-usd', color: 'success' }
-]);
+const recentActivity = ref<RecentActivityItem[]>([]);
 
 const metrics = ref({
   totalOrders: 0,
@@ -299,22 +260,14 @@ function formatNumber(num: number): string {
 
 function getOrderStatusColor(status?: string | null): string {
   const statusColors: Record<string, string> = {
-    'pending': 'warning',
-    'processing': 'info',
-    'completed': 'success',
-    'cancelled': 'error',
-    'shipped': 'primary'
-  };
-  return statusColors[status?.toLowerCase() || ''] || 'grey';
-}
-
-function getEmiStatusColor(status?: string | null): string {
-  const statusColors: Record<string, string> = {
-    'pending': 'warning',
-    'processing': 'info',
-    'approved': 'success',
-    'rejected': 'error',
-    'completed': 'primary'
+    draft: 'grey',
+    placed: 'warning',
+    confirmed: 'info',
+    dispatched: 'primary',
+    delivered: 'primary',
+    completed: 'success',
+    canceled: 'error',
+    cancelled: 'error',
   };
   return statusColors[status?.toLowerCase() || ''] || 'grey';
 }
@@ -339,12 +292,57 @@ async function fetchMetrics() {
   }
 }
 
+async function fetchLatest() {
+  latestLoading.value = true;
+  latestError.value = null;
+  try {
+    const data = await getDashboardLatest();
+    recentOrders.value = Array.isArray(data?.orders) ? data.orders : [];
+    recentEmiRequests.value = Array.isArray(data?.emi_requests) ? data.emi_requests : [];
+    const logs = Array.isArray(data?.activity_logs) ? data.activity_logs : [];
+    recentActivity.value = logs.map(mapActivityLogToItem);
+  } catch (error) {
+    console.error('Failed to load dashboard latest', error);
+    latestError.value = 'Failed to load latest data';
+  } finally {
+    latestLoading.value = false;
+  }
+}
+
+function mapActivityLogToItem(log: DashboardLatestActivityLog): RecentActivityItem {
+  const createdAt = log?.created_at ?? null;
+  const entityType = String(log?.entity_type ?? '').trim();
+  const normalizedEntityType = entityType.toLowerCase();
+
+  let icon: string | undefined = undefined;
+  if (normalizedEntityType === 'emi_requests' || normalizedEntityType.includes('emirequest')) {
+    icon = 'mdi-bell-check-outline';
+  } else if (normalizedEntityType === 'orders' || normalizedEntityType.includes('order')) {
+    icon = 'mdi-shopping-outline';
+  }else{
+    icon = 'mdi-bell-check-outline';
+  }
+
+  return {
+    id: log.id,
+    title: String(log.label ?? ''),
+    description: String(log.description ?? ''),
+    time: createdAt ? timeAgo(createdAt) : '',
+    actor_name: log.actor_name ?? null,
+    entity_type: log.entity_type ?? null,
+    entity_id: log.entity_id ?? null,
+    icon,
+  };
+}
+
 function refreshData() {
   void fetchMetrics();
+  void fetchLatest();
 }
 
 onMounted(() => {
   void fetchMetrics();
+  void fetchLatest();
 });
 </script>
 

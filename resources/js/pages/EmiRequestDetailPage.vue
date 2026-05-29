@@ -426,6 +426,7 @@ interface ApplicationProduct {
 }
 
 interface Application {
+	id?: number | string;
 	user?: ApplicationUser;
 	product?: ApplicationProduct;
 	name?: string;
@@ -562,8 +563,6 @@ async function fetchDetail() {
 			...application.value,
 			...detail,
 		} as any;
-
-		console.log(detail)
 	} catch {
 		// keep demo data on error
 	} finally {
