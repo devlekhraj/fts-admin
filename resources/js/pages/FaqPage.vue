@@ -67,25 +67,30 @@
             <v-list-item class="py-4">
               <template #title>
                 <div class="d-flex align-center justify-space-between flex-wrap ga-3">
-                  <div class="text-body-1 font-weight-medium">
-                    {{ faq.question }}
+                  <div>
+                    <div class="text-body-1 font-weight-medium">
+                     {{ idx+1 }}. {{ faq.question }}
+                    </div>
                   </div>
                   <div class="d-flex align-center flex-wrap ga-2">
                     <v-chip size="small" label class="text-capitalize" variant="tonal" color="primary">
                       {{ normalizeType(faq.type) }}
                     </v-chip>
                     <v-chip
-                      v-if="faq.type_name"
-                      size="small"
-                      label
-                      variant="tonal"
-                      color="grey"
-                      class="text-truncate"
-                      style="max-width: 220px"
-                      :title="String(faq.type_name)"
+                    v-if="faq.type_name"
+                    size="small"
+                    label
+                    variant="tonal"
+                    color="grey"
+                    class="text-truncate"
+                    style="max-width: 220px"
+                    :title="String(faq.type_name)"
                     >
-                      {{ faq.type_name }}
-                    </v-chip>
+                    {{ faq.type_name }}
+                  </v-chip>
+                  <div>
+                    <v-btn variant="outlined" color="primary" size="small" @click="handleEdit(faq)">Edit</v-btn>
+                  </div>
                   </div>
                 </div>
               </template>
@@ -108,6 +113,8 @@ import { listFaqs, type FaqListItem } from '@/api/faqs.api';
 import { listProductBrandsLite } from '@/api/product-brands.api';
 import { listProductCategoriesLite } from '@/api/product-categories.api';
 import AppSearchButton from '@/components/shared/AppSearchButton.vue';
+import { openModal } from '@/shared/modal';
+import FaqFormModal from '@/components/faq/FaqFormModal.vue';
 
 const items = ref<FaqListItem[]>([]);
 const loading = ref(false);
@@ -134,6 +141,23 @@ const typeSelectItems = computed(() => (
 function normalizeType(value: unknown): string {
   const raw = String(value ?? '').trim();
   return raw.length ? raw : 'general';
+}
+
+function handleEdit(faq: FaqListItem) {
+  const type = normalizeType(faq?.type);
+  openModal(
+    FaqFormModal,
+    {
+      type,
+      type_id: type === 'general' ? null : (faq?.type_id ?? null),
+      faq,
+    },
+    {
+      title: 'Edit FAQ',
+      size: 'lg',
+      onSaved: () => fetchFaqs(selectedType.value, appliedSearch.value, selectedTypeId.value),
+    },
+  );
 }
 
 function formatOptionTitle(value: string): string {

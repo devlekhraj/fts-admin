@@ -4,12 +4,10 @@
       <v-col cols="12" lg="8" offset-lg="2">
         <div class="d-flex align-center justify-space-between mb-6">
           <div>
-            <div class="text-h6">Brand FAQs</div>
+            <div class="text-h6">Brand FAQs ({{ items.length }})</div>
             <div class="text-body-2 text-medium-emphasis">FAQs attached to this brand.</div>
           </div>
-          <v-chip v-if="!loading" size="small" label variant="tonal" color="primary">
-            {{ items.length }}
-          </v-chip>
+          <v-btn prepend-icon="mdi-plus" variant="flat" color="primary" @click="addFaq">Add FAQ</v-btn>
         </div>
 
         <template v-if="loading">
@@ -31,24 +29,11 @@
               <template #title>
                 <div class="d-flex align-center justify-space-between flex-wrap ga-3">
                   <div class="text-body-1 font-weight-medium">
-                    {{ faq.question }}
+                    {{ idx + 1 }}. {{ faq.question }}
                   </div>
                   <div class="d-flex align-center flex-wrap ga-2">
-                    <v-chip size="small" label class="text-capitalize" variant="tonal" color="primary">
-                      Brand
-                    </v-chip>
-                    <v-chip
-                      v-if="faq.type_name"
-                      size="small"
-                      label
-                      variant="tonal"
-                      color="grey"
-                      class="text-truncate"
-                      style="max-width: 220px"
-                      :title="String(faq.type_name)"
-                    >
-                      {{ faq.type_name }}
-                    </v-chip>
+                    <v-btn variant="outlined" size="small" color="primary" @click="handleEdit(faq)">Edit</v-btn>
+                    <v-btn variant="outlined" size="small" color="error" @click="handleDelete(faq)">Delete</v-btn>
                   </div>
                 </div>
               </template>
@@ -68,6 +53,9 @@
 import { onMounted, ref, watch } from 'vue';
 import { listBrandFaqs, type FaqListItem } from '@/api/faqs.api';
 import type { ProductBrandDetailResponse } from '@/api/products.api';
+import { openModal } from '@/shared/modal';
+import FaqFormModal from '@/components/faq/FaqFormModal.vue';
+import FaqDeleteModal from '@/components/faq/FaqDeleteModal.vue';
 
 const props = defineProps<{
   item: ProductBrandDetailResponse | null;
@@ -101,6 +89,43 @@ watch(
   () => props.brandId,
   () => fetchFaqs(),
 );
+
+function addFaq() {
+  openModal(
+    FaqFormModal,
+    { type: 'brand', type_id: props.brandId },
+    {
+      title: 'Add FAQ',
+      size: 'lg',
+      onSaved: () => fetchFaqs(),
+    },
+  );
+}
+
+function handleEdit(faq: FaqListItem) {
+  openModal(
+    FaqFormModal,
+    { type: 'brand', type_id: props.brandId, faq },
+    {
+      title: 'Edit FAQ',
+      size: 'lg',
+      onSaved: () => fetchFaqs(),
+    },
+  );
+}
+
+function handleDelete(faq: FaqListItem) {
+  openModal(
+    FaqDeleteModal,
+    { faq },
+    {
+      title: 'Delete FAQ',
+      size: 'sm',
+      showHeader: false,
+      onSaved: () => fetchFaqs(),
+    },
+  );
+}
 </script>
 
 <style scoped>
@@ -122,4 +147,3 @@ watch(
   text-decoration: underline;
 }
 </style>
-

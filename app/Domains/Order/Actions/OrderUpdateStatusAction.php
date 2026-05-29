@@ -30,6 +30,7 @@ final class OrderUpdateStatusAction
             'old_status_label' => $oldLabel,
             'new_status_label' => $newLabel,
             'order_no' => $order->order_no,
+            'type' => 'order_processing',
         ];
         if ($data->notes !== null && $data->notes !== '') {
             $meta['notes'] = $data->notes;

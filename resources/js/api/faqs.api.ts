@@ -35,9 +35,38 @@ export type FaqListResponse = {
   total?: number;
 };
 
+export type SaveFaqPayload = {
+  id?: number | string | null;
+  type: string;
+  type_id?: number | string | null;
+  question: string;
+  answer: string;
+};
+
+export type SaveFaqResponse = {
+  message?: string;
+  data: FaqListItem;
+  success?: boolean;
+};
+
+export type DeleteFaqResponse = {
+  message?: string;
+  success?: boolean;
+};
+
 export async function listFaqs(params?: ListFaqsParams): Promise<FaqListResponse> {
   const response = await http.get('/admin/faqs', { params });
   return response as unknown as FaqListResponse;
+}
+
+export async function saveFaq(payload: SaveFaqPayload): Promise<SaveFaqResponse> {
+  const response = await http.post('/admin/faqs/save', payload);
+  return response as unknown as SaveFaqResponse;
+}
+
+export async function deleteFaq(id: number | string): Promise<DeleteFaqResponse> {
+  const response = await http.delete(`/admin/faqs/${id}`);
+  return response as unknown as DeleteFaqResponse;
 }
 
 export async function listProductFaqs(

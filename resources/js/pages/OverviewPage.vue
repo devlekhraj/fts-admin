@@ -8,10 +8,7 @@
             <div>
               <div class="text-caption mb-1">Total Orders</div>
               <div class="text-h4 font-weight-bold text-primary">{{ formatNumber(metrics.totalOrders) }}</div>
-              <!-- <div class="text-caption mt-1">
-                <v-icon size="small" color="success">mdi-trending-up</v-icon>
-                <span class="text-success">+8.2%</span> from last month
-              </div> -->
+            
             </div>
             <v-avatar size="48" color="primary" variant="tonal">
               <v-icon size="24">mdi-shopping-outline</v-icon>
@@ -26,10 +23,7 @@
             <div>
               <div class="text-caption mb-1">Total EMI Requests</div>
               <div class="text-h4 font-weight-bold">{{ formatNumber(metrics.totalEmiRequests) }}</div>
-              <!-- <div class="text-caption mt-1">
-                <v-icon size="small" color="success">mdi-trending-up</v-icon>
-                <span class="text-success">+12.5%</span> from last month
-              </div> -->
+            
             </div>
             <v-avatar size="48" color="success" variant="tonal">
               <v-icon size="24">mdi-cash-multiple</v-icon>
@@ -44,10 +38,7 @@
             <div>
               <div class="text-caption mb-1">Total Products</div>
               <div class="text-h4 font-weight-bold">{{ formatNumber(metrics.totalProducts) }}</div>
-              <!-- <div class="text-caption mt-1">
-                <v-icon size="small" color="warning">mdi-trending-neutral</v-icon>
-                <span class="text-warning">+2.1%</span> from last month
-              </div> -->
+           
             </div>
             <v-avatar size="48" color="warning" variant="tonal">
               <v-icon size="24">mdi-package-variant-closed</v-icon>
@@ -62,10 +53,7 @@
             <div>
               <div class="text-caption mb-1">Total Customers</div>
               <div class="text-h4 font-weight-bold">{{ formatNumber(metrics.totalCustomers) }}</div>
-              <!-- <div class="text-caption mt-1">
-                <v-icon size="small" color="success">mdi-trending-up</v-icon>
-                <span class="text-success">+15.3%</span> from last month
-              </div> -->
+            
             </div>
             <v-avatar size="48" color="info" variant="tonal">
               <v-icon size="24">mdi-account-group</v-icon>
@@ -75,49 +63,6 @@
       </v-col>
     </v-row>
 
-    <!-- Charts Section -->
-    <!-- <v-row>
-      <v-col cols="12" lg="8">
-        <v-card>
-          <v-card-title class="d-flex align-center justify-space-between">
-            <div class="text-h6 font-weight-bold">Sales Overview</div>
-            <v-btn-toggle v-model="chartPeriod" variant="outlined" density="compact">
-              <v-btn value="week" size="small">Week</v-btn>
-              <v-btn value="month" size="small">Month</v-btn>
-              <v-btn value="year" size="small">Year</v-btn>
-            </v-btn-toggle>
-          </v-card-title>
-          <v-card-text class="pa-4">
-            <div class="chart-placeholder">
-              <v-sheet height="300" class="d-flex align-center justify-center">
-                <div class="text-center">
-                  <v-icon size="48" color="grey-lighten-2">mdi-chart-line</v-icon>
-                  <div class="text-medium-emphasis mt-2">Sales Chart</div>
-                  <div class="text-caption text-medium-emphasis">Revenue trends over time</div>
-                </div>
-              </v-sheet>
-            </div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-
-      <v-col cols="12" lg="4">
-        <v-card>
-          <v-card-title class="text-h5 font-weight-bold">Order Status</v-card-title>
-          <v-card-text class="pa-4">
-            <div class="chart-placeholder">
-              <v-sheet height="300" class="d-flex align-center justify-center">
-                <div class="text-center">
-                  <v-icon size="48" color="grey-lighten-2">mdi-chart-pie</v-icon>
-                  <div class="text-medium-emphasis mt-2">Order Distribution</div>
-                  <div class="text-caption text-medium-emphasis">Orders by status</div>
-                </div>
-              </v-sheet>
-            </div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row> -->
 
     <!-- Recent Orders & EMI Requests Section -->
     <v-row>
@@ -221,44 +166,7 @@
       </v-col>
     </v-row>
 
-    <!-- Recent Activity & Top Products Section -->
-    <!-- <v-row>
-      <v-col cols="12" lg="6">
-      </v-col>
-
-      <v-col cols="12" lg="6">
-        <v-card>
-          <v-card-title class="d-flex align-center justify-space-between">
-            <div class="text-h6 font-weight-bold">Top Products</div>
-            <v-btn variant="text" size="small" :to="{ name: 'admin.product.list' }">
-              View All
-              <v-icon end>mdi-chevron-right</v-icon>
-            </v-btn>
-          </v-card-title>
-          <v-divider></v-divider>
-          <v-card-text class="pa-4">
-            <v-list density="compact">
-              <v-list-item v-for="(product, index) in topProducts" :key="product.id"
-                :class="{ 'border-b': index < topProducts.length - 1 }">
-                <template #prepend>
-                  <v-avatar size="32" rounded>
-                    <v-img v-if="product.thumb" :src="product.thumb" alt="Product" />
-                    <v-icon v-else size="16">mdi-package-variant-closed</v-icon>
-                  </v-avatar>
-                </template>
-                <v-list-item-title>{{ product.name }}</v-list-item-title>
-                <v-list-item-subtitle class="d-flex align-center justify-space-between mt-1">
-                  <span class="text-caption">{{ product.variants_count }} variants</span>
-                  <v-chip size="x-small" :color="product.status ? 'success' : 'error'" variant="tonal">
-                    {{ product.status ? 'Active' : 'Inactive' }}
-                  </v-chip>
-                </v-list-item-subtitle>
-              </v-list-item>
-            </v-list>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row> -->
+ 
   </v-container>
 </template>
 

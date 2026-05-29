@@ -76,6 +76,9 @@ final class OrderController extends Controller
             label: 'Comment added',
             description: $validated['comment'],
             actor: $actor,
+            meta: array_filter([
+                'type' => 'comment',
+            ], fn($v) => $v !== null && $v !== ''),
         );
 
         return response()->json([

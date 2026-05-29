@@ -205,7 +205,7 @@ final class EmiRequestController extends Controller
         }
 
         $emiRequest->logActivity(
-            action: 'emi_request_status_updated',
+            action: 'emi_processing',
             label: $label,
             description: $description,
             actor: $actor,
@@ -259,6 +259,9 @@ final class EmiRequestController extends Controller
             label: 'Comment added',
             description: $validated['comment'],
             actor: $actor,
+            meta: array_filter([
+                'type' => 'comment',
+            ], fn($v) => $v !== null && $v !== ''),
         );
 
         return response()->json([

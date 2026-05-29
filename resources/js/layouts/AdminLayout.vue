@@ -74,7 +74,7 @@
             <div class="d-flex align-center ga-3 pr-6">
 
                 <div class="d-flex align-center ga-2">
-                    <v-menu v-model="notificationMenu" :close-on-content-click="false" location="bottom end">
+                    <!-- <v-menu v-model="notificationMenu" :close-on-content-click="false" location="bottom end">
                         <template #activator="{ props }">
                             <v-btn v-bind="props" icon variant="text" size="small">
                                 <v-badge :content="unreadCount" :model-value="unreadCount > 0" color="error">
@@ -116,7 +116,7 @@
                                 </div>
                             </v-card-text>
                         </v-card>
-                    </v-menu>
+                    </v-menu> -->
                     <v-avatar size="30">
                         <v-img v-if="adminAvatar" :src="adminAvatar" alt="Admin" />
                         <v-icon v-else size="28">mdi-account-circle</v-icon>

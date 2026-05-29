@@ -8,6 +8,7 @@ export type ModalOptions = {
 	title?: string;
 	size?: ModalSize;
 	persistent?: boolean;
+	showHeader?: boolean;
 	onSaved?: (payload?: unknown) => void;
 	onDeleted?: (payload?: unknown) => void;
 };
@@ -20,6 +21,7 @@ export const useModalStore = defineStore('modal', {
 		title: '' as string,
 		size: 'md' as ModalSize,
 		persistent: true,
+		showHeader: true,
 		onSaved: null as ((payload?: unknown) => void) | null,
 		onDeleted: null as ((payload?: unknown) => void) | null,
 	}),
@@ -30,6 +32,7 @@ export const useModalStore = defineStore('modal', {
 			this.title = options.title ?? '';
 			this.size = options.size ?? 'md';
 			this.persistent = options.persistent ?? true;
+			this.showHeader = options.showHeader ?? true;
 			this.onSaved = options.onSaved ?? null;
 			this.onDeleted = options.onDeleted ?? null;
 			this.isOpen = true;
@@ -43,6 +46,7 @@ export const useModalStore = defineStore('modal', {
 			this.title = '';
 			this.size = 'md';
 			this.persistent = true;
+			this.showHeader = true;
 			this.onSaved = null;
 			this.onDeleted = null;
 		},
