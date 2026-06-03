@@ -75,6 +75,12 @@ export type ProductDetailBrand = {
   thumb?: string | null;
 };
 
+export type ProductDetailCategory = {
+  id?: number | string | null;
+  title?: string | null;
+  slug?: string | null;
+};
+
 export type ProductDetailMeta = {
   meta_title?: string | null;
   meta_description?: string | null;
@@ -108,6 +114,7 @@ export type ProductDetailAttributes = {
 export type ProductDetailResponse = {
   overview?: ProductDetailOverview | null;
   brand?: ProductDetailBrand | null;
+  categories?: ProductDetailCategory[];
   meta?: ProductDetailMeta | null;
   description?: ProductDetailDescription | null;
   pre_order?: ProductDetailPreOrder | null;

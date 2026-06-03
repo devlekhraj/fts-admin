@@ -53,6 +53,7 @@ class ProductResource extends JsonResource
         $images = [];
         $variants = [];
         $brand = null;
+        $categories = [];
         $attribute = null;
 
         if ($this->relationLoaded('files')) {
@@ -93,6 +94,16 @@ class ProductResource extends JsonResource
                 'slug' => $this->brand->slug,
                 'thumb' => $this->brand->logo,
             ];
+        }
+
+        if ($this->relationLoaded('categories')) {
+            $categories = $this->categories->map(static function ($category): array {
+                return [
+                    'id' => $category->id,
+                    'title' => $category->title,
+                    'slug' => $category->slug,
+                ];
+            })->values()->all();
         }
 
         if ($this->relationLoaded('variants')) {
@@ -174,6 +185,7 @@ class ProductResource extends JsonResource
                 'sku' => $this->sku,
             ],
             'brand' => $brand,
+            'categories' => $categories,
             'meta' => [
                 'meta_title' => $data['meta_title'] ?? null,
                 'meta_description' => $data['meta_description'] ?? null,

@@ -5,7 +5,7 @@
         <div class="d-flex align-center justify-space-between mb-6">
           <div>
             <div class="text-h6">Product Overview</div>
-            <div class="text-body-2 text-medium-emphasis">Edit product name, slug, and status.</div>
+            <div class="text-body-2 text-medium-emphasis">Edit product name, slug, brand, categories, and status.</div>
           </div>
           <v-btn color="primary" :loading="saving" @click="onUpdate" variant="flat">
             <v-icon start size="16">mdi-content-save-outline</v-icon>
@@ -48,6 +48,39 @@
           <div class="mb-0">
             <v-row>
               <v-col cols="12" md="6">
+                <app-field-label label="Brand" />
+                <v-select
+                  v-model="form.brand_id"
+                  :items="brandOptions"
+                  item-title="title"
+                  item-value="value"
+                  variant="outlined"
+                  density="comfortable"
+                  clearable
+                  :loading="loadingOptions"
+                  placeholder="Select brand"
+                />
+              </v-col>
+
+              <v-col cols="12" md="6">
+                <app-field-label label="Categories" />
+                <v-select
+                  v-model="form.category_ids"
+                  :items="categoryOptions"
+                  item-title="title"
+                  item-value="value"
+                  variant="outlined"
+                  density="comfortable"
+                  multiple
+                  chips
+                  closable-chips
+                  clearable
+                  :loading="loadingOptions"
+                  placeholder="Select categories"
+                />
+              </v-col>
+
+              <v-col cols="12" md="6">
                 <app-field-label label="Status" />
                 <v-select
                   v-model="form.status"
@@ -80,10 +113,17 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, watch } from 'vue';
+import { onMounted, reactive, ref, watch } from 'vue';
 import { update as updateProduct, type ProductDetailResponse } from '@/api/products.api';
+import { listProductBrandsLite, type ProductBrandLiteItem } from '@/api/product-brands.api';
+import { listProductCategoriesLite, type ProductCategoryListItem } from '@/api/product-categories.api';
 import AppFieldLabel from '@/components/shared/AppFieldLabel.vue';
 import { useSnackbarStore } from '@/stores/snackbar.store';
+
+type SelectOption = {
+  title: string;
+  value: number;
+};
 
 const props = defineProps<{
   item: ProductDetailResponse | null;
@@ -96,12 +136,17 @@ const emit = defineEmits<{
 
 const snackbar = useSnackbarStore();
 const saving = ref(false);
+const loadingOptions = ref(false);
 const overviewFormRef = ref();
+const brandOptions = ref<SelectOption[]>([]);
+const categoryOptions = ref<SelectOption[]>([]);
 
 const form = reactive({
   name: '',
   slug: '',
   sku: '',
+  brand_id: null as number | null,
+  category_ids: [] as number[],
   status: '0',
   emi_enabled: '0',
 });
@@ -122,11 +167,56 @@ watch(
     form.name = item?.overview?.name ? String(item.overview.name) : '';
     form.slug = item?.overview?.slug ? String(item.overview.slug) : '';
     form.sku = item?.overview?.sku ? String(item.overview.sku) : '';
+    form.brand_id = normalizeId(item?.brand?.id);
+    form.category_ids = Array.isArray(item?.categories)
+      ? item.categories.map((category) => normalizeId(category.id)).filter((id): id is number => id !== null)
+      : [];
     form.status = item?.overview?.status ? '1' : '0';
     form.emi_enabled = item?.overview?.emi_enabled ? '1' : '0';
   },
   { immediate: true },
 );
+
+onMounted(() => {
+  fetchOptions();
+});
+
+function normalizeId(value: unknown): number | null {
+  if (value === null || value === undefined || value === '') return null;
+  const id = Number(value);
+  return Number.isFinite(id) ? id : null;
+}
+
+async function fetchOptions() {
+  loadingOptions.value = true;
+  try {
+    const [brands, categories] = await Promise.all([
+      listProductBrandsLite(),
+      listProductCategoriesLite(),
+    ]);
+
+    brandOptions.value = brands
+      .map((brand: ProductBrandLiteItem) => ({
+        title: String(brand.name ?? ''),
+        value: normalizeId(brand.id),
+      }))
+      .filter((brand): brand is SelectOption => brand.value !== null && brand.title.length > 0);
+
+    categoryOptions.value = categories
+      .map((category: ProductCategoryListItem) => ({
+        title: String(category.title ?? ''),
+        value: normalizeId(category.id),
+      }))
+      .filter((category): category is SelectOption => category.value !== null && category.title.length > 0);
+  } catch (error) {
+    snackbar.show({
+      message: 'Failed to load brand and category options',
+      color: 'error',
+    });
+  } finally {
+    loadingOptions.value = false;
+  }
+}
 
 async function onUpdate() {
   const id = String(props.productId ?? '').trim();
@@ -141,6 +231,8 @@ async function onUpdate() {
       name: form.name.trim(),
       slug: form.slug.trim(),
       sku: form.sku.trim(),
+      brand_id: form.brand_id || null,
+      category_ids: form.category_ids,
       status: Number(form.status) === 1,
       emi_enabled: Number(form.emi_enabled) === 1,
     });

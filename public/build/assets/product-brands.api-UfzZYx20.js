@@ -1,0 +1,1 @@
+import{Y as i}from"./main-BDtxxK3-.js";async function s(){const r=await i.get("/admin/brands",{params:{per_page:-1}}),t=r;return t&&Array.isArray(t.data)?t.data.map(a=>({id:a.id,name:String(a.name??""),slug:a.slug??null,thumb:a.thumb??null})).filter(a=>a.id!==void 0&&a.id!==null&&a.name.length>0):Array.isArray(r)?r:[]}export{s as l};

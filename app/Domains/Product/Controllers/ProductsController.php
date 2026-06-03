@@ -101,7 +101,7 @@ class ProductsController extends Controller
     public function show(string $id): JsonResponse
     {
         $product = Product::query()
-            ->with(['defaultFile', 'files', 'variants.files', 'attribute.attributes', 'brand.defaultFile','giftItems.defaultFile'])
+            ->with(['defaultFile', 'files', 'variants.files', 'attribute.attributes', 'brand.defaultFile', 'categories', 'giftItems.defaultFile'])
             ->findOrFail($id);
 
         return response()->json([
@@ -181,6 +181,8 @@ class ProductsController extends Controller
     {
         $product = Product::query()->findOrFail($id);
         $validated = $request->validated();
+        $categoryIds = $validated['category_ids'] ?? null;
+        unset($validated['category_ids']);
 
         if (array_key_exists('attributes', $validated)) {
             $attributes = $validated['attributes'];
@@ -195,6 +197,10 @@ class ProductsController extends Controller
         }
 
         $product->update($validated);
+
+        if (is_array($categoryIds)) {
+            $product->categories()->sync($categoryIds);
+        }
 
         $product->save();
 

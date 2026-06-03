@@ -21,6 +21,8 @@ class UpdateProductRequest extends FormRequest
             'price' => ['sometimes', 'required', 'numeric', 'min:0'],
             'original_price' => ['nullable', 'numeric', 'min:0'],
             'brand_id' => ['nullable', 'integer', 'exists:product_brands,id'],
+            'category_ids' => ['nullable', 'array'],
+            'category_ids.*' => ['integer', 'exists:product_categories,id'],
             'vendor_id' => ['nullable', 'integer'],
             'quantity' => ['nullable', 'integer', 'min:0'],
             'pre_order' => ['sometimes', 'boolean'],
