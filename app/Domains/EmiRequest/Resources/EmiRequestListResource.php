@@ -25,6 +25,7 @@ class EmiRequestListResource extends JsonResource
             'application_code' => $this->application_code ?? $this->id,
             'user' => [
                 'name' => $this->user?->name ?? $this->name ?? $this->email,
+                'email' => $this->user?->email ?? $this->email,
                 'avatar' => $this->user?->avatar ?? 'https://placehold.co/32',
             ],
             'product' => [

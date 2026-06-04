@@ -26,7 +26,10 @@
 					<v-avatar size="32">
 						<v-img :src="item.user?.avatar" alt="User" />
 					</v-avatar>
-					<span class="ml-3">{{ item.user?.name ?? '-' }}</span>
+					<div>
+						<p class="ml-3 text-primary">{{ item.user?.name ?? '-' }}</p>
+						<p class="ml-3">{{ item.user?.email ?? '-' }}</p>
+					</div>
 				</div>
 			</template>
 			<template #item.product="{ item }">
@@ -86,9 +89,9 @@ type EmiRequest = Record<string, unknown>;
 
 const headers: DataTableHeader[] = [
 	{ title: 'Product', key: 'product', sortable: false, width: '300' },
-	// { title: 'Per Month', key: 'emi_per_month', minWidth: '120', sortable: false },
+	// { title: 'Per Month', key: 'emi_per_month', width: '120', sortable: false },
+	{ title: 'Customer', key: 'user', sortable: false,width:'200' },
 	{ title: 'EMI Type', key: 'emi_type', sortable: false, width: '120' },
-	// { title: 'User', key: 'user', sortable: false,minWidth:'200' },
 	{ title: 'Status', key: 'status_label', sortable: false, width: '100' },
 	{ title: 'Time', key: 'time', width: '200', sortable: false },
 	{ title: 'Actions', key: 'action', sortable: false, width: '100', align: 'end' },
