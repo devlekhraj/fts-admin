@@ -16,6 +16,7 @@ class CartResource extends JsonResource
                 'name' => $this->user->name ?? $this->user->email ?? null,
                 'avatar' => $this->user->avatar_url ?? $this->user->avatar ?? null,
             ],
+            'amount' => (float) $this->items()->sum('price'),
             'is_proceed' => (bool) $this->is_processed,
             'items_count' => (int) ($this->items_count ?? 0),
             'updated_at' => $this->updated_at,

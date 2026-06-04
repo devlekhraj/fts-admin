@@ -72,6 +72,7 @@ final class FileService
                         'banners',
                         'blog_categories',
                         'blogs',
+                        'product_brand_banners',
                         'product_brands',
                         'product_categories',
                         'products'

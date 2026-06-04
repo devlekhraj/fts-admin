@@ -15,3 +15,9 @@ export function update(id: string, payload: Record<string, unknown>) {
 export function remove(id: string) {
   return http.delete(`/brands/${id}`);
 }
+
+export function saveBrandBanner(id: number | string, payload: FormData) {
+  return http.post(`/admin/brands/${id}/banner`, payload, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+}

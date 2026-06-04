@@ -51,6 +51,15 @@ final class ProductBrand extends BaseModel
             ->withTimestamps();
     }
 
+    public function banners(): BelongsToMany
+    {
+        return $this->belongsToMany(File::class, 'file_usages', 'usage_id', 'file_id')
+            ->wherePivot('usage_type', 'product_brands')
+            ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(file_usages.meta, '$.type'))) = 'banner'")
+            ->withPivot(['id', 'usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
+            ->withTimestamps();
+    }
+
     public function defaultFile(): BelongsToMany
     {
         return $this->belongsToMany(File::class, 'file_usages', 'usage_id', 'file_id')

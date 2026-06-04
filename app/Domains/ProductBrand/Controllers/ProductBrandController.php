@@ -40,6 +40,7 @@ class ProductBrandController extends Controller
     {
         $brand = $this->productBrandService->detail($id);
 
+        $brand->load('banners', 'files','defaultFile');
         return response()->json([
             'data' => (new ProductBrandResource($brand)),
             'success' => true,

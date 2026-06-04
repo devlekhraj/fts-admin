@@ -7,6 +7,7 @@ export type CartListItem = {
     avatar?: string | null;
   } | null;
   is_proceed?: boolean | null;
+  amount?: number | null;
   items_count?: number | null;
   updated_at?: string | null;
 };
@@ -67,4 +68,9 @@ export async function listCarts(params?: ListCartsParams): Promise<CartListRespo
 export async function getCart(id: number | string): Promise<CartDetailResponse> {
   const response = await http.get(`/admin/carts/${id}`);
   return response as unknown as CartDetailResponse;
+}
+
+export async function deleteCart(id: number | string): Promise<CartDetailResponse> {
+  const response = await http.delete(`/admin/carts/${id}/delete`);
+  return response;
 }

@@ -72,7 +72,7 @@ final class FileUploadAction
         $height = is_array($imageInfo) && isset($imageInfo[1]) ? (float) $imageInfo[1] : null;
 
         $now = now();
-        $key = $this->makeKey($directory, (string) Str::uuid());
+        $key = (string) Str::uuid();
 
         $meta = json_encode(array_filter([
             'directory' => $directory !== '' ? $directory : null,
@@ -161,8 +161,4 @@ final class FileUploadAction
         return $cleaned !== '' ? $cleaned : self::DEFAULT_DIRECTORY;
     }
 
-    private function makeKey(string $type, string $typeId): string
-    {
-        return $type . '-' . $typeId . '-' . Str::orderedUuid()->toString();
-    }
 }

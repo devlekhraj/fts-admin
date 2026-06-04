@@ -1,0 +1,1 @@
+import{Y as e}from"./main-CG3iiO3b.js";async function a(t){return await e.get("/admin/carts",{params:t})}async function r(t){return await e.get(`/admin/carts/${t}`)}async function o(t){return await e.delete(`/admin/carts/${t}/delete`)}export{o as d,r as g,a as l};

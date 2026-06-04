@@ -7,12 +7,12 @@ namespace App\Domains\Cart\Controllers;
 use App\Domains\Cart\Actions\CartDetailAction;
 use App\Domains\Cart\Actions\CartListAction;
 use App\Domains\Cart\DTOs\CartListData;
+use App\Domains\Cart\Models\Cart;
 use App\Domains\Cart\Resources\CartDetailResource;
 use App\Domains\Cart\Resources\CartResource;
-use Illuminate\Routing\Controller;
-
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 
 final class CartController extends Controller
 {
@@ -38,6 +38,15 @@ final class CartController extends Controller
 
         return response()->json([
             'data' => new CartDetailResource($cart),
+        ]);
+    }
+
+    public function destroy(string $id): JsonResponse
+    {
+        $cart = Cart::find($id);
+        $cart->items()->delete(); // Soft delete cart items
+        return response()->json([
+            'message' => 'Cart deleted successfully.',
         ]);
     }
 }

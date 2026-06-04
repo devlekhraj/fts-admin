@@ -51,6 +51,9 @@
     <template #item.items="{ item }">
       <span>{{ item.items > 0 ? `${item.items} ${item.items === 1 ? 'item' : 'items'}` : '-' }}</span>
     </template>
+    <template #item.amount="{ item }">
+      <span>{{ formatNPR(item.amount) }}</span>
+    </template>
     <template #item.status="{ item }">
       <v-chip size="small" label variant="tonal" :color="item.isProceed ? 'success' : 'warning'">
         {{ item.isProceed ? 'Completed' : 'Pending' }}
@@ -59,9 +62,12 @@
     <template #item.updatedAt="{ item }">
       <span class="text-medium-emphasis">{{ item.updatedAt }}</span>
     </template>
-    <template #item.action="{ item }" class="justify-end">
-      <v-btn size="small" variant="outlined" color="primary" @click="onView(item)">
+    <template #item.action="{ item }" class="d-flex align-center justify-end">
+      <v-btn size="small" class="mr-2" variant="outlined" color="primary" @click="onView(item)">
         Details
+      </v-btn>
+      <v-btn size="small" variant="outlined" color="error" @click="onDelete(item)">
+        Delete
       </v-btn>
     </template>
   </AppDataTable>
@@ -77,13 +83,15 @@ import { timeAgo } from '@/shared/utils';
 import { listCarts, type CartListItem } from '@/api/carts.api';
 import AppTextField from '@/components/shared/AppTextField.vue';
 import AppSearchButton from '@/components/shared/AppSearchButton.vue';
+import { formatNPR } from '@/shared/formatters';
 
 const headers = [
   { title: 'Name', key: 'customer' ,minWidth:'250'},
   { title: 'Items', key: 'items',minWidth:'150' },
+  { title: 'Amount', key: 'amount',minWidth:'150' },
   { title: 'Status', key: 'status', minWidth:'120' },
   { title: 'Updated', key: 'updatedAt', minWidth:'150' },
-  { title: 'Action', key: 'action', width:'120', align: 'end' as const },
+  { title: 'Action', key: 'action', width:'220', align: 'end' as const },
 ];
 
 const router = useRouter();
@@ -94,7 +102,8 @@ const activeTotal = ref<number | null>(null);
 const loading = ref(false);
 const search = ref('');
 const options = ref<DataTableOptions>({ page: 1, itemsPerPage: 10, sortBy: [] });
-
+import { openModal } from '@/shared/modal';
+import CartDeleteModal from '@/components/cart/CartDeleteModal.vue';
 const subtitle = computed(() => {
   if (typeof activeTotal.value === 'number') return `Active carts (${activeTotal.value})`;
   return 'Active carts';
@@ -103,6 +112,18 @@ const subtitle = computed(() => {
 function onView(item: any) {
   router.push({ name: 'admin.orders.cart.detail', params: { id: item.id } });
 }
+function onDelete(cart: any) {
+  openModal(
+    CartDeleteModal,
+    { cart },
+    {
+      title: 'Confirm Cart Deletion',
+      size: 'sm',
+      onSaved: () => fetchCarts(),
+    },
+  );
+}
+
 
 function onSearch() {
   options.value.page = 1;
@@ -130,6 +151,7 @@ async function fetchCarts() {
       customer: cart.customer?.name ?? '-',
       avatar: cart.customer?.avatar ?? null,
       items: Number(cart.items_count ?? 0),
+      amount: Number(cart.amount ?? 0),
       updatedAt: cart.updated_at ? timeAgo(cart.updated_at) : '-',
       isProceed: Boolean(cart.is_proceed),
     }));

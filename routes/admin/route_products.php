@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 // Product Brands
 use App\Domains\ProductBrand\Controllers\ProductBrandController;
+use App\Domains\ProductBrand\Controllers\ProductBrandBannerController;
 use App\Domains\ProductBrand\Controllers\ProductBrandImageController;
 
 // Products
@@ -34,6 +35,7 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::post('brands', [ProductBrandController::class, 'store'])->name('admin.brands.store');
     Route::put('brands/{id}', [ProductBrandController::class, 'update'])->name('admin.brands.update');
     Route::delete('brands/{id}', [ProductBrandController::class, 'destroy'])->name('admin.brands.destroy');
+    Route::post('brands/{id}/banner', [ProductBrandBannerController::class, 'store'])->name('admin.brands.banner.store');
     Route::put('brands/{id}/images/{fileUsageId}', [ProductBrandImageController::class, 'update'])->name('admin.brands.images.update');
     Route::delete('brands/{id}/images/{fileUsageId}', [ProductBrandImageController::class, 'delete'])->name('admin.brands.images.delete');
 
