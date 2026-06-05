@@ -300,6 +300,31 @@ export async function updateVariant(
   return response as unknown as CreateProductVariantResponse;
 }
 
+export type UpdateProductPricePayload = {
+  price: number | null;
+  original_price?: number | null;
+  quantity?: number | null;
+  pre_order: boolean;
+  pre_order_price?: number | null;
+  variants?: Array<{
+    id: number | string;
+    price: number | null;
+    quantity: number | null;
+  }>;
+};
+
+export async function updateProductPrice(
+  id: number | string,
+  payload: UpdateProductPricePayload,
+): Promise<ProductDetailResponse> {
+  const response = await http.put(`/admin/products/${id}/price`, payload);
+  const wrapped = response as { data?: unknown };
+  if (wrapped && typeof wrapped === 'object' && 'data' in wrapped && wrapped.data) {
+    return wrapped.data as ProductDetailResponse;
+  }
+  return response as unknown as ProductDetailResponse;
+}
+
 export function remove(id: string) {
   return http.delete(`/admin/products/${id}`);
 }

@@ -14,6 +14,17 @@ export function formatNPR(value: unknown) {
   }).format(amount)}`;
 }
 
+export function formatNPRIfDecimal(value: unknown) {
+  const amount = typeof value === 'number' ? value : Number(value);
+  if (Number.isNaN(amount)) return '-';
+
+  const hasDecimal = !Number.isInteger(amount);
+  return `Rs. ${new Intl.NumberFormat('en-IN', {
+    minimumFractionDigits: hasDecimal ? 2 : 0,
+    maximumFractionDigits: 2,
+  }).format(amount)}`;
+}
+
 export function formatDateTime(value: unknown) {
   if (!value) return '-';
   const date = value instanceof Date ? value : new Date(String(value));

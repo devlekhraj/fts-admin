@@ -44,6 +44,7 @@ class ProductResource extends JsonResource
             'images_count' => $imagesCount,
             'created_at' => $this->created_at,
             'thumb' => $defaultFile?->url,
+            'price' => $this->price,
         ];
     }
 

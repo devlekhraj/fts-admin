@@ -56,6 +56,7 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::post('products/{id}/variants', [ProductVariantController::class, 'store'])->name('admin.products.variants.store');
     Route::put('products/{id}/variants/{item_id}', [ProductVariantController::class, 'update'])->name('admin.products.variants.update');
     Route::put('products/{id}', [ProductsController::class, 'update'])->name('admin.products.update');
+    Route::put('products/{id}/price', [ProductsController::class, 'updatePrice'])->name('admin.products.price.update');
     Route::put('products/{id}/images/{fileUsageId}', [ProductImageController::class, 'update'])->name('admin.products.images.update');
     Route::delete('products/{id}/images/{fileUsageId}', [ProductImageController::class, 'delete'])->name('admin.products.images.delete');
     Route::delete('products/{id}/delete', [ProductsController::class, 'deleteProduct'])->name('admin.products.delete');

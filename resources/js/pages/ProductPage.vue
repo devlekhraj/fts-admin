@@ -61,9 +61,9 @@
       </div>
     </template>
     <template #item.status="{ item }">
-      <v-chip size="small" label variant="tonal" :color="item.status ? 'success' : 'warning'">
-        {{ item.status ? 'Active' : 'Inactive' }}
-      </v-chip>
+      <ProductInlineBooleanToggle
+        :product="item"
+        field="status" />
     </template>
     <template #item.images_count="{ item }">
       <div class="d-flex align-center ga-2">
@@ -75,14 +75,22 @@
       </div>
     </template>
     <template #item.emi_enabled="{ item }">
-      <v-chip size="small" label variant="tonal" :color="item.emi_enabled ? 'primary' : 'grey'">
-        {{ item.emi_enabled ? 'Enabled' : 'Disabled' }}
-      </v-chip>
+      <ProductInlineBooleanToggle
+        :product="item"
+        field="emi_enabled" />
     </template>
     <template #item.variants_count="{ item }">
       <span>
         {{ Number(item.variants_count ?? 0) === 0 ? '-' : `${Number(item.variants_count ?? 0)} variants` }}
       </span>
+    </template>
+    <template #item.price="{ item }">
+      <ProductPriceCell
+        :product="item"
+        :on-updated="fetchProducts" />
+    </template>
+    <template #item.variant_count="{ item }">
+      {{item.variants_count ?? '0'}} Variants
     </template>
     <template #item.created_at="{ item }">
       <span>{{ formatLongDate(item.created_at) ?? '-' }}</span>
@@ -174,7 +182,6 @@ import { useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
-import AppTextField from '@/components/shared/AppTextField.vue';
 import AppSelectField from '@/components/shared/AppSelectField.vue';
 import { getProductDetail, listProducts, type ProductDetailResponse, type ProductListItem } from '@/api/products.api';
 import { listProductCategoriesLite, type ProductCategoryListItem } from '@/api/product-categories.api';
@@ -182,14 +189,16 @@ import { formatLongDate } from '@/shared/utils';
 import { openModal } from '@/shared/modal';
 import ProductCreateModal from '@/components/product/ProductCreateModal.vue';
 import AppSearchTextField from '@/components/shared/AppSearchTextField.vue';
-import App from '@/app/App.vue';
 import AppSearchButton from '@/components/shared/AppSearchButton.vue';
 import ProductDeleteModal from '@/components/product/ProductDeleteModal.vue';
+import ProductInlineBooleanToggle from '@/components/product/ProductInlineBooleanToggle.vue';
+import ProductPriceCell from '@/components/product/ProductPriceCell.vue';
 
 type Product = {
   id: number | string;
   name: string;
   slug: string;
+  price: number;
   status: boolean;
   emi_enabled: boolean;
   variants_count: number;
@@ -208,12 +217,11 @@ const exportOptions: Array<{ type: ExportType; title: string; icon: string }> = 
 
 const headers = [
   { title: 'Name', key: 'name', sortable: false, minWidth: '260' },
-  // { title: 'Slug', key: 'slug', sortable: false, minWidth: '220' },
   { title: 'Images', key: 'images_count', sortable: false, minWidth: '120' },
-  // { title: 'Variants', key: 'variants_count', sortable: false, minWidth: '120' },
+  { title: 'Variants', key: 'variants_count', sortable: false, minWidth: '120' },
+  { title: 'Price', key: 'price', sortable: false, minWidth: '120' },
   { title: 'Status', key: 'status', sortable: false, minWidth: '140' },
   { title: 'EMI', key: 'emi_enabled', sortable: false, minWidth: '140' },
-  // { title: 'Created', key: 'created_at', sortable: false, minWidth: '170' },
   { title: 'Actions', key: 'action', sortable: false, width: '100' },
 ];
 
@@ -288,6 +296,7 @@ function onDelete(product: Product) {
     const list = Array.isArray(response) ? response : response?.data ?? [];
     items.value = list.map((product: ProductListItem) => ({
       id: product.id,
+
       name: product.name ?? '-',
       slug: product.slug ?? '-',
       status: Boolean(product.status),
@@ -296,6 +305,7 @@ function onDelete(product: Product) {
       images_count: Number((product as any).images_count ?? (Array.isArray((product as any).images) ? (product as any).images.length : 0)),
       created_at: typeof product.created_at === 'string' ? product.created_at : '',
       thumb: typeof product.thumb === 'string' ? product.thumb : '',
+      price: Number(product.price ?? 0),
     }));
     total.value = Number(response?.total ?? response?.meta?.total ?? list.length);
     if (response?.meta?.current_page) {
@@ -402,6 +412,7 @@ onMounted(() => {
   }
 });
 </script>
+
 
 <style scoped>
 .export-menu-list :deep(.v-list-item-title) {

@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Domains\Product\Controllers;
 
+use App\Domains\Product\Models\ProductVariant;
 use App\Domains\Product\Models\Product;
 use App\Domains\Product\Requests\StoreProductRequest;
+use App\Domains\Product\Requests\UpdateProductPriceRequest;
 use App\Domains\Product\Requests\UpdateProductRequest;
 use App\Domains\Faq\Resources\FaqResource;
 use App\Domains\Product\Resources\ProductResource;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Routing\Controller;
 
 use App\Domains\Faq\Models\Faq;
@@ -211,6 +214,51 @@ class ProductsController extends Controller
                 'attributes' => $product->attributes,
                 'attribute_class_id' => $product->attribute_class_id,
             ],
+            'success' => true,
+        ], 200);
+    }
+
+    public function updatePrice(UpdateProductPriceRequest $request, string $id): JsonResponse
+    {
+        $product = Product::query()->findOrFail($id);
+        $validated = $request->validated();
+        $variants = is_array($validated['variants'] ?? null) ? $validated['variants'] : [];
+        unset($validated['variants']);
+
+        DB::transaction(function () use ($product, $validated, $variants): void {
+            $product->update([
+                'price' => $validated['price'],
+                'original_price' => $validated['original_price'] ?? null,
+                'quantity' => $validated['quantity'] ?? null,
+                'pre_order' => (bool) $validated['pre_order'],
+                'pre_order_price' => $validated['pre_order_price'] ?? null,
+            ]);
+
+            foreach ($variants as $variantPayload) {
+                $variantId = (int) ($variantPayload['id'] ?? 0);
+                if ($variantId <= 0) {
+                    continue;
+                }
+
+                $variant = ProductVariant::query()
+                    ->where('product_id', $product->id)
+                    ->where('id', $variantId)
+                    ->firstOrFail();
+
+                $variant->update([
+                    'price' => $variantPayload['price'],
+                    'quantity' => $variantPayload['quantity'],
+                ]);
+            }
+        });
+
+        $freshProduct = Product::query()
+            ->with(['defaultFile', 'files', 'variants.files', 'attribute.attributes', 'brand.defaultFile', 'categories', 'giftItems.defaultFile'])
+            ->findOrFail($product->id);
+
+        return response()->json([
+            'message' => 'Product price updated successfully.',
+            'data' => new ProductResource($freshProduct),
             'success' => true,
         ], 200);
     }
