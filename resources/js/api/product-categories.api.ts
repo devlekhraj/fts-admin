@@ -50,7 +50,20 @@ export type ProductCategoryDetailResponse = ProductCategoryListItem & {
   updated_at?: string | null;
   default_file?: Record<string, unknown> | null;
   files?: ProductCategoryFileItem[];
+  banners?: ProductCategoryBannerItem[];
   [key: string]: unknown;
+};
+
+export type ProductCategoryBannerItem = ProductCategoryFileItem & {
+  title?: string | null;
+  meta?: {
+    type?: string | null;
+    status?: string | null;
+    end_date?: string | null;
+    is_default?: boolean;
+    start_date?: string | null;
+    redirect_url?: string | null;
+  } | null;
 };
 
 export type UpdateProductCategoryImagePayload = {
@@ -105,4 +118,30 @@ export function updateProductCategoryImage(
 
 export function deleteProductCategoryImage(categoryId: number | string, fileUsageId: number | string) {
   return http.delete(`/admin/product-categories/${categoryId}/images/${fileUsageId}`);
+}
+
+export function saveProductCategoryBanner(categoryId: number | string, payload: FormData) {
+  return http.post(`/admin/product-categories/${categoryId}/banner`, payload, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+}
+
+export function updateProductCategoryBanner(
+  categoryId: number | string,
+  fileUsageId: number | string,
+  payload: FormData,
+) {
+  const formData = new FormData();
+  payload.forEach((value, key) => {
+    formData.append(key, value);
+  });
+  formData.append('_method', 'PUT');
+
+  return http.post(`/admin/product-categories/${categoryId}/banner/${fileUsageId}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+}
+
+export function deleteProductCategoryBanner(categoryId: number | string, fileUsageId: number | string) {
+  return http.delete(`/admin/product-categories/${categoryId}/banner/${fileUsageId}`);
 }

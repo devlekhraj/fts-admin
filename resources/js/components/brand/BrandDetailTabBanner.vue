@@ -3,7 +3,7 @@
     <div class="d-flex align-center justify-space-between mb-4">
       <div>
         <div class="text-subtitle-1 font-weight-medium">Brand Banners</div>
-        <div class="text-body-2 text-medium-emphasis">Total banners: {{ demoBanners.length }}</div>
+        <div class="text-body-2 text-medium-emphasis">Total banners: {{ banners.length }}</div>
       </div>
 
       <v-btn color="primary" variant="flat" @click="onAddBanner">
@@ -12,7 +12,7 @@
       </v-btn>
     </div>
 
-    <v-table v-if="demoBanners.length" density="comfortable">
+    <v-table v-if="banners.length" density="comfortable">
       <thead>
         <tr>
           <th>Banner</th>
@@ -22,27 +22,44 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="banner in demoBanners" :key="banner.id">
+        <tr v-for="banner in banners" :key="banner.id">
           <td class="py-3">
             <div class="banner-preview rounded">
-              <v-img :src="banner.image" cover :alt="banner.title" />
+              <v-img :src="banner.url || ''" :alt="banner.title || 'Brand banner'" contain />
             </div>
           </td>
           <td class="py-3 details-col">
-            <div class="text-body-2 font-weight-medium">{{ banner.title }}</div>
-            <div class="text-caption text-medium-emphasis mt-1">{{ banner.altText }}</div>
-            <div class="d-flex align-center ga-2 mt-1">
-              <span class="text-caption text-medium-emphasis">Redirect: {{ banner.link }}</span>
-              <v-btn :href="banner.link" target="_blank" rel="noopener noreferrer" icon size="x-small" variant="tonal"
-                color="primary">
+         
+            <div v-if="redirectUrl(banner)" class="d-flex align-center ga-2 mt-1">
+              <span class="text-caption text-medium-emphasis">Redirect: {{ redirectUrl(banner) }}</span>
+              <v-btn
+                :href="redirectUrl(banner)"
+                target="_blank"
+                rel="noopener noreferrer"
+                icon
+                size="x-small"
+                variant="tonal"
+                color="primary"
+              >
                 <v-icon size="14">mdi-open-in-new</v-icon>
               </v-btn>
             </div>
+            <div v-if="banner.size_info" class="text-caption text-medium-emphasis mt-1">
+              {{ banner.size_info }}
+            </div>
+            <div v-if="dateRange(banner)" class="text-caption text-medium-emphasis mt-1">
+              {{ dateRange(banner) }}
+            </div>
           </td>
           <td class="py-3">
-            <v-chip size="small" label variant="tonal" :color="banner.status ? 'success' : 'warning'">
-              {{ banner.status ? 'Active' : 'Inactive' }}
-            </v-chip>
+            <div class="d-flex flex-column ga-2">
+              <v-chip size="small" label variant="tonal" :color="banner.meta?.status === 'active' ? 'success' : 'warning'">
+                {{ banner.meta?.status === 'active' ? 'Active' : 'Inactive' }}
+              </v-chip>
+              <v-chip v-if="banner.meta?.is_default" size="small" label variant="tonal" color="primary">
+                Default
+              </v-chip>
+            </div>
           </td>
           <td class="py-3">
             <div class="d-flex align-center justify-end ga-2">
@@ -67,19 +84,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { type ProductBrandDetailResponse } from '@/api/products.api';
-import BrandBannerFormModal from '@/components/brand/BrandBannerFormModal.vue';
+import { computed } from 'vue';
+import { type ProductBrandDetailResponse, type ProductBrandFileItem } from '@/api/products.api';
 import { openModal } from '@/shared/modal';
-import { useSnackbarStore } from '@/stores/snackbar.store';
+import BrandBannerFormModal from '@/components/brand/BrandBannerFormModal.vue';
+import BrandBannerDeleteModal from '@/components/brand/BrandBannerDeleteModal.vue';
 
-type DemoBanner = {
-  id: number;
-  title: string;
-  altText: string;
-  image: string;
-  link: string;
-  status: boolean;
+type BrandBannerItem = ProductBrandFileItem & {
+  title?: string | null;
+  meta?: {
+    type?: string | null;
+    status?: string | null;
+    end_date?: string | null;
+    is_default?: boolean;
+    start_date?: string | null;
+    redirect_url?: string | null;
+  } | null;
 };
 
 const props = defineProps<{
@@ -87,44 +107,66 @@ const props = defineProps<{
   brandId?: number | string | null;
 }>();
 
-const snackbar = useSnackbarStore();
+const emit = defineEmits<{
+  (e: 'updated'): void;
+}>();
 
-const demoBanners = ref<DemoBanner[]>([
-  {
-    id: 1,
-    title: 'Summer Brand Offer',
-    altText: 'Summer offer banner for this brand',
-    image: 'https://picsum.photos/seed/brand-banner-1/640/320',
-    link: 'https://example.com/summer-offer',
-    status: true,
-  },
-  {
-    id: 2,
-    title: 'Featured Collection',
-    altText: 'Featured collection promotional banner',
-    image: 'https://picsum.photos/seed/brand-banner-2/640/320',
-    link: 'https://example.com/featured-collection',
-    status: false,
-  },
-]);
+const banners = computed<BrandBannerItem[]>(() => {
+  const bannerItems = (props.item?.banners ?? []) as BrandBannerItem[];
+  if (bannerItems.length) return bannerItems;
+  return (props.item?.files ?? []) as BrandBannerItem[];
+});
 
-function onAddBanner() {
+function redirectUrl(banner: BrandBannerItem) {
+  return String(banner.meta?.redirect_url ?? '').trim();
+}
+
+function dateRange(banner: BrandBannerItem) {
+  const start = String(banner.meta?.start_date ?? '').trim();
+  const end = String(banner.meta?.end_date ?? '').trim();
+  if (!start && !end) return '';
+  if (start && end) return `Active from ${start} to ${end}`;
+  if (start) return `Active from ${start}`;
+  return `Active until ${end}`;
+}
+
+function openBannerModal(mode: 'create' | 'edit', banner?: BrandBannerItem) {
   openModal(
     BrandBannerFormModal,
-    { brandId: props.brandId ?? props.item?.id ?? null },
     {
-      title: 'Add New Banner',
+      brandId: props.brandId ?? props.item?.id ?? null,
+      mode,
+      banner: banner ?? null,
+    },
+    {
+      title: mode === 'edit' ? 'Edit Banner' : 'Add New Banner',
       size: 'md',
+      onSaved: () => emit('updated'),
     },
   );
 }
 
-function onEditBanner(banner: DemoBanner) {
-  snackbar.show({ message: `Edit banner action for ${banner.title} will be connected later.`, color: 'info' });
+function onAddBanner() {
+  openBannerModal('create');
 }
 
-function onDeleteBanner(banner: DemoBanner) {
-  snackbar.show({ message: `Delete banner action for ${banner.title} will be connected later.`, color: 'info' });
+function onEditBanner(banner: BrandBannerItem) {
+  openBannerModal('edit', banner);
+}
+
+function onDeleteBanner(banner: BrandBannerItem) {
+  openModal(
+    BrandBannerDeleteModal,
+    {
+      brandId: props.brandId ?? props.item?.id ?? null,
+      banner,
+    },
+    {
+      title: 'Confirm Banner Deletion',
+      size: 'sm',
+      onSaved: () => emit('updated'),
+    },
+  );
 }
 </script>
 

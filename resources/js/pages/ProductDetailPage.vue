@@ -98,7 +98,7 @@ const tabItems = [
   { value: 'attributes', label: 'Attributes', icon: 'mdi-tune-variant', component: ProductDetailTabAttributes },
   { value: 'variants', label: 'Variants', icon: 'mdi-shape-outline', component: ProductDetailTabVariants },
   { value: 'images', label: 'Images', icon: 'mdi-image-multiple-outline', component: ProductDetailTabImages },
-  { value: 'faqs', label: 'FAQs', icon: 'mdi-help-circle-outline', component: ProductDetailTabFaqs },
+  // { value: 'faqs', label: 'FAQs', icon: 'mdi-help-circle-outline', component: ProductDetailTabFaqs },
   { value: 'free_gift', label: 'Free Gift', icon: 'mdi-gift-outline', component: ProductDetailTabFreeGift },
   { value: 'seo', label: 'SEO', icon: 'mdi-magnify', component: ProductDetailTabSeo },
   { value: 'schema_jsonld', label: 'Schema | JSON-LD', icon: 'mdi-code-json', component: ProductDetailTabSchemaJsonld },

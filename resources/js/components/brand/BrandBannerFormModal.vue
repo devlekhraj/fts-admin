@@ -2,13 +2,17 @@
   <v-card-text class="py-6">
     <v-form ref="formRef" class="banner-form-grid" @submit.prevent="onSubmit">
       <div class="mb-4">
-     
         <div class="image-picker rounded" role="button" tabindex="0" @click="openImagePicker" @keydown.enter="openImagePicker">
           <v-img v-if="imagePreview" :src="imagePreview" contain />
           <div v-else class="image-picker-empty">
             <v-icon size="36" color="grey-darken-1">mdi-image-plus-outline</v-icon>
-            <div class="text-body-2 text-medium-emphasis mt-2">Select banner image</div>
+            <div class="text-body-2 text-medium-emphasis mt-2">
+              {{ hasExistingImage ? 'Select a new banner image' : 'Select banner image' }}
+            </div>
           </div>
+        </div>
+        <div v-if="isEditMode && hasExistingImage" class="text-caption text-medium-emphasis mt-2">
+          Keep the current image if you do not select a new one.
         </div>
         <div v-if="imageError" class="text-caption text-error mt-1">{{ imageError }}</div>
         <div v-if="imageInfo.length" class="image-info mt-2">
@@ -27,14 +31,20 @@
           prepend-icon=""
           label="Upload Image"
           :rules="[rules.image]"
-          @update:model-value="onImageChange" />
+          @update:model-value="onImageChange"
+        />
       </div>
 
       <v-row>
         <v-col cols="12" class="py-0">
           <app-field-label label="Redirect URL" />
-          <v-text-field v-model="form.redirectUrl" variant="outlined" density="comfortable"
-            :rules="[rules.url]" placeholder="https://example.com/offer" />
+          <v-text-field
+            v-model="form.redirectUrl"
+            variant="outlined"
+            density="comfortable"
+            :rules="[rules.url]"
+            placeholder="https://example.com/offer"
+          />
         </v-col>
 
         <v-col cols="4" class="py-0">
@@ -46,7 +56,8 @@
             prepend-icon=""
             prepend-inner-icon="mdi-calendar"
             variant="outlined"
-            density="comfortable" />
+            density="comfortable"
+          />
         </v-col>
 
         <v-col cols="4" class="py-0">
@@ -57,7 +68,8 @@
             prepend-icon=""
             prepend-inner-icon="mdi-calendar"
             variant="outlined"
-            density="comfortable" />
+            density="comfortable"
+          />
         </v-col>
 
         <v-col cols="4" class="py-0">
@@ -67,7 +79,8 @@
             :items="statusOptions"
             variant="outlined"
             density="comfortable"
-            :rules="[rules.required]" />
+            :rules="[rules.required]"
+          />
         </v-col>
       </v-row>
     </v-form>
@@ -79,24 +92,43 @@
     <v-spacer />
     <v-btn variant="text" :disabled="saving" @click="emit('close')">Cancel</v-btn>
     <v-btn color="primary" variant="flat" :loading="saving" :disabled="saving" @click="onSubmit">
-      Save Banner
+      {{ submitLabel }}
     </v-btn>
   </v-card-actions>
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue';
-import { saveBrandBanner } from '@/api/brands.api';
+import { computed, reactive, ref, watch } from 'vue';
+import { saveBrandBanner, updateBrandBanner } from '@/api/brands.api';
 import AppFieldLabel from '@/components/shared/AppFieldLabel.vue';
 import { getErrorMessage } from '@/shared/errors';
 import { useSnackbarStore } from '@/stores/snackbar.store';
 
+type BrandBannerItem = {
+  id: number | string;
+  url?: string | null;
+  title?: string | null;
+  alt_text?: string | null;
+  meta?: {
+    type?: string | null;
+    status?: string | null;
+    end_date?: string | null;
+    is_default?: boolean;
+    start_date?: string | null;
+    redirect_url?: string | null;
+  } | null;
+  size_info?: string | null;
+};
+
 const props = defineProps<{
   brandId: number | string | null;
+  banner?: BrandBannerItem | null;
+  mode?: 'create' | 'edit';
 }>();
 
 const emit = defineEmits<{
   (e: 'close'): void;
+  (e: 'saved', payload?: unknown): void;
 }>();
 
 const formRef = ref();
@@ -107,6 +139,10 @@ const imageDimensions = ref<{ width: number; height: number } | null>(null);
 const imageError = ref('');
 const today = new Date();
 const snackbar = useSnackbarStore();
+
+const isEditMode = computed(() => props.mode === 'edit' && Boolean(props.banner?.id));
+const hasExistingImage = computed(() => Boolean(props.banner?.url));
+const submitLabel = computed(() => (isEditMode.value ? 'Update Banner' : 'Save Banner'));
 
 const form = reactive({
   image: null as File | File[] | null,
@@ -123,7 +159,7 @@ const statusOptions = [
 
 const rules = {
   required: (value: unknown) => (String(value ?? '').trim() ? true : 'Required'),
-  image: (value: File | File[] | null) => getImageFile(value) ? true : 'Image is required',
+  image: (value: File | File[] | null) => (getImageFile(value) || hasExistingImage.value) ? true : 'Image is required',
   url: (value: string) => {
     const text = String(value ?? '').trim();
     if (!text) return true;
@@ -131,7 +167,7 @@ const rules = {
   },
 };
 
-const imagePreview = computed(() => imagePreviewUrl.value);
+const imagePreview = computed(() => imagePreviewUrl.value || String(props.banner?.url ?? '').trim());
 const imageInfo = computed(() => {
   const file = getImageFile(form.image);
   if (!file) return [];
@@ -151,6 +187,24 @@ const imageInfo = computed(() => {
   return items;
 });
 
+watch(
+  () => props.banner,
+  (banner) => {
+    form.image = null;
+    form.redirectUrl = String(banner?.meta?.redirect_url ?? '').trim();
+    form.startDate = toDate(banner?.meta?.start_date ?? null);
+    form.endDate = toDate(banner?.meta?.end_date ?? null);
+    form.status = String(banner?.meta?.status ?? 'active') === 'inactive' ? 'inactive' : 'active';
+    imageError.value = '';
+    if (imagePreviewUrl.value.startsWith('blob:')) {
+      URL.revokeObjectURL(imagePreviewUrl.value);
+    }
+    imagePreviewUrl.value = '';
+    imageDimensions.value = null;
+  },
+  { immediate: true },
+);
+
 function getImageFile(value: File | File[] | null): File | null {
   if (Array.isArray(value)) return value[0] ?? null;
   return value ?? null;
@@ -159,7 +213,7 @@ function getImageFile(value: File | File[] | null): File | null {
 function onImageChange(value: File | File[] | null) {
   const file = getImageFile(value);
   imageError.value = '';
-  if (imagePreviewUrl.value) {
+  if (imagePreviewUrl.value && imagePreviewUrl.value.startsWith('blob:')) {
     URL.revokeObjectURL(imagePreviewUrl.value);
   }
   imageDimensions.value = null;
@@ -201,12 +255,23 @@ function gcd(a: number, b: number): number {
   return b === 0 ? a : gcd(b, a % b);
 }
 
+function toDate(value: unknown): Date | null {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+
+  const raw = String(value).trim();
+  if (!raw) return null;
+
+  const parsed = new Date(raw);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
 async function onSubmit() {
   const { valid } = (await formRef.value?.validate?.()) ?? { valid: true };
   if (!valid) return;
 
   const image = getImageFile(form.image);
-  if (!image) {
+  if (!image && !hasExistingImage.value) {
     imageError.value = 'Select image';
     snackbar.show({ message: 'Select image', color: 'error' });
     return;
@@ -218,6 +283,7 @@ async function onSubmit() {
     return;
   }
 
+ 
   saving.value = true;
   try {
     const payload = new FormData();
@@ -229,8 +295,15 @@ async function onSubmit() {
       payload.append('image', image);
     }
 
-    const response = await saveBrandBanner(brandId, payload);
-    snackbar.show({ message: (response as any)?.message || 'Brand banner saved successfully.', color: 'success' });
+    const response = isEditMode.value && props.banner?.id
+      ? await updateBrandBanner(brandId, props.banner.id, payload)
+      : await saveBrandBanner(brandId, payload);
+
+    snackbar.show({
+      message: (response as any)?.message || (isEditMode.value ? 'Brand banner updated successfully.' : 'Brand banner saved successfully.'),
+      color: 'success',
+    });
+    emit('saved', (response as any)?.data ?? { id: props.banner?.id ?? null });
     emit('close');
   } catch (error) {
     snackbar.show({ message: getErrorMessage(error), color: 'error' });
@@ -240,7 +313,15 @@ async function onSubmit() {
 }
 
 function formatDateToYMD(date: Date | null): string {
-  return date ? new Date(date).toISOString().split('T')[0] : '';
+  if (!date) return '';
+  const value = new Date(date);
+  if (Number.isNaN(value.getTime())) return '';
+
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, '0');
+  const day = String(value.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
 }
 </script>
 
@@ -290,5 +371,4 @@ function formatDateToYMD(date: Date | null): string {
 .image-info-value {
   color: rgba(var(--v-theme-on-surface), 0.7);
 }
-
 </style>

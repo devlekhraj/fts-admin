@@ -68,6 +68,7 @@ import { useRoute, useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import { getProductCategory, type ProductCategoryDetailResponse } from '@/api/product-categories.api';
 import ProductCategoryDetailTabDescription from '@/components/product-category/ProductCategoryDetailTabDescription.vue';
+import ProductCategoryDetailTabBanner from '@/components/product-category/ProductCategoryDetailTabBanner.vue';
 import ProductCategoryDetailTabFaqs from '@/components/product-category/ProductCategoryDetailTabFaqs.vue';
 import ProductCategoryDetailTabImages from '@/components/product-category/ProductCategoryDetailTabImages.vue';
 import ProductCategoryDetailTabOverview from '@/components/product-category/ProductCategoryDetailTabOverview.vue';
@@ -81,6 +82,7 @@ const tabItems = [
   { value: 'description', label: 'Description', icon: 'mdi-text-box-outline', component: ProductCategoryDetailTabDescription },
   { value: 'images', label: 'Images', icon: 'mdi-image-multiple-outline', component: ProductCategoryDetailTabImages },
   { value: 'faqs', label: 'FAQs', icon: 'mdi-help-circle-outline', component: ProductCategoryDetailTabFaqs },
+  { value: 'banners', label: 'Banners', icon: 'mdi-image-outline', component: ProductCategoryDetailTabBanner },
   { value: 'seo', label: 'SEO', icon: 'mdi-magnify', component: ProductCategoryDetailTabSeo },
 ];
 

@@ -190,6 +190,7 @@ export type ProductBrandDetailResponse = ProductBrandListItem & {
   updated_at?: string | null;
   default_file?: Record<string, unknown> | null;
   files?: ProductBrandFileItem[];
+  banners?: ProductBrandFileItem[];
   [key: string]: unknown;
 };
 

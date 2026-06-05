@@ -23,6 +23,7 @@ use App\Domains\Product\Controllers\ProductAttributeController;
 
 // Product Categories
 use App\Domains\ProductCategory\Controllers\ProductCategoryController;
+use App\Domains\ProductCategory\Controllers\ProductCategoryBannerController;
 use App\Domains\ProductCategory\Controllers\ProductCategoryImageController;
 
 // TODO: Protect with admin auth + permission middleware.
@@ -36,6 +37,8 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::put('brands/{id}', [ProductBrandController::class, 'update'])->name('admin.brands.update');
     Route::delete('brands/{id}', [ProductBrandController::class, 'destroy'])->name('admin.brands.destroy');
     Route::post('brands/{id}/banner', [ProductBrandBannerController::class, 'store'])->name('admin.brands.banner.store');
+    Route::put('brands/{id}/banner/{fileUsageId}', [ProductBrandBannerController::class, 'update'])->name('admin.brands.banner.update');
+    Route::delete('brands/{id}/banner/{fileUsageId}', [ProductBrandBannerController::class, 'delete'])->name('admin.brands.banner.delete');
     Route::put('brands/{id}/images/{fileUsageId}', [ProductBrandImageController::class, 'update'])->name('admin.brands.images.update');
     Route::delete('brands/{id}/images/{fileUsageId}', [ProductBrandImageController::class, 'delete'])->name('admin.brands.images.delete');
 
@@ -84,6 +87,9 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::get('product-categories/{id}/faqs', [ProductCategoryController::class, 'faqs'])->name('admin.product-categories.faqs');
     Route::post('product-categories', [ProductCategoryController::class, 'store'])->name('admin.product-categories.store');
     Route::put('product-categories/{id}', [ProductCategoryController::class, 'update'])->name('admin.product-categories.update');
+    Route::post('product-categories/{id}/banner', [ProductCategoryBannerController::class, 'store'])->name('admin.product-categories.banner.store');
+    Route::put('product-categories/{id}/banner/{fileUsageId}', [ProductCategoryBannerController::class, 'update'])->name('admin.product-categories.banner.update');
+    Route::delete('product-categories/{id}/banner/{fileUsageId}', [ProductCategoryBannerController::class, 'delete'])->name('admin.product-categories.banner.delete');
     Route::put('product-categories/{id}/images/{fileUsageId}', [ProductCategoryImageController::class, 'update'])->name('admin.product-categories.images.update');
     Route::delete('product-categories/{id}/images/{fileUsageId}', [ProductCategoryImageController::class, 'delete'])->name('admin.product-categories.images.delete');
     Route::delete('product-categories/{id}', [ProductCategoryController::class, 'destroy'])->name('admin.product-categories.destroy');

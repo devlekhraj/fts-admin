@@ -39,6 +39,7 @@ class ProductCategoryController extends Controller
     public function categoryShow(int $id): JsonResponse
     {
         $category = $this->productCategoryService->detail((string) $id);
+        $category->load('banners', 'files', 'defaultFile');
 
         return response()->json([
             'data' => (new ProductCategoryResource($category)),

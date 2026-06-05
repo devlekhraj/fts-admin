@@ -21,3 +21,19 @@ export function saveBrandBanner(id: number | string, payload: FormData) {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 }
+
+export function updateBrandBanner(id: number | string, fileUsageId: number | string, payload: FormData) {
+  const formData = new FormData();
+  payload.forEach((value, key) => {
+    formData.append(key, value);
+  });
+  formData.append('_method', 'PUT');
+
+  return http.post(`/admin/brands/${id}/banner/${fileUsageId}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+}
+
+export function deleteBrandBanner(id: number | string, fileUsageId: number | string) {
+  return http.delete(`/admin/brands/${id}/banner/${fileUsageId}`);
+}

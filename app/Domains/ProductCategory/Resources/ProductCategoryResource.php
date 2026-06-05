@@ -41,38 +41,58 @@ class ProductCategoryResource extends JsonResource
     {
         $data = $this->resource->toArray();
         $files = [];
+        $banners = [];
+
+        $formatFile = static function ($file): array {
+            $meta = $file->pivot?->meta;
+
+            if (is_string($meta)) {
+                $decoded = json_decode($meta, true);
+                $meta = json_last_error() === JSON_ERROR_NONE && is_array($decoded) ? $decoded : [];
+            }
+
+            if (! is_array($meta)) {
+                $meta = [];
+            }
+
+            $meta['is_default'] = in_array(
+                $meta['is_default'] ?? false,
+                [true, 1, '1', 'true'],
+                true
+            );
+
+            $fileSize = ByteSizeFormatter::format($file->file_size ?? null);
+            $fileDimension = FileDimensionFormatter::format($file->width ?? null, $file->height ?? null);
+
+            return [
+                'id' => $file->pivot?->id,
+                'url' => $file->url,
+                'title' => $file->pivot?->title,
+                'alt_text' => $file->pivot?->alt_text,
+                'meta' => $meta,
+                'size_info' => "{$fileSize} | {$fileDimension}",
+            ];
+        };
 
         if ($this->relationLoaded('files')) {
-            $files = $this->files->map(static function ($file) {
-                $meta = $file->pivot?->meta;
-                if (is_string($meta)) {
-                    $decoded = json_decode($meta, true);
-                    $meta = json_last_error() === JSON_ERROR_NONE && is_array($decoded) ? $decoded : [];
-                }
-                if (! is_array($meta)) {
-                    $meta = [];
-                }
-                $meta = [
-                    'is_default' => in_array($meta['is_default'] ?? false, [true, 1, '1', 'true'], true),
-                ];
+            $files = $this->files
+                ->map($formatFile)
+                ->values()
+                ->all();
+        }
 
-                $fileSize = ByteSizeFormatter::format($file->file_size ?? null);
-                $fileDimension = FileDimensionFormatter::format($file->width ?? null, $file->height ?? null);
-
-                return [
-                    'id' => $file->pivot?->id,
-                    'url' => $file->url,
-                    'alt_text' => $file->pivot?->alt_text,
-                    'meta' => $meta,
-                    'size_info' => "{$fileSize} | {$fileDimension}",
-                ];
-            })->values()->all();
+        if ($this->relationLoaded('banners')) {
+            $banners = $this->banners
+                ->map($formatFile)
+                ->values()
+                ->all();
         }
 
         $data['thumb'] = $defaultFile?->url;
         $data['status'] = (bool) ($data['status'] ?? $this->status);
         $data['default_file'] = $defaultFile?->toArray();
         $data['files'] = $files;
+        $data['banners'] = $banners;
 
         return $data;
     }
