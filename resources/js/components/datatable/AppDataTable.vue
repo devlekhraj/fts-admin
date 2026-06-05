@@ -7,11 +7,11 @@
 				</v-card>
 			</v-toolbar>
 	
-		<v-data-table-server :headers="normalizedHeaders" :items="items" :items-length="total" :loading="loading"
-			:search="searchModel" :page="page" :items-per-page="itemsPerPage"
-			:show-expand="showExpand" v-model:expanded="expandedModel"
-			:hide-default-footer="total <= itemsPerPage"
-			@update:options="(opts) => $emit('update:options', opts)">
+			<v-data-table-server :headers="normalizedHeaders" :items="items" :items-length="total" :loading="loading"
+				:search="searchModel" :page="page" :items-per-page="itemsPerPageState"
+				:show-expand="showExpand" v-model:expanded="expandedModel"
+				:hide-default-footer="total <= itemsPerPageState"
+				@update:options="onUpdateOptions">
 				<template v-for="(_, name) in $slots" v-slot:[name]="slotProps">
 					<slot :name="name" v-bind="slotProps" />
 				</template>
@@ -22,6 +22,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import type { DataTableHeader, DataTableOptions } from './types';
 
 type Props = {
@@ -49,6 +50,8 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{ (e: 'update:options', options: DataTableOptions): void; (e: 'update:expanded', expanded: Array<string | number>): void }>();
+const route = useRoute();
+const storageKey = computed(() => `app-datatable:${String(route.name ?? route.path ?? 'default')}:items-per-page`);
 
 const searchModel = computed({
 	get: () => props.search ?? '',
@@ -64,6 +67,49 @@ watch(
 		expandedState.value = next ?? [];
 	},
 );
+
+watch(
+	() => props.itemsPerPage,
+	(next) => {
+		if (typeof next === 'number' && Number.isFinite(next) && next > 0) {
+			itemsPerPageState.value = next;
+		}
+	},
+);
+
+function readStoredItemsPerPage(): number | null {
+	if (typeof window === 'undefined') return null;
+
+	const stored = Number(window.localStorage.getItem(storageKey.value) ?? '');
+	return Number.isInteger(stored) && stored > 0 ? stored : null;
+}
+
+function persistItemsPerPage(value: number) {
+	if (typeof window === 'undefined') return;
+	if (!Number.isInteger(value) || value <= 0) return;
+
+	window.localStorage.setItem(storageKey.value, String(value));
+}
+
+function onUpdateOptions(opts: DataTableOptions) {
+	if (typeof opts.itemsPerPage === 'number' && Number.isFinite(opts.itemsPerPage) && opts.itemsPerPage > 0) {
+		itemsPerPageState.value = opts.itemsPerPage;
+		persistItemsPerPage(opts.itemsPerPage);
+	}
+
+	emit('update:options', opts);
+}
+
+const restoredItemsPerPage = readStoredItemsPerPage();
+const itemsPerPageState = ref(restoredItemsPerPage ?? props.itemsPerPage);
+
+if (restoredItemsPerPage && restoredItemsPerPage !== props.itemsPerPage) {
+	emit('update:options', {
+		page: props.page ?? 1,
+		itemsPerPage: restoredItemsPerPage,
+		sortBy: [],
+	});
+}
 
 const expandedModel = computed({
 	get: () => expandedState.value,
