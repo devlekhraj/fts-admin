@@ -332,3 +332,40 @@ export function remove(id: string) {
 export function deleteProduct(id: number | string) {
   return http.delete(`/admin/products/${id}/delete`);
 }
+
+export type ImportProductsRow = Record<string, unknown>;
+
+export type ImportProductsResponse = {
+  success?: boolean;
+  message?: string;
+  data?: {
+    summary?: {
+      processed: number;
+      created: number;
+      updated: number;
+      skipped: number;
+      failed: number;
+    };
+    results?: Array<{
+      row: number;
+      status: 'created' | 'updated' | 'skipped' | 'failed';
+      product_id?: number | string | null;
+      product_name?: string | null;
+      price?: number | string | null;
+      match_field?: 'id' | 'sku' | null;
+      changes?: Array<{
+        field: string;
+        previous?: unknown;
+        current?: unknown;
+      }>;
+      reason?: string;
+      error?: string;
+      warnings?: string[];
+    }>;
+  };
+};
+
+export async function importProducts(rows: ImportProductsRow[]): Promise<ImportProductsResponse> {
+  const response = await http.post('/admin/products/import', { rows });
+  return response as unknown as ImportProductsResponse;
+}

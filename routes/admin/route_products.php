@@ -16,6 +16,7 @@ use App\Domains\Product\Controllers\ProductImageController;
 use App\Domains\Product\Controllers\ProductListController;
 use App\Domains\Product\Controllers\ProductVariantImageController;
 use App\Domains\Product\Controllers\ProductGiftController;
+use App\Domains\Product\Controllers\ProductImportController;
 
 // Product Attributes 
 use App\Domains\Product\Controllers\ProductAttributeController;
@@ -50,6 +51,7 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
 
     // Products
     Route::get('products', [ProductsController::class, 'productList'])->name('admin.products.index');
+    Route::post('products/import', [ProductImportController::class, 'store'])->name('admin.products.import');
     Route::get('products/{id}', [ProductsController::class, 'show'])->name('admin.products.show');
     Route::get('products/{id}/faqs', [ProductsController::class, 'faqs'])->name('admin.products.faqs');
     Route::post('products', [ProductsController::class, 'store'])->name('admin.products.store');
