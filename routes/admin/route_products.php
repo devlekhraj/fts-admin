@@ -51,6 +51,7 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
 
     // Products
     Route::get('products', [ProductsController::class, 'productList'])->name('admin.products.index');
+    Route::post('products/import/preview', [ProductImportController::class, 'preview'])->name('admin.products.import.preview');
     Route::post('products/import', [ProductImportController::class, 'store'])->name('admin.products.import');
     Route::get('products/{id}', [ProductsController::class, 'show'])->name('admin.products.show');
     Route::get('products/{id}/faqs', [ProductsController::class, 'faqs'])->name('admin.products.faqs');

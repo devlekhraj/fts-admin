@@ -335,6 +335,35 @@ export function deleteProduct(id: number | string) {
 
 export type ImportProductsRow = Record<string, unknown>;
 
+export type ImportProductsPreviewResponse = {
+  success?: boolean;
+  message?: string;
+  data?: {
+    summary?: {
+      processed: number;
+      existing: number;
+      new: number;
+      unchanged: number;
+      invalid: number;
+    };
+    rows?: Array<{
+      row: number;
+      mode: 'existing' | 'new' | 'unchanged' | 'invalid';
+      product_id?: number | string | null;
+      product_name?: string | null;
+      price?: number | string | null;
+      match_field?: 'id' | 'sku' | null;
+      changes?: Array<{
+        field: string;
+        previous?: unknown;
+        current?: unknown;
+      }>;
+      reason?: string;
+      warnings?: string[];
+    }>;
+  };
+};
+
 export type ImportProductsResponse = {
   success?: boolean;
   message?: string;
@@ -368,4 +397,9 @@ export type ImportProductsResponse = {
 export async function importProducts(rows: ImportProductsRow[]): Promise<ImportProductsResponse> {
   const response = await http.post('/admin/products/import', { rows });
   return response as unknown as ImportProductsResponse;
+}
+
+export async function previewImportProducts(rows: ImportProductsRow[]): Promise<ImportProductsPreviewResponse> {
+  const response = await http.post('/admin/products/import/preview', { rows });
+  return response as unknown as ImportProductsPreviewResponse;
 }

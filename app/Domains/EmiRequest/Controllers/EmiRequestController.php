@@ -96,6 +96,11 @@ final class EmiRequestController extends Controller
         try {
             Mail::to($toEmail)->send(new EmiApprovedMail($emiRequest, $pdfResult));
         } catch (Throwable $e) {
+            Log::error('Failed to send EMI approval email.', [
+                'emi_request_id' => $emiRequest->id,
+                'email' => $emiRequest->email ?? null,
+                'error' => $e->getMessage(),
+            ]);
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
         return response()->json([

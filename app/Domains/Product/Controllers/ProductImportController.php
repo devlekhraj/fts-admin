@@ -24,6 +24,44 @@ final class ProductImportController extends Controller
         private readonly FileUploadAction $fileUploadAction,
     ) {}
 
+    public function preview(ImportProductsRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
+        $rows = is_array($validated['rows'] ?? null) ? $validated['rows'] : [];
+        $normalizedRows = array_map(
+            fn ($row) => $this->normalizeRow(is_array($row) ? $row : []),
+            $rows,
+        );
+        $lookupMaps = $this->buildLookupMaps($normalizedRows);
+
+        $summary = [
+            'processed' => 0,
+            'existing' => 0,
+            'new' => 0,
+            'unchanged' => 0,
+            'invalid' => 0,
+        ];
+        $rowsPreview = [];
+
+        foreach ($normalizedRows as $index => $normalizedRow) {
+            $rowNumber = $this->resolveRowNumber($normalizedRow, (int) $index + 2);
+            $previewRow = $this->previewRow($normalizedRow, $lookupMaps['by_id'], $lookupMaps['by_sku'], $rowNumber);
+
+            $summary['processed']++;
+            $summary[$previewRow['mode']]++;
+            $rowsPreview[] = $previewRow;
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product import preview generated successfully.',
+            'data' => [
+                'summary' => $summary,
+                'rows' => $rowsPreview,
+            ],
+        ]);
+    }
+
     public function store(ImportProductsRequest $request): JsonResponse
     {
         $validated = $request->validated();
@@ -258,6 +296,83 @@ final class ProductImportController extends Controller
         $sku = $this->toString($row['sku'] ?? null);
         if ($sku !== null && $product->sku === $sku) {
             return 'sku';
+        }
+
+        return null;
+    }
+
+    private function previewRow(array $normalizedRow, array $byId, array $bySku, int $rowNumber): array
+    {
+        $resolvedProduct = $this->resolveProduct($normalizedRow, $byId, $bySku);
+        $payload = $this->extractProductPayload($normalizedRow);
+        $categoryIds = $this->extractCategoryIds($normalizedRow);
+
+        if ($resolvedProduct instanceof Product) {
+            if (empty($payload) && empty($categoryIds)) {
+                return [
+                    'row' => $rowNumber,
+                    'mode' => 'unchanged',
+                    'product_id' => $resolvedProduct->id,
+                    'product_name' => $resolvedProduct->name,
+                    'price' => $resolvedProduct->price,
+                    'match_field' => $this->matchedBy($normalizedRow, $resolvedProduct),
+                    'reason' => 'No updatable values were provided.',
+                ];
+            }
+
+            $changes = $this->buildUpdateChanges($resolvedProduct, $payload, $categoryIds);
+            if ($changes === []) {
+                return [
+                    'row' => $rowNumber,
+                    'mode' => 'unchanged',
+                    'product_id' => $resolvedProduct->id,
+                    'product_name' => $resolvedProduct->name,
+                    'price' => $resolvedProduct->price,
+                    'match_field' => $this->matchedBy($normalizedRow, $resolvedProduct),
+                    'reason' => 'No changes detected.',
+                ];
+            }
+
+            return [
+                'row' => $rowNumber,
+                'mode' => 'existing',
+                'product_id' => $resolvedProduct->id,
+                'product_name' => $resolvedProduct->name,
+                'price' => $resolvedProduct->price,
+                'match_field' => $this->matchedBy($normalizedRow, $resolvedProduct),
+                'changes' => $changes,
+            ];
+        }
+
+        $previewErrors = [];
+        $createPayload = $this->buildCreatePayload($normalizedRow, $previewErrors, $rowNumber);
+        if ($createPayload === null) {
+            return [
+                'row' => $rowNumber,
+                'mode' => 'invalid',
+                'reason' => $this->firstValidationMessage($previewErrors) ?? 'Unable to preview this row.',
+            ];
+        }
+
+        return [
+            'row' => $rowNumber,
+            'mode' => 'new',
+            'product_id' => null,
+            'product_name' => $createPayload['name'] ?? null,
+            'price' => $createPayload['price'] ?? null,
+            'match_field' => null,
+        ];
+    }
+
+    private function firstValidationMessage(array $validationErrors): ?string
+    {
+        foreach ($validationErrors as $messages) {
+            if (is_array($messages) && $messages !== []) {
+                $first = $messages[0] ?? null;
+                if (is_string($first) && trim($first) !== '') {
+                    return $first;
+                }
+            }
         }
 
         return null;

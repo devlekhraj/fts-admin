@@ -6,7 +6,7 @@
     prepend-icon="mdi-check-bold"
     @click="openApprove"
   >
-    Approve Request
+    Approve EMI Request
   </v-btn>
 
   <v-btn
@@ -16,7 +16,7 @@
     prepend-icon="mdi-progress-clock"
     @click="openStatusConfirm('processing')"
   >
-    Processing
+    Start EMI Process
   </v-btn>
 
   <v-btn
@@ -36,7 +36,7 @@
     prepend-icon="mdi-truck"
     @click="openStatusConfirm('dispatched')"
   >
-    Dispatched
+    Dispatched Now
   </v-btn>
 
   <v-btn
@@ -46,7 +46,7 @@
     prepend-icon="mdi-package-variant-closed"
     @click="openStatusConfirm('delivered')"
   >
-    Delivered
+    Mark As Delivered
   </v-btn>
 
   <v-btn
@@ -56,7 +56,7 @@
     prepend-icon="mdi-check-circle-outline"
     @click="openStatusConfirm('completed')"
   >
-    Completed
+    Mark As Completed
   </v-btn>
 
   <v-btn
@@ -82,6 +82,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { openModal } from '@/shared/modal';
 import { updateStatus } from '@/api/emi-requests.api';
 import { useSnackbar } from '@/composables/snackbar';
@@ -98,15 +99,16 @@ const props = defineProps<{
 
 const emit = defineEmits<{ (e: 'success'): void }>();
 
+const router = useRouter();
 const { showSuccess, showError } = useSnackbar();
 
 const status = computed(() => String(props.statusLabel ?? '').trim());
 
 // Flow: Pending -> Processing -> Bank Approval -> Approved -> Dispatched -> Delivered -> Completed
-const showProcessing = computed(() => status.value === 'Pending');
+const showApprove = computed(() => status.value === 'Pending');
+const showProcessing = computed(() => status.value === 'Approved');
 const showBankApproval = computed(() => status.value === 'Processing');
-const showApprove = computed(() => status.value === 'Bank Approval');
-const showDispatched = computed(() => status.value === 'Approved');
+const showDispatched = computed(() => status.value === 'Bank Approval');
 const showDelivered = computed(() => status.value === 'Dispatched');
 const showCompleted = computed(() => status.value === 'Delivered');
 // Reject removed; use Cancel instead
@@ -137,7 +139,10 @@ function openDelete() {
     {
       title: 'Delete EMI Request',
       size: 'sm',
-      onSaved: () => emit('success'),
+      onSaved: async () => {
+        emit('success');
+        await router.push({ name: 'admin.emi.requests' });
+      },
     },
   );
 }

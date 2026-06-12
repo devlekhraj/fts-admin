@@ -34,6 +34,25 @@
       {{ importError }}
     </v-alert>
 
+    <v-alert v-if="previewError" variant="tonal" type="warning" class="mt-4">
+      {{ previewError }}
+    </v-alert>
+
+    <v-alert v-if="isPreviewing" variant="tonal" type="info" class="mt-4">
+      Building preview...
+    </v-alert>
+
+    <v-alert v-if="previewSummary" variant="tonal" type="info" class="mt-4">
+      <div class="font-weight-medium mb-2">Preview ready</div>
+      <div class="d-flex flex-wrap ga-2">
+        <v-chip size="small" color="primary" label>Processed {{ previewSummary.processed }}</v-chip>
+        <v-chip size="small" color="info" label>Existing {{ previewSummary.existing }}</v-chip>
+        <v-chip size="small" color="success" label>New {{ previewSummary.new }}</v-chip>
+        <v-chip size="small" color="warning" label>Unchanged {{ previewSummary.unchanged }}</v-chip>
+        <v-chip size="small" color="error" label>Invalid {{ previewSummary.invalid }}</v-chip>
+      </div>
+    </v-alert>
+
     <v-alert v-if="importSummary" variant="tonal" type="success" class="mt-4">
       <div class="font-weight-medium mb-2">{{ importMessage }}</div>
       <div class="d-flex flex-wrap ga-2">
@@ -149,6 +168,100 @@
       </div>
     </v-card>
 
+    <v-card v-if="previewExistingGroups.length > 0" class="mt-6" variant="outlined">
+      <v-card-title class="text-subtitle-1">
+        Existing Products
+      </v-card-title>
+      <v-divider />
+      <div class="table-scroll">
+        <v-table density="comfortable">
+          <thead>
+            <tr>
+              <th class="text-left">Row</th>
+              <th class="text-left">Product</th>
+              <th class="text-left">Match</th>
+              <th class="text-left">Changed Fields</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="group in previewExistingGroups" :key="group.row">
+              <td>{{ group.row }}</td>
+              <td>
+                <div class="font-weight-medium">{{ group.product_name || 'Product' }}</div>
+                <div class="text-caption text-medium-emphasis">ID: {{ group.product_id ?? '-' }}</div>
+              </td>
+              <td>{{ group.match_field || '-' }}</td>
+              <td class="py-2">
+                <v-table density="compact" class="changes-table">
+                  <thead>
+                    <tr>
+                      <th class="text-left">Field</th>
+                      <th class="text-left">Previous Value</th>
+                      <th class="text-left">New Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="change in group.changes" :key="`${group.row}-${change.field}`">
+                      <td>{{ change.field }}</td>
+                      <td>{{ formatChangeValue(change.previous) }}</td>
+                      <td>{{ formatChangeValue(change.current) }}</td>
+                    </tr>
+                  </tbody>
+                </v-table>
+              </td>
+            </tr>
+          </tbody>
+        </v-table>
+      </div>
+    </v-card>
+
+    <v-card v-if="newPreviewRows.length > 0" class="mt-6" variant="outlined">
+      <v-card-title class="text-subtitle-1">
+        New Products
+      </v-card-title>
+      <v-divider />
+      <div class="table-scroll">
+        <v-table density="comfortable">
+          <thead>
+            <tr>
+              <th v-for="(col, i) in columnMeta" :key="`new-${i}`" class="text-left">
+                {{ col.title }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(row, rIndex) in newPreviewRows" :key="`new-${rIndex}`">
+              <td v-for="(col, cIndex) in columnMeta" :key="`new-${rIndex}-${cIndex}`">
+                <template v-if="col.kind === 'name_with_image'">
+                  <div class="d-flex align-center ga-3">
+                    <v-avatar size="34" color="grey-lighten-3" rounded>
+                      <v-img
+                        v-if="row[col.imageIndex] && looksLikeUrl(row[col.imageIndex])"
+                        :src="row[col.imageIndex]"
+                        :alt="row[col.sourceIndex] || 'Product image'"
+                      />
+                      <v-icon v-else size="18" color="grey-darken-1">mdi-image-outline</v-icon>
+                    </v-avatar>
+                    <div class="">
+                      {{ row[col.sourceIndex] ?? '' }}
+                    </div>
+                  </div>
+                </template>
+                <template v-else-if="col.kind === 'image'">
+                  <div class="d-flex align-center ga-2">
+                    <span class="text-truncate">{{ row[col.sourceIndex] ?? '' }}</span>
+                  </div>
+                </template>
+                <template v-else>
+                  {{ row[col.sourceIndex] ?? '' }}
+                </template>
+              </td>
+            </tr>
+          </tbody>
+        </v-table>
+      </div>
+    </v-card>
+
     <div class="d-flex ga-3 mt-4">
       <v-btn
         color="primary"
@@ -170,7 +283,7 @@ import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import * as XLSX from 'xlsx';
-import { importProducts, type ImportProductsResponse, type ImportProductsRow } from '@/api/products.api';
+import { importProducts, previewImportProducts, type ImportProductsPreviewResponse, type ImportProductsResponse, type ImportProductsRow } from '@/api/products.api';
 import { getErrorMessage } from '@/shared/errors';
 import { useSnackbarStore } from '@/stores/snackbar.store';
 
@@ -189,6 +302,16 @@ const headerKeys = ref<string[]>([]);
 const tableRows = ref<string[][]>([]);
 const importRows = ref<ImportProductsRow[]>([]);
 const isImporting = ref(false);
+const isPreviewing = ref(false);
+const previewError = ref<string>('');
+const previewSummary = ref<{
+  processed: number;
+  existing: number;
+  new: number;
+  unchanged: number;
+  invalid: number;
+} | null>(null);
+const previewRows = ref<NonNullable<NonNullable<ImportProductsPreviewResponse['data']>['rows']>>([]);
 const importSummary = ref<{
   processed: number;
   created: number;
@@ -221,6 +344,21 @@ type ColumnMeta =
 
 const columnMeta = ref<ColumnMeta[]>([]);
 const visibleImportResults = computed(() => importResults.value.filter((result) => result.status === 'created' || result.status === 'updated'));
+const previewExistingGroups = computed(() =>
+  previewRows.value
+    .filter((result) => result.mode === 'existing' && Array.isArray(result.changes) && result.changes.length > 0)
+    .map((result) => ({
+      row: result.row,
+      product_id: result.product_id,
+      product_name: result.product_name,
+      match_field: result.match_field,
+      changes: result.changes ?? [],
+    })),
+);
+const previewNewRowNumbers = computed(() => new Set(previewRows.value.filter((result) => result.mode === 'new').map((result) => result.row)));
+const newPreviewRows = computed(() =>
+  tableRows.value.filter((_, index) => previewNewRowNumbers.value.has(index + 2)),
+);
 const importMessage = computed(() => {
   if (!importSummary.value) {
     return '';
@@ -342,8 +480,11 @@ async function onFileSelected(input: File | File[] | null) {
   selectedFile.value = file ?? null;
   errorMessage.value = '';
   importError.value = '';
+  previewError.value = '';
   importSummary.value = null;
   importResults.value = [];
+  previewSummary.value = null;
+  previewRows.value = [];
   tableHeaders.value = [];
   headerKeys.value = [];
   tableRows.value = [];
@@ -399,6 +540,20 @@ async function onFileSelected(input: File | File[] | null) {
       }
       return { title, sourceIndex, kind: 'text' } as ColumnMeta;
     });
+
+    isPreviewing.value = true;
+    try {
+      const response = await previewImportProducts(importRows.value);
+      previewSummary.value = response.data?.summary ?? null;
+      previewRows.value = response.data?.rows ?? [];
+      previewError.value = '';
+    } catch (previewErr: any) {
+      previewError.value = getErrorMessage(previewErr);
+      previewSummary.value = null;
+      previewRows.value = [];
+    } finally {
+      isPreviewing.value = false;
+    }
   } catch (err: any) {
     errorMessage.value = err?.message || 'Failed to read file';
   }
