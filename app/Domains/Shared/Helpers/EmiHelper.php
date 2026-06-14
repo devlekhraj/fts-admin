@@ -60,7 +60,10 @@ class EmiHelper
                 'url' => $disk->url($relativePath),
             ];
         } catch (Throwable $e) {
-            dd($e->getMessage());
+            Log::error('Error generating/storing EMI quotation PDF.', [
+                'emi_request_id' => $emiRequest->id,
+                'error' => $e->getMessage(),
+            ]);
             throw new RuntimeException('Unable to generate/store EMI quotation PDF.', 0, $e);
         }
     }

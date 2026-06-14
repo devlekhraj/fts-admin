@@ -8,11 +8,13 @@ use App\Domains\ProductCategory\Models\ProductCategory;
 use App\Domains\ProductCategory\DTOs\CategoryCreateData;
 use App\Domains\ProductCategory\DTOs\CategoryUpdateData;
 use App\Domains\ProductCategory\Requests\UpdateProductCategoryRequest;
+use App\Domains\ProductCategory\Requests\ReorderProductCategoriesRequest;
 use App\Domains\ProductCategory\Requests\StoreProductCategoryRequest;
 use App\Domains\Faq\Resources\FaqResource;
 use App\Domains\ProductCategory\Resources\ProductCategoryResource;
 use App\Domains\ProductCategory\Services\ProductCategoryService;
 use Illuminate\Routing\Controller;
+use InvalidArgumentException;
 
 use App\Domains\Faq\Models\Faq;
 use Illuminate\Http\JsonResponse;
@@ -132,17 +134,38 @@ class ProductCategoryController extends Controller
             'success' => true,
         ], 200);
     }
+
+    public function reorder(ReorderProductCategoriesRequest $request): JsonResponse
+    {
+        try {
+            $this->productCategoryService->reorder($request->validated('category_ids'));
+        } catch (InvalidArgumentException $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'success' => false,
+            ], 422);
+        }
+
+        return response()->json([
+            'message' => 'Product categories reordered successfully.',
+            'success' => true,
+        ]);
+    }
+
     public function getList(Request $request)
     {
         $categories = ProductCategory::with('defaultFile')
             ->withCount('products')
             ->has('products')
+            ->orderByRaw('CASE WHEN seq_no IS NULL OR seq_no = 0 THEN 1 ELSE 0 END')
+            ->orderBy('seq_no')
             ->orderBy('title', 'asc')
             ->get()
             ->map(function ($category) {
                 return [
                     'id' => $category->id,
                     'title' => $category->title,
+                    'seq_no' => (int) ($category->seq_no ?? 0),
                     'slug' => $category->slug,
                     'thumb' => $category->defaultFile->first()?->url,
                     'products_count' => $category->products_count ?? 0,

@@ -8,6 +8,7 @@ use App\Domains\ProductCategory\Actions\CategoryCreateAction;
 use App\Domains\ProductCategory\Actions\CategoryDeleteAction;
 use App\Domains\ProductCategory\Actions\CategoryDetailAction;
 use App\Domains\ProductCategory\Actions\CategoryListAction;
+use App\Domains\ProductCategory\Actions\CategoryReorderAction;
 use App\Domains\ProductCategory\Actions\CategoryUpdateAction;
 use App\Domains\ProductCategory\DTOs\CategoryCreateData;
 use App\Domains\ProductCategory\DTOs\CategoryUpdateData;
@@ -21,6 +22,7 @@ final class ProductCategoryService
         private readonly CategoryCreateAction $categoryCreateAction,
         private readonly CategoryUpdateAction $categoryUpdateAction,
         private readonly CategoryDeleteAction $categoryDeleteAction,
+        private readonly CategoryReorderAction $categoryReorderAction,
     ) {}
 
     public function list(?string $search, int $perPageParam): array
@@ -50,5 +52,13 @@ final class ProductCategoryService
         $category = ProductCategory::query()->findOrFail($id);
 
         $this->categoryDeleteAction->execute($category);
+    }
+
+    /**
+     * @param  array<int, int|string>  $categoryIds
+     */
+    public function reorder(array $categoryIds): void
+    {
+        $this->categoryReorderAction->execute($categoryIds);
     }
 }

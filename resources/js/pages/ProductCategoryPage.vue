@@ -41,8 +41,13 @@
           <v-spacer></v-spacer>
 
           <v-col cols="12" md="auto" class="text-right">
-            <div class="text-medium-emphasis">
-              <span class="text-primary" style="font-size: smaller;">Total: {{ total }} Items found.</span>
+            <div class="d-flex align-center justify-end ga-4">
+              <div class="text-medium-emphasis">
+                <span class="text-primary" style="font-size: smaller;">Total: {{ total }} Items found.</span>
+              </div>
+              <v-btn variant="outlined" color="primary" prepend-icon="mdi-pencil-outline" @click="openOrderModal">
+                Edit Order
+              </v-btn>
             </div>
           </v-col>
         </v-row>
@@ -87,6 +92,7 @@ import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import PageFilter from '@/components/filters/PageFilter.vue';
 import ProductCategoryCreateButton from '@/components/category/ProductCategoryCreateButton.vue';
 import ProductCategoryDeleteButton from '@/components/category/ProductCategoryDeleteButton.vue';
+import ProductCategoryOrderModal from '@/components/category/ProductCategoryOrderModal.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
 import {
   listProductCategories,
@@ -96,6 +102,7 @@ import { formatLongDate } from '@/shared/utils';
 import AppSearchTextField from '@/components/shared/AppSearchTextField.vue';
 import AppSelectField from '@/components/shared/AppSelectField.vue';
 import AppSearchButton from '@/components/shared/AppSearchButton.vue';
+import { openModal } from '@/shared/modal';
 
 type ProductCategory = {
   id: number;
@@ -143,6 +150,18 @@ const fetchingState = ref(false);
 function onExport(type: ExportType) {
   // TODO: replace with real export API/download logic.
   console.log(`Export clicked: ${type}`);
+}
+
+function openOrderModal() {
+  openModal(
+    ProductCategoryOrderModal,
+    {},
+    {
+      size: 'xl',
+      title: 'Edit Category Order',
+      onSaved: () => fetchCategories(),
+    },
+  );
 }
 
 function onView(category: ProductCategory) {

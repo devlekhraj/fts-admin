@@ -29,6 +29,7 @@ class ProductCategoryResource extends JsonResource
         return [
             'id' => $this->id,
             'title' => $this->title,
+            'seq_no' => (int) ($this->seq_no ?? 0),
             'slug' => $this->slug,
             'thumb' => $defaultFile?->url,
             'products_count' => (int) ($this->products_count ?? 0),

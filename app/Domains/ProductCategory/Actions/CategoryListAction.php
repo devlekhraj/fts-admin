@@ -13,7 +13,9 @@ final class CategoryListAction
         $query = ProductCategory::query()
             ->with('defaultFile')
             ->withCount('products')
-            ->orderByDesc('created_at');
+            ->orderByRaw('CASE WHEN seq_no IS NULL OR seq_no = 0 THEN 1 ELSE 0 END')
+            ->orderBy('seq_no')
+            ->orderBy('id');
 
         $search = is_string($search) ? trim($search) : '';
         if ($search !== '') {

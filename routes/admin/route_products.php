@@ -90,6 +90,7 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::get('product-categories/{id}', [ProductCategoryController::class, 'categoryShow'])->name('admin.product-categories.show');
     Route::get('product-categories/{id}/faqs', [ProductCategoryController::class, 'faqs'])->name('admin.product-categories.faqs');
     Route::post('product-categories', [ProductCategoryController::class, 'store'])->name('admin.product-categories.store');
+    Route::put('product-categories/reorder', [ProductCategoryController::class, 'reorder'])->name('admin.product-categories.reorder');
     Route::put('product-categories/{id}', [ProductCategoryController::class, 'update'])->name('admin.product-categories.update');
     Route::post('product-categories/{id}/banner', [ProductCategoryBannerController::class, 'store'])->name('admin.product-categories.banner.store');
     Route::put('product-categories/{id}/banner/{fileUsageId}', [ProductCategoryBannerController::class, 'update'])->name('admin.product-categories.banner.update');

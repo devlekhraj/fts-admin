@@ -9,6 +9,7 @@ export type ListProductCategoriesParams = {
 export type ProductCategoryListItem = {
   id: number;
   title?: string | null;
+  seq_no?: number | null;
   slug?: string | null;
   thumb?: string | null;
   products_count?: number | null;
@@ -102,6 +103,12 @@ export function updateProductCategory(id: string, payload: Record<string, unknow
 
 export function createProductCategory(payload: Record<string, unknown>) {
   return http.post('/admin/product-categories', payload);
+}
+
+export function reorderProductCategories(categoryIds: Array<number | string>) {
+  return http.put('/admin/product-categories/reorder', {
+    category_ids: categoryIds,
+  });
 }
 
 export function deleteProductCategory(id: string) {
