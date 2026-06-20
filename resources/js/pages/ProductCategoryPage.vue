@@ -6,6 +6,9 @@
           <v-btn v-bind="props" variant="tonal" color="primary" prepend-icon="mdi-download-outline">
             Export
           </v-btn>
+           <v-btn variant="outlined" color="primary" prepend-icon="mdi-pencil-outline" @click="openOrderModal">
+                Edit Category Sequence
+              </v-btn>
         </template>
         <v-list class="export-menu-list" density="comfortable" min-width="170">
           <v-list-item v-for="option in exportOptions" :key="option.type" :title="option.title"
@@ -45,9 +48,7 @@
               <div class="text-medium-emphasis">
                 <span class="text-primary" style="font-size: smaller;">Total: {{ total }} Items found.</span>
               </div>
-              <v-btn variant="outlined" color="primary" prepend-icon="mdi-pencil-outline" @click="openOrderModal">
-                Edit Order
-              </v-btn>
+             
             </div>
           </v-col>
         </v-row>

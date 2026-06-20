@@ -14,7 +14,7 @@
       </v-menu>
 
       <v-btn variant="outlined" color="primary" prepend-icon="mdi-pencil-outline" @click="openOrderModal">
-        Edit Order
+        Edit Brand Sequence
       </v-btn>
 
       <BrandCreateButton @saved="onBrandCreated" />
