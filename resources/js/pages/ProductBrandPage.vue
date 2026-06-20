@@ -13,6 +13,10 @@
         </v-list>
       </v-menu>
 
+      <v-btn variant="outlined" color="primary" prepend-icon="mdi-pencil-outline" @click="openOrderModal">
+        Edit Order
+      </v-btn>
+
       <BrandCreateButton @saved="onBrandCreated" />
     </template>
   </AppPageHeader>
@@ -77,17 +81,20 @@ import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import PageFilter from '@/components/filters/PageFilter.vue';
 import BrandCreateButton from '@/components/brand/BrandCreateButton.vue';
 import BrandDeleteButton from '@/components/brand/BrandDeleteButton.vue';
+import ProductBrandOrderModal from '@/components/brand/ProductBrandOrderModal.vue';
 import type { DataTableHeader, DataTableOptions } from '@/components/datatable/types';
 import { listBrands, type ProductBrandListItem } from '@/api/products.api';
 import { formatLongDate } from '@/shared/utils';
 import AppSearchTextField from '@/components/shared/AppSearchTextField.vue';
 import AppSearchButton from '@/components/shared/AppSearchButton.vue';
+import { openModal } from '@/shared/modal';
 
 type ProductBrand = {
   id: number | string;
   name: string;
   logo: string;
   slug: string;
+  seq_no: number;
   status: boolean;
   total_products: number;
   created_at: string;
@@ -128,6 +135,18 @@ function onExport(type: ExportType) {
   console.log(`Export clicked: ${type}`);
 }
 
+function openOrderModal() {
+  openModal(
+    ProductBrandOrderModal,
+    {},
+    {
+      size: 'xl',
+      title: 'Edit Brand Order',
+      onSaved: () => fetchBrands(),
+    },
+  );
+}
+
 function onView(brand: ProductBrand) {
   router.push({ name: 'admin.product.brands.detail', params: { id: brand.id } });
 }
@@ -147,6 +166,7 @@ async function fetchBrands() {
       name: brand.name ?? '-',
       logo: typeof brand.logo === 'string' ? brand.logo : '',
       slug: brand.slug ?? '-',
+      seq_no: Number(brand.seq_no ?? 0),
       status: Boolean(brand.status),
       total_products: Number(brand.total_products ?? 0),
       created_at: brand.created_at ?? '',

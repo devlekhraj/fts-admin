@@ -126,7 +126,7 @@ final class ProductBrandBannerController extends Controller
             ->where('id', $fileUsageId)
             ->where('usage_type', self::USAGE_TYPE)
             ->where('usage_id', $brand->id)
-            ->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(meta, '$.type'))) = 'banner'")
+            ->whereRaw("LOWER(REPLACE(CAST(JSON_EXTRACT(meta, '$.type') AS CHAR), '\"', '')) = 'banner'")
             ->first();
 
         if (! $fileUsage) {

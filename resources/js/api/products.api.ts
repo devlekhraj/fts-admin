@@ -151,6 +151,7 @@ export type ProductBrandListItem = {
   name?: string | null;
   logo?: string | null;
   slug?: string | null;
+  seq_no?: number | null;
   status: boolean;
   total_products?: number | null;
   created_at?: string | null;
@@ -228,6 +229,12 @@ export function createBrand(payload: Record<string, unknown>) {
 
 export function deleteBrand(id: string) {
   return http.delete(`/admin/brands/${id}`);
+}
+
+export function reorderBrands(brandIds: Array<number | string>) {
+  return http.put('/admin/brands/reorder', {
+    brand_ids: brandIds,
+  });
 }
 
 export function updateBrandImage(

@@ -30,6 +30,7 @@ class ProductBrandResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
+            'seq_no' => $this->seq_no,
             'status' => (bool) $this->status,
             'total_products' => (int) ($this->products_count ?? 0),
             'created_at' => $this->created_at,

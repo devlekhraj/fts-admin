@@ -6,6 +6,7 @@ namespace App\Domains\ProductBrand\Controllers;
 
 use App\Domains\ProductBrand\Models\ProductBrand;
 use App\Domains\ProductBrand\Requests\StoreBrandRequest;
+use App\Domains\ProductBrand\Requests\ReorderProductBrandsRequest;
 use App\Domains\ProductBrand\Requests\UpdateBrandRequest;
 use App\Domains\Faq\Resources\FaqResource;
 use App\Domains\ProductBrand\DTOs\BrandCreateData;
@@ -123,6 +124,16 @@ class ProductBrandController extends Controller
         ]);
     }
 
+    public function reorder(ReorderProductBrandsRequest $request): JsonResponse
+    {
+        $this->productBrandService->reorder($request->validated('brand_ids'));
+
+        return response()->json([
+            'message' => 'Brands reordered successfully.',
+            'success' => true,
+        ]);
+    }
+
     public function destroy(string $id): JsonResponse
     {
         $this->productBrandService->delete($id);
@@ -137,7 +148,9 @@ class ProductBrandController extends Controller
     {
         $brands = ProductBrand::with('defaultFile')
             ->has('products') // Only brands with at least one product
-            ->orderBy('name', 'asc')
+            ->orderByRaw('CASE WHEN seq_no IS NULL OR seq_no = 0 THEN 1 ELSE 0 END')
+            ->orderBy('seq_no')
+            ->orderBy('id')
             ->get()
             ->map(function ($brand) {
                 return [
@@ -145,6 +158,7 @@ class ProductBrandController extends Controller
                     'name' => $brand->name,
                     'slug' => $brand->slug,
                     'thumb' => $brand->defaultFile->first()?->url,
+                    'seq_no' => $brand->seq_no,
                 ];
             });
 

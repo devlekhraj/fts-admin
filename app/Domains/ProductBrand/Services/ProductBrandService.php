@@ -8,6 +8,7 @@ use App\Domains\ProductBrand\Actions\BrandCreateAction;
 use App\Domains\ProductBrand\Actions\BrandDeleteAction;
 use App\Domains\ProductBrand\Actions\BrandDetailAction;
 use App\Domains\ProductBrand\Actions\BrandListAction;
+use App\Domains\ProductBrand\Actions\BrandReorderAction;
 use App\Domains\ProductBrand\Actions\BrandUpdateAction;
 use App\Domains\ProductBrand\DTOs\BrandCreateData;
 use App\Domains\ProductBrand\DTOs\BrandUpdateData;
@@ -20,6 +21,7 @@ final class ProductBrandService
         private readonly BrandDetailAction $brandDetailAction,
         private readonly BrandCreateAction $brandCreateAction,
         private readonly BrandUpdateAction $brandUpdateAction,
+        private readonly BrandReorderAction $brandReorderAction,
         private readonly BrandDeleteAction $brandDeleteAction,
     ) {}
 
@@ -36,6 +38,11 @@ final class ProductBrandService
     public function create(BrandCreateData $data): ProductBrand
     {
         return $this->brandCreateAction->execute($data);
+    }
+
+    public function reorder(array $brandIds): void
+    {
+        $this->brandReorderAction->execute($brandIds);
     }
 
     public function update(string $id, BrandUpdateData $data): ProductBrand

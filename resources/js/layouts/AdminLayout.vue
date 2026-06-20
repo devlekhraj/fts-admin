@@ -26,15 +26,10 @@
                     </template>
                 </div>
             </v-sheet>
-            <!-- <div class="px-6 pb-2">
-                <v-text-field v-model="navSearch" color="primary" class="nav-search-field" density="compact"
-                    variant="outlined" placeholder="Search menu" prepend-inner-icon="mdi-magnify" hide-details
-                    clearable />
-            </div> -->
             <div class="pt-6">
                 <v-list density="comfortable" class="px-6" id="side-nav-items" open-strategy="single"
                     v-model:opened="openGroups" :ripple="false">
-                    <template v-for="group in filteredItems" :key="group.routeName || group.group">
+                    <template v-for="group in items" :key="group.routeName || group.group">
                         <v-list-group v-if="group.items && group.items.length" :value="group.group"
                             :class="{ 'active-nav-group': isGroupActive(group) }">
                             <template #activator="{ props }">
@@ -63,60 +58,11 @@
         <v-app-bar app flat class="admin-app-bar">
             <v-app-bar-nav-icon color="primary" :icon="drawer ? 'mdi-dock-left' : 'mdi-dock-right'"
                 @click="drawer = !drawer" />
-            <v-toolbar-title>
-                <!-- <div class="toolbar-title-wrap">
-                    <v-text-field v-model="navSearch" color="primary" class="nav-search-field" density="compact"
-                        variant="outlined" placeholder="Search menu" prepend-inner-icon="mdi-magnify" hide-details
-                        clearable />
-                </div> -->
-            </v-toolbar-title>
+            <v-toolbar-title />
             <v-spacer />
             <div class="d-flex align-center ga-3 pr-6">
 
                 <div class="d-flex align-center ga-2">
-                    <!-- <v-menu v-model="notificationMenu" :close-on-content-click="false" location="bottom end">
-                        <template #activator="{ props }">
-                            <v-btn v-bind="props" icon variant="text" size="small">
-                                <v-badge :content="unreadCount" :model-value="unreadCount > 0" color="error">
-                                    <v-icon>mdi-bell-outline</v-icon>
-                                </v-badge>
-                            </v-btn>
-                        </template>
-                        <v-card min-width="320" max-height="400">
-                            <v-card-title class="d-flex align-center justify-space-between">
-                                <span class="text-h6">Notifications</span>
-                                <v-btn variant="text" size="small" @click="markAllAsRead">
-                                    Mark all as read
-                                </v-btn>
-                            </v-card-title>
-                            <v-card-text class="pa-0">
-                                <v-list density="compact">
-                                    <v-list-item v-for="notification in notifications" :key="notification.id"
-                                        :class="{ 'bg-grey-lighten-4': !notification.read }">
-                                        <template #prepend>
-                                            <v-avatar size="32" :color="notification.color" variant="tonal">
-                                                <v-icon size="16">{{ notification.icon }}</v-icon>
-                                            </v-avatar>
-                                        </template>
-                                        <v-list-item-title class="text-body-2">{{ notification.title
-                                        }}</v-list-item-title>
-                                        <v-list-item-subtitle class="text-caption">{{ notification.time
-                                        }}</v-list-item-subtitle>
-                                        <template #append>
-                                            <v-btn v-if="!notification.read" icon size="x-small" variant="text"
-                                                @click="markAsRead(notification.id)">
-                                                <v-icon size="12">mdi-check</v-icon>
-                                            </v-btn>
-                                        </template>
-                                    </v-list-item>
-                                </v-list>
-                                <div v-if="notifications.length === 0" class="text-center pa-4">
-                                    <v-icon size="48" color="grey-lighten-2">mdi-bell-off</v-icon>
-                                    <div class="text-medium-emphasis mt-2">No notifications</div>
-                                </div>
-                            </v-card-text>
-                        </v-card>
-                    </v-menu> -->
                     <v-avatar size="30">
                         <v-img v-if="adminAvatar" :src="adminAvatar" alt="Admin" />
                         <v-icon v-else size="28">mdi-account-circle</v-icon>
@@ -150,73 +96,12 @@ import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth.store';
 import { logout as apiLogout } from '@/api/auth.api';
 import { menuByProject, type NavGroup, type ProjectType } from '@/layouts/navigation';
-import { breadcrumbRouteConfig } from '@/layouts/navigation/breadcrumbs';
 
 const drawer = ref(true);
 const isLoggingOut = ref(false);
-const notificationMenu = ref(false);
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
-
-// Sample notification data
-const notifications = ref([
-    { id: 1, title: 'New order received', time: '2 minutes ago', read: false, icon: 'mdi-shopping-outline', color: 'primary' },
-    { id: 2, title: 'EMI request approved', time: '15 minutes ago', read: false, icon: 'mdi-cash-multiple', color: 'success' },
-    { id: 3, title: 'Product updated', time: '1 hour ago', read: true, icon: 'mdi-package-variant-closed', color: 'warning' },
-    { id: 4, title: 'New customer registered', time: '2 hours ago', read: true, icon: 'mdi-account-plus', color: 'info' },
-    { id: 5, title: 'Payment received', time: '3 hours ago', read: true, icon: 'mdi-currency-usd', color: 'success' }
-]);
-
-const unreadCount = computed(() => notifications.value.filter(n => !n.read).length);
-
-function markAsRead(id: number) {
-    const notification = notifications.value.find(n => n.id === id);
-    if (notification) {
-        notification.read = true;
-    }
-}
-
-function markAllAsRead() {
-    notifications.value.forEach(notification => {
-        notification.read = true;
-    });
-}
-const pageTitle = computed(() => {
-    return (route.meta.title as string) ?? 'Admin';
-});
-
-const breadcrumbItems = computed(() => {
-    const currentName = typeof route.name === 'string' ? route.name : '';
-    const chain: string[] = [];
-
-    if (currentName !== 'admin.overview') {
-        chain.push('admin.overview');
-    }
-
-    const parentName = breadcrumbRouteConfig[currentName]?.parent;
-    if (parentName && parentName !== 'admin.overview') {
-        chain.push(parentName);
-    }
-
-    if (currentName) {
-        chain.push(currentName);
-    } else {
-        chain.push('admin.overview');
-    }
-
-    return chain
-        .filter((name, index, arr) => arr.indexOf(name) === index)
-        .map((name, index, arr) => {
-            const isLast = index === arr.length - 1;
-            const title = name === currentName ? pageTitle.value : (breadcrumbRouteConfig[name]?.title ?? name);
-            return {
-                title,
-                disabled: isLast,
-                to: isLast ? undefined : { name },
-            };
-        });
-});
 
 const isAdminLoading = computed(() => authStore.isAuthenticated && !authStore.admin);
 
@@ -228,9 +113,7 @@ const adminAvatar = computed(() => {
 const adminDisplayName = computed(() => {
     return authStore.admin?.name?.trim() || 'Admin';
 });
-const navSearch = ref('');
 const openGroups = ref<string[]>([]);
-const searchOpenBackup = ref<string[] | null>(null);
 
 const projectType = String(import.meta.env.VITE_PROJECT_TYPE ?? 'ecommerce').toLowerCase() as ProjectType;
 
@@ -242,66 +125,14 @@ watch(items, (groups) => {
         .filter((group) => Array.isArray(group.items) && group.items.length > 0)
         .map((group) => group.group);
 
-    // keep only still-present expandable groups
     const nextOpen: string[] = openGroups.value.filter((name) => expandable.includes(name));
 
-    // ensure dashboard is open by default when present
     if (expandable.includes(defaultGroup) && !nextOpen.includes(defaultGroup)) {
         nextOpen.push(defaultGroup);
     }
 
     openGroups.value = nextOpen;
 }, { immediate: true });
-
-const filteredItems = computed(() => {
-    const query = (navSearch.value ?? '').trim().toLowerCase();
-    if (!query) return items.value;
-
-    return items.value
-        .map((group) => {
-            const groupMatch = (group.group ?? '').toLowerCase().includes(query);
-
-            if (group.items && group.items.length) {
-                const matchedItems = group.items.filter((item) =>
-                    item.title.toLowerCase().includes(query)
-                );
-                return {
-                    ...group,
-                    items: groupMatch ? group.items : matchedItems,
-                };
-            }
-
-            // leaf group: include if the group title matches
-            return groupMatch ? group : null;
-        })
-        .filter((group) => {
-            if (!group) return false;
-            if (group.items && group.items.length) return true;
-            return !!group.routeName; // leaf groups
-        }) as NavGroup[];
-});
-
-watch(filteredItems, (groups) => {
-    const query = (navSearch.value ?? '').trim();
-    if (!query) {
-        if (searchOpenBackup.value) {
-            openGroups.value = [...searchOpenBackup.value];
-            searchOpenBackup.value = null;
-        }
-        return;
-    }
-
-    // store the current open groups the first time we search
-    if (!searchOpenBackup.value) {
-        searchOpenBackup.value = [...openGroups.value];
-    }
-
-    const matchedExpandable = groups
-        .filter((group) => Array.isArray(group.items) && group.items.length > 0)
-        .map((group) => group.group);
-
-    openGroups.value = Array.from(new Set(matchedExpandable));
-});
 
 function isRouteActive(name?: string) {
     if (!name) return false;
@@ -322,7 +153,6 @@ async function logout() {
         try {
             await apiLogout();
         } catch {
-            // ignore logout API errors
         }
         authStore.token = null;
         authStore.admin = null;
@@ -334,32 +164,10 @@ async function logout() {
 }
 </script>
 <style lang="scss">
-.top-fixed {
-    position: sticky;
-    top: 0;
-    background: var(--white-color);
-    z-index: 1;
-}
-
-.custom-title {
-    font-size: 0.82rem;
-}
-
 .main-container-content {
     max-height: calc(100vh - 65px);
     min-height: calc(100vh - 65px);
     overflow-y: scroll;
-    // background-color: #fff;
-}
-
-.hover-notification {
-    transition: background-color 0.2s;
-    border-radius: 4px;
-}
-
-.hover-notification:hover {
-    background-color: #f5f5f5;
-    cursor: pointer;
 }
 
 .v-navigation-drawer {
@@ -405,29 +213,20 @@ async function logout() {
 
 
 .v-list-item {
-    // min-height: 36px !important;
     font-size: 0.82rem;
-    // font-weight: 400;
 }
 
 .group-activator {
-    // min-height: 36px !important;
     padding-top: 0;
     padding-bottom: 0;
-    // margin-bottom: 6px;
 
     &.group-active-tonal {
         background: rgba(63, 193, 131, 0.1) !important;
         border-radius: 4px !important;
     }
-
-    .v-list-item-title {
-        // line-height: 36px;
-    }
 }
 
 .submenu-item {
-    // min-height: 20px !important;
     padding-top: 0;
     padding-bottom: 0;
     margin-bottom: 0px;
@@ -459,7 +258,6 @@ async function logout() {
     }
 
     .v-list-item-title {
-        // line-height: 30px;
         font-size: 0.8rem;
     }
 
@@ -517,45 +315,6 @@ async function logout() {
 
 .admin-main {
     padding-top: 64px;
-}
-
-.admin-menu-trigger {
-    min-width: 22px;
-    height: 22px;
-}
-
-.toolbar-title-wrap {
-    display: flex;
-    flex-direction: column;
-    // font-size: sm;
-    font-weight: 600;
-    max-width: 400px;
-}
-
-.toolbar-breadcrumbs :deep(.v-breadcrumbs-item),
-.toolbar-breadcrumbs :deep(.v-breadcrumbs-divider) {
-    font-size: 0.875rem;
-    color: rgba(var(--v-theme-on-surface), 0.58);
-}
-
-.toolbar-breadcrumbs {
-    margin-top: 2px;
-}
-
-.toolbar-page-title {
-    line-height: 1.1;
-}
-
-.nav-search-field :deep(.v-field__input) {
-    font-size: 0.8rem;
-}
-
-.nav-search-field :deep(input::placeholder) {
-    font-size: 0.8rem;
-}
-
-.nav-search-field :deep(.v-field) {
-    --v-field-input-size: 0.8rem;
 }
 
 .v-list-item__content {
