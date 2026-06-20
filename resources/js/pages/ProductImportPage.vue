@@ -11,6 +11,7 @@
     <v-file-input
       variant="outlined"
       prepend-icon=""
+      density="comfortable"
       prepend-inner-icon="mdi-paperclip"
       accept=".csv,.xlsx,.xls"
       :error-messages="errorMessage ? [errorMessage] : []"
@@ -19,7 +20,8 @@
     />
 
     <v-alert v-if="selectedFile" variant="tonal" type="info" class="mt-4">
-      Selected: <strong>{{ selectedFile.name }}</strong>
+      <div class="font-weight-medium mb-1">Step 1 - File selected</div>
+      <div>Selected file: <strong>{{ selectedFile.name }}</strong></div>
     </v-alert>
 
     <v-alert v-if="!selectedFile" variant="tonal" type="warning" class="mt-4">
@@ -43,7 +45,7 @@
     </v-alert>
 
     <v-alert v-if="previewSummary" variant="tonal" type="info" class="mt-4">
-      <div class="font-weight-medium mb-2">Preview ready</div>
+      <div class="font-weight-medium mb-2">Step 2 - Preview summary</div>
       <div class="d-flex flex-wrap ga-2">
         <v-chip size="small" color="primary" label>Processed {{ previewSummary.processed }}</v-chip>
         <v-chip size="small" color="info" label>Existing {{ previewSummary.existing }}</v-chip>
@@ -54,7 +56,8 @@
     </v-alert>
 
     <v-alert v-if="importSummary" variant="tonal" type="success" class="mt-4">
-      <div class="font-weight-medium mb-2">{{ importMessage }}</div>
+      <div class="font-weight-medium mb-2">Step 3 - Import summary</div>
+      <div class="mb-2">{{ importMessage }}</div>
       <div class="d-flex flex-wrap ga-2">
         <v-chip size="small" color="primary" label>Processed {{ importSummary.processed }}</v-chip>
         <v-chip size="small" color="success" label>Created {{ importSummary.created }}</v-chip>
@@ -279,7 +282,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import * as XLSX from 'xlsx';
@@ -602,6 +605,13 @@ async function onStartImport() {
 
     importSummary.value = summary;
     importResults.value = results.slice().sort((a, b) => a.row - b.row);
+    await nextTick();
+    const scrollContainer = document.querySelector<HTMLElement>('.main-container-content');
+    if (scrollContainer) {
+      scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
     snackbar.show({
       message: `Product import completed in ${batches.length} batch${batches.length === 1 ? '' : 'es'}.`,

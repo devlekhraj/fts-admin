@@ -7,7 +7,13 @@ namespace App\Domains\Product\Controllers;
 use App\Domains\File\Actions\FileUploadAction;
 use App\Domains\File\Models\File;
 use App\Domains\File\Models\FileUsage;
+use App\Domains\ProductBrand\Actions\BrandCreateAction;
+use App\Domains\ProductBrand\DTOs\BrandCreateData;
+use App\Domains\ProductBrand\Models\ProductBrand;
 use App\Domains\Product\Models\Product;
+use App\Domains\ProductCategory\Actions\CategoryCreateAction;
+use App\Domains\ProductCategory\DTOs\CategoryCreateData;
+use App\Domains\ProductCategory\Models\ProductCategory;
 use App\Domains\Product\Requests\ImportProductsRequest;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Http\JsonResponse;
@@ -22,6 +28,8 @@ final class ProductImportController extends Controller
 {
     public function __construct(
         private readonly FileUploadAction $fileUploadAction,
+        private readonly BrandCreateAction $brandCreateAction,
+        private readonly CategoryCreateAction $categoryCreateAction,
     ) {}
 
     public function preview(ImportProductsRequest $request): JsonResponse
@@ -33,6 +41,7 @@ final class ProductImportController extends Controller
             $rows,
         );
         $lookupMaps = $this->buildLookupMaps($normalizedRows);
+        $referenceMaps = $this->buildReferenceMaps($normalizedRows);
 
         $summary = [
             'processed' => 0,
@@ -44,8 +53,18 @@ final class ProductImportController extends Controller
         $rowsPreview = [];
 
         foreach ($normalizedRows as $index => $normalizedRow) {
+            if ($this->isEmptyRow($normalizedRow)) {
+                continue;
+            }
+
             $rowNumber = $this->resolveRowNumber($normalizedRow, (int) $index + 2);
-            $previewRow = $this->previewRow($normalizedRow, $lookupMaps['by_id'], $lookupMaps['by_sku'], $rowNumber);
+            $previewRow = $this->previewRow(
+                $normalizedRow,
+                $lookupMaps['by_id'],
+                $lookupMaps['by_sku'],
+                $referenceMaps,
+                $rowNumber,
+            );
 
             $summary['processed']++;
             $summary[$previewRow['mode']]++;
@@ -71,6 +90,7 @@ final class ProductImportController extends Controller
             $rows,
         );
         $lookupMaps = $this->buildLookupMaps($normalizedRows);
+        $referenceMaps = $this->buildReferenceMaps($normalizedRows);
         $summary = [
             'processed' => 0,
             'created' => 0,
@@ -83,16 +103,20 @@ final class ProductImportController extends Controller
         $rowWarnings = [];
 
         try {
-            DB::transaction(function () use ($normalizedRows, $lookupMaps, &$summary, &$results, &$validationErrors, &$rowWarnings): void {
+            DB::transaction(function () use ($normalizedRows, $lookupMaps, $referenceMaps, &$summary, &$results, &$validationErrors, &$rowWarnings): void {
                 foreach (array_chunk($normalizedRows, 5, true) as $chunk) {
                     foreach ($chunk as $index => $normalizedRow) {
+                        if ($this->isEmptyRow($normalizedRow)) {
+                            continue;
+                        }
+
                         $rowNumber = $this->resolveRowNumber($normalizedRow, (int) $index + 2);
 
                         try {
                             $summary['processed']++;
                             $resolvedProduct = $this->resolveProduct($normalizedRow, $lookupMaps['by_id'], $lookupMaps['by_sku']);
-                            $payload = $this->extractProductPayload($normalizedRow);
-                            $categoryIds = $this->extractCategoryIds($normalizedRow);
+                            $payload = $this->extractProductPayload($normalizedRow, $referenceMaps['brands'], true);
+                            $categoryIds = $this->extractCategoryIds($normalizedRow, $referenceMaps['categories'], true);
 
                             if ($resolvedProduct) {
                                 if (empty($payload) && empty($categoryIds)) {
@@ -149,7 +173,13 @@ final class ProductImportController extends Controller
                                 continue;
                             }
 
-                            $createPayload = $this->buildCreatePayload($normalizedRow, $validationErrors, $rowNumber);
+                            $createPayload = $this->buildCreatePayload(
+                                $normalizedRow,
+                                $validationErrors,
+                                $rowNumber,
+                                $referenceMaps['brands'],
+                                true,
+                            );
                             if ($createPayload === null) {
                                 continue;
                             }
@@ -265,6 +295,79 @@ final class ProductImportController extends Controller
         ];
     }
 
+    private function buildReferenceMaps(array $rows): array
+    {
+        $brandTokens = [];
+        $categoryTokens = [];
+
+        foreach ($rows as $row) {
+            foreach ($this->tokenizeLookupValues($row['brand_id'] ?? null) as $token) {
+                $brandTokens[] = $token;
+            }
+
+            foreach ($this->tokenizeLookupValues($row['category_ids'] ?? null) as $token) {
+                $categoryTokens[] = $token;
+            }
+        }
+
+        $brandLookup = [];
+        $uniqueBrandIds = array_values(array_unique(array_filter($brandTokens, static fn ($value) => is_int($value))));
+        $uniqueBrandNames = array_values(array_unique(array_filter($brandTokens, static fn ($value) => is_string($value) && trim($value) !== '')));
+        if ($uniqueBrandIds !== [] || $uniqueBrandNames !== []) {
+            ProductBrand::query()
+                ->where(static function ($query) use ($uniqueBrandIds, $uniqueBrandNames): void {
+                    if ($uniqueBrandIds !== []) {
+                        $query->whereIn('id', $uniqueBrandIds);
+                    }
+
+                    if ($uniqueBrandNames !== []) {
+                        if ($uniqueBrandIds !== []) {
+                            $query->orWhereIn('name', $uniqueBrandNames)->orWhereIn('slug', $uniqueBrandNames);
+                        } else {
+                            $query->whereIn('name', $uniqueBrandNames)->orWhereIn('slug', $uniqueBrandNames);
+                        }
+                    }
+                })
+                ->get()
+                ->each(function (ProductBrand $brand) use (&$brandLookup): void {
+                    $brandLookup[(string) $brand->id] = (int) $brand->id;
+                    $brandLookup[$this->normalizeLookupKey((string) $brand->name)] = (int) $brand->id;
+                    $brandLookup[$this->normalizeLookupKey((string) $brand->slug)] = (int) $brand->id;
+                });
+        }
+
+        $categoryLookup = [];
+        $uniqueCategoryIds = array_values(array_unique(array_filter($categoryTokens, static fn ($value) => is_int($value))));
+        $uniqueCategoryNames = array_values(array_unique(array_filter($categoryTokens, static fn ($value) => is_string($value) && trim($value) !== '')));
+        if ($uniqueCategoryIds !== [] || $uniqueCategoryNames !== []) {
+            ProductCategory::query()
+                ->where(static function ($query) use ($uniqueCategoryIds, $uniqueCategoryNames): void {
+                    if ($uniqueCategoryIds !== []) {
+                        $query->whereIn('id', $uniqueCategoryIds);
+                    }
+
+                    if ($uniqueCategoryNames !== []) {
+                        if ($uniqueCategoryIds !== []) {
+                            $query->orWhereIn('title', $uniqueCategoryNames)->orWhereIn('slug', $uniqueCategoryNames);
+                        } else {
+                            $query->whereIn('title', $uniqueCategoryNames)->orWhereIn('slug', $uniqueCategoryNames);
+                        }
+                    }
+                })
+                ->get()
+                ->each(function (ProductCategory $category) use (&$categoryLookup): void {
+                    $categoryLookup[(string) $category->id] = (int) $category->id;
+                    $categoryLookup[$this->normalizeLookupKey((string) $category->title)] = (int) $category->id;
+                    $categoryLookup[$this->normalizeLookupKey((string) $category->slug)] = (int) $category->id;
+                });
+        }
+
+        return [
+            'brands' => $brandLookup,
+            'categories' => $categoryLookup,
+        ];
+    }
+
     private function resolveProduct(array $row, array $byId, array $bySku): ?Product
     {
         $id = $this->toInteger($row['id'] ?? null);
@@ -286,6 +389,183 @@ final class ProductImportController extends Controller
         return null;
     }
 
+    private function resolveBrandId(mixed $value, array $brandLookup = [], bool $createMissingBrand = false): ?int
+    {
+        $id = $this->toInteger($value);
+        if ($id !== null) {
+            return $id;
+        }
+
+        $token = $this->toString($value);
+        if ($token === null) {
+            return null;
+        }
+
+        $normalizedToken = $this->normalizeLookupKey($token);
+        $brandId = $brandLookup[$normalizedToken] ?? null;
+        if (is_int($brandId)) {
+            return $brandId;
+        }
+
+        $existingBrand = ProductBrand::query()
+            ->where(static function ($query) use ($token): void {
+                $query->where('name', $token)
+                    ->orWhere('slug', Str::slug($token));
+            })
+            ->first();
+
+        if ($existingBrand instanceof ProductBrand) {
+            return (int) $existingBrand->id;
+        }
+
+        if (! $createMissingBrand) {
+            return null;
+        }
+
+        $createdBrand = $this->createImportBrand($token);
+
+        return (int) $createdBrand->id;
+    }
+
+    private function resolveCategoryId(mixed $value, array $categoryLookup = [], bool $createMissingCategory = false): ?int
+    {
+        $id = $this->toInteger($value);
+        if ($id !== null) {
+            return $id;
+        }
+
+        $token = $this->toString($value);
+        if ($token === null) {
+            return null;
+        }
+
+        $normalizedToken = $this->normalizeLookupKey($token);
+        $categoryId = $categoryLookup[$normalizedToken] ?? null;
+        if (is_int($categoryId)) {
+            return $categoryId;
+        }
+
+        $existingCategory = ProductCategory::query()
+            ->where(static function ($query) use ($token): void {
+                $query->where('title', $token)
+                    ->orWhere('slug', Str::slug($token));
+            })
+            ->first();
+
+        if ($existingCategory instanceof ProductCategory) {
+            return (int) $existingCategory->id;
+        }
+
+        if (! $createMissingCategory) {
+            return null;
+        }
+
+        $createdCategory = $this->createImportCategory($token);
+
+        return (int) $createdCategory->id;
+    }
+
+    private function tokenizeLookupValues(mixed $value): array
+    {
+        if ($value === null || $value === '') {
+            return [];
+        }
+
+        if (is_int($value)) {
+            return [$value];
+        }
+
+        if (is_float($value) && (int) $value === $value) {
+            return [(int) $value];
+        }
+
+        if (is_array($value)) {
+            $tokens = [];
+            foreach ($value as $item) {
+                foreach ($this->tokenizeLookupValues($item) as $token) {
+                    $tokens[] = $token;
+                }
+            }
+
+            return array_values(array_filter($tokens, static fn ($token) => $token !== null && $token !== ''));
+        }
+
+        if (! is_string($value)) {
+            return [];
+        }
+
+        $trimmed = trim($value);
+        if ($trimmed === '') {
+            return [];
+        }
+
+        if (Str::startsWith($trimmed, '[')) {
+            $decoded = json_decode($trimmed, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return $this->tokenizeLookupValues($decoded);
+            }
+        }
+
+        $tokens = [];
+        foreach (preg_split('/[\r\n,|;]+/', $trimmed) ?: [] as $part) {
+            $part = trim($part);
+            if ($part === '') {
+                continue;
+            }
+
+            $tokens[] = is_numeric($part) ? (int) $part : $part;
+        }
+
+        return $tokens;
+    }
+
+    private function normalizeLookupKey(string $value): string
+    {
+        return Str::of($value)->lower()->trim()->toString();
+    }
+
+    private function createImportBrand(string $name): ProductBrand
+    {
+        $slugBase = Str::slug($name);
+        if ($slugBase === '') {
+            $slugBase = 'brand';
+        }
+
+        $slug = $slugBase;
+        $suffix = 2;
+        while (ProductBrand::query()->where('slug', $slug)->exists()) {
+            $slug = $slugBase . '-' . $suffix;
+            $suffix++;
+        }
+
+        return $this->brandCreateAction->execute(new BrandCreateData(
+            name: $name,
+            slug: $slug,
+            status: true,
+        ));
+    }
+
+    private function createImportCategory(string $title): ProductCategory
+    {
+        $slugBase = Str::slug($title);
+        if ($slugBase === '') {
+            $slugBase = 'category';
+        }
+
+        $slug = $slugBase;
+        $suffix = 2;
+        while (ProductCategory::query()->where('slug', $slug)->exists()) {
+            $slug = $slugBase . '-' . $suffix;
+            $suffix++;
+        }
+
+        return $this->categoryCreateAction->execute(new CategoryCreateData(
+            title: $title,
+            slug: $slug,
+            status: true,
+        ));
+    }
+
     private function matchedBy(array $row, Product $product): ?string
     {
         $id = $this->toInteger($row['id'] ?? null);
@@ -301,11 +581,11 @@ final class ProductImportController extends Controller
         return null;
     }
 
-    private function previewRow(array $normalizedRow, array $byId, array $bySku, int $rowNumber): array
+    private function previewRow(array $normalizedRow, array $byId, array $bySku, array $referenceMaps, int $rowNumber): array
     {
         $resolvedProduct = $this->resolveProduct($normalizedRow, $byId, $bySku);
-        $payload = $this->extractProductPayload($normalizedRow);
-        $categoryIds = $this->extractCategoryIds($normalizedRow);
+        $payload = $this->extractProductPayload($normalizedRow, $referenceMaps['brands']);
+        $categoryIds = $this->extractCategoryIds($normalizedRow, $referenceMaps['categories']);
 
         if ($resolvedProduct instanceof Product) {
             if (empty($payload) && empty($categoryIds)) {
@@ -345,7 +625,7 @@ final class ProductImportController extends Controller
         }
 
         $previewErrors = [];
-        $createPayload = $this->buildCreatePayload($normalizedRow, $previewErrors, $rowNumber);
+        $createPayload = $this->buildCreatePayload($normalizedRow, $previewErrors, $rowNumber, $referenceMaps['brands']);
         if ($createPayload === null) {
             return [
                 'row' => $rowNumber,
@@ -415,9 +695,9 @@ final class ProductImportController extends Controller
         return $changes;
     }
 
-    private function buildCreatePayload(array $row, array &$validationErrors, int $rowNumber): ?array
+    private function buildCreatePayload(array $row, array &$validationErrors, int $rowNumber, array $brandLookup = [], bool $createMissingBrand = false): ?array
     {
-        $payload = $this->extractProductPayload($row);
+        $payload = $this->extractProductPayload($row, $brandLookup, $createMissingBrand);
         $name = $this->toString($row['name'] ?? $row['title'] ?? $row['product_name'] ?? null);
         if ($name === null) {
             $validationErrors["rows.{$rowNumber}.name"] = ['Name is required when creating a new product.'];
@@ -442,7 +722,7 @@ final class ProductImportController extends Controller
         return $payload;
     }
 
-    private function extractProductPayload(array $row): array
+    private function extractProductPayload(array $row, array $brandLookup = [], bool $createMissingBrand = false): array
     {
         $payload = [];
         $fields = [
@@ -483,7 +763,9 @@ final class ProductImportController extends Controller
                 continue;
             }
 
-            $value = $this->castFieldValue($field, $row[$field]);
+            $value = $field === 'brand_id'
+                ? $this->resolveBrandId($row[$field], $brandLookup, $createMissingBrand)
+                : $this->castFieldValue($field, $row[$field]);
             if ($this->isEmptyValue($value)) {
                 continue;
             }
@@ -494,7 +776,7 @@ final class ProductImportController extends Controller
         return $payload;
     }
 
-    private function extractCategoryIds(array $row): ?array
+    private function extractCategoryIds(array $row, array $categoryLookup = [], bool $createMissingCategory = false): ?array
     {
         if (! array_key_exists('category_ids', $row)) {
             return null;
@@ -505,55 +787,19 @@ final class ProductImportController extends Controller
             return [];
         }
 
-        if (is_array($value)) {
-            $ids = [];
-            foreach ($value as $item) {
-                $id = $this->toInteger($item);
-                if ($id !== null) {
-                    $ids[] = $id;
-                }
-            }
-
-            return $ids;
-        }
-
-        $decoded = null;
-        if (is_string($value)) {
-            $trimmed = trim($value);
-            if ($trimmed === '') {
-                return [];
-            }
-
-            if (Str::startsWith($trimmed, '[')) {
-                $decoded = json_decode($trimmed, true);
-            }
-        }
-
-        if (is_array($decoded)) {
-            $ids = [];
-            foreach ($decoded as $item) {
-                $id = $this->toInteger($item);
-                if ($id !== null) {
-                    $ids[] = $id;
-                }
-            }
-
-            return $ids;
-        }
-
-        if (! is_string($value)) {
-            return [];
-        }
-
         $ids = [];
-        foreach (preg_split('/[,|;]/', $value) ?: [] as $part) {
-            $id = $this->toInteger(trim($part));
+        foreach ($this->tokenizeLookupValues($value) as $part) {
+            $id = $this->resolveCategoryId($part, $categoryLookup, $createMissingCategory);
             if ($id !== null) {
                 $ids[] = $id;
             }
         }
 
-        return $ids;
+        if ($ids === []) {
+            return null;
+        }
+
+        return array_values(array_unique($ids));
     }
 
     private function normalizeRow(array $row): array
@@ -1129,6 +1375,21 @@ final class ProductImportController extends Controller
         }
 
         return false;
+    }
+
+    private function isEmptyRow(array $row): bool
+    {
+        foreach ($row as $key => $value) {
+            if ($key === 'row_number') {
+                continue;
+            }
+
+            if (! $this->isEmptyValue($value)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function valuesAreEqual(mixed $previous, mixed $current): bool

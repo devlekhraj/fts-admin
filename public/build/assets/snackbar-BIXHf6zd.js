@@ -1,0 +1,1 @@
+import{Z as r}from"./main-COdQo-w0.js";function t(){const s=r();return{showSuccess:o=>{s.show({message:o,color:"success"})},showError:o=>{s.show({message:o,color:"error"})},showInfo:o=>{s.show({message:o,color:"info"})},showWarning:o=>{s.show({message:o,color:"warning"})}}}export{t as u};
