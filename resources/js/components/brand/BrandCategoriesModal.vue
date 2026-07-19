@@ -29,7 +29,6 @@
         <tr>
           <th>Category</th>
           <th>Slug</th>
-          <th>Status</th>
         </tr>
       </thead>
       <tbody>
@@ -41,15 +40,6 @@
           </td>
           <td class="py-3 text-body-2 text-medium-emphasis">
             {{ category.slug || '-' }}
-          </td>
-          <td class="py-3">
-            <v-chip
-              size="small"
-              label
-              variant="tonal"
-              :color="category.status ? 'success' : 'warning'">
-              {{ category.status ? 'Active' : 'Inactive' }}
-            </v-chip>
           </td>
         </tr>
       </tbody>
