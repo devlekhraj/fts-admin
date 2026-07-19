@@ -86,7 +86,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
@@ -143,7 +143,6 @@ const options = ref<DataTableOptions>({
   itemsPerPage: 10,
   sortBy: [],
 });
-const hasLoadedOnce = ref(false);
 const router = useRouter();
 const categoryOptions = ref<Array<{ title: string; value: number | string | null }>>([]);
 const fetchingState = ref(false);
@@ -202,10 +201,18 @@ async function fetchCategories() {
 }
 
 function onOptions(next: DataTableOptions) {
-  options.value = next;
-  if (!hasLoadedOnce.value) {
-    hasLoadedOnce.value = true;
+  const currentSortBy = JSON.stringify(options.value.sortBy ?? []);
+  const nextSortBy = JSON.stringify(next.sortBy ?? []);
+
+  if (
+    options.value.page === next.page
+    && options.value.itemsPerPage === next.itemsPerPage
+    && currentSortBy === nextSortBy
+  ) {
+    return;
   }
+
+  options.value = next;
   fetchCategories();
 }
 
@@ -220,13 +227,6 @@ function onClearSearch() {
   options.value.page = 1;
   fetchCategories();
 }
-
-onMounted(() => {
-  if (!hasLoadedOnce.value) {
-    fetchCategories();
-    hasLoadedOnce.value = true;
-  }
-});
 
 function onCategoryCreated(payload?: unknown) {
   const created: any = payload ?? {};

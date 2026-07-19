@@ -8,7 +8,9 @@ use App\Domains\Product\Models\Product;
 use App\Domains\File\Models\File;
 use App\Domains\Faq\Models\Faq;
 use App\Support\Eloquent\BaseModel;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -20,22 +22,41 @@ final class ProductCategory extends BaseModel
 
     protected $casts = [
         'status' => 'boolean',
+        'parent_id' => 'integer',
+        'order' => 'integer',
+        'featured' => 'boolean',
+        'parent_tree' => 'array',
     ];
 
     protected $fillable = [
+        'parent_id',
         'title',
         'seq_no',
         'slug',
         'status',
+        'parent_tree',
+        'order',
+        'featured',
         'description',
         'meta_title',
         'meta_keywords',
         'meta_description',
+        'custom_code',
     ];
 
     public function faqs(): MorphMany
     {
         return $this->morphMany(Faq::class, 'faqable', 'type', 'type_id');
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_id');
+    }
+
+    public function children(): HasMany
+    {
+        return $this->hasMany(self::class, 'parent_id');
     }
 
     public function products(): BelongsToMany

@@ -33,6 +33,11 @@ export type ProductCategoryListResponse = {
   total?: number;
 };
 
+export type ProductCategoryLookupItem = {
+  id: number;
+  name: string;
+};
+
 export type ProductCategoryFileItem = {
   id: number | string;
   url?: string | null;
@@ -85,6 +90,29 @@ export async function listProductCategoriesLite(): Promise<ProductCategoryListIt
   if (Array.isArray(response)) return response as ProductCategoryListItem[];
   const wrapped = response as { data?: unknown };
   if (wrapped && Array.isArray(wrapped.data)) return wrapped.data as ProductCategoryListItem[];
+  return [];
+}
+
+export async function getProductCategoryLookups(): Promise<ProductCategoryLookupItem[]> {
+  const response = await http.get('/admin/product-categorie-lookups');
+  const normalize = (items: unknown): ProductCategoryLookupItem[] => {
+    if (!Array.isArray(items)) return [];
+
+    return items
+      .map((item) => {
+        if (!item || typeof item !== 'object') return null;
+        const entry = item as Record<string, unknown>;
+        const id = Number(entry.id ?? 0);
+        const name = String(entry.name ?? entry.title ?? '').trim();
+        if (!Number.isFinite(id) || !name) return null;
+        return { id, name };
+      })
+      .filter((item): item is ProductCategoryLookupItem => item !== null);
+  };
+
+  if (Array.isArray(response)) return normalize(response);
+  const wrapped = response as { data?: unknown };
+  if (wrapped && 'data' in wrapped) return normalize(wrapped.data);
   return [];
 }
 

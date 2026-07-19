@@ -174,4 +174,19 @@ class ProductCategoryController extends Controller
 
         return response()->json($categories);
     }
+    public function getCategoryLookups(Request $request)
+    {
+        $categories = ProductCategory::with('defaultFile')
+            ->orderBy('seq_no')
+            ->orderBy('title', 'asc')
+            ->get()
+            ->map(function ($category) {
+                return [
+                    'id' => $category->id,
+                    'name' => $category->title,
+                ];
+            });
+
+        return response()->json($categories);
+    }
 }

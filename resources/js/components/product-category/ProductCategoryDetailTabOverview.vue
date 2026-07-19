@@ -14,41 +14,70 @@
         </div>
         
         <v-form ref="overviewFormRef">
-          <div class="mt-4">
-            <app-field-label label="Title" />
-            <v-text-field
-              v-model="form.title"
-              variant="outlined"
-              density="comfortable"
-              :rules="[v => !!v || 'Title is required']"
-              placeholder="Enter category title"
-            />
-          </div>
+          <v-row>
+            <v-col cols="12">
+              <div>
+                <app-field-label label="Title" />
+                <v-text-field
+                  v-model="form.title"
+                  variant="outlined"
+                  density="comfortable"
+                  :rules="[v => !!v || 'Title is required']"
+                  placeholder="Enter category title"
+                />
+              </div>
+            </v-col>
+            <v-col cols="12">
+              <div>
+                <app-field-label label="Slug" />
+                <v-text-field
+                  v-model="form.slug"
+                  variant="outlined"
+                  density="comfortable"
+                  :rules="[v => !!v || 'Slug is required']"
+                  placeholder="category-slug"
+                />
+              </div>
+            </v-col>
+            <v-col cols="12" md="4">
+              <div>
+                <app-field-label label="Parent Category" />
+                <div>
+                  <v-select
+                    :key="parentSelectKey"
+                    v-model="form.parent_id"
+                    :items="parentCategoryOptions"
+                    item-title="title"
+                    item-value="value"
+                    variant="outlined"
+                    placeholder="Select parent category"
+                    persistent-placeholder
+                    density="comfortable"
+                    clearable
+                  />
+                </div>
+              </div>
+              
+            </v-col>
+            <v-col cols="12" md="4">
+              <div>
+                <app-field-label label="Status" />
+                <div>
+                  <v-select
+                    v-model="form.status"
+                    :items="statusOptions"
+                    item-title="label"
+                    item-value="value"
+                    variant="outlined"
+                    density="comfortable"
+                  />
+                </div>
+              </div>
+              
+            </v-col>
+          </v-row>
 
-          <div class="mb-4">
-            <app-field-label label="Slug" />
-            <v-text-field
-              v-model="form.slug"
-              variant="outlined"
-              density="comfortable"
-              :rules="[v => !!v || 'Slug is required']"
-              placeholder="category-slug"
-            />
-          </div>
 
-          <div>
-            <app-field-label label="Status" />
-            <div style="max-width: 200px;">
-              <v-select
-                v-model="form.status"
-                :items="statusOptions"
-                item-title="label"
-                item-value="value"
-                variant="outlined"
-                density="comfortable"
-              />
-            </div>
-          </div>
         </v-form>
       </v-col>
     </v-row>
@@ -56,8 +85,13 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, watch } from 'vue';
-import { updateProductCategory, type ProductCategoryDetailResponse } from '@/api/product-categories.api';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
+import {
+  getProductCategoryLookups,
+  updateProductCategory,
+  type ProductCategoryDetailResponse,
+  type ProductCategoryLookupItem,
+} from '@/api/product-categories.api';
 import AppFieldLabel from '@/components/shared/AppFieldLabel.vue';
 import { useSnackbarStore } from '@/stores/snackbar.store';
 
@@ -71,6 +105,8 @@ const emit = defineEmits<{
 }>();
 
 const overviewFormRef = ref();
+const parentCategories = ref<ProductCategoryLookupItem[]>([]);
+const parentCategoriesLoaded = ref(false);
 const statusOptions = [
   { label: 'Active', value: '1' },
   { label: 'Inactive', value: '0' },
@@ -80,9 +116,19 @@ const form = reactive({
   title: '',
   slug: '',
   status: '0',
+  parent_id: null as number | null,
 });
 const snackbar = useSnackbarStore();
 const saving = ref(false);
+
+const parentSelectKey = computed(() => (parentCategoriesLoaded.value ? 'parent-select-ready' : 'parent-select-loading'));
+
+const parentCategoryOptions = computed(() => {
+  return parentCategories.value.map((category) => ({
+    title: category.name,
+    value: category.id,
+  }));
+});
 
 watch(
   () => props.item,
@@ -90,9 +136,25 @@ watch(
     form.title = item?.title ? String(item.title) : '';
     form.slug = item?.slug ? String(item.slug) : '';
     form.status = item?.status ? '1' : '0';
+    const rawParentId = item?.parent_id as number | string | null | undefined;
+    form.parent_id = rawParentId === null || rawParentId === undefined || rawParentId === ''
+      ? null
+      : Number(rawParentId);
   },
   { immediate: true },
 );
+
+async function fetchParentCategories() {
+  try {
+    const categories = await getProductCategoryLookups();
+    const currentId = String(props.categoryId ?? '').trim();
+    parentCategories.value = categories.filter((category) => String(category.id ?? '').trim() !== currentId);
+  } catch {
+    parentCategories.value = [];
+  } finally {
+    parentCategoriesLoaded.value = true;
+  }
+}
 
 async function onUpdate() {
   const id = String(props.categoryId ?? '').trim();
@@ -107,6 +169,7 @@ async function onUpdate() {
       title: form.title.trim(),
       slug: form.slug.trim(),
       status: Number(form.status) === 1,
+      parent_id: form.parent_id,
     });
     
     snackbar.show({
@@ -124,4 +187,6 @@ async function onUpdate() {
     saving.value = false;
   }
 }
+
+onMounted(fetchParentCategories);
 </script>
