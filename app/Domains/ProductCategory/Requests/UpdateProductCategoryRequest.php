@@ -23,6 +23,7 @@ final class UpdateProductCategoryRequest extends FormRequest
             'slug' => ['sometimes', 'required', 'string', 'max:255', Rule::unique('product_categories', 'slug')->ignore($id)],
             'status' => ['sometimes', 'required', 'boolean'],
             'description' => ['nullable', 'string'],
+            'parent_id' => ['nullable', 'integer', 'exists:product_categories,id'],
             'meta_title' => ['nullable', 'string'],
             'meta_keywords' => ['nullable', 'string'],
             'meta_description' => ['nullable', 'string'],
