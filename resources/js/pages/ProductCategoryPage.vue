@@ -60,7 +60,10 @@
           <v-img v-if="item.thumb" :src="item.thumb" :alt="item.title" class="category-thumb" />
           <v-icon v-else size="18" color="grey-darken-1">mdi-image-outline</v-icon>
         </v-avatar>
-        <span>{{ item.title }}</span>
+        <div>
+          <p class="text-primary">{{ item.title }}</p>
+          <p class="text-caption">{{ item.slug }}</p>
+        </div>
       </div>
     </template>
     <template #item.products_count="{ item }">
@@ -108,6 +111,7 @@ import { openModal } from '@/shared/modal';
 type ProductCategory = {
   id: number;
   title: string;
+  parent_title: string;
   slug: string;
   thumb: string;
   products_count: number;
@@ -125,6 +129,7 @@ const exportOptions: Array<{ type: ExportType; title: string; icon: string }> = 
 
 const headers = [
   { title: 'Title', key: 'title', sortable: false, minWidth: '240' },
+  { title: 'Parent Category', key: 'parent_title', sortable: false, minWidth: '200' },
   // { title: 'Slug', key: 'slug', sortable: false, minWidth: '240' },
   { title: 'Products', key: 'products_count', sortable: false, minWidth: '120' },
   { title: 'Status', key: 'status', sortable: false, minWidth: '140' },
@@ -181,6 +186,9 @@ async function fetchCategories() {
     items.value = list.map((category: ProductCategoryListItem) => ({
       id: Number(category.id),
       title: category.title ?? '-',
+      parent_title: typeof category.parent_title === 'string'
+        ? category.parent_title
+        : '-',
       slug: category.slug ?? '-',
       status: Boolean(category.status),
       created_at: category.created_at ?? '-',

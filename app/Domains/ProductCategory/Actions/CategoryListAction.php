@@ -12,6 +12,7 @@ final class CategoryListAction
     {
         $query = ProductCategory::query()
             ->with('defaultFile')
+            ->with('parent:id,title')
             ->withCount('products')
             ->orderByRaw('CASE WHEN seq_no IS NULL OR seq_no = 0 THEN 1 ELSE 0 END')
             ->orderBy('seq_no')

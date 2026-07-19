@@ -31,6 +31,8 @@ class ProductCategoryResource extends JsonResource
             'title' => $this->title,
             'seq_no' => (int) ($this->seq_no ?? 0),
             'slug' => $this->slug,
+            'parent_id' => $this->parent_id,
+            'parent_title' => $this->relationLoaded('parent') ? $this->parent?->title : null,
             'thumb' => $defaultFile?->url,
             'products_count' => (int) ($this->products_count ?? 0),
             'status' => (bool) $this->status,
