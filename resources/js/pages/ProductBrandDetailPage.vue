@@ -58,6 +58,7 @@ import AppPageHeader from '@/components/AppPageHeader.vue';
 import { getBrandDetail, type ProductBrandDetailResponse } from '@/api/products.api';
 import BrandDetailTabDescription from '@/components/brand/BrandDetailTabDescription.vue';
 import BrandDetailTabBanner from '@/components/brand/BrandDetailTabBanner.vue';
+import BrandDetailTabCategories from '@/components/brand/BrandDetailTabCategories.vue';
 import BrandDetailTabFaqs from '@/components/brand/BrandDetailTabFaqs.vue';
 import BrandDetailTabImages from '@/components/brand/BrandDetailTabImages.vue';
 import BrandDetailTabOverview from '@/components/brand/BrandDetailTabOverview.vue';
@@ -70,6 +71,7 @@ const tabItems = [
   { value: 'overview', label: 'Overview', icon: 'mdi-view-dashboard-outline', component: BrandDetailTabOverview },
   { value: 'description', label: 'Description', icon: 'mdi-text-box-outline', component: BrandDetailTabDescription },
   { value: 'images', label: 'Images', icon: 'mdi-image-multiple-outline', component: BrandDetailTabImages },
+  { value: 'categories', label: 'Categories', icon: 'mdi-shape-outline', component: BrandDetailTabCategories },
   { value: 'faqs', label: 'FAQs', icon: 'mdi-help-circle-outline', component: BrandDetailTabFaqs },
   { value: 'banners', label: 'Banners', icon: 'mdi-image-outline', component: BrandDetailTabBanner },
   { value: 'seo', label: 'SEO', icon: 'mdi-magnify', component: BrandDetailTabSeo },

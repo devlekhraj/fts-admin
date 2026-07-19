@@ -38,6 +38,7 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::post('brands', [ProductBrandController::class, 'store'])->name('admin.brands.store');
     Route::put('brands/{id}', [ProductBrandController::class, 'update'])->name('admin.brands.update');
     Route::delete('brands/{id}', [ProductBrandController::class, 'destroy'])->name('admin.brands.destroy');
+    Route::put('brands/{id}/categories', [ProductBrandController::class, 'syncCategories'])->name('admin.brands.categories.sync');
     Route::post('brands/{id}/banner', [ProductBrandBannerController::class, 'store'])->name('admin.brands.banner.store');
     Route::put('brands/{id}/banner/{fileUsageId}', [ProductBrandBannerController::class, 'update'])->name('admin.brands.banner.update');
     Route::delete('brands/{id}/banner/{fileUsageId}', [ProductBrandBannerController::class, 'delete'])->name('admin.brands.banner.delete');

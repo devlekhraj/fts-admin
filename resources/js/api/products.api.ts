@@ -192,6 +192,13 @@ export type ProductBrandDetailResponse = ProductBrandListItem & {
   default_file?: Record<string, unknown> | null;
   files?: ProductBrandFileItem[];
   banners?: ProductBrandFileItem[];
+  categories?: Array<{
+    id?: number | string | null;
+    title?: string | null;
+    slug?: string | null;
+    status?: boolean | null;
+    seq_no?: number | null;
+  }>;
   [key: string]: unknown;
 };
 
@@ -229,6 +236,12 @@ export function createBrand(payload: Record<string, unknown>) {
 
 export function deleteBrand(id: string) {
   return http.delete(`/admin/brands/${id}`);
+}
+
+export function syncBrandCategories(id: string | number, categoryIds: Array<string | number>) {
+  return http.put(`/admin/brands/${id}/categories`, {
+    category_ids: categoryIds,
+  });
 }
 
 export function reorderBrands(brandIds: Array<number | string>) {

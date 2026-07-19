@@ -41,7 +41,7 @@ class ProductBrandController extends Controller
     {
         $brand = $this->productBrandService->detail($id);
 
-        $brand->load('banners', 'files','defaultFile');
+        $brand->load('banners', 'files', 'defaultFile', 'categories');
         return response()->json([
             'data' => (new ProductBrandResource($brand)),
             'success' => true,
@@ -98,6 +98,26 @@ class ProductBrandController extends Controller
                 'from' => $paginator->firstItem(),
                 'to' => $paginator->lastItem(),
             ],
+        ]);
+    }
+
+    public function syncCategories(Request $request, string $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'category_ids' => ['sometimes', 'array'],
+            'category_ids.*' => ['required', 'integer', 'distinct', 'exists:product_categories,id'],
+        ]);
+
+        $brand = ProductBrand::query()->findOrFail($id);
+        $categoryIds = array_map('intval', $validated['category_ids'] ?? []);
+
+        $brand->categories()->sync($categoryIds);
+        $brand->load(['categories', 'banners', 'files', 'defaultFile']);
+
+        return response()->json([
+            'message' => 'Brand categories updated successfully.',
+            'data' => new ProductBrandResource($brand),
+            'success' => true,
         ]);
     }
 

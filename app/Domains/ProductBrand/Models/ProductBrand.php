@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Domains\ProductBrand\Models;
 
-use App\Domains\Product\Models\Product;
-use App\Domains\File\Models\File;
 use App\Domains\Faq\Models\Faq;
+use App\Domains\File\Models\File;
+use App\Domains\Product\Models\Product;
+use App\Domains\ProductBrand\Models\BrandCategory;
+use App\Domains\ProductCategory\Models\ProductCategory;
 use App\Support\Eloquent\BaseModel;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -69,10 +71,17 @@ final class ProductBrand extends BaseModel
             ->wherePivot('usage_type', 'product_brands');
 
         return $query->where(static function ($builder) {
-                $builder->whereRaw("JSON_EXTRACT(file_usages.meta, '$.is_default') = 1")
-                    ->orWhereRaw("LOWER(REPLACE(CAST(JSON_EXTRACT(file_usages.meta, '$.is_default') AS CHAR), '\"', '')) = 'true'");
-            })
+            $builder->whereRaw("JSON_EXTRACT(file_usages.meta, '$.is_default') = 1")
+                ->orWhereRaw("LOWER(REPLACE(CAST(JSON_EXTRACT(file_usages.meta, '$.is_default') AS CHAR), '\"', '')) = 'true'");
+        })
             ->withPivot(['id', 'usage_type', 'usage_id', 'title', 'alt_text', 'meta'])
             ->orderByPivot('id', 'asc');
+    }
+
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(ProductCategory::class, 'brand_category', 'brand_id', 'category_id')
+            ->using(BrandCategory::class)
+            ->withTimestamps();
     }
 }

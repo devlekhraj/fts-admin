@@ -33,6 +33,7 @@ class ProductBrandResource extends JsonResource
             'seq_no' => $this->seq_no,
             'status' => (bool) $this->status,
             'total_products' => (int) ($this->products_count ?? 0),
+            'categories_count' => (int) ($this->categories_count ?? 0),
             'created_at' => $this->created_at,
             'logo' => $defaultFile?->url,
         ];
@@ -43,6 +44,7 @@ class ProductBrandResource extends JsonResource
 
         $files = [];
         $banners = [];
+        $categories = [];
 
         $formatFile = static function ($file): array {
             $meta = $file->pivot?->meta;
@@ -92,12 +94,28 @@ class ProductBrandResource extends JsonResource
                 ->all();
         }
 
+        if ($this->relationLoaded('categories')) {
+            $categories = $this->categories
+                ->map(static function ($category): array {
+                    return [
+                        'id' => $category->id,
+                        'title' => $category->title,
+                        'slug' => $category->slug,
+                        'status' => (bool) ($category->status ?? false),
+                        'seq_no' => $category->seq_no,
+                    ];
+                })
+                ->values()
+                ->all();
+        }
+
         $data['logo'] = $defaultFile?->url;
         $data['status'] = (bool) ($data['status'] ?? $this->status);
         $data['total_products'] = (int) ($this->products_count ?? $this->products()->count());
         $data['default_file'] = $defaultFile?->toArray();
         $data['files'] = $files;
         $data['banners'] = $banners;
+        $data['categories'] = $categories;
 
         return $data;
     }

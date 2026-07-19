@@ -13,6 +13,7 @@ final class BrandListAction
         $query = ProductBrand::query()
             ->with('defaultFile')
             ->withCount('products')
+            ->withCount('categories')
             ->orderByRaw('CASE WHEN seq_no IS NULL OR seq_no = 0 THEN 1 ELSE 0 END')
             ->orderBy('seq_no')
             ->orderBy('id');

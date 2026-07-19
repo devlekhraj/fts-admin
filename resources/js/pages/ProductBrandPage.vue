@@ -54,6 +54,14 @@
     <template #item.created_at="{ item }">
       <span>{{ formatLongDate(item.created_at) ?? '-' }}</span>
     </template>
+    <template #item.categories_count="{ item }">
+      <button
+        type="button"
+        class="brand-categories-link text-primary"
+        @click="openCategoriesModal(item)">
+        {{ item.categories_count }} items
+      </button>
+    </template>
     <template #item.status="{ item }">
       <v-chip size="small" label variant="tonal" :color="item.status ? 'success' : 'warning'">
         {{ item.status ? 'Active' : 'Inactive' }}
@@ -88,6 +96,7 @@ import { formatLongDate } from '@/shared/utils';
 import AppSearchTextField from '@/components/shared/AppSearchTextField.vue';
 import AppSearchButton from '@/components/shared/AppSearchButton.vue';
 import { openModal } from '@/shared/modal';
+import BrandCategoriesModal from '@/components/brand/BrandCategoriesModal.vue';
 
 type ProductBrand = {
   id: number | string;
@@ -97,6 +106,7 @@ type ProductBrand = {
   seq_no: number;
   status: boolean;
   total_products: number;
+  categories_count: number;
   created_at: string;
 };
 
@@ -112,6 +122,7 @@ const headers: DataTableHeader[] = [
   { title: 'Name', key: 'name', sortable: false, minWidth: '220' },
   // { title: 'Slug', key: 'slug', sortable: false, minWidth: '220' },
   { title: 'Products', key: 'total_products', sortable: false, minWidth: '160' },
+  { title: 'Total Categories', key: 'categories_count', sortable: false, minWidth: '160' },
   { title: 'Status', key: 'status', sortable: false, minWidth: '140' },
   { title: 'Created', key: 'created_at', sortable: false, minWidth: '140' },
   { title: 'Actions', key: 'action', sortable: false, minWidth: '120', align: 'end' },
@@ -147,6 +158,17 @@ function openOrderModal() {
   );
 }
 
+function openCategoriesModal(brand: ProductBrand) {
+  openModal(
+    BrandCategoriesModal,
+    { brand },
+    {
+      title: 'Brand Categories',
+      size: 'lg',
+    },
+  );
+}
+
 function onView(brand: ProductBrand) {
   router.push({ name: 'admin.product.brands.detail', params: { id: brand.id } });
 }
@@ -169,6 +191,7 @@ async function fetchBrands() {
       seq_no: Number(brand.seq_no ?? 0),
       status: Boolean(brand.status),
       total_products: Number(brand.total_products ?? 0),
+      categories_count: Number(brand.categories_count ?? 0),
       created_at: brand.created_at ?? '',
     }));
     total.value = Number(response?.total ?? response?.meta?.total ?? list.length);
@@ -234,5 +257,19 @@ function onBrandDeleted() {
 
 :deep(.brand-logo .v-img__img) {
   object-fit: contain;
+}
+
+.brand-categories-link {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.brand-categories-link:hover {
+  text-decoration: underline;
 }
 </style>
