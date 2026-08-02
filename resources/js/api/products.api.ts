@@ -238,6 +238,10 @@ export function deleteBrand(id: string) {
   return http.delete(`/admin/brands/${id}`);
 }
 
+export function bulkDeleteBrands(ids: Array<number | string>) {
+  return http.delete('/admin/brands/bulk-delete', { data: { ids } });
+}
+
 export function syncBrandCategories(id: string | number, categoryIds: Array<string | number>) {
   return http.put(`/admin/brands/${id}/categories`, {
     category_ids: categoryIds,
@@ -351,6 +355,10 @@ export function remove(id: string) {
 
 export function deleteProduct(id: number | string) {
   return http.delete(`/admin/products/${id}/delete`);
+}
+
+export function bulkDeleteProducts(ids: Array<number | string>) {
+  return http.delete('/admin/products/bulk-delete', { data: { ids } });
 }
 
 export type ImportProductsRow = Record<string, unknown>;

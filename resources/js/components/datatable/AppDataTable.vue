@@ -7,8 +7,17 @@
 				</v-card>
 			</v-toolbar>
 	
-			<v-data-table-server :headers="normalizedHeaders" :items="items" :items-length="total" :loading="loading"
-				:search="searchModel" :page="page" :items-per-page="itemsPerPageState"
+			<v-data-table-server
+				v-model="selectedModel"
+				:headers="normalizedHeaders"
+				:items="items"
+				:items-length="total"
+				:loading="loading"
+				:search="searchModel"
+				:page="page"
+				:items-per-page="itemsPerPageState"
+				:show-select="showSelect"
+				item-value="id"
 				:show-expand="showExpand" v-model:expanded="expandedModel"
 				:hide-default-footer="total <= itemsPerPageState"
 				@update:options="onUpdateOptions">
@@ -35,6 +44,8 @@ type Props = {
 	search?: string;
 	searchable?: boolean;
 	itemsPerPage?: number;
+	showSelect?: boolean;
+	selected?: Array<string | number>;
 	showExpand?: boolean;
 	expanded?: Array<string | number>;
 };
@@ -45,11 +56,17 @@ const props = withDefaults(defineProps<Props>(), {
 	search: '',
 	searchable: true,
 	itemsPerPage: 10,
+	showSelect: false,
+	selected: () => [],
 	showExpand: false,
 	expanded: () => [],
 });
 
-const emit = defineEmits<{ (e: 'update:options', options: DataTableOptions): void; (e: 'update:expanded', expanded: Array<string | number>): void }>();
+const emit = defineEmits<{
+	(e: 'update:options', options: DataTableOptions): void;
+	(e: 'update:selected', selected: Array<string | number>): void;
+	(e: 'update:expanded', expanded: Array<string | number>): void;
+}>();
 const route = useRoute();
 const storageKey = computed(() => `app-datatable:${String(route.name ?? route.path ?? 'default')}:items-per-page`);
 
@@ -57,6 +74,15 @@ const searchModel = computed({
 	get: () => props.search ?? '',
 	set: () => undefined,
 });
+
+const selectedState = ref<Array<string | number>>(props.selected ?? []);
+
+watch(
+	() => props.selected,
+	(next) => {
+		selectedState.value = next ?? [];
+	},
+);
 
 // Keep local expanded state so row expansion works even without parent `v-model:expanded`.
 // Also avoid coercing keys to string; Vuetify compares expanded keys against `item-value` strictly.
@@ -116,6 +142,14 @@ const expandedModel = computed({
 	set: (val) => {
 		expandedState.value = (val as Array<string | number>) ?? [];
 		emit('update:expanded', expandedState.value);
+	},
+});
+
+const selectedModel = computed({
+	get: () => selectedState.value,
+	set: (val) => {
+		selectedState.value = (val as Array<string | number>) ?? [];
+		emit('update:selected', selectedState.value);
 	},
 });
 

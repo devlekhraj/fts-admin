@@ -13,6 +13,7 @@ use App\Domains\ProductCategory\Requests\StoreProductCategoryRequest;
 use App\Domains\Faq\Resources\FaqResource;
 use App\Domains\ProductCategory\Resources\ProductCategoryResource;
 use App\Domains\ProductCategory\Services\ProductCategoryService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Routing\Controller;
 use InvalidArgumentException;
 
@@ -23,7 +24,7 @@ use Illuminate\Http\Request;
 class ProductCategoryController extends Controller
 {
     public function __construct(
-        private readonly ProductCategoryService $productCategoryService
+        private readonly ProductCategoryService $productCategoryService,
     ) {}
 
     public function categoryList(Request $request): JsonResponse
@@ -127,10 +128,52 @@ class ProductCategoryController extends Controller
 
     public function destroy(string $id): JsonResponse
     {
-        $this->productCategoryService->delete($id);
+        $category = ProductCategory::query()->findOrFail($id);
+        $category->delete();
 
         return response()->json([
             'message' => 'Product category deleted successfully.',
+            'success' => true,
+        ], 200);
+    }
+
+    public function bulkDelete(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['required', 'exists:product_categories,id'],
+        ]);
+
+        $ids = collect($validated['ids'])
+            ->filter(fn ($id) => $id !== null && $id !== '')
+            ->values()
+            ->all();
+
+        if ($ids === []) {
+            return response()->json([
+                'message' => 'At least one category id is required.',
+                'success' => false,
+            ], 422);
+        }
+
+        $deletedCount = 0;
+
+        DB::transaction(function () use ($ids, &$deletedCount): void {
+            $categories = ProductCategory::query()->whereIn('id', $ids)->get();
+
+            foreach ($categories as $category) {
+                $category->delete();
+                $deletedCount++;
+            }
+        });
+
+        return response()->json([
+            'message' => $deletedCount > 0
+                ? "Deleted {$deletedCount} category" . ($deletedCount === 1 ? '' : 's') . ' successfully.'
+                : 'No categories were deleted.',
+            'data' => [
+                'deleted_count' => $deletedCount,
+            ],
             'success' => true,
         ], 200);
     }

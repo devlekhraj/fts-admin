@@ -143,6 +143,10 @@ export function deleteProductCategory(id: string) {
   return http.delete(`/admin/product-categories/${id}`);
 }
 
+export function bulkDeleteProductCategories(ids: Array<number | string>) {
+  return http.delete('/admin/product-categories/bulk-delete', { data: { ids } });
+}
+
 export function updateProductCategoryImage(
   categoryId: number | string,
   fileUsageId: number | string,

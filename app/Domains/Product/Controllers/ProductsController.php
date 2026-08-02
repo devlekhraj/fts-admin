@@ -273,4 +273,45 @@ class ProductsController extends Controller
             'success' => true,
         ], 200);
     }
+
+    public function bulkDelete(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['required', 'exists:products,id'],
+        ]);
+
+        $ids = collect($validated['ids'])
+            ->filter(fn ($id) => $id !== null && $id !== '')
+            ->values()
+            ->all();
+
+        if ($ids === []) {
+            return response()->json([
+                'message' => 'At least one product id is required.',
+                'success' => false,
+            ], 422);
+        }
+
+        $deletedCount = 0;
+
+        DB::transaction(function () use ($ids, &$deletedCount): void {
+            $products = Product::query()->whereIn('id', $ids)->get();
+
+            foreach ($products as $product) {
+                $product->delete();
+                $deletedCount++;
+            }
+        });
+
+        return response()->json([
+            'message' => $deletedCount > 0
+                ? "Deleted {$deletedCount} product" . ($deletedCount === 1 ? '' : 's') . ' successfully.'
+                : 'No products were deleted.',
+            'data' => [
+                'deleted_count' => $deletedCount,
+            ],
+            'success' => true,
+        ], 200);
+    }
 }

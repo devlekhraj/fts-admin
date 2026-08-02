@@ -6,9 +6,9 @@
           <v-btn v-bind="props" variant="tonal" color="primary" prepend-icon="mdi-download-outline">
             Export
           </v-btn>
-           <v-btn variant="outlined" color="primary" prepend-icon="mdi-pencil-outline" @click="openOrderModal">
-                Edit Category Sequence
-              </v-btn>
+          <v-btn variant="outlined" color="primary" prepend-icon="mdi-pencil-outline" @click="openOrderModal">
+            Edit Category Sequence
+          </v-btn>
         </template>
         <v-list class="export-menu-list" density="comfortable" min-width="170">
           <v-list-item v-for="option in exportOptions" :key="option.type" :title="option.title"
@@ -20,36 +20,41 @@
     </template>
   </AppPageHeader>
 
-  <AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :page="options.page"
-    :items-per-page="options.itemsPerPage" @update:options="onOptions">
+  <AppDataTable
+    :headers="headers"
+    :items="items"
+    :total="total"
+    :loading="loading"
+    :page="options.page"
+    :items-per-page="options.itemsPerPage"
+    show-select
+    v-model:selected="selectedCategories"
+    @update:options="onOptions">
     <template #actions>
-      <!-- <PageFilter v-model:search="search" search-label="Search categories" search-placeholder="Search by title or slug"
-        :total="total" total-label="Items found." @search="onSearch" @clear="onClearSearch" /> -->
-        <v-container fluid class="py-4">
+      <v-container fluid class="py-4">
         <v-row align="center">
           <v-col cols="12" md="6" lg="4">
             <div class="d-flex align-center ga-3">
-              <AppSearchTextField v-model="search" label="Search products" placeholder="Search by name..."
+              <AppSearchTextField v-model="search" label="Search" placeholder="Search by name..."
                 @click:clear="onClearSearch" />
 
-                <AppSelectField v-model="categoryFilter" :items="categoryOptions" item-title="title"
-                  style="width: 260px;"
-                  item-value="value"
-                  label="Category" clearable hide-details @update:model-value="onSearch" />
-                <AppSearchButton :loading="fetchingState" @click="onSearch" />
+           
+              <AppSearchButton :loading="fetchingState" @click="onSearch" />
             </div>
           </v-col>
-
 
           <v-spacer></v-spacer>
 
           <v-col cols="12" md="auto" class="text-right">
-            <div class="d-flex align-center justify-end ga-4">
-              <div class="text-medium-emphasis">
-                <span class="text-primary" style="font-size: smaller;">Total: {{ total }} Items found.</span>
-              </div>
-             
-            </div>
+            <v-btn
+              v-if="selectedCategories.length > 0"
+              color="error"
+              variant="flat"
+              prepend-icon="mdi-delete"
+              :loading="bulkDeleting"
+              @click="onBulkDelete">
+              Bulk Delete ({{ selectedCategories.length }})
+            </v-btn>
           </v-col>
         </v-row>
       </v-container>
@@ -89,16 +94,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import PageFilter from '@/components/filters/PageFilter.vue';
 import ProductCategoryCreateButton from '@/components/category/ProductCategoryCreateButton.vue';
+import ProductCategoryBulkDeleteModal from '@/components/category/ProductCategoryBulkDeleteModal.vue';
 import ProductCategoryDeleteButton from '@/components/category/ProductCategoryDeleteButton.vue';
 import ProductCategoryOrderModal from '@/components/category/ProductCategoryOrderModal.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
 import {
+  bulkDeleteProductCategories,
   listProductCategories,
   type ProductCategoryListItem,
 } from '@/api/product-categories.api';
@@ -107,6 +114,8 @@ import AppSearchTextField from '@/components/shared/AppSearchTextField.vue';
 import AppSelectField from '@/components/shared/AppSelectField.vue';
 import AppSearchButton from '@/components/shared/AppSearchButton.vue';
 import { openModal } from '@/shared/modal';
+import { useSnackbarStore } from '@/stores/snackbar.store';
+import { getErrorMessage } from '@/shared/errors';
 
 type ProductCategory = {
   id: number;
@@ -140,6 +149,7 @@ const headers = [
 const items = ref<ProductCategory[]>([]);
 const total = ref(0);
 const loading = ref(false);
+const selectedCategories = ref<Array<string | number>>([]);
 const search = ref('');
 const categoryFilter = ref('');
 
@@ -151,6 +161,8 @@ const options = ref<DataTableOptions>({
 const router = useRouter();
 const categoryOptions = ref<Array<{ title: string; value: number | string | null }>>([]);
 const fetchingState = ref(false);
+const bulkDeleting = ref(false);
+const snackbar = useSnackbarStore();
 
 function onExport(type: ExportType) {
   // TODO: replace with real export API/download logic.
@@ -176,6 +188,7 @@ function onView(category: ProductCategory) {
 async function fetchCategories() {
   loading.value = true;
   try {
+    selectedCategories.value = [];
     const response = await listProductCategories({
       page: options.value.page,
       per_page: options.value.itemsPerPage,
@@ -250,6 +263,46 @@ function onCategoryDeleted() {
   options.value.page = 1;
   fetchCategories();
 }
+
+function onBulkDelete() {
+  if (selectedCategories.value.length === 0) return;
+
+  openModal(
+    ProductCategoryBulkDeleteModal,
+    {
+      count: selectedCategories.value.length,
+      onConfirm: bulkDelete,
+    },
+    {
+      title: 'Confirm Category Deletion',
+      size: 'sm',
+    },
+  );
+}
+
+async function bulkDelete() {
+  bulkDeleting.value = true;
+  try {
+    const selectedIds = [...selectedCategories.value];
+    const response = await bulkDeleteProductCategories(selectedIds);
+    const deletedCount = Number((response as any)?.data?.deleted_count ?? selectedIds.length);
+    snackbar.show({
+      message: (response as any)?.data?.message ?? `Deleted ${deletedCount} ${deletedCount === 1 ? 'category' : 'categories'} successfully.`,
+      color: 'success',
+    });
+    selectedCategories.value = [];
+    await fetchCategories();
+  } catch (error) {
+    snackbar.show({ message: getErrorMessage(error), color: 'error' });
+    throw error;
+  } finally {
+    bulkDeleting.value = false;
+  }
+}
+
+onMounted(() => {
+  fetchCategories();
+});
 </script>
 
 <style scoped>

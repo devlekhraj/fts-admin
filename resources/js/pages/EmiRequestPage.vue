@@ -1,14 +1,14 @@
 <template>
 	<div>
 		<AppPageHeader title="EMI Requests" subtitle="Manage EMI requests" />
-		<AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :searchable="false"
+	<AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :searchable="false"
 			:items-per-page="options.itemsPerPage" @update:options="onOptions">
 			<template #actions>
 				<v-container fluid>
 					<v-row>
 						<v-col cols="12" md="3">
 							<v-text-field v-model="filters.query" density="compact" variant="outlined" label="Search"
-								hide-details clearable style="min-width: 220px" />
+								hide-details clearable style="min-width: 220px" @keyup.enter="onSearch" />
 						</v-col>
 						<v-col cols="12" md="3">
 							<v-select v-model="filters.emiType" :items="emiTypeOptions" density="compact"
@@ -17,6 +17,9 @@
 						<v-col cols="12" md="3">
 							<v-select v-model="filters.status" :items="statusOptions" density="compact"
 								variant="outlined" label="Status" hide-details clearable style="min-width: 200px" />
+						</v-col>
+						<v-col cols="12" md="3" class="d-flex align-end">
+							<AppSearchButton :loading="fetchingState" variant="flat" @click="onSearch" />
 						</v-col>
 					</v-row>
 				</v-container>
@@ -75,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref } from 'vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
 import { list as listEmiRequests } from '@/api/emi-requests.api';
@@ -84,6 +87,7 @@ import { getEmiIconColor, getEmiIconTextColor, getEmiTypeIcon, statusColor } fro
 import { getStatusColor, timeAgo } from '@/shared/utils';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import type { DataTableHeader } from '@/components/datatable/types';
+import AppSearchButton from '@/components/shared/AppSearchButton.vue';
 
 type EmiRequest = Record<string, unknown>;
 
@@ -111,6 +115,7 @@ const filters = ref({
 	status: null as null | number,
 });
 const hasLoadedOnce = ref(false);
+const fetchingState = ref(false);
 
 const emiTypeOptions = [
 	{ title: 'Credit Card', value: 'credit_card' },
@@ -145,7 +150,14 @@ async function fetchRequests() {
 		total.value = Number(response?.total ?? response?.meta?.total ?? list.length);
 	} finally {
 		loading.value = false;
+		fetchingState.value = false;
 	}
+}
+
+function onSearch() {
+	options.value.page = 1;
+	fetchingState.value = true;
+	fetchRequests();
 }
 
 function onOptions(next: DataTableOptions) {
@@ -155,15 +167,6 @@ function onOptions(next: DataTableOptions) {
 	}
 	fetchRequests();
 }
-
-watch(
-	filters,
-	() => {
-		options.value.page = 1;
-		fetchRequests();
-	},
-	{ deep: true }
-);
 
 onMounted(() => {
 	if (!hasLoadedOnce.value) {

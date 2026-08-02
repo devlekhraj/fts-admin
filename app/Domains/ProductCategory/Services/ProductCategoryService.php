@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Domains\ProductCategory\Services;
 
 use App\Domains\ProductCategory\Actions\CategoryCreateAction;
-use App\Domains\ProductCategory\Actions\CategoryDeleteAction;
 use App\Domains\ProductCategory\Actions\CategoryDetailAction;
 use App\Domains\ProductCategory\Actions\CategoryListAction;
 use App\Domains\ProductCategory\Actions\CategoryReorderAction;
@@ -21,7 +20,6 @@ final class ProductCategoryService
         private readonly CategoryDetailAction $categoryDetailAction,
         private readonly CategoryCreateAction $categoryCreateAction,
         private readonly CategoryUpdateAction $categoryUpdateAction,
-        private readonly CategoryDeleteAction $categoryDeleteAction,
         private readonly CategoryReorderAction $categoryReorderAction,
     ) {}
 
@@ -50,8 +48,7 @@ final class ProductCategoryService
     public function delete(string $id): void
     {
         $category = ProductCategory::query()->findOrFail($id);
-
-        $this->categoryDeleteAction->execute($category);
+        $category->delete();
     }
 
     /**

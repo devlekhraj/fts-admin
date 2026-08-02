@@ -37,6 +37,7 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::get('brands/{id}/faqs', [ProductBrandController::class, 'faqs'])->name('admin.brands.faqs');
     Route::post('brands', [ProductBrandController::class, 'store'])->name('admin.brands.store');
     Route::put('brands/{id}', [ProductBrandController::class, 'update'])->name('admin.brands.update');
+    Route::delete('brands/bulk-delete', [ProductBrandController::class, 'bulkDelete'])->name('admin.brands.bulk-delete');
     Route::delete('brands/{id}', [ProductBrandController::class, 'destroy'])->name('admin.brands.destroy');
     Route::put('brands/{id}/categories', [ProductBrandController::class, 'syncCategories'])->name('admin.brands.categories.sync');
     Route::post('brands/{id}/banner', [ProductBrandBannerController::class, 'store'])->name('admin.brands.banner.store');
@@ -55,6 +56,7 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::get('products', [ProductsController::class, 'productList'])->name('admin.products.index');
     Route::post('products/import/preview', [ProductImportController::class, 'preview'])->name('admin.products.import.preview');
     Route::post('products/import', [ProductImportController::class, 'store'])->name('admin.products.import');
+    Route::delete('products/bulk-delete', [ProductsController::class, 'bulkDelete'])->name('admin.products.bulk-delete');
     Route::get('products/{id}', [ProductsController::class, 'show'])->name('admin.products.show');
     Route::get('products/{id}/faqs', [ProductsController::class, 'faqs'])->name('admin.products.faqs');
     Route::post('products', [ProductsController::class, 'store'])->name('admin.products.store');
@@ -91,6 +93,7 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::get('product-categorie-list', [ProductCategoryController::class, 'getList'])->name('admin.product-categories.list-alt');
 
     Route::get('product-categorie-lookups', [ProductCategoryController::class, 'getCategoryLookups'])->name('admin.product-categories.lookups');
+    Route::delete('product-categories/bulk-delete', [ProductCategoryController::class, 'bulkDelete'])->name('admin.product-categories.bulk-delete');
     
     Route::get('product-categories/{id}', [ProductCategoryController::class, 'categoryShow'])->name('admin.product-categories.show');
     Route::get('product-categories/{id}/faqs', [ProductCategoryController::class, 'faqs'])->name('admin.product-categories.faqs');

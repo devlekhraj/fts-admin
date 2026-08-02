@@ -21,23 +21,37 @@
     </template>
   </AppPageHeader>
 
-  <AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :page="options.page"
-    :items-per-page="options.itemsPerPage" @update:options="onOptions">
+  <AppDataTable
+    :headers="headers"
+    :items="items"
+    :total="total"
+    :loading="loading"
+    :page="options.page"
+    :items-per-page="options.itemsPerPage"
+    show-select
+    v-model:selected="selectedBrands"
+    @update:options="onOptions">
     <template #actions>
-        <v-container fluid class="py-4">
+      <v-container fluid class="py-4">
         <v-row align="center">
           <v-col cols="12" md="6" lg="4">
             <div class="d-flex align-center ga-3">
               <AppSearchTextField v-model="search" label="Search" placeholder="Type ..."
                 @click:clear="onClearSearch" />
-                <AppSearchButton :loading="fetchingState" @click="onSearch" />
+              <AppSearchButton :loading="fetchingState" @click="onSearch" />
             </div>
           </v-col>
           <v-spacer></v-spacer>
           <v-col cols="12" md="auto" class="text-right">
-            <div class="text-medium-emphasis">
-              <span class="text-primary" style="font-size: smaller;">Total: {{ total }} Items found.</span>
-            </div>
+            <v-btn
+              v-if="selectedBrands.length > 0"
+              color="error"
+              variant="flat"
+              prepend-icon="mdi-delete"
+              :loading="bulkDeleting"
+              @click="onBulkDelete">
+              Bulk Delete ({{ selectedBrands.length }})
+            </v-btn>
           </v-col>
         </v-row>
       </v-container>
@@ -88,15 +102,18 @@ import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import PageFilter from '@/components/filters/PageFilter.vue';
 import BrandCreateButton from '@/components/brand/BrandCreateButton.vue';
+import BrandBulkDeleteModal from '@/components/brand/BrandBulkDeleteModal.vue';
 import BrandDeleteButton from '@/components/brand/BrandDeleteButton.vue';
 import ProductBrandOrderModal from '@/components/brand/ProductBrandOrderModal.vue';
 import type { DataTableHeader, DataTableOptions } from '@/components/datatable/types';
-import { listBrands, type ProductBrandListItem } from '@/api/products.api';
+import { bulkDeleteBrands, listBrands, type ProductBrandListItem } from '@/api/products.api';
 import { formatLongDate } from '@/shared/utils';
 import AppSearchTextField from '@/components/shared/AppSearchTextField.vue';
 import AppSearchButton from '@/components/shared/AppSearchButton.vue';
 import { openModal } from '@/shared/modal';
 import BrandCategoriesModal from '@/components/brand/BrandCategoriesModal.vue';
+import { useSnackbarStore } from '@/stores/snackbar.store';
+import { getErrorMessage } from '@/shared/errors';
 
 type ProductBrand = {
   id: number | string;
@@ -131,6 +148,7 @@ const headers: DataTableHeader[] = [
 const items = ref<ProductBrand[]>([]);
 const total = ref(0);
 const loading = ref(false);
+const selectedBrands = ref<Array<string | number>>([]);
 const search = ref('');
 const options = ref<DataTableOptions>({
   page: 1,
@@ -140,6 +158,8 @@ const options = ref<DataTableOptions>({
 const hasLoadedOnce = ref(false);
 const router = useRouter();
 const fetchingState = ref(false);
+const bulkDeleting = ref(false);
+const snackbar = useSnackbarStore();
 
 function onExport(type: ExportType) {
   // TODO: replace with real export API/download logic.
@@ -176,6 +196,7 @@ function onView(brand: ProductBrand) {
 async function fetchBrands() {
   loading.value = true;
   try {
+    selectedBrands.value = [];
     const response = await listBrands({
       page: options.value.page,
       per_page: options.value.itemsPerPage,
@@ -247,6 +268,42 @@ function onBrandCreated(payload?: unknown) {
 function onBrandDeleted() {
   options.value.page = 1;
   fetchBrands();
+}
+
+function onBulkDelete() {
+  if (selectedBrands.value.length === 0) return;
+
+  openModal(
+    BrandBulkDeleteModal,
+    {
+      count: selectedBrands.value.length,
+      onConfirm: bulkDelete,
+    },
+    {
+      title: 'Confirm Brand Deletion',
+      size: 'sm',
+    },
+  );
+}
+
+async function bulkDelete() {
+  bulkDeleting.value = true;
+  try {
+    const selectedIds = [...selectedBrands.value];
+    const response = await bulkDeleteBrands(selectedIds);
+    const deletedCount = Number((response as any)?.data?.deleted_count ?? selectedIds.length);
+    snackbar.show({
+      message: (response as any)?.data?.message ?? `Deleted ${deletedCount} ${deletedCount === 1 ? 'brand' : 'brands'} successfully.`,
+      color: 'success',
+    });
+    selectedBrands.value = [];
+    await fetchBrands();
+  } catch (error) {
+    snackbar.show({ message: getErrorMessage(error), color: 'error' });
+    throw error;
+  } finally {
+    bulkDeleting.value = false;
+  }
 }
 </script>
 

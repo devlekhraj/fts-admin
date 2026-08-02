@@ -23,12 +23,11 @@ final class EmiRequestListAction
         if ($data->search !== '') {
             $search = $data->search;
             $query->where(function ($builder) use ($search) {
-                $builder->where('application_code', 'like', "%{$search}%")
-                    ->orWhereHas('user', function ($userQuery) use ($search) {
-                        $userQuery->where('name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('product', function ($productQuery) use ($search) {
+                $builder->whereHas('user', function ($userQuery) use ($search): void {
+                    $userQuery->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                })
+                    ->orWhereHas('product', function ($productQuery) use ($search): void {
                         $productQuery->where('name', 'like', "%{$search}%");
                     });
 

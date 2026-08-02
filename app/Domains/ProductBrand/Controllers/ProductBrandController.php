@@ -13,6 +13,7 @@ use App\Domains\ProductBrand\DTOs\BrandCreateData;
 use App\Domains\ProductBrand\DTOs\BrandUpdateData;
 use App\Domains\ProductBrand\Resources\ProductBrandResource;
 use App\Domains\ProductBrand\Services\ProductBrandService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Routing\Controller;
 
 use App\Domains\Faq\Models\Faq;
@@ -160,6 +161,47 @@ class ProductBrandController extends Controller
 
         return response()->json([
             'message' => 'Brand deleted successfully.',
+            'success' => true,
+        ], 200);
+    }
+
+    public function bulkDelete(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['required', 'exists:product_brands,id'],
+        ]);
+
+        $ids = collect($validated['ids'])
+            ->filter(fn ($id) => $id !== null && $id !== '')
+            ->values()
+            ->all();
+
+        if ($ids === []) {
+            return response()->json([
+                'message' => 'At least one brand id is required.',
+                'success' => false,
+            ], 422);
+        }
+
+        $deletedCount = 0;
+
+        DB::transaction(function () use ($ids, &$deletedCount): void {
+            $brands = ProductBrand::query()->whereIn('id', $ids)->get();
+
+            foreach ($brands as $brand) {
+                $this->productBrandService->delete((string) $brand->id);
+                $deletedCount++;
+            }
+        });
+
+        return response()->json([
+            'message' => $deletedCount > 0
+                ? "Deleted {$deletedCount} brand" . ($deletedCount === 1 ? '' : 's') . ' successfully.'
+                : 'No brands were deleted.',
+            'data' => [
+                'deleted_count' => $deletedCount,
+            ],
             'success' => true,
         ], 200);
     }

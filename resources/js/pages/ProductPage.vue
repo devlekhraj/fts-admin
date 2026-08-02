@@ -22,8 +22,17 @@
     </template>
   </AppPageHeader>
 
-  <AppDataTable :headers="headers" :items="items" :total="total" :loading="loading" :page="options.page"
-    :items-per-page="options.itemsPerPage" v-model:expanded="expandedRows" @update:options="onOptions">
+  <AppDataTable
+    :headers="headers"
+    :items="items"
+    :total="total"
+    :loading="loading"
+    :page="options.page"
+    :items-per-page="options.itemsPerPage"
+    show-select
+    v-model:selected="selectedProducts"
+    v-model:expanded="expandedRows"
+    @update:options="onOptions">
     <template #actions>
       <v-container fluid class="py-4">
         <v-row align="center">
@@ -31,7 +40,6 @@
             <div class="d-flex align-center ga-3">
               <AppSearchTextField v-model="search" label="Search products" placeholder="Search by name..."
                 @click:clear="onClearSearch" />
-
               <AppSelectField v-model="categoryFilter" :items="categoryOptions" item-title="title" style="width: 260px;"
                 item-value="value" label="Category" clearable hide-details @update:model-value="onCategoryChange" />
               <AppSearchButton :loading="fetchingState" @click="onSearch" />
@@ -44,9 +52,15 @@
           <v-spacer></v-spacer>
 
           <v-col cols="12" md="auto" class="text-right">
-            <div class="text-medium-emphasis">
-              <span class="text-primary" style="font-size: smaller;">Total: {{ total }} Items found.</span>
-            </div>
+            <v-btn
+              v-if="selectedProducts.length > 0"
+              color="error"
+              variant="flat"
+              prepend-icon="mdi-delete"
+              :loading="bulkDeleting"
+              @click="onBulkDelete">
+              Bulk Delete ({{ selectedProducts.length }})
+            </v-btn>
           </v-col>
         </v-row>
       </v-container>
@@ -183,7 +197,7 @@ import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
 import AppSelectField from '@/components/shared/AppSelectField.vue';
-import { getProductDetail, listProducts, type ProductDetailResponse, type ProductListItem } from '@/api/products.api';
+import { bulkDeleteProducts, deleteProduct, getProductDetail, listProducts, type ProductDetailResponse, type ProductListItem } from '@/api/products.api';
 import { listProductCategoriesLite, type ProductCategoryListItem } from '@/api/product-categories.api';
 import { formatLongDate } from '@/shared/utils';
 import { openModal } from '@/shared/modal';
@@ -191,8 +205,11 @@ import ProductCreateModal from '@/components/product/ProductCreateModal.vue';
 import AppSearchTextField from '@/components/shared/AppSearchTextField.vue';
 import AppSearchButton from '@/components/shared/AppSearchButton.vue';
 import ProductDeleteModal from '@/components/product/ProductDeleteModal.vue';
+import BulkDeleteModel from '@/components/product/BulkDeleteModel.vue';
 import ProductInlineBooleanToggle from '@/components/product/ProductInlineBooleanToggle.vue';
 import ProductPriceCell from '@/components/product/ProductPriceCell.vue';
+import { useSnackbarStore } from '@/stores/snackbar.store';
+import { getErrorMessage } from '@/shared/errors';
 
 type Product = {
   id: number | string;
@@ -228,6 +245,7 @@ const headers = [
 const items = ref<Product[]>([]);
 const total = ref(0);
 const loading = ref(false);
+const selectedProducts = ref<Array<string | number>>([]);
 const expandedRows = ref<Array<string | number>>([]);
 const productImages = ref<Record<string, { loading: boolean; error: string | null; images: ProductDetailResponse['images'] }>>({});
 const options = ref<DataTableOptions>({
@@ -241,6 +259,8 @@ const categoryFilter = ref<number | string | null>(null);
 const categoryOptions = ref<Array<{ title: string; value: number | string | null }>>([]);
 const router = useRouter();
 const fetchingState = ref(false);
+const bulkDeleting = ref(false);
+const snackbar = useSnackbarStore();
 
 function onExport(type: ExportType) {
   // TODO: replace with real export API/download logic.
@@ -282,9 +302,10 @@ function onDelete(product: Product) {
 	  router.push({ name: 'admin.product.imports' });
 	}
 
-	async function fetchProducts() {
-	  loading.value = true;
-	  try {
+async function fetchProducts() {
+  loading.value = true;
+  try {
+    selectedProducts.value = [];
     const response = await listProducts({
       page: options.value.page,
       per_page: options.value.itemsPerPage,
@@ -402,6 +423,42 @@ function onClearSearch() {
   search.value = '';
   options.value.page = 1;
   fetchProducts();
+}
+
+function onBulkDelete() {
+  if (selectedProducts.value.length === 0) return;
+
+  openModal(
+    BulkDeleteModel,
+    {
+      count: selectedProducts.value.length,
+      onConfirm: bulkDelete,
+    },
+    {
+      title: 'Confirm Bulk Deletion',
+      size: 'sm',
+    },
+  );
+}
+
+async function bulkDelete() {
+  bulkDeleting.value = true;
+  try {
+    const selectedIds = [...selectedProducts.value];
+    const response = await bulkDeleteProducts(selectedIds);
+    const deletedCount = Number((response as any)?.data?.deleted_count ?? selectedIds.length);
+    snackbar.show({
+      message: (response as any)?.data?.message ?? `Deleted ${deletedCount} product${deletedCount === 1 ? '' : 's'} successfully.`,
+      color: 'success',
+    });
+    selectedProducts.value = [];
+    await fetchProducts();
+  } catch (error) {
+    snackbar.show({ message: getErrorMessage(error), color: 'error' });
+    throw error;
+  } finally {
+    bulkDeleting.value = false;
+  }
 }
 
 onMounted(() => {
