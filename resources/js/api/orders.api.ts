@@ -4,6 +4,8 @@ export type ListOrdersParams = {
   page?: number;
   per_page?: number;
   search?: string;
+  pre_order?: boolean;
+  payment_status?: string;
 };
 
 export type OrdersListMeta = {
@@ -20,6 +22,10 @@ export type OrderListItem = {
   order_number?: string | null;
   status?: string | null;
   total?: number | null;
+  payment_type?: string | null;
+  payment_status?: string | null;
+  is_pre_order?: boolean;
+  deposit_amount?: number | null;
   customer?: {
     id?: number | string | null;
     name?: string | null;
@@ -47,6 +53,9 @@ export type OrderDetailResponse = {
     order_date?: string | null;
     status?: string | null;
     warranty_token?: string | null;
+    payment_status?: string | null;
+    is_pre_order?: boolean;
+    deposit_amount?: number | null;
   } | null;
   customer?: {
     id?: number | string | null;

@@ -33,6 +33,9 @@ final class Order extends BaseModel
         'order_total',
         'total',
         'payment_type',
+        'payment_status',
+        'is_pre_order',
+        'deposit_amount',
         'created_at',
         'updated_at'
     ];
@@ -45,6 +48,8 @@ final class Order extends BaseModel
         'shipping_cost' => 'decimal:2',
         'order_total' => 'decimal:2',
         'total' => 'decimal:2',
+        'is_pre_order' => 'boolean',
+        'deposit_amount' => 'decimal:2',
         'meta' => 'array',
         'placed_at' => 'datetime',
         'paid_at' => 'datetime',

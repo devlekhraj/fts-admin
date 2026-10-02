@@ -27,6 +27,57 @@
             prepend-inner-icon="mdi-link-variant"
             @update:model-value="onSlugInput" />
         </v-col>
+        <v-col cols="12" md="6" class="pb-0">
+          <v-text-field
+            v-model="form.price"
+            label="Price"
+            type="number"
+            min="0"
+            variant="outlined"
+            density="comfortable"
+            :error-messages="getErrorMessages('price')"
+            prepend-inner-icon="mdi-currency-usd" />
+        </v-col>
+        <v-col cols="12" md="6" class="pb-0">
+          <v-text-field
+            v-model="form.quantity"
+            label="Stock quantity"
+            type="number"
+            min="0"
+            variant="outlined"
+            density="comfortable"
+            :error-messages="getErrorMessages('quantity')"
+            prepend-inner-icon="mdi-warehouse" />
+        </v-col>
+        <v-col cols="12" class="pb-0">
+          <v-autocomplete
+            v-model="form.category_ids"
+            :items="categories"
+            item-title="name"
+            item-value="id"
+            label="Categories"
+            multiple
+            chips
+            closable-chips
+            variant="outlined"
+            density="comfortable"
+            :loading="categoriesLoading"
+            :error-messages="getErrorMessages('category_ids')"
+            hint="Products only appear on a category page once a category is assigned."
+            persistent-hint
+            prepend-inner-icon="mdi-shape-outline" />
+        </v-col>
+        <v-col cols="12" class="pb-0">
+          <v-switch
+            v-model="form.status"
+            color="success"
+            density="comfortable"
+            hide-details
+            label="Publish immediately (visible to customers)" />
+          <div class="text-caption text-medium-emphasis">
+            Off keeps the product hidden from the website until you enable it from the product list.
+          </div>
+        </v-col>
       </v-row>
     </v-form>
   </v-card-text>
@@ -59,18 +110,37 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { getErrorMessage } from '@/shared/errors';
 import { useSnackbarStore } from '@/stores/snackbar.store';
 import { create as createProduct } from '@/api/products.api';
+import { getProductCategoryLookups, type ProductCategoryLookupItem } from '@/api/product-categories.api';
 
 const emit = defineEmits<{ (e: 'close'): void; (e: 'saved', payload?: unknown): void }>();
 
 const formRef = ref();
 const error = ref('');
-const form = ref({
+const emptyForm = () => ({
   name: '',
   slug: '',
+  price: '' as string | number,
+  quantity: '' as string | number,
+  category_ids: [] as number[],
+  status: false,
+});
+const form = ref(emptyForm());
+const categories = ref<ProductCategoryLookupItem[]>([]);
+const categoriesLoading = ref(false);
+
+onMounted(async () => {
+  categoriesLoading.value = true;
+  try {
+    categories.value = await getProductCategoryLookups();
+  } catch {
+    categories.value = [];
+  } finally {
+    categoriesLoading.value = false;
+  }
 });
 const slugEdited = ref(false);
 const fieldErrors = ref<Record<string, string[]>>({});
@@ -109,10 +179,7 @@ function onSlugInput(value: string) {
 }
 
 function resetForm() {
-  form.value = {
-    name: '',
-    slug: '',
-  };
+  form.value = emptyForm();
   slugEdited.value = false;
   error.value = '';
   fieldErrors.value = {};
@@ -132,11 +199,15 @@ async function onSubmit() {
 
   loading.value = true;
   try {
-    const payload = { ...form.value };
+    const { price, quantity, ...rest } = form.value;
+    const payload: Record<string, unknown> = { ...rest };
+    if (price !== '' && price !== null) payload.price = Number(price);
+    if (quantity !== '' && quantity !== null) payload.quantity = Number(quantity);
     const response = await createProduct(payload);
     // console.log({response});
     // Explicitly casting the response to avoid ts error, or just checking if it exists
-    const message = (response as any)?.data?.message || 'Product created successfully.';
+    const baseMessage = (response as any)?.data?.message || 'Product created successfully.';
+    const message = form.value.status ? baseMessage : `${baseMessage} It is hidden from customers until you enable it.`;
     const savedData = (response as any)?.data ?? payload;
     console.log({savedData});
     snackbar.show({ message, color: 'success' });

@@ -7,6 +7,7 @@ use App\Domains\EmiRequest\Models\EmiRequest;
 use App\Domains\Order\Models\Order;
 use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use App\Support\Storefront\StorefrontCacheObservers;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -35,5 +36,6 @@ class AppServiceProvider extends ServiceProvider
             'App\\Models\\Admin' => Admin::class,
         ]);
 
+        StorefrontCacheObservers::register();
     }
 }

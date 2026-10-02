@@ -46,6 +46,15 @@
         {{ item.status || '-' }}
       </v-chip>
     </template>
+    <template #item.payment="{ item }">
+      <div class="d-flex align-center ga-1 flex-wrap">
+        <span class="text-capitalize">{{ item.payment_type }}</span>
+        <v-chip size="x-small" variant="tonal" label :color="item.payment_status === 'paid' ? 'success' : 'warning'">
+          {{ item.payment_status }}
+        </v-chip>
+        <v-chip v-if="item.is_pre_order" size="x-small" variant="tonal" label color="info">Pre-order</v-chip>
+      </div>
+    </template>
     <template #item.total="{ item }">
       <span>{{ item.total }}</span>
     </template>
@@ -78,6 +87,7 @@ const headers = [
   { title: 'Customer', key: 'customer', sortable: false, minWidth: '220' },
   { title: 'Items', key: 'items_count', sortable: false, minWidth: '130' },
   { title: 'Status', key: 'status', sortable: false, minWidth: '130' },
+  { title: 'Payment', key: 'payment', sortable: false, minWidth: '170' },
   { title: 'Amount', key: 'total', sortable: false, minWidth: '130' },
   { title: 'Order Date', key: 'created_at', sortable: false, minWidth: '150' },
   { title: 'Actions', key: 'action', sortable: false, minWidth: '130', align: 'end'  as const },
@@ -90,6 +100,9 @@ type Order = {
   customer_avatar: string;
   items_count: number;
   status: string;
+  payment_type: string;
+  payment_status: string;
+  is_pre_order: boolean;
   total: string;
   created_at: string;
 };
@@ -132,6 +145,9 @@ async function fetchOrders() {
       customer_avatar: String(order.customer?.avatar ?? ''),
       items_count: Number(order.items_count ?? 0),
       status: String(order.status ?? '-'),
+      payment_type: String(order.payment_type ?? '-'),
+      payment_status: String(order.payment_status ?? '-'),
+      is_pre_order: Boolean(order.is_pre_order),
       total: order.total !== null && order.total !== undefined ? formatNPR(order.total) : '-',
       created_at: order.created_at ? timeAgo(order.created_at) : '-',
     }));

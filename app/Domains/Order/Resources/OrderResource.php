@@ -28,6 +28,10 @@ class OrderResource extends JsonResource
             'order_number' => $this->order_no ?: $this->invoice_number,
             'status' => $this->order_status,
             'total' => is_numeric($this->total) ? (float) $this->total : null,
+            'payment_type' => $this->payment_type,
+            'payment_status' => $this->payment_status,
+            'is_pre_order' => (bool) $this->is_pre_order,
+            'deposit_amount' => is_numeric($this->deposit_amount) ? (float) $this->deposit_amount : null,
             'customer' => [
                 'id' => $this->user?->id,
                 'name' => $this->user?->name,
@@ -49,6 +53,9 @@ class OrderResource extends JsonResource
             'order_date' => $this->created_at,
             'status' => $this->order_status,
             'warranty_token' => $this->warranty_token,
+            'payment_status' => $this->payment_status,
+            'is_pre_order' => (bool) $this->is_pre_order,
+            'deposit_amount' => is_numeric($this->deposit_amount) ? (float) $this->deposit_amount : null,
         ];
       
         $order['customer'] = [
@@ -67,7 +74,7 @@ class OrderResource extends JsonResource
             'receiver_photo' => $this->receipent?->receiver_photo,
         ];
         $order['shipping_address'] = [
-            'id' => $this->shippingAddress?->add,
+            'id' => $this->shippingAddress?->id,
             'label' => $this->shippingAddress?->label,
             'district' => $this->shippingAddress?->district,
             'city' => $this->shippingAddress?->city,
@@ -92,6 +99,9 @@ class OrderResource extends JsonResource
 
         $order['total_summary'] = [
             'payment_type' => $this->payment_type,
+            'payment_status' => $this->payment_status,
+            'is_pre_order' => (bool) $this->is_pre_order,
+            'deposit_amount' => is_numeric($this->deposit_amount) ? (float) $this->deposit_amount : null,
             'shipping_cost' => $this->shipping_cost,
             'discount_total' => $this->discounts_total,
             'sub_total' => $this->order_total,

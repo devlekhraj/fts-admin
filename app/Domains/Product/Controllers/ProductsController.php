@@ -170,8 +170,23 @@ class ProductsController extends Controller
     {
         $validated = $request->validated();
         $validated['sku'] = $validated['slug'];
+        $validated['status'] = (bool) ($validated['status'] ?? false);
+        $categoryIds = $validated['category_ids'] ?? null;
+        unset($validated['category_ids']);
+        foreach (['price', 'quantity'] as $numericField) {
+            if (array_key_exists($numericField, $validated) && $validated[$numericField] === null) {
+                unset($validated[$numericField]);
+            }
+        }
 
-        $product = Product::query()->create($validated);
+        $product = DB::transaction(function () use ($validated, $categoryIds): Product {
+            $product = Product::query()->create($validated);
+            if (is_array($categoryIds) && $categoryIds !== []) {
+                $product->categories()->sync($categoryIds);
+            }
+
+            return $product;
+        });
 
         return response()->json([
             'message' => 'Product created successfully.',

@@ -28,6 +28,14 @@ final class OrderListAction
             });
         }
 
+        if ($data->preOrder !== null) {
+            $query->where('is_pre_order', $data->preOrder);
+        }
+
+        if ($data->paymentStatus !== '') {
+            $query->where('payment_status', $data->paymentStatus);
+        }
+
         if ($data->perPage === -1) {
             $items = $query->get();
 
