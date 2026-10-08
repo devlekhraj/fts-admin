@@ -114,6 +114,17 @@
         <v-btn size="small" variant="outlined" class="mr-2" color="primary" @click="onView(item)">
           Details
         </v-btn>
+        <v-btn
+          size="small"
+          variant="outlined"
+          class="mr-2"
+          color="secondary"
+          prepend-icon="mdi-content-copy"
+          :loading="duplicatingId === item.id"
+          :disabled="duplicatingId !== null"
+          @click="onDuplicate(item)">
+          Duplicate
+        </v-btn>
         <v-btn size="small" variant="outlined" color="error" @click="onDelete(item)">
           Delete
         </v-btn>
@@ -197,7 +208,7 @@ import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import type { DataTableOptions } from '@/components/datatable/types';
 import AppSelectField from '@/components/shared/AppSelectField.vue';
-import { bulkDeleteProducts, deleteProduct, getProductDetail, listProducts, type ProductDetailResponse, type ProductListItem } from '@/api/products.api';
+import { bulkDeleteProducts, deleteProduct, duplicateProduct, getProductDetail, listProducts, type ProductDetailResponse, type ProductListItem } from '@/api/products.api';
 import { listProductCategoriesLite, type ProductCategoryListItem } from '@/api/product-categories.api';
 import { formatLongDate } from '@/shared/utils';
 import { openModal } from '@/shared/modal';
@@ -260,6 +271,7 @@ const categoryOptions = ref<Array<{ title: string; value: number | string | null
 const router = useRouter();
 const fetchingState = ref(false);
 const bulkDeleting = ref(false);
+const duplicatingId = ref<number | string | null>(null);
 const snackbar = useSnackbarStore();
 
 function onExport(type: ExportType) {
@@ -269,6 +281,28 @@ function onExport(type: ExportType) {
 
 function onView(product: Product) {
   router.push({ name: 'admin.product.detail', params: { id: product.id } });
+}
+
+async function onDuplicate(product: Product) {
+  if (duplicatingId.value !== null) return;
+  duplicatingId.value = product.id;
+  try {
+    const response = await duplicateProduct(product.id);
+    const created = (response as any)?.data;
+    snackbar.show({
+      message: (response as any)?.message ?? 'Product duplicated. The copy is hidden until you enable it.',
+      color: 'success',
+    });
+    if (created?.id) {
+      router.push({ name: 'admin.product.detail', params: { id: created.id } });
+    } else {
+      fetchProducts();
+    }
+  } catch (error) {
+    snackbar.show({ message: getErrorMessage(error), color: 'error' });
+  } finally {
+    duplicatingId.value = null;
+  }
 }
 
 function onDelete(product: Product) {

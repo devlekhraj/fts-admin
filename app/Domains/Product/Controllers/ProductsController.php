@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Product\Controllers;
 
+use App\Domains\Product\Actions\ProductDuplicateAction;
 use App\Domains\Product\Models\ProductVariant;
 use App\Domains\Product\Models\Product;
 use App\Domains\Product\Requests\StoreProductRequest;
@@ -169,7 +170,8 @@ class ProductsController extends Controller
     public function store(StoreProductRequest $request): JsonResponse
     {
         $validated = $request->validated();
-        $validated['sku'] = $validated['slug'];
+        // products.sku is varchar(30); a long slug would fail the insert in strict mode.
+        $validated['sku'] = mb_substr($validated['slug'], 0, 30);
         $validated['status'] = (bool) ($validated['status'] ?? false);
         $categoryIds = $validated['category_ids'] ?? null;
         unset($validated['category_ids']);
@@ -191,6 +193,22 @@ class ProductsController extends Controller
         return response()->json([
             'message' => 'Product created successfully.',
             'data' => (new ProductResource($product)),
+            'success' => true,
+        ], 201);
+    }
+
+    public function duplicate(string $id, ProductDuplicateAction $action): JsonResponse
+    {
+        $source = Product::query()->findOrFail($id);
+        $copy = $action->execute($source);
+
+        return response()->json([
+            'message' => 'Product duplicated. The copy is hidden from customers until you enable it.',
+            'data' => [
+                'id' => $copy->id,
+                'name' => $copy->name,
+                'slug' => $copy->slug,
+            ],
             'success' => true,
         ], 201);
     }

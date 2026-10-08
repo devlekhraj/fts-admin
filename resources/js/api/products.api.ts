@@ -297,6 +297,10 @@ export function create(payload: Record<string, unknown>) {
   return http.post('/admin/products', payload);
 }
 
+export function duplicateProduct(id: number | string) {
+  return http.post(`/admin/products/${id}/duplicate`);
+}
+
 export function update(id: string, payload: Record<string, unknown>) {
   return http.put(`/admin/products/${id}`, payload);
 }

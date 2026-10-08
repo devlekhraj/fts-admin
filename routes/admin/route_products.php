@@ -60,6 +60,7 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::get('products/{id}', [ProductsController::class, 'show'])->name('admin.products.show');
     Route::get('products/{id}/faqs', [ProductsController::class, 'faqs'])->name('admin.products.faqs');
     Route::post('products', [ProductsController::class, 'store'])->name('admin.products.store');
+    Route::post('products/{id}/duplicate', [ProductsController::class, 'duplicate'])->name('admin.products.duplicate');
     Route::post('products/{id}/variants', [ProductVariantController::class, 'store'])->name('admin.products.variants.store');
     Route::put('products/{id}/variants/{item_id}', [ProductVariantController::class, 'update'])->name('admin.products.variants.update');
     Route::put('products/{id}', [ProductsController::class, 'update'])->name('admin.products.update');
