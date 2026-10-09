@@ -32,6 +32,8 @@ final class UpdateFileUsageAction
         }
 
         $link = trim((string) ($data->link ?? ''));
+        // The old /product-details/ address now only redirects; always store the real page address.
+        $link = str_replace('/product-details/', '/product-detail/', $link);
         $startDate = trim((string) ($data->startDate ?? ''));
         $endDate = trim((string) ($data->endDate ?? ''));
 
