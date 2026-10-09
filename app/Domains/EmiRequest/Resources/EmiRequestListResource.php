@@ -49,6 +49,8 @@ class EmiRequestListResource extends JsonResource
             'id' => $this->id,
             'application_code' => $this->application_code ?? $this->id,
             'name' => $this->name,
+            'grandfather_name' => $this->grandfather_name,
+            'nid_number' => $this->nid_number,
             'email' => $this->email,
             'contact_number' => $this->contact_number,
             'address' => $this->address,
@@ -88,6 +90,7 @@ class EmiRequestListResource extends JsonResource
             'guarantors' => $this->guarantors ? $this->guarantors->map(function ($guarantor) {
                 return [
                     'name' => $guarantor->name,
+                    'grandfather_name' => $guarantor->grandfather_name,
                     'email' => $guarantor->email,
                     'phone' => $guarantor->phone,
                     'gender' => $guarantor->gender,

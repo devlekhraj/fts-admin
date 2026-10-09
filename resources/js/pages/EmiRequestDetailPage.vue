@@ -52,6 +52,13 @@
 												</td>
 											</tr>
 											<tr>
+												<td class="text-medium-emphasis">Grandfather's Name</td>
+												<td class="font-weight-medium text-body-2 text-right">{{
+													applicantInfo.grandfatherName
+												}}
+												</td>
+											</tr>
+											<tr>
 												<td class="text-medium-emphasis">Email</td>
 												<td class="font-weight-medium text-body-2 text-right">{{
 													applicantInfo.email
@@ -324,6 +331,13 @@
 														</td>
 													</tr>
 													<tr>
+														<td class="text-medium-emphasis">Grandfather's Name</td>
+														<td class="font-weight-medium text-body-2 text-right">{{
+															guerantor.grandfatherName
+														}}
+														</td>
+													</tr>
+													<tr>
 														<td class="text-medium-emphasis">Phone</td>
 														<td class="font-weight-medium text-body-2 text-right">{{
 															guerantor.phone
@@ -349,12 +363,6 @@
 														<td class="text-medium-emphasis">Marital Status</td>
 														<td class="font-weight-medium text-body-2 text-right">{{
 															guerantor.maritalStatus }}
-														</td>
-													</tr>
-													<tr>
-														<td class="text-medium-emphasis">Citizenship</td>
-														<td class="font-weight-medium text-body-2 text-right">{{
-															guerantor.citizenshipNumber }}
 														</td>
 													</tr>
 												</tbody>
@@ -484,13 +492,14 @@ const applicant = computed(() => (application.value.user ?? {}) as Record<string
 
 const applicantInfo = computed(() => ({
 	name: String(applicant.value.name ?? application.value.name ?? 'N/A'),
+	grandfatherName: String((application.value as any)?.grandfather_name || 'N/A'),
 	email: String(applicant.value.email ?? 'N/A'),
 	phone: String(applicant.value.phone ?? applicant.value.mobile ?? 'N/A'),
 	dobAd: String((application.value as any)?.dob_ad ?? '1995-05-15'),
 	dobBs: String((application.value as any)?.dob_bs ?? '2052-01-31'),
 	gender: String((application.value as any)?.gender ?? 'Male'),
 	maritalStatus: String((application.value as any)?.marital_status ?? 'Married'),
-	citizenshipNumber: String((application.value as any)?.citizenship_number ?? '45-01-78-12345'),
+	citizenshipNumber: String((application.value as any)?.nid_number || (application.value as any)?.citizenship_number || 'N/A'),
 	address: String((application.value as any)?.address ?? 'Kathmandu, Bagmati Pradesh, Nepal'),
 	agreed: (application.value as any)?.agreed_to_terms ? 'Yes' : 'Yes',
 	documents: (application.value as any).documents,
@@ -543,11 +552,11 @@ const guarantorList = computed(() => {
 	const g = (application.value as any)?.guarantors;
 	const list = Array.isArray(g) ? g : g ? [g] : [];
 	return list.map((item: any) => ({
-		name: String(item?.name ?? 'Suman Shrestha'),
-		phone: String(item?.phone ?? '+977 98111 22233'),
-		gender: String(item?.gender ?? 'Male'),
-		maritalStatus: String(item?.marital_status ?? 'Married'),
-		citizenshipNumber: String(item?.citizenship_number ?? '45-01-78-67890'),
+		name: String(item?.name || 'N/A'),
+		grandfatherName: String(item?.grandfather_name || 'N/A'),
+		phone: String(item?.phone || 'N/A'),
+		gender: String(item?.gender || 'N/A'),
+		maritalStatus: String(item?.marriage_status || item?.marital_status || 'N/A'),
 		documents: item?.documents ?? [],
 	}));
 });

@@ -14,6 +14,8 @@ class EmiRequestResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'grandfather_name' => $this->grandfather_name,
+            'nid_number' => $this->nid_number,
             'email' => $this->email,
             'contact_number' => $this->contact_number,
             'address' => $this->address,

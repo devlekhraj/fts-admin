@@ -19,6 +19,7 @@ final class EmiRequestGuarantor extends BaseModel
     protected $fillable = [
         'emi_request_id',
         'name',
+        'grandfather_name',
         'email',
         'phone',
         'gender',
