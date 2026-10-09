@@ -25,6 +25,7 @@ final class Blog extends BaseModel
         'meta_keywords',
         'meta_description',
         'category_id',
+        'publish_date',
     ];
 
     public function category(): BelongsTo

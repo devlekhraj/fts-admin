@@ -43,6 +43,14 @@
                 variant="outlined" density="comfortable" clearable placeholder="Select category" />
             </v-col>
           </v-row>
+
+          <v-row>
+            <v-col cols="12" md="4">
+              <app-field-label label="Publish date" />
+              <v-text-field v-model="form.publish_date" type="datetime-local" variant="outlined"
+                density="comfortable" hint="Nepal time. Leave empty to publish now." persistent-hint />
+            </v-col>
+          </v-row>
         </v-form>
       </v-col>
     </v-row>
@@ -77,6 +85,7 @@ const form = reactive({
   author: '',
   status: '0',
   category_id: null as number | null,
+  publish_date: '',
 });
 const statusOptions = [
   { label: 'Active', value: '1' },
@@ -94,10 +103,24 @@ watch(
     form.author = item?.author ? String(item.author) : '';
     form.status = item?.status ? '1' : '0';
     form.category_id = item?.category_id ? Number(item.category_id) : null;
+    form.publish_date = toDateTimeInput(item?.published_at);
     console.log('Form category_id set to:', form.category_id, 'from item:', item?.category_id);
   },
   { immediate: true },
 );
+
+function toDateTimeInput(value: unknown): string {
+  if (typeof value !== 'string' || value === '') return '';
+  if (!/[zZ]|[+-]\d{2}:?\d{2}$/.test(value)) return value.replace(' ', 'T').slice(0, 16);
+
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Kathmandu',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(new Date(value));
+  const get = (type: string) => parts.find((part) => part.type === type)?.value ?? '';
+  return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}`;
+}
 
 async function fetchCategories() {
   try {
@@ -151,6 +174,7 @@ async function onUpdate() {
       author: form.author.trim(),
       status: Number(form.status) === 1,
       category_id: form.category_id || null,
+      publish_date: form.publish_date || null,
     });
 
     snackbar.show({

@@ -36,6 +36,7 @@ final class BlogCreateAction
             'title' => $data->title,
             'slug' => $data->slug,
             'status' => $data->status,
+            'publish_date' => $data->status ? now()->toDateTimeString() : null,
             'category_id' => $category->id,
             'content' => '',
             'author' => '',

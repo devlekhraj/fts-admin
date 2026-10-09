@@ -28,6 +28,7 @@ class UpdateBlogPostRequest extends FormRequest
             'meta_title' => ['nullable', 'string'],
             'meta_keywords' => ['nullable', 'string'],
             'meta_description' => ['nullable', 'string'],
+            'publish_date' => ['sometimes', 'nullable', 'date'],
             'category_id' => ['sometimes', 'nullable'],
         ];
     }
