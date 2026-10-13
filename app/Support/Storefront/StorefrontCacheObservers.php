@@ -54,14 +54,15 @@ final class StorefrontCacheObservers
                     continue;
                 }
 
-                $class::{$event}(static function (Model $model) use ($type): void {
-                    self::safely(static function () use ($model, $type): void {
+                $class::{$event}(static function (Model $model) use ($type, $event): void {
+                    self::safely(static function () use ($model, $type, $event): void {
                         if ($type === 'all') {
                             StorefrontCacheInvalidator::queue('all');
                             return;
                         }
 
                         StorefrontCacheInvalidator::queue($type, self::slugOf($model));
+                        IndexNowNotifier::queueModel($type, $model, $event);
                     });
                 });
             }
@@ -107,14 +108,18 @@ final class StorefrontCacheObservers
             return;
         }
 
-        $slug = $class::query()->whereKey($usage->usage_id)->value('slug');
+        $row = $class::query()->whereKey($usage->usage_id)->first(['slug', 'status']);
+        $slug = $row?->getAttribute('slug');
         StorefrontCacheInvalidator::queue($type, $slug ?: null);
+        IndexNowNotifier::queuePage($type, $slug, (bool) $row?->getAttribute('status'));
     }
 
     private static function queueProductById(mixed $productId): void
     {
-        $slug = $productId ? Product::withTrashed()->whereKey($productId)->value('slug') : null;
+        $product = $productId ? Product::withTrashed()->whereKey($productId)->first(['id', 'slug', 'status', 'deleted_at']) : null;
+        $slug = $product?->getAttribute('slug');
         StorefrontCacheInvalidator::queue('product', $slug ?: null);
+        IndexNowNotifier::queuePage('product', $slug, $product !== null && ! $product->trashed() && (bool) $product->getAttribute('status'));
     }
 
     private static function slugOf(Model $model): ?string

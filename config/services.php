@@ -34,6 +34,14 @@ return [
         'invalidate_secret' => env('STOREFRONT_INVALIDATE_SECRET'),
     ],
 
+    // IndexNow: pings Bing/Yandex/Naver/Seznam when catalogue pages change. The key is public by design
+    // (it is served at https://<host>/<key>.txt). Enabled by default wherever storefront sync is configured.
+    'indexnow' => [
+        'enabled' => env('INDEXNOW_ENABLED'),
+        'key' => env('INDEXNOW_KEY', '5e18a089fd8877586675bdb039d42ed2'),
+        'host' => env('INDEXNOW_HOST', 'fatafatsewa.com'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
