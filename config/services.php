@@ -34,6 +34,13 @@ return [
         'invalidate_secret' => env('STOREFRONT_INVALIDATE_SECRET'),
     ],
 
+    // Private customer documents (emi-requests/...) are only reachable through time-limited signed links.
+    // The secret must match the one in the image server's nginx config (snippets/img-emi-secret.conf).
+    'media' => [
+        'emi_url_secret' => env('EMI_URL_SECRET'),
+        'emi_url_ttl' => (int) env('EMI_URL_TTL', 14400), // seconds a link stays valid (4 hours)
+    ],
+
     // IndexNow: pings Bing/Yandex/Naver/Seznam when catalogue pages change. The key is public by design
     // (it is served at https://<host>/<key>.txt). Enabled by default wherever storefront sync is configured.
     'indexnow' => [

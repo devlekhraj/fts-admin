@@ -31,7 +31,7 @@ class EmiApplicationResource extends JsonResource
             'bank_name' => $this->emiBank?->name ?? $this->emiBank?->slug ?? null,
             'file_path' => $this->file_path ?? null,
             'file_url' => $this->file_path
-                ? $storage->url($this->file_path)
+                ? \App\Support\MediaUrl::for((string) $this->file_path, (string) config('filesystems.disks.' . $this->disk . '.url', ''))
                 : null,
             'status' => $this->status ?? null,
             'created_at' => $this->created_at

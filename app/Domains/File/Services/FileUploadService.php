@@ -128,10 +128,6 @@ final class FileUploadService
 
     private function buildUrl(string $relativePath): string
     {
-        $baseUrl = trim((string) config('filesystems.disks.' . $this->disk . '.url', ''), '/');
-
-        return $baseUrl !== ''
-            ? $baseUrl . '/' . ltrim($relativePath, '/')
-            : '/' . ltrim($relativePath, '/');
+        return \App\Support\MediaUrl::for($relativePath, (string) config('filesystems.disks.' . $this->disk . '.url', ''));
     }
 }

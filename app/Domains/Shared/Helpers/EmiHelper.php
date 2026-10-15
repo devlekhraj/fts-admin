@@ -57,7 +57,7 @@ class EmiHelper
             return [
                 'disk' => $this->disk,
                 'path' => $relativePath,
-                'url' => $disk->url($relativePath),
+                'url' => \App\Support\MediaUrl::for($relativePath, (string) config('filesystems.disks.' . $this->disk . '.url', '')),
             ];
         } catch (Throwable $e) {
             Log::error('Error generating/storing EMI quotation PDF.', [

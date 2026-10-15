@@ -52,12 +52,6 @@ final class File extends BaseModel
             return $path;
         }
 
-        $relativePath = ltrim($path, '/');
-        $disk =  config('filesystems.default');
-
-        /** @var FilesystemAdapter $storage */
-        $storage = Storage::disk($disk);
-
-        return $storage->url($relativePath);
+        return \App\Support\MediaUrl::for(ltrim($path, '/'));
     }
 }
