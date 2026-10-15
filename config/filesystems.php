@@ -44,19 +44,19 @@ return [
             'visibility' => 'public',
         ],
 
+        // Images and uploaded documents live on this server (served read-only by nginx as
+        // img.fatafatsewa.com). The disk keeps its old name because existing file rows reference it.
+        // Files can only be added through this application (admin or API); there is no FTP access.
         'fatafat_cdn' => [
-            'driver' => 'ftp',
-            'host' => env('IMG_FTP_HOST'),
-            'username' => env('IMG_FTP_USERNAME'),
-            'password' => env('IMG_FTP_PASSWORD'),
-            'port' => 21,
-
-            'passive' => true,   // recommended
-            'ssl' => false,      // usually false unless using FTPS
-            'timeout' => 30,
-
-            'root' => env('IMG_FTP_ROOT', '/public_html'),
-            'url' => env('IMG_BASE_URL', 'https://img.fatafatsewa.com')
+            'driver' => 'local',
+            'root' => env('MEDIA_ROOT', '/var/www/media'),
+            'url' => env('IMG_BASE_URL', 'https://img.fatafatsewa.com'),
+            'visibility' => 'public',
+            'throw' => false,
+            'permissions' => [
+                'file' => ['public' => 0644, 'private' => 0600],
+                'dir' => ['public' => 0755, 'private' => 0700],
+            ],
         ],
 
         's3' => [
