@@ -25,3 +25,7 @@ Thumbs.db
 /public/cdn
 /public/media
 /tests/*
+
+# Never commit environment files or their backups: they hold passwords and keys.
+.env.*
+!.env.example
