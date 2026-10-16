@@ -34,6 +34,10 @@ class AppServiceProvider extends ServiceProvider
             // Legacy morph types (backward compatibility)
             'App\\Models\\User'  => User::class,
             'App\\Models\\Admin' => Admin::class,
+            // The customer API's own class names (older rows may use them instead of the short names above)
+            'App\\Models\\Order'      => Order::class,
+            'App\\Models\\OrderModel' => Order::class,
+            'App\\Models\\EmiRequest' => EmiRequest::class,
         ]);
 
         StorefrontCacheObservers::register();
