@@ -42,120 +42,43 @@
 						Information</v-card-title>
 					<v-divider></v-divider>
 					<div class="pa-4">
-						<v-alert v-if="identityMismatch" type="warning" variant="tonal" density="compact" class="mb-4">
-							The account that submitted this application (<strong>{{ accountHolder.name || 'unknown' }}</strong>,
-							{{ accountHolder.email }}) is different from the applicant (<strong>{{ applicantInfo.name }}</strong>,
-							{{ applicantInfo.email }}). The quotation and approval email go to the applicant's email.
-							Please confirm who this application is for before approving.
+						<v-alert v-if="identityMismatch" type="warning" variant="tonal" density="comfortable" class="mb-5"
+							title="Submitted from a different account">
+							<div class="identity-compare mt-2">
+								<div class="identity-box">
+									<div class="text-caption text-medium-emphasis">Applicant (receives the quotation and approval email)</div>
+									<div class="font-weight-bold">{{ applicantInfo.name }}</div>
+									<div class="wrap-anywhere">{{ applicantInfo.email }}</div>
+								</div>
+								<div class="identity-box">
+									<div class="text-caption text-medium-emphasis">Logged-in account that submitted it</div>
+									<div class="font-weight-bold">{{ accountHolder.name || 'Unknown' }}</div>
+									<div class="wrap-anywhere">{{ accountHolder.email }}</div>
+								</div>
+							</div>
+							<div class="text-body-2 mt-3">Please confirm who this application is for before approving.</div>
 						</v-alert>
-						<div>
-							<v-row>
-								<v-col cols="12" md="6">
-									<v-table>
-										<tbody>
-											<tr>
-												<td class="text-medium-emphasis">Full Name</td>
-												<td class="font-weight-medium text-body-2 text-right">{{
-													applicantInfo.name
-												}}
-												</td>
-											</tr>
-											<tr>
-												<td class="text-medium-emphasis">Grandfather's Name</td>
-												<td class="font-weight-medium text-body-2 text-right">{{
-													applicantInfo.grandfatherName
-												}}
-												</td>
-											</tr>
-											<tr>
-												<td class="text-medium-emphasis">Applicant Email</td>
-												<td class="font-weight-medium text-body-2 text-right">{{
-													applicantInfo.email
-												}}
-												</td>
-											</tr>
-											<tr v-if="accountHolder.email">
-												<td class="text-medium-emphasis">Account Email</td>
-												<td class="font-weight-medium text-body-2 text-right">
-													{{ accountHolder.email }}
-													<v-chip v-if="identityMismatch" size="x-small" color="warning" variant="tonal" class="ml-1">Different</v-chip>
-												</td>
-											</tr>
-											<tr>
-												<td class="text-medium-emphasis">Phone</td>
-												<td class="font-weight-medium text-body-2 text-right">{{
-													applicantInfo.phone
-												}}
-												</td>
-											</tr>
-											<tr v-if="accountHolder.name">
-												<td class="text-medium-emphasis">Account Name</td>
-												<td class="font-weight-medium text-body-2 text-right">{{ accountHolder.name }}</td>
-											</tr>
-											<tr>
-												<td class="text-medium-emphasis">Gender</td>
-												<td class="font-weight-medium text-body-2 text-right">{{
-													applicantInfo.gender }}
-												</td>
-											</tr>
-											<tr>
-												<td class="text-medium-emphasis">Address</td>
-												<td class="font-weight-medium text-body-2 text-right">{{
-													applicantInfo.address
-												}}
-												</td>
-											</tr>
 
-										</tbody>
-									</v-table>
-
-								</v-col>
-
-								<v-col cols="12" md="6" class="with-divider">
-									<div>
-										<v-table>
-											<tbody>
-
-												<tr>
-													<td class="text-medium-emphasis">Date of Birth (AD)</td>
-													<td class="font-weight-medium text-body-2 text-right">{{
-														applicantInfo.dobAd
-													}}
-													</td>
-												</tr>
-												<tr>
-													<td class="text-medium-emphasis">Date of Birth (BS)</td>
-													<td class="font-weight-medium text-body-2 text-right">{{
-														applicantInfo.dobBs
-													}}
-													</td>
-												</tr>
-												<tr>
-													<td class="text-medium-emphasis">Marital Status</td>
-													<td class="font-weight-medium text-body-2 text-right">
-														{{ applicantInfo.maritalStatus }}
-													</td>
-												</tr>
-												<tr>
-													<td class="text-medium-emphasis">Citizenship Number</td>
-													<td class="font-weight-medium text-body-2 text-right">
-														{{ applicantInfo.citizenshipNumber }}
-													</td>
-												</tr>
-												<tr>
-													<td class="text-medium-emphasis">Agreed to Terms</td>
-													<td class="font-weight-medium text-body-2 text-right">{{
-														applicantInfo.agreed
-													}}
-													</td>
-												</tr>
-											</tbody>
-										</v-table>
-									</div>
-								</v-col>
-
-							</v-row>
+						<div class="field-section-title">Applicant details</div>
+						<div class="field-grid">
+							<div v-for="field in applicantFields" :key="field.label" class="field">
+								<div class="field__label">{{ field.label }}</div>
+								<div class="field__value" :class="{ 'field__value--empty': isEmptyValue(field.value) }">{{ field.value }}</div>
+							</div>
 						</div>
+
+						<template v-if="accountFields.length">
+							<div class="field-section-title mt-5">
+								Logged-in account
+								<v-chip v-if="identityMismatch" size="x-small" color="warning" variant="tonal" class="ml-2">Different from applicant</v-chip>
+							</div>
+							<div class="field-grid">
+								<div v-for="field in accountFields" :key="field.label" class="field">
+									<div class="field__label">{{ field.label }}</div>
+									<div class="field__value">{{ field.value }}</div>
+								</div>
+							</div>
+						</template>
 						<DocGrid class="mt-4" :items="applicantInfo?.documents || []" />
 					</div>
 				</v-card>
@@ -541,6 +464,29 @@ const identityMismatch = computed(() => {
 	return applicantEmail !== '' && applicantEmail !== 'n/a' && accountEmail !== '' && applicantEmail !== accountEmail;
 });
 
+const isEmptyValue = (value: string) => ['', 'N/A', 'Not provided'].includes(value.trim());
+
+const applicantFields = computed(() => [
+	{ label: 'Full Name', value: applicantInfo.value.name },
+	{ label: "Grandfather's Name", value: applicantInfo.value.grandfatherName },
+	{ label: 'Email', value: applicantInfo.value.email },
+	{ label: 'Phone', value: applicantInfo.value.phone },
+	{ label: 'Gender', value: applicantInfo.value.gender },
+	{ label: 'Address', value: applicantInfo.value.address },
+	{ label: 'Date of Birth (AD)', value: applicantInfo.value.dobAd },
+	{ label: 'Date of Birth (BS)', value: applicantInfo.value.dobBs },
+	{ label: 'Marital Status', value: applicantInfo.value.maritalStatus },
+	{ label: 'Citizenship Number', value: applicantInfo.value.citizenshipNumber },
+	{ label: 'Agreed to Terms', value: applicantInfo.value.agreed },
+]);
+
+const accountFields = computed(() =>
+	[
+		{ label: 'Account Name', value: accountHolder.value.name },
+		{ label: 'Account Email', value: accountHolder.value.email },
+	].filter((field) => field.value !== ''),
+);
+
 const financialInfo = computed(() => {
 	const price = Number(application.value.product?.price ?? application.value.product_price ?? 0);
 	const emi = Number(application.value.emi_per_month ?? 0);
@@ -742,5 +688,62 @@ onMounted(fetchDetail);
 	.docs-grid {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
+}
+
+.field-section-title {
+	font-size: 0.8125rem;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	color: rgba(var(--v-theme-on-surface), 0.7);
+	margin-bottom: 10px;
+}
+
+.field-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+	gap: 14px 24px;
+}
+
+.field {
+	min-width: 0;
+	padding-bottom: 10px;
+	border-bottom: 1px solid rgba(var(--v-border-color), 0.12);
+}
+
+.field__label {
+	font-size: 0.75rem;
+	color: rgba(var(--v-theme-on-surface), 0.6);
+	margin-bottom: 2px;
+}
+
+.field__value {
+	font-size: 0.9rem;
+	font-weight: 500;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+}
+
+.field__value--empty {
+	font-weight: 400;
+	font-style: italic;
+	color: rgba(var(--v-theme-on-surface), 0.45);
+}
+
+.identity-compare {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 12px;
+}
+
+.identity-box {
+	min-width: 0;
+	padding: 10px 12px;
+	border-radius: 8px;
+	background: rgba(var(--v-theme-surface), 0.7);
+}
+
+.wrap-anywhere {
+	overflow-wrap: anywhere;
+	word-break: break-word;
 }
 </style>
