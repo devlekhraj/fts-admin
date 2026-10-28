@@ -23,11 +23,18 @@ class EmiRequestListResource extends JsonResource
         return [
             'id' => $this->id,
             'application_code' => $this->application_code ?? $this->id,
+            // The person the application is for (what they typed in the form). The quotation and the approval
+            // email use these details, so the admin must show them too, not the login account's.
             'user' => [
-                'name' => $this->user?->name ?? $this->name ?? $this->email,
-                'email' => $this->user?->email ?? $this->email,
+                'name' => $this->name ?: ($this->user?->name ?? $this->email),
+                'email' => $this->email ?: $this->user?->email,
                 'avatar' => $this->user?->avatar ?? 'https://placehold.co/32',
             ],
+            'account' => [
+                'name' => $this->user?->name,
+                'email' => $this->user?->email,
+            ],
+            'identity_mismatch' => $this->identityMismatch(),
             'product' => [
                 'name' => $this->product?->name ?? null,
                 'thumb' => $this->resolveProductThumb(),
@@ -41,6 +48,15 @@ class EmiRequestListResource extends JsonResource
             'created_at' => $this->created_at,
 
         ];
+    }
+
+    /** True when the account that submitted the application belongs to someone else (different email). */
+    private function identityMismatch(): bool
+    {
+        $applicant = strtolower(trim((string) $this->email));
+        $account = strtolower(trim((string) $this->user?->email));
+
+        return $applicant !== '' && $account !== '' && $applicant !== $account;
     }
 
     private function detailResponse(): array

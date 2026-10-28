@@ -32,6 +32,10 @@
 					<div>
 						<p class="ml-3 text-primary">{{ item.user?.name ?? '-' }}</p>
 						<p class="ml-3">{{ item.user?.email ?? '-' }}</p>
+						<p v-if="item.account?.email" class="ml-3 text-caption text-medium-emphasis">
+							Account: {{ item.account.email }}
+							<v-chip v-if="item.identity_mismatch" size="x-small" color="warning" variant="tonal" class="ml-1">Different</v-chip>
+						</p>
 					</div>
 				</div>
 			</template>

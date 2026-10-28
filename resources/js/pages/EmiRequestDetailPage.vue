@@ -23,6 +23,9 @@
 						<div class="text-body-2 text-medium-emphasis mt-1 dot-line">
 							{{ applicantInfo.name }} · {{ applicantInfo.phone }} · {{ applicantInfo.email }}
 						</div>
+						<div v-if="accountHolder.email" class="text-caption text-medium-emphasis mt-1">
+							Account: {{ accountHolder.name }} · {{ accountHolder.email }}
+						</div>
 					</div>
 				</div>
 				<div class="summary__right">
@@ -39,6 +42,12 @@
 						Information</v-card-title>
 					<v-divider></v-divider>
 					<div class="pa-4">
+						<v-alert v-if="identityMismatch" type="warning" variant="tonal" density="compact" class="mb-4">
+							The account that submitted this application (<strong>{{ accountHolder.name || 'unknown' }}</strong>,
+							{{ accountHolder.email }}) is different from the applicant (<strong>{{ applicantInfo.name }}</strong>,
+							{{ applicantInfo.email }}). The quotation and approval email go to the applicant's email.
+							Please confirm who this application is for before approving.
+						</v-alert>
 						<div>
 							<v-row>
 								<v-col cols="12" md="6">
@@ -59,10 +68,17 @@
 												</td>
 											</tr>
 											<tr>
-												<td class="text-medium-emphasis">Email</td>
+												<td class="text-medium-emphasis">Applicant Email</td>
 												<td class="font-weight-medium text-body-2 text-right">{{
 													applicantInfo.email
 												}}
+												</td>
+											</tr>
+											<tr v-if="accountHolder.email">
+												<td class="text-medium-emphasis">Account Email</td>
+												<td class="font-weight-medium text-body-2 text-right">
+													{{ accountHolder.email }}
+													<v-chip v-if="identityMismatch" size="x-small" color="warning" variant="tonal" class="ml-1">Different</v-chip>
 												</td>
 											</tr>
 											<tr>
@@ -71,6 +87,10 @@
 													applicantInfo.phone
 												}}
 												</td>
+											</tr>
+											<tr v-if="accountHolder.name">
+												<td class="text-medium-emphasis">Account Name</td>
+												<td class="font-weight-medium text-body-2 text-right">{{ accountHolder.name }}</td>
 											</tr>
 											<tr>
 												<td class="text-medium-emphasis">Gender</td>
@@ -491,10 +511,11 @@ const emiType = computed(() => {
 const applicant = computed(() => (application.value.user ?? {}) as Record<string, unknown>);
 
 const applicantInfo = computed(() => ({
-	name: String(applicant.value.name ?? application.value.name ?? 'N/A'),
+	// What the customer typed into the application: the same details the quotation and approval email use.
+	name: String((application.value as any)?.name || applicant.value.name || 'N/A'),
 	grandfatherName: String((application.value as any)?.grandfather_name || 'N/A'),
-	email: String(applicant.value.email ?? 'N/A'),
-	phone: String(applicant.value.phone ?? applicant.value.mobile ?? 'N/A'),
+	email: String((application.value as any)?.email || applicant.value.email || 'N/A'),
+	phone: String((application.value as any)?.contact_number || applicant.value.phone || applicant.value.mobile || 'N/A'),
 	dobAd: String((application.value as any)?.dob_ad || 'Not provided'),
 	dobBs: String((application.value as any)?.dob_bs || 'Not provided'),
 	gender: String((application.value as any)?.gender || 'Not provided'),
@@ -507,6 +528,18 @@ const applicantInfo = computed(() => ({
 }));
 
 
+
+// The login account that submitted the application. It can belong to someone else (a relative or a friend).
+const accountHolder = computed(() => ({
+	name: String(applicant.value.name ?? '').trim(),
+	email: String(applicant.value.email ?? '').trim(),
+}));
+
+const identityMismatch = computed(() => {
+	const applicantEmail = applicantInfo.value.email.trim().toLowerCase();
+	const accountEmail = accountHolder.value.email.toLowerCase();
+	return applicantEmail !== '' && applicantEmail !== 'n/a' && accountEmail !== '' && applicantEmail !== accountEmail;
+});
 
 const financialInfo = computed(() => {
 	const price = Number(application.value.product?.price ?? application.value.product_price ?? 0);
