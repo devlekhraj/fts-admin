@@ -43,12 +43,18 @@ export type BlogFileItem = {
   size_info?: string | null;
 };
 
+export type BlogSchemaMarkup = {
+  faqs?: { question: string; answer: string }[];
+  custom?: string | null;
+};
+
 export type BlogDetailResponse = BlogListItem & {
   short_desc?: string | null;
   content?: string | null;
   meta_title?: string | null;
   meta_keywords?: string | null;
   meta_description?: string | null;
+  schema_markup?: BlogSchemaMarkup | null;
   updated_at?: string | null;
   category_id?: number | string | null;
   default_file?: Record<string, unknown> | null;

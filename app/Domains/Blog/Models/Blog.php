@@ -24,8 +24,13 @@ final class Blog extends BaseModel
         'meta_title',
         'meta_keywords',
         'meta_description',
+        'schema_markup',
         'category_id',
         'publish_date',
+    ];
+
+    protected $casts = [
+        'schema_markup' => 'array',
     ];
 
     public function category(): BelongsTo
