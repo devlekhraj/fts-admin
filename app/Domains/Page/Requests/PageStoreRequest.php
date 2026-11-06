@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Page\Requests;
 
+use App\Support\Rules\SchemaMarkupRules;
 use Illuminate\Foundation\Http\FormRequest;
 
 class PageStoreRequest extends FormRequest
@@ -15,7 +16,7 @@ class PageStoreRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        return array_merge(SchemaMarkupRules::rules(), [
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'string', 'max:255'],
             'content' => ['nullable', 'string'],
@@ -23,6 +24,6 @@ class PageStoreRequest extends FormRequest
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_keywords' => ['nullable', 'string'],
             'meta_description' => ['nullable', 'string'],
-        ];
+        ]);
     }
 }

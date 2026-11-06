@@ -22,6 +22,13 @@
               <div>
                 <RichText v-model="form.content" />
               </div>
+              <v-divider class="my-6" />
+              <v-form ref="schemaFormRef">
+                <schema-markup-editor
+                  :form="schema"
+                  hint="Extra schema for this page. Add FAQ questions or paste custom JSON-LD."
+                />
+              </v-form>
             </div>
           </v-col>
           <v-col cols="12" md="4">
@@ -76,6 +83,7 @@ import { getPageDetail, updatePage, type PageDetailResponse } from '@/api/pages.
 import { formatLongDate } from '@/shared/utils';
 import RichText from '@/components/RichText.vue';
 import AppTextField from '@/components/shared/AppTextField.vue';
+import SchemaMarkupEditor, { emptySchemaForm, schemaFromForm, schemaToForm } from '@/components/shared/SchemaMarkupEditor.vue';
 import { useSnackbarStore } from '@/stores/snackbar.store';
 
 const route = useRoute();
@@ -85,6 +93,9 @@ const saving = ref(false);
 const pageDetail = ref<PageDetailResponse | null>(null);
 const pageId = computed(() => String(route.params.id ?? ''));
 const snackbar = useSnackbarStore();
+
+const schemaFormRef = ref();
+const schema = reactive(emptySchemaForm());
 
 const form = reactive({
   title:'',
@@ -115,6 +126,7 @@ async function fetchPageDetail() {
     form.slug = detail?.slug ? String(detail.slug) : '';
     form.excerpt = detail?.excerpt ? String(detail.excerpt) : '';
     form.content = detail?.content ? String(detail.content) : '';
+    schemaToForm(detail?.schema_markup, schema);
 
     // Prefer root-level meta fields; fall back to meta object if present
     const meta = detail?.meta ?? {};
@@ -144,9 +156,11 @@ function goBack() {
 
 async function handleSavePage(){
   if (!pageId.value) return;
+  const { valid } = await schemaFormRef.value?.validate();
+  if (!valid) return;
   saving.value = true;
   try {
-    await updatePage(pageId.value, { ...form });
+    await updatePage(pageId.value, { ...form, schema_markup: schemaFromForm(schema) });
     snackbar.show({ message: 'Page updated successfully', color: 'success' });
     await fetchPageDetail();
   } catch (error: any) {

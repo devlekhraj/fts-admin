@@ -36,6 +36,7 @@ export type PageDetailResponse = PageListItem & {
   created_at?: string;
   updated_at?: string;
   excerpt?: string | null;
+  schema_markup?: { faqs?: { question: string; answer: string }[]; custom?: string | null } | null;
   meta_title?: string | null;
   meta_keywords?: string | null;
   meta_description?: string | null;
@@ -49,6 +50,7 @@ export type PagePayload = {
   meta_title?: string | null;
   meta_keywords?: string | null;
   meta_description?: string | null;
+  schema_markup?: { faqs?: { question: string; answer: string }[]; custom?: string | null } | null;
 };
 
 export async function listPages(params?: ListPagesParams): Promise<PageListResponse> {

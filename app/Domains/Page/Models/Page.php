@@ -18,7 +18,10 @@ final class Page extends BaseModel
         'meta_title',
         'meta_keywords',
         'meta_description',
+        'schema_markup',
     ];
 
-    protected $casts = [];
+    protected $casts = [
+        'schema_markup' => 'array',
+    ];
 }

@@ -24,6 +24,7 @@ class PageResource extends JsonResource
                 'meta_title' => $this->meta_title,
                 'meta_keywords' => $this->meta_keywords,
                 'meta_description' => $this->meta_description,
+                'schema_markup' => $this->schema_markup,
                 'meta' => [
                     'excerpt' => $this->excerpt,
                     'meta_title' => $this->meta_title,
