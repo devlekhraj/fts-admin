@@ -34,6 +34,12 @@ return [
         'invalidate_secret' => env('STOREFRONT_INVALIDATE_SECRET'),
     ],
 
+    // Trade-in (exchange) requests: who is emailed when a customer sends a new one.
+    // Leave EXCHANGE_NOTIFY_EMAIL empty to use the site's own sender address (MAIL_FROM_ADDRESS).
+    'exchange' => [
+        'notify_email' => env('EXCHANGE_NOTIFY_EMAIL'),
+    ],
+
     // Private customer documents (emi-requests/...) are only reachable through time-limited signed links.
     // The secret must match the one in the image server's nginx config (snippets/img-emi-secret.conf).
     'media' => [

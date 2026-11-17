@@ -6,6 +6,7 @@ namespace App\Domains\Exchange\Controllers;
 
 use App\Domains\Exchange\Models\ExchangeRequest;
 use App\Domains\Exchange\Models\ExchangeRequestLog;
+use App\Domains\Exchange\Services\ExchangeNotifier;
 use App\Support\MediaUrl;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,6 +16,8 @@ use Illuminate\Validation\Rule;
 
 final class ExchangeRequestController extends Controller
 {
+    public function __construct(private readonly ExchangeNotifier $notifier) {}
+
     public function index(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -106,7 +109,7 @@ final class ExchangeRequestController extends Controller
 
         $actor = auth('admin_api')->user();
 
-        return DB::transaction(function () use ($id, $to, $validated, $actor) {
+        $response = DB::transaction(function () use ($id, $to, $validated, $actor) {
             $row = ExchangeRequest::query()->select(ExchangeRequest::READABLE)->lockForUpdate()->findOrFail($id);
 
             if (! in_array($to, ExchangeRequest::TRANSITIONS[$row->status] ?? [], true)) {
@@ -138,6 +141,13 @@ final class ExchangeRequestController extends Controller
 
             return response()->json(['success' => true, 'message' => 'Request updated.', 'data' => ['id' => $row->id, 'status' => $row->status]]);
         });
+
+        // Tell the customer by email once the change is saved. A failed email never undoes the decision.
+        if ($response->getStatusCode() === 200) {
+            $this->notifier->notifyCustomerOfDecision($id, $to);
+        }
+
+        return $response;
     }
 
     private function summary(ExchangeRequest $r): array
