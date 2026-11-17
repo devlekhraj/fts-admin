@@ -15,7 +15,12 @@
           variant="outlined"
           density="comfortable"
           auto-grow
-          rows="12" />
+          rows="12"
+          persistent-placeholder
+          :placeholder="placeholder"
+          :rules="[jsonRule]"
+          hint="Paste only the JSON, without script tags. Leave empty if not needed."
+          persistent-hint />
       </v-col>
     </v-row>
   </div>
@@ -39,6 +44,19 @@ const form = reactive({
 });
 const saving = ref(false);
 
+const placeholder = '{"@context": "https://schema.org", "@type": "Product"}';
+
+function jsonRule(v: string) {
+  const text = String(v ?? '').trim();
+  if (!text) return true;
+  try {
+    const parsed = JSON.parse(text);
+    return (parsed && typeof parsed === 'object') || 'Schema must be a JSON object or list';
+  } catch {
+    return 'Schema must be valid JSON';
+  }
+}
+
 watch(
   () => props.item,
   (item) => {
@@ -50,6 +68,7 @@ watch(
 async function onUpdate() {
   const id = String(props.productId ?? '').trim();
   if (!id) return;
+  if (jsonRule(form.schema_jsonld) !== true) return; // the box already shows what is wrong
 
   saving.value = true;
   try {
