@@ -9,6 +9,7 @@ use App\Domains\Exchange\Models\ExchangeValuation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 /** Prices and condition deductions used by the customer's trade-in estimate. */
@@ -51,6 +52,11 @@ final class ExchangePricingController extends Controller
             'sort_order' => (int) ExchangeValuation::query()->max('sort_order') + 1,
         ]);
 
+        $this->recordAudit('valuation', $row->id, "Added {$row->model} {$row->storage_gb} GB", [
+            'base_value' => ['from' => null, 'to' => $row->base_value],
+            'confidence' => ['from' => null, 'to' => $row->confidence],
+        ]);
+
         return response()->json(['success' => true, 'message' => 'Price added.', 'data' => $this->valuation($row)]);
     }
 
@@ -66,8 +72,13 @@ final class ExchangePricingController extends Controller
 
         $row = ExchangeValuation::query()->findOrFail($id);
         $row->fill($data);
+        $changes = $this->diff($row, ['base_value', 'admin_override', 'confidence', 'evidence_note', 'is_active']);
         $row->effective_date = now()->toDateString();
         $row->save();
+
+        if ($changes !== []) {
+            $this->recordAudit('valuation', $row->id, "Changed {$row->model} {$row->storage_gb} GB", $changes);
+        }
 
         return response()->json(['success' => true, 'message' => 'Price saved.', 'data' => $this->valuation($row)]);
     }
@@ -89,9 +100,59 @@ final class ExchangePricingController extends Controller
         ]);
 
         $row = ExchangeDamageRule::query()->findOrFail($id);
-        $row->fill($data)->save();
+        $row->fill($data);
+        $changes = $this->diff($row, ['deduction_percent', 'guidance', 'requires_manual_review', 'is_active']);
+        $row->save();
+
+        if ($changes !== []) {
+            $this->recordAudit('rule', $row->id, 'Changed ' . $row->label, $changes);
+        }
 
         return response()->json(['success' => true, 'message' => 'Condition saved.', 'data' => $this->rule($row)]);
+    }
+
+    /** Who changed which price or deduction, newest first. */
+    public function auditLog(Request $request): JsonResponse
+    {
+        $rows = DB::table('exchange_pricing_audit')->orderByDesc('id')->limit(200)->get();
+
+        return response()->json(['data' => $rows->map(fn ($r) => [
+            'id' => $r->id,
+            'entity' => $r->entity,
+            'entity_id' => $r->entity_id,
+            'summary' => $r->summary,
+            'changes' => json_decode((string) $r->changes, true) ?: [],
+            'admin_name' => $r->admin_name,
+            'created_at' => $r->created_at,
+        ])->all()]);
+    }
+
+    /** @param array<int, string> $fields */
+    private function diff($model, array $fields): array
+    {
+        $changes = [];
+        foreach ($fields as $field) {
+            if ($model->isDirty($field)) {
+                $changes[$field] = ['from' => $model->getOriginal($field), 'to' => $model->getAttribute($field)];
+            }
+        }
+
+        return $changes;
+    }
+
+    private function recordAudit(string $entity, int $id, string $summary, array $changes): void
+    {
+        $actor = auth('admin_api')->user();
+
+        DB::table('exchange_pricing_audit')->insert([
+            'entity' => $entity,
+            'entity_id' => $id,
+            'summary' => mb_substr($summary, 0, 255),
+            'changes' => json_encode($changes, JSON_UNESCAPED_UNICODE),
+            'admin_id' => $actor?->getAuthIdentifier(),
+            'admin_name' => is_object($actor) && isset($actor->name) ? mb_substr((string) $actor->name, 0, 120) : null,
+            'created_at' => now(),
+        ]);
     }
 
     private function valuation(ExchangeValuation $v): array

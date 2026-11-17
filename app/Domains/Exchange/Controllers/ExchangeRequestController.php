@@ -16,6 +16,9 @@ use Illuminate\Validation\Rule;
 
 final class ExchangeRequestController extends Controller
 {
+    /** Same cap the customer estimate uses. */
+    private const MAX_DEDUCTION_PERCENT = 70;
+
     public function __construct(private readonly ExchangeNotifier $notifier) {}
 
     public function index(Request $request): JsonResponse
@@ -77,12 +80,16 @@ final class ExchangeRequestController extends Controller
                 'admin_note' => $row->admin_note,
                 'customer_note' => $row->customer_note,
                 'allowed_statuses' => ExchangeRequest::TRANSITIONS[$row->status] ?? [],
+                'rule_version' => data_get($row->estimate_breakdown, 'rule_version'),
+                'flags' => (array) data_get($row->estimate_breakdown, 'flags', []),
+                'approval_requires' => $this->approvalRequirements($row),
                 'logs' => $row->logs->map(fn (ExchangeRequestLog $l) => [
                     'id' => $l->id,
                     'from_status' => $l->from_status,
                     'to_status' => $l->to_status,
                     'changed_by_type' => $l->changed_by_type,
                     'note' => $l->note,
+                    'meta' => $l->meta,
                     'created_at' => $l->created_at,
                 ])->all(),
             ],
@@ -96,6 +103,9 @@ final class ExchangeRequestController extends Controller
             'admin_offer' => ['nullable', 'numeric', 'min:0', 'max:10000000'],
             'admin_note' => ['nullable', 'string', 'max:2000'],
             'customer_note' => ['nullable', 'string', 'max:1000'],
+            'inspection_note' => ['nullable', 'string', 'max:2000'],
+            'override_reason' => ['nullable', 'string', 'max:1000'],
+            'cap_override_reason' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $to = $validated['status'];
@@ -114,6 +124,15 @@ final class ExchangeRequestController extends Controller
 
             if (! in_array($to, ExchangeRequest::TRANSITIONS[$row->status] ?? [], true)) {
                 return $this->fail("A {$row->status} request cannot be moved to {$to}.");
+            }
+
+            // Approving a phone that needs a manual check, is on hold, or is offered below the 70% cap needs the
+            // admin's written record (this is what the audit log keeps).
+            if ($to === ExchangeRequest::STATUS_APPROVED) {
+                $problem = $this->approvalProblem($row, $validated);
+                if ($problem !== null) {
+                    return $this->fail($problem[0], $problem[1]);
+                }
             }
 
             $from = $row->status;
@@ -136,6 +155,7 @@ final class ExchangeRequestController extends Controller
                 'changed_by' => $actor?->getAuthIdentifier(),
                 'changed_by_type' => 'admin',
                 'note' => $validated['admin_note'] ?? ($validated['customer_note'] ?? null),
+                'meta' => $this->auditSnapshot($row, $to, $validated, $actor),
                 'created_at' => now(),
             ]);
 
@@ -150,6 +170,66 @@ final class ExchangeRequestController extends Controller
         return $response;
     }
 
+    /** What an admin must write down before this request can be approved. */
+    private function approvalRequirements(ExchangeRequest $r): array
+    {
+        $breakdown = $r->estimate_breakdown;
+        $base = data_get($breakdown, 'base_value');
+
+        return [
+            'inspection_note' => (bool) data_get($breakdown, 'needs_manual_review', true),
+            'override_reason' => (bool) data_get($breakdown, 'hold', false),
+            // An offer below this amount takes off more than the 70% cap allows.
+            'cap_floor' => is_numeric($base) && $base > 0 ? (int) round($base * (1 - self::MAX_DEDUCTION_PERCENT / 100)) : null,
+        ];
+    }
+
+    /** @return array{0: string, 1: array<string, array<int, string>>}|null */
+    private function approvalProblem(ExchangeRequest $r, array $input): ?array
+    {
+        $need = $this->approvalRequirements($r);
+        $text = fn (string $key) => trim((string) ($input[$key] ?? ''));
+
+        if ($need['inspection_note'] && mb_strlen($text('inspection_note')) < 5) {
+            return ['Write what you found when you checked the phone before approving.', ['inspection_note' => ['The inspection note is required.']]];
+        }
+        if ($need['override_reason'] && mb_strlen($text('override_reason')) < 10) {
+            return ['This request is on hold. Record who authorised approving it and why.', ['override_reason' => ['The hold override reason is required.']]];
+        }
+        $offer = (float) ($input['admin_offer'] ?? 0);
+        if ($need['cap_floor'] !== null && $offer < $need['cap_floor'] && mb_strlen($text('cap_override_reason')) < 10) {
+            return [
+                'This offer takes off more than 70% of the phone value. Record the authorised reason for going past the cap.',
+                ['cap_override_reason' => ['The cap override reason is required.']],
+            ];
+        }
+
+        return null;
+    }
+
+    /** The audit record of one decision: values as they were, who decided, and under which price and rule version. */
+    private function auditSnapshot(ExchangeRequest $r, string $to, array $input, mixed $actor): array
+    {
+        $b = $r->estimate_breakdown;
+
+        return [
+            'status' => $to,
+            'admin_id' => $actor?->getAuthIdentifier(),
+            'admin_name' => is_object($actor) && isset($actor->name) ? (string) $actor->name : null,
+            'rule_version' => data_get($b, 'rule_version'),
+            'base_value' => data_get($b, 'base_value'),
+            'deductions' => data_get($b, 'deductions'),
+            'calculated_value' => (float) $r->customer_estimate,
+            'final_offer' => $r->admin_offer !== null ? (float) $r->admin_offer : null,
+            'needs_manual_review' => (bool) data_get($b, 'needs_manual_review', true),
+            'hold' => (bool) data_get($b, 'hold', false),
+            'flags' => (array) data_get($b, 'flags', []),
+            'inspection_note' => trim((string) ($input['inspection_note'] ?? '')) ?: null,
+            'override_reason' => trim((string) ($input['override_reason'] ?? '')) ?: null,
+            'cap_override_reason' => trim((string) ($input['cap_override_reason'] ?? '')) ?: null,
+        ];
+    }
+
     private function summary(ExchangeRequest $r): array
     {
         return [
@@ -162,6 +242,7 @@ final class ExchangeRequestController extends Controller
             'customer_estimate' => $r->customer_estimate,
             'admin_offer' => $r->admin_offer,
             'needs_manual_review' => (bool) data_get($r->estimate_breakdown, 'needs_manual_review', true),
+            'hold' => (bool) data_get($r->estimate_breakdown, 'hold', false),
             'created_at' => $r->created_at,
         ];
     }

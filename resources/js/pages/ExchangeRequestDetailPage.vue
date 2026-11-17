@@ -44,6 +44,9 @@
             <v-card-title>Customer's estimate</v-card-title>
             <v-card-text>
               <div class="text-h6 mb-2">{{ formatNPR(request.customer_estimate) }}</div>
+              <v-alert v-if="request.hold" type="error" variant="tonal" density="compact" class="mb-3">
+                This request is <strong>on hold</strong>. Do not make an offer until the phone has been checked. Approving it needs a recorded authorisation.
+              </v-alert>
               <v-alert v-if="request.needs_manual_review" type="warning" variant="tonal" density="compact" class="mb-3">
                 Check this device in person before confirming a price (low-confidence model, severe damage, or an estimate made on the old form).
                 <ul v-if="breakdown?.flags?.length" class="mt-2 ml-4">
@@ -51,6 +54,7 @@
                 </ul>
               </v-alert>
 
+              <div v-if="request.rule_version" class="text-caption text-medium-emphasis mb-2">Prices and rules version: {{ request.rule_version }}</div>
               <template v-if="breakdown">
                 <div class="mb-2">
                   <strong>{{ breakdown.model }}</strong> {{ breakdown.storage_gb }} GB, clean value {{ formatNPR(breakdown.base_value) }}
@@ -123,6 +127,13 @@
                 </div>
                 <div class="text-caption text-medium-emphasis">{{ formatDateTime(log.created_at) }}</div>
                 <div v-if="log.note" class="text-body-2">{{ log.note }}</div>
+                <div v-if="log.meta?.admin_name" class="text-caption text-medium-emphasis">Decided by {{ log.meta.admin_name }}</div>
+                <div v-if="log.meta?.final_offer != null" class="text-caption text-medium-emphasis">
+                  Calculated {{ formatNPR(log.meta.calculated_value) }}, final offer {{ formatNPR(log.meta.final_offer) }}
+                </div>
+                <div v-if="log.meta?.inspection_note" class="text-caption">Inspection: {{ log.meta.inspection_note }}</div>
+                <div v-if="log.meta?.override_reason" class="text-caption">Hold override: {{ log.meta.override_reason }}</div>
+                <div v-if="log.meta?.cap_override_reason" class="text-caption">Cap override: {{ log.meta.cap_override_reason }}</div>
               </div>
             </v-card-text>
           </v-card>
@@ -153,6 +164,38 @@
             variant="outlined"
             :error-messages="errors.customer_note"
           />
+          <template v-if="target === 'approved'">
+            <v-textarea
+              v-if="request?.approval_requires.inspection_note"
+              v-model="inspectionNote"
+              label="What you found when you checked the phone (required)"
+              rows="2"
+              auto-grow
+              variant="outlined"
+              :error-messages="errors.inspection_note"
+            />
+            <v-textarea
+              v-if="request?.approval_requires.override_reason"
+              v-model="overrideReason"
+              label="This request is on hold: who authorised approving it, and why (required)"
+              rows="2"
+              auto-grow
+              variant="outlined"
+              :error-messages="errors.override_reason"
+            />
+            <v-alert v-if="belowCap" type="warning" variant="tonal" density="compact" class="mb-3">
+              This offer takes off more than 70% of the phone value (the lowest offer inside the cap is {{ formatNPR(request?.approval_requires.cap_floor) }}).
+            </v-alert>
+            <v-textarea
+              v-if="belowCap"
+              v-model="capOverrideReason"
+              label="Authorised reason for going past the 70% cap (required)"
+              rows="2"
+              auto-grow
+              variant="outlined"
+              :error-messages="errors.cap_override_reason"
+            />
+          </template>
           <v-textarea v-model="adminNote" label="Internal note (optional)" rows="2" auto-grow variant="outlined" />
         </v-card-text>
         <v-card-actions class="justify-end">
@@ -199,6 +242,9 @@ const target = ref<ExchangeStatus>('under_review');
 const offer = ref('');
 const customerNote = ref('');
 const adminNote = ref('');
+const inspectionNote = ref('');
+const overrideReason = ref('');
+const capOverrideReason = ref('');
 const errors = ref<Record<string, string[]>>({});
 
 const breakdown = computed<Breakdown | null>(() => {
@@ -215,6 +261,11 @@ function toLines(source: unknown): { k: string; v: string }[] {
 
 const legacyAnswers = computed(() => (breakdown.value ? [] : toLines(request.value?.condition_answers)));
 const pickupLines = computed(() => toLines(request.value?.pickup_info));
+
+const belowCap = computed(() => {
+  const floor = request.value?.approval_requires.cap_floor;
+  return target.value === 'approved' && floor != null && offer.value !== '' && Number(offer.value) < floor;
+});
 
 const dialogTitle = computed(() => ({
   under_review: 'Mark this request under review',
@@ -234,6 +285,9 @@ function open(status: ExchangeStatus) {
   offer.value = status === 'approved' && request.value ? String(request.value.admin_offer ?? request.value.customer_estimate ?? '') : '';
   customerNote.value = '';
   adminNote.value = '';
+  inspectionNote.value = '';
+  overrideReason.value = '';
+  capOverrideReason.value = '';
   errors.value = {};
   dialog.value = true;
 }
@@ -259,6 +313,9 @@ async function submit() {
       admin_offer: target.value === 'approved' ? Number(offer.value) : null,
       admin_note: adminNote.value.trim() || null,
       customer_note: customerNote.value.trim() || null,
+      inspection_note: inspectionNote.value.trim() || null,
+      override_reason: overrideReason.value.trim() || null,
+      cap_override_reason: capOverrideReason.value.trim() || null,
     });
     showSuccess('Request updated');
     dialog.value = false;

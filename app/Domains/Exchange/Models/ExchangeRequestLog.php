@@ -12,5 +12,7 @@ final class ExchangeRequestLog extends Model
 
     protected $table = 'exchange_request_logs';
 
-    protected $fillable = ['exchange_request_id', 'from_status', 'to_status', 'changed_by', 'changed_by_type', 'note', 'created_at'];
+    protected $fillable = ['exchange_request_id', 'from_status', 'to_status', 'changed_by', 'changed_by_type', 'note', 'meta', 'created_at'];
+
+    protected $casts = ['meta' => 'array'];
 }

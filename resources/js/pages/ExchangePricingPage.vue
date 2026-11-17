@@ -11,6 +11,7 @@
       <v-tabs v-model="tab" class="mb-4">
         <v-tab value="prices">Prices</v-tab>
         <v-tab value="conditions">Conditions</v-tab>
+        <v-tab value="history" @click="loadHistory">Change history</v-tab>
       </v-tabs>
 
       <v-window v-model="tab">
@@ -67,6 +68,29 @@
             </v-card-text>
           </v-card>
           <div class="text-caption text-medium-emphasis">The total deduction is always capped at 70% of the clean value.</div>
+        </v-window-item>
+        <v-window-item value="history">
+          <v-card variant="flat">
+            <v-card-text>
+              <v-skeleton-loader v-if="loadingHistory" type="table" />
+              <div v-else-if="history.length === 0" class="text-medium-emphasis">No price or condition has been changed yet.</div>
+              <v-table v-else density="compact">
+                <thead><tr><th>When</th><th>Who</th><th>What</th><th>Change</th></tr></thead>
+                <tbody>
+                  <tr v-for="h in history" :key="h.id">
+                    <td>{{ formatDateTime(h.created_at) }}</td>
+                    <td>{{ h.admin_name || '-' }}</td>
+                    <td>{{ h.summary }}</td>
+                    <td>
+                      <div v-for="(c, field) in h.changes" :key="field" class="text-caption">
+                        {{ field.replace(/_/g, ' ') }}: {{ c.from ?? '-' }} &rarr; {{ c.to ?? '-' }}
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </v-table>
+            </v-card-text>
+          </v-card>
         </v-window-item>
       </v-window>
     </v-container>
@@ -125,13 +149,15 @@ import AppPageHeader from '@/components/AppPageHeader.vue';
 import {
   createExchangeValuation,
   listExchangeDamageRules,
+  listExchangePricingAudit,
   listExchangeValuations,
   updateExchangeDamageRule,
   updateExchangeValuation,
   type ExchangeDamageRule,
+  type ExchangePricingAuditEntry,
   type ExchangeValuation,
 } from '@/api/exchange.api';
-import { formatNPR } from '@/shared/formatters';
+import { formatDateTime, formatNPR } from '@/shared/formatters';
 import { useSnackbar } from '@/composables/snackbar';
 
 const { showSuccess, showError } = useSnackbar();
@@ -141,6 +167,17 @@ const prices = ref<ExchangeValuation[]>([]);
 const rules = ref<ExchangeDamageRule[]>([]);
 const loadingPrices = ref(true);
 const loadingRules = ref(true);
+const history = ref<ExchangePricingAuditEntry[]>([]);
+const loadingHistory = ref(false);
+
+async function loadHistory() {
+  loadingHistory.value = true;
+  try {
+    history.value = (await listExchangePricingAudit()).data ?? [];
+  } finally {
+    loadingHistory.value = false;
+  }
+}
 const priceSearch = ref('');
 const saving = ref(false);
 const errors = ref<Record<string, string[]>>({});

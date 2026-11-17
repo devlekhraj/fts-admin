@@ -12,8 +12,22 @@ export type ExchangeRequestListItem = {
   customer_estimate: number;
   admin_offer: number | null;
   needs_manual_review: boolean;
+  hold: boolean;
   created_at: string;
 };
+
+export type ExchangeAuditMeta = {
+  admin_name?: string | null;
+  rule_version?: string | null;
+  base_value?: number | null;
+  calculated_value?: number | null;
+  final_offer?: number | null;
+  inspection_note?: string | null;
+  override_reason?: string | null;
+  cap_override_reason?: string | null;
+  flags?: string[];
+  hold?: boolean;
+} | null;
 
 export type ExchangeRequestLog = {
   id: number;
@@ -21,6 +35,7 @@ export type ExchangeRequestLog = {
   to_status: string;
   changed_by_type: string;
   note: string | null;
+  meta: ExchangeAuditMeta;
   created_at: string;
 };
 
@@ -50,6 +65,9 @@ export type ExchangeRequestDetail = ExchangeRequestListItem & {
   admin_note: string | null;
   customer_note: string | null;
   allowed_statuses: ExchangeStatus[];
+  rule_version: string | null;
+  flags: string[];
+  approval_requires: { inspection_note: boolean; override_reason: boolean; cap_floor: number | null };
   logs: ExchangeRequestLog[];
 };
 
@@ -88,6 +106,19 @@ export type ExchangeStatusPayload = {
   admin_offer?: number | null;
   admin_note?: string | null;
   customer_note?: string | null;
+  inspection_note?: string | null;
+  override_reason?: string | null;
+  cap_override_reason?: string | null;
+};
+
+export type ExchangePricingAuditEntry = {
+  id: number;
+  entity: 'valuation' | 'rule';
+  entity_id: number;
+  summary: string;
+  changes: Record<string, { from: unknown; to: unknown }>;
+  admin_name: string | null;
+  created_at: string;
 };
 
 export async function listExchangeRequests(params?: Record<string, unknown>): Promise<ExchangeRequestListResponse> {
@@ -133,4 +164,8 @@ export async function updateExchangeDamageRule(
   payload: Pick<ExchangeDamageRule, 'deduction_percent' | 'guidance' | 'requires_manual_review' | 'is_active'>,
 ) {
   return (await http.put(`/admin/exchange-damage-rules/${id}`, payload)) as unknown as { success: boolean; message: string; data: ExchangeDamageRule };
+}
+
+export async function listExchangePricingAudit(): Promise<{ data: ExchangePricingAuditEntry[] }> {
+  return (await http.get('/admin/exchange-pricing-audit')) as unknown as { data: ExchangePricingAuditEntry[] };
 }

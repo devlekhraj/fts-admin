@@ -53,6 +53,7 @@
       </template>
       <template #item.customer_estimate="{ item }">
         <div>{{ formatNPR(item.customer_estimate) }}</div>
+        <v-chip v-if="item.hold" size="x-small" color="error" variant="tonal" label class="mr-1">On hold</v-chip>
         <v-chip v-if="item.needs_manual_review" size="x-small" color="warning" variant="tonal" label>Manual review</v-chip>
       </template>
       <template #item.admin_offer="{ item }">

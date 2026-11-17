@@ -15,6 +15,7 @@ Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::post('exchange-valuations', [ExchangePricingController::class, 'storeValuation'])->name('admin.exchange-valuations.store');
     Route::put('exchange-valuations/{id}', [ExchangePricingController::class, 'updateValuation'])->whereNumber('id')->name('admin.exchange-valuations.update');
 
+    Route::get('exchange-pricing-audit', [ExchangePricingController::class, 'auditLog'])->name('admin.exchange-pricing-audit.index');
     Route::get('exchange-damage-rules', [ExchangePricingController::class, 'rules'])->name('admin.exchange-damage-rules.index');
     Route::put('exchange-damage-rules/{id}', [ExchangePricingController::class, 'updateRule'])->whereNumber('id')->name('admin.exchange-damage-rules.update');
 });
