@@ -18,7 +18,7 @@ namespace App\Support;
 final class MediaUrl
 {
     /** Folders whose files are private and need a signed link. */
-    private const PROTECTED_PREFIXES = ['emi-requests/'];
+    private const PROTECTED_PREFIXES = ['emi-requests/', 'exchange-requests/'];
 
     public static function for(string $relativePath, ?string $baseUrl = null): string
     {

@@ -25,6 +25,10 @@ const routes: RouteRecordRaw[] = [
       // emi requests
       { path: 'emi-requests', name: 'admin.emi.requests', component: () => import('@/pages/EmiRequestPage.vue'), meta: { title: 'EMI Requests' } },
       { path: 'emi-requests/:id', name: 'admin.emi.requests.detail', component: () => import('@/pages/EmiRequestDetailPage.vue'), meta: { title: 'EMI Request Detail' } },
+      // exchange (trade-in)
+      { path: 'exchange-requests', name: 'admin.exchange.requests', component: () => import('@/pages/ExchangeRequestPage.vue'), meta: { title: 'Exchange Requests' } },
+      { path: 'exchange-requests/:id', name: 'admin.exchange.requests.detail', component: () => import('@/pages/ExchangeRequestDetailPage.vue'), meta: { title: 'Exchange Request' } },
+      { path: 'exchange-prices', name: 'admin.exchange.pricing', component: () => import('@/pages/ExchangePricingPage.vue'), meta: { title: 'Exchange Prices' } },
       { path: 'emi-users', name: 'admin.emi.users', component: () => import('@/pages/EmiUsersListPage.vue'), meta: { title: 'EMI Users' } },
       { path: 'emi-applications', name: 'admin.emi.applications', component: () => import('@/pages/EmiUsersListPage.vue'), meta: { title: 'EMI Applications' } },
       { path: 'emi-banks', name: 'admin.emi.banks', component: () => import('@/pages/EmiBankPage.vue'), meta: { title: 'EMI Banks' } },
