@@ -95,6 +95,17 @@
                               <div class="d-flex flex-column ga-1">
                                 <span class="product-title">{{ row.product_name || '-' }}</span>
                                 <span v-if="row.sku" class="text-caption text-medium-emphasis">SKU: {{ row.sku }}</span>
+                                <div v-if="attributeList(row.product_attributes).length" class="d-flex flex-wrap ga-1">
+                                  <v-chip
+                                    v-for="attr in attributeList(row.product_attributes)"
+                                    :key="attr.label"
+                                    size="x-small"
+                                    label
+                                    variant="tonal"
+                                  >
+                                    {{ attr.label }}: {{ attr.value }}
+                                  </v-chip>
+                                </div>
                               </div>
                             </div>
                           </td>
@@ -287,6 +298,26 @@ const orderItems = computed(() => {
   const items = (orderDetail.value as Record<string, unknown> | null)?.order_items;
   return Array.isArray(items) ? items : [];
 });
+
+function attributeList(raw: unknown): Array<{ label: string; value: string }> {
+  if (!raw || typeof raw !== 'object') return [];
+  const entries: Array<{ label: string; value: string }> = [];
+  if (Array.isArray(raw)) {
+    for (const entry of raw) {
+      if (entry && typeof entry === 'object') {
+        const e = entry as Record<string, unknown>;
+        entries.push({ label: String(e.name ?? e.key ?? e.label ?? 'Option'), value: String(e.value ?? '') });
+      } else if (entry !== null && entry !== undefined) {
+        entries.push({ label: 'Option', value: String(entry) });
+      }
+    }
+  } else {
+    for (const [label, value] of Object.entries(raw as Record<string, unknown>)) {
+      if (value !== null && value !== undefined && typeof value !== 'object') entries.push({ label, value: String(value) });
+    }
+  }
+  return entries.filter((attr) => attr.value.trim() !== '');
+}
 
 const paymentSummary = computed(() => ({
   subtotal: Number(orderDetail.value?.total_summary?.sub_total ?? 0),

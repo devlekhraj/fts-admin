@@ -87,6 +87,7 @@ export type OrderDetailResponse = {
     quantity?: number | null;
     sku?: string | null;
     product_thumb?: string | null;
+    product_attributes?: Record<string, unknown> | unknown[] | null;
   }> | null;
   total_summary?: {
     payment_type?: string | null;
