@@ -96,6 +96,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth.store';
 import { logout as apiLogout } from '@/api/auth.api';
 import { menuByProject, type NavGroup, type ProjectType } from '@/layouts/navigation';
+import { canOpenRoute } from '@/shared/access';
 
 const drawer = ref(true);
 const isLoggingOut = ref(false);
@@ -117,7 +118,22 @@ const openGroups = ref<string[]>([]);
 
 const projectType = String(import.meta.env.VITE_PROJECT_TYPE ?? 'ecommerce').toLowerCase() as ProjectType;
 
-const items = computed<NavGroup[]>(() => menuByProject[projectType] ?? menuByProject.ecommerce);
+const allItems = computed<NavGroup[]>(() => menuByProject[projectType] ?? menuByProject.ecommerce);
+
+// Only the menu entries this admin's role may open; a group with nothing left to open disappears.
+const items = computed<NavGroup[]>(() => {
+    const admin = authStore.admin;
+    const visible: NavGroup[] = [];
+    for (const group of allItems.value) {
+        if (group.items && group.items.length) {
+            const children = group.items.filter((item) => canOpenRoute(admin, item.routeName));
+            if (children.length) visible.push({ ...group, items: children });
+        } else if (canOpenRoute(admin, group.routeName)) {
+            visible.push(group);
+        }
+    }
+    return visible;
+});
 
 watch(items, (groups) => {
     const defaultGroup = 'Dashboard';

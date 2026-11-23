@@ -2,9 +2,15 @@ import { defineStore } from 'pinia';
 import * as authApi from '@/api/auth.api';
 
 export interface AdminProfile {
-	id?: string;
+	id?: string | number;
 	name?: string;
 	email?: string;
+	role?: string | null;
+	role_id?: number | string | null;
+	/** The Administrator role can do everything. */
+	is_super?: boolean;
+	/** What the role allows. The server checks every request again; this only decides what the screens show. */
+	permissions?: string[];
 	[key: string]: unknown;
 }
 
@@ -15,6 +21,7 @@ export const useAuthStore = defineStore('auth', {
 	}),
 	getters: {
 		isAuthenticated: (state) => Boolean(state.token),
+		isSuper: (state) => Boolean(state.admin?.is_super),
 	},
 	actions: {
 		initFromStorage() {
@@ -27,6 +34,14 @@ export const useAuthStore = defineStore('auth', {
 			localStorage.setItem('admin_token', response.access_token);
 			this.admin = response.admin ?? await authApi.profile();
 			return this.admin;
+		},
+		/** True when the signed-in admin holds any one of these permissions (an Administrator holds all). */
+		can(...permissions: string[]) {
+			const admin = this.admin;
+			if (!admin) return false;
+			if (admin.is_super) return true;
+			const mine = Array.isArray(admin.permissions) ? admin.permissions : [];
+			return permissions.some((permission) => mine.includes(permission));
 		},
 		async fetchProfile() {
 			const admin = await authApi.profile();

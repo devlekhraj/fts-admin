@@ -5,6 +5,7 @@ import LoginPage from '../pages/LoginPage.vue';
 import OverviewPage from '../pages/OverviewPage.vue';
 import AnalyticsPage from '../pages/AnalyticsPage.vue';
 import { useAuthStore } from '../stores/auth.store';
+import { canOpenRoute } from '../shared/access';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -21,6 +22,7 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
     children: [
       { path: 'overview', name: 'admin.overview', component: OverviewPage, meta: { title: 'Overview' } },
+      { path: 'no-access', name: 'admin.forbidden', component: () => import('@/pages/ForbiddenPage.vue'), meta: { title: 'No access' } },
       { path: 'analytics', name: 'admin.analytics', component: AnalyticsPage, meta: { title: 'Analytics' } },
       // emi requests
       { path: 'emi-requests', name: 'admin.emi.requests', component: () => import('@/pages/EmiRequestPage.vue'), meta: { title: 'EMI Requests' } },
@@ -100,7 +102,7 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const auth = useAuthStore();
   const isLogin = to.name === 'admin.login';
   const requiresAuth = to.matched.some((record) => Boolean(record.meta.requiresAuth));
@@ -111,6 +113,22 @@ router.beforeEach((to) => {
 
   if (isLogin && auth.isAuthenticated) {
     return { name: 'admin.overview' };
+  }
+
+  if (requiresAuth) {
+    // The page needs to know what this admin may open, so the profile must be here before it is judged.
+    if (!auth.admin) {
+      try {
+        await auth.fetchProfile();
+      } catch {
+        await auth.logout();
+        return { name: 'admin.login' };
+      }
+    }
+
+    if (!canOpenRoute(auth.admin, to.name)) {
+      return { name: 'admin.forbidden', query: { from: String(to.name ?? '') } };
+    }
   }
 
   return true;

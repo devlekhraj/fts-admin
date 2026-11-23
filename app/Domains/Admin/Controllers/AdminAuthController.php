@@ -43,9 +43,15 @@ final class AdminAuthController extends Controller
             ], 401);
         }
 
+        $admin->loadMissing('role');
+
         return response()->json([
             'success' => true,
-            'data' => new AdminResource($admin),
+            // permissions and is_super drive which menus and buttons the admin screens show; the server checks every request again
+            'data' => array_merge((new AdminResource($admin))->resolve(), [
+                'is_super' => $admin->isSuper(),
+                'permissions' => $admin->permissionList(),
+            ]),
         ]);
     }
 

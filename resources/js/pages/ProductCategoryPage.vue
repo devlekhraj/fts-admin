@@ -16,7 +16,7 @@
         </v-list>
       </v-menu>
 
-      <ProductCategoryCreateButton @saved="onCategoryCreated" />
+      <ProductCategoryCreateButton v-if="auth.can('add-product-category')" @saved="onCategoryCreated" />
     </template>
   </AppPageHeader>
 
@@ -47,7 +47,7 @@
 
           <v-col cols="12" md="auto" class="text-right">
             <v-btn
-              v-if="selectedCategories.length > 0"
+              v-if="auth.can('delete-product-category') && selectedCategories.length > 0"
               color="error"
               variant="flat"
               prepend-icon="mdi-delete"
@@ -116,6 +116,9 @@ import AppSearchButton from '@/components/shared/AppSearchButton.vue';
 import { openModal } from '@/shared/modal';
 import { useSnackbarStore } from '@/stores/snackbar.store';
 import { getErrorMessage } from '@/shared/errors';
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 type ProductCategory = {
   id: number;

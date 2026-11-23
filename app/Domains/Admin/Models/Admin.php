@@ -100,6 +100,28 @@ final class Admin extends Authenticatable implements JWTSubject
         return $this->belongsTo(Role::class, 'role_id');
     }
 
+    /** The Administrator role can do everything and is never checked against a permission list. */
+    public function isSuper(): bool
+    {
+        return (bool) ($this->role?->is_super);
+    }
+
+    /** @return string[] */
+    public function permissionList(): array
+    {
+        return $this->role?->permissionList() ?? [];
+    }
+
+    /** True when this admin may do something that needs any one of these permissions. */
+    public function hasAnyPermission(array $permissions): bool
+    {
+        if ($this->isSuper()) {
+            return true;
+        }
+
+        return array_intersect($permissions, $this->permissionList()) !== [];
+    }
+
     public function getAvatarUrlAttribute(): string
     {
         $avatar = $this->avatar;

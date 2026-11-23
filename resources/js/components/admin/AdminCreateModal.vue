@@ -77,6 +77,7 @@ async function fetchRoles() {
 	const { data } = await listRoles();
 	const list = Array.isArray(data) ? data : data?.data ?? [];
 	roleOptions.value = list
+		.filter((role: { assignable?: boolean }) => role.assignable !== false)
 		.map((role: { id?: string | number; name?: string }) => ({
 			title: role?.name ?? '',
 			value: role?.id ?? '',

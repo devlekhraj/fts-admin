@@ -13,7 +13,7 @@
         </v-list>
       </v-menu>
 
-      <BlogCategoryCreateButton @saved="onCategoryCreated" />
+      <BlogCategoryCreateButton v-if="auth.can('add-blog-category')" @saved="onCategoryCreated" />
     </template>
   </AppPageHeader>
 
@@ -90,6 +90,9 @@ import { formatLongDate } from '@/shared/utils';
 import AppTextField from '@/components/shared/AppTextField.vue';
 import AppSelectField from '@/components/shared/AppSelectField.vue';
 import AppSearchButton from '@/components/shared/AppSearchButton.vue';
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 type BlogCategory = {
   id: number | string;

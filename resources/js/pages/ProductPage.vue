@@ -13,10 +13,10 @@
             :prepend-icon="option.icon" @click="onExport(option.type)" />
         </v-list>
       </v-menu>
-	      <v-btn color="primary" variant="flat" prepend-icon="mdi-download-outline" @click="goToProductImport()">
+	      <v-btn v-if="auth.can('access-data-import')" color="primary" variant="flat" prepend-icon="mdi-download-outline" @click="goToProductImport()">
 	        Import Product
 	      </v-btn>
-      <v-btn color="primary" variant="flat" prepend-icon="mdi-plus" @click="openProductModal()">
+      <v-btn v-if="auth.can('add-product')" color="primary" variant="flat" prepend-icon="mdi-plus" @click="openProductModal()">
         New Product
       </v-btn>
     </template>
@@ -53,7 +53,7 @@
 
           <v-col cols="12" md="auto" class="text-right">
             <v-btn
-              v-if="selectedProducts.length > 0"
+              v-if="auth.can('delete-product') && selectedProducts.length > 0"
               color="error"
               variant="flat"
               prepend-icon="mdi-delete"
@@ -119,13 +119,14 @@
           variant="outlined"
           class="mr-2"
           color="secondary"
+          v-if="auth.can('add-product')"
           prepend-icon="mdi-content-copy"
           :loading="duplicatingId === item.id"
           :disabled="duplicatingId !== null"
           @click="onDuplicate(item)">
           Duplicate
         </v-btn>
-        <v-btn size="small" variant="outlined" color="error" @click="onDelete(item)">
+        <v-btn v-if="auth.can('delete-product')" size="small" variant="outlined" color="error" @click="onDelete(item)">
           Delete
         </v-btn>
       </div>
@@ -221,6 +222,9 @@ import ProductInlineBooleanToggle from '@/components/product/ProductInlineBoolea
 import ProductPriceCell from '@/components/product/ProductPriceCell.vue';
 import { useSnackbarStore } from '@/stores/snackbar.store';
 import { getErrorMessage } from '@/shared/errors';
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 type Product = {
   id: number | string;

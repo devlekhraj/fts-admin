@@ -5,6 +5,9 @@ declare(strict_types=1);
 // TODO: API route loader for Foundation modules.
 
 require __DIR__ . '/auth/route_auth.php';
+
+// Every admin route below is checked against the signed-in admin's role (see App\Domains\Rbac\Support\AccessMap).
+Route::middleware('admin.permission')->group(function () {
 require __DIR__ . '/admin/route_admins.php';
 require __DIR__ . '/admin/route_blogs.php';
 require __DIR__ . '/admin/route_banners.php';
@@ -30,3 +33,4 @@ require __DIR__ . '/admin/route_emi_banks.php';
 require __DIR__ . '/admin/route_exchange.php';
 require __DIR__ . '/admin/route_emi_users.php';
 require __DIR__ . '/admin/route_orders.php';
+});

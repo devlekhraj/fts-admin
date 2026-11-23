@@ -1,7 +1,7 @@
 <template>
   <AppPageHeader title="Banners" subtitle="Promotional banners">
     <template #actions>
-      <BannerCreateButton @saved="onBannerCreated" />
+      <BannerCreateButton v-if="auth.can('add-banner')" @saved="onBannerCreated" />
     </template>
   </AppPageHeader>
 
@@ -73,6 +73,9 @@ import { listBanners, type BannerListItem } from '@/api/banners.api';
 import { formatLongDate } from '@/shared/utils';
 import AppSearchTextField from '@/components/shared/AppSearchTextField.vue';
 import AppSearchButton from '@/components/shared/AppSearchButton.vue';
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 const headers = [
   { title: 'Name', key: 'name', sortable: false, minWidth: '240' },

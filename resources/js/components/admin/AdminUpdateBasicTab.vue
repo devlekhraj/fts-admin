@@ -17,7 +17,8 @@
 					</v-col>
 					<v-col cols="12" md="6" class="pb-0">
 						<v-autocomplete v-model="form.role_id" :items="roleOptions" label="Role" variant="outlined"
-							density="comfortable" clearable :rules="[rules.required]"
+							density="comfortable" :clearable="!isSelf" :disabled="isSelf" :rules="[rules.required]"
+							:hint="isSelf ? 'You cannot change your own role. Ask another administrator.' : ''" :persistent-hint="isSelf"
 							:error-messages="getErrorMessages('role_id')"
 							prepend-inner-icon="mdi-shield-account-outline"
 							@update:model-value="clearFieldError('role_id')" />
@@ -41,6 +42,7 @@ import { list as listRoles } from '@/api/roles.api';
 import { updateBasicInfo } from '@/api/admins.api';
 import { getErrorMessage } from '@/shared/errors';
 import { useSnackbarStore } from '@/stores/snackbar.store';
+import { useAuthStore } from '@/stores/auth.store';
 
 type Admin = {
 	id?: number | string;
@@ -66,6 +68,8 @@ const formRef = ref();
 const roleOptions = ref<RoleOption[]>([]);
 const error = ref('');
 const snackbar = useSnackbarStore();
+const auth = useAuthStore();
+const isSelf = String(props.admin?.id ?? '') !== '' && String(props.admin?.id) === String(auth.admin?.id ?? '');
 const loading = ref(false);
 const form = ref<BasicForm>({
 	name: props.admin?.name ?? '',
@@ -94,6 +98,8 @@ async function fetchRoles() {
 	const { data } = await listRoles();
 	const list = Array.isArray(data) ? data : data?.data ?? [];
 	roleOptions.value = list
+		// only roles this admin may give, plus the role the person already has so the field is never blank
+		.filter((role: { id?: string | number; assignable?: boolean }) => role.assignable !== false || String(role.id) === String(props.admin?.role_id ?? ''))
 		.map((role: { id?: string | number; name?: string }) => ({
 			title: role?.name ?? '',
 			value: role?.id ?? '',

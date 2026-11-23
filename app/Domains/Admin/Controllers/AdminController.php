@@ -10,6 +10,7 @@ use App\Domains\Admin\DTOs\UpdateAdminPasswordData;
 use App\Domains\Admin\DTOs\UpdateAdminProfileData;
 use App\Domains\Admin\DTOs\UpdateAdminRoleData;
 use App\Domains\Admin\Models\Admin;
+use App\Domains\Admin\Models\Role;
 use App\Domains\Admin\Requests\SendAdminEmailVerificationCodeRequest;
 use App\Domains\Admin\Requests\StoreAdminRequest;
 use App\Domains\Admin\Requests\UpdateAdminEmailRequest;
@@ -18,6 +19,7 @@ use App\Domains\Admin\Requests\UpdateAdminProfileRequest;
 use App\Domains\Admin\Requests\UpdateAdminRoleRequest;
 use App\Domains\Admin\Resources\AdminResource;
 use App\Domains\Admin\Services\AdminService;
+use App\Domains\Rbac\Services\AccessGuard;
 use Illuminate\Routing\Controller;
 
 use Illuminate\Http\JsonResponse;
@@ -27,7 +29,8 @@ use Illuminate\Validation\ValidationException;
 final class AdminController extends Controller
 {
     public function __construct(
-        private readonly AdminService $adminService
+        private readonly AdminService $adminService,
+        private readonly AccessGuard $guard,
     ) {}
 
     public function index(Request $request): JsonResponse
@@ -84,6 +87,8 @@ final class AdminController extends Controller
         try {
             $dto = CreateAdminData::fromArray($request->validated());
 
+            $this->guard->assertCanAssign($this->actor(), Role::query()->findOrFail($dto->roleId));
+
             $admin = $this->adminService->create($dto);
 
             return response()->json([
@@ -103,6 +108,11 @@ final class AdminController extends Controller
     {
         try {
             $dto = UpdateAdminProfileData::fromArray($request->validated());
+
+            $actor = $this->actor();
+            $this->guard->assertCanManage($actor, $admin);
+            $this->assertRoleChangeAllowed($actor, $admin, $dto->roleId);
+
             $admin = $this->adminService->updateProfile($admin, $dto);
 
             return response()->json([
@@ -122,6 +132,9 @@ final class AdminController extends Controller
     {
         try {
             $dto = UpdateAdminRoleData::fromArray($request->validated());
+
+            $this->assertRoleChangeAllowed($this->actor(), $admin, $dto->roleId);
+
             $admin = $this->adminService->updateRole($admin, $dto);
 
             return response()->json([
@@ -142,6 +155,7 @@ final class AdminController extends Controller
         $data = $request->validated();
         $email = is_string($data['email'] ?? null) ? trim((string) $data['email']) : '';
 
+        $this->guard->assertCanManage($this->actor(), $admin);
         $this->adminService->sendEmailVerificationCode($admin, $email);
 
         return response()->json([
@@ -155,6 +169,9 @@ final class AdminController extends Controller
     {
         try {
             $dto = UpdateAdminEmailData::fromArray($request->validated());
+
+            $this->guard->assertCanManage($this->actor(), $admin);
+
             $admin = $this->adminService->updateEmail($admin, $dto);
 
             return response()->json([
@@ -174,6 +191,9 @@ final class AdminController extends Controller
     {
         try {
             $dto = UpdateAdminPasswordData::fromArray($request->validated());
+
+            $this->guard->assertCanManage($this->actor(), $admin);
+
             $this->adminService->updatePassword($admin, $dto);
 
             return response()->json([
@@ -191,6 +211,8 @@ final class AdminController extends Controller
 
     public function destroy(Admin $admin): JsonResponse
     {
+        $this->guard->assertCanDelete($this->actor(), $admin);
+
         $this->adminService->delete($admin);
 
         return response()->json([
@@ -198,6 +220,24 @@ final class AdminController extends Controller
             'message' => 'Admin deleted successfully.',
             'data' => null,
         ]);
+    }
+
+    private function actor(): Admin
+    {
+        $actor = $this->guard->currentAdmin();
+        abort_unless($actor instanceof Admin, 401, 'Unauthenticated');
+
+        return $actor;
+    }
+
+    /** A role change is only checked when the role really changes (the edit form always sends the current role). */
+    private function assertRoleChangeAllowed(Admin $actor, Admin $target, ?int $newRoleId): void
+    {
+        if ($newRoleId === null || (int) $target->role_id === $newRoleId) {
+            return;
+        }
+
+        $this->guard->assertCanChangeRole($actor, $target, Role::query()->findOrFail($newRoleId));
     }
 
     private function firstValidationMessage(ValidationException $exception): string

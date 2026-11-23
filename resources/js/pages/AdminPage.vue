@@ -1,7 +1,7 @@
 <template>
 	<AppPageHeader title="Admin Users" subtitle="Manage admin users">
 		<template #actions>
-			<AdminCreateButton @saved="onAdminCreated" />
+			<AdminCreateButton v-if="auth.can('admins-add')" @saved="onAdminCreated" />
 		</template>
 	</AppPageHeader>
 
@@ -92,6 +92,9 @@ import { list as listRoles } from '@/api/roles.api';
 import { formatLongDate } from '@/shared/utils';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppSearchButton from '@/components/shared/AppSearchButton.vue';
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 // RoleOption interface
 interface RoleOption {

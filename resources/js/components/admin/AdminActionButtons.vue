@@ -1,8 +1,8 @@
 <template>
-	<v-btn variant="outlined" color="primary" size="small"  @click="onEdit">
+	<v-btn v-if="auth.can('admins-edit')" variant="outlined" color="primary" size="small"  @click="onEdit">
 		Edit
 	</v-btn>
-	<v-btn variant="outlined" class="ml-2" color="error" size="small"  @click="onDelete">
+	<v-btn v-if="canDelete" variant="outlined" class="ml-2" color="error" size="small"  @click="onDelete">
 		Delete
 	</v-btn>
 </template>
@@ -11,6 +11,8 @@
 import AdminDeleteModal from '@/components/admin/AdminDeleteModal.vue';
 import AdminUpdateModal from '@/components/admin/AdminUpdateModal.vue';
 import { openModal } from '@/shared/modal';
+import { computed } from 'vue';
+import { useAuthStore } from '@/stores/auth.store';
 
 type Admin = {
 	id?: number | string;
@@ -22,6 +24,9 @@ type Admin = {
 };
 
 const props = defineProps<{ admin: Admin }>();
+const auth = useAuthStore();
+// Nobody deletes their own account here; the server refuses it too.
+const canDelete = computed(() => auth.can('admins-delete') && String(props.admin.id ?? '') !== String(auth.admin?.id ?? ''));
 const emit = defineEmits<{
 	(e: 'saved', payload?: unknown): void;
 	(e: 'deleted', payload?: unknown): void;

@@ -17,7 +17,7 @@
         Edit Brand Sequence
       </v-btn>
 
-      <BrandCreateButton @saved="onBrandCreated" />
+      <BrandCreateButton v-if="auth.can('add-brand')" @saved="onBrandCreated" />
     </template>
   </AppPageHeader>
 
@@ -44,7 +44,7 @@
           <v-spacer></v-spacer>
           <v-col cols="12" md="auto" class="text-right">
             <v-btn
-              v-if="selectedBrands.length > 0"
+              v-if="auth.can('delete-brand') && selectedBrands.length > 0"
               color="error"
               variant="flat"
               prepend-icon="mdi-delete"
@@ -114,6 +114,9 @@ import { openModal } from '@/shared/modal';
 import BrandCategoriesModal from '@/components/brand/BrandCategoriesModal.vue';
 import { useSnackbarStore } from '@/stores/snackbar.store';
 import { getErrorMessage } from '@/shared/errors';
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 type ProductBrand = {
   id: number | string;
