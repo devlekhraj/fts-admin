@@ -1,6 +1,38 @@
 <template>
   <div>
-    <AppPageHeader title="Exchange Requests" subtitle="Customers trading in an old device" />
+    <AppPageHeader title="Mobile & Laptop Exchange" subtitle="Manage device exchange requests, evaluation and approvals." />
+
+    <v-container fluid class="pb-0">
+      <v-row dense>
+        <v-col v-for="card in summaryCards" :key="card.key" cols="6" md="" class="summary-col">
+          <v-card
+            variant="outlined"
+            class="summary-card"
+            :class="{ 'summary-card--active': activeTab === card.tab }"
+            :aria-label="`Show ${card.label}`"
+            @click="selectTab(card.tab)"
+          >
+            <div class="d-flex align-center ga-3 pa-4">
+              <v-avatar :color="card.color" variant="tonal" size="48">
+                <v-icon :icon="card.icon" size="26" />
+              </v-avatar>
+              <div>
+                <div class="text-h5 font-weight-bold">{{ card.value }}</div>
+                <div class="text-body-2 text-medium-emphasis">{{ card.label }}</div>
+              </div>
+            </div>
+          </v-card>
+        </v-col>
+      </v-row>
+
+      <v-tabs v-model="activeTab" color="primary" class="mt-4 request-tabs" show-arrows @update:model-value="selectTab">
+        <v-tab v-for="tab in visibleTabs" :key="tab.key" :value="tab.key" class="text-none">
+          {{ tab.label }} ({{ tab.count }})
+        </v-tab>
+      </v-tabs>
+      <v-divider />
+    </v-container>
+
     <AppDataTable
       :headers="headers"
       :items="items"
@@ -12,32 +44,67 @@
     >
       <template #actions>
         <v-container fluid>
-          <v-row>
-            <v-col cols="12" md="5">
-              <v-text-field
-                v-model="filters.query"
+          <v-row dense>
+            <v-col cols="12" sm="6" md="2">
+              <v-select
+                v-model="filters.deviceType"
+                :items="deviceTypeItems"
                 density="compact"
                 variant="outlined"
-                label="Search name, phone, device, IMEI or reference"
+                label="Device type"
                 hide-details
-                clearable
-                @keyup.enter="onSearch"
-                @click:clear="onSearch"
+                @update:model-value="onSearch"
               />
             </v-col>
-            <v-col cols="12" md="3">
+            <v-col cols="12" sm="6" md="2">
               <v-select
-                v-model="filters.status"
+                v-model="dropdownStatus"
                 :items="statusItems"
                 density="compact"
                 variant="outlined"
                 label="Status"
                 hide-details
                 clearable
+              />
+            </v-col>
+            <v-col cols="6" md="2">
+              <v-text-field
+                v-model="filters.dateFrom"
+                type="date"
+                density="compact"
+                variant="outlined"
+                label="From"
+                hide-details
+                :max="filters.dateTo || undefined"
                 @update:model-value="onSearch"
               />
             </v-col>
-            <v-col cols="12" md="2" class="d-flex align-end">
+            <v-col cols="6" md="2">
+              <v-text-field
+                v-model="filters.dateTo"
+                type="date"
+                density="compact"
+                variant="outlined"
+                label="To"
+                hide-details
+                :min="filters.dateFrom || undefined"
+                @update:model-value="onSearch"
+              />
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-text-field
+                v-model="filters.query"
+                density="compact"
+                variant="outlined"
+                label="Search name, phone, IMEI or ID"
+                prepend-inner-icon="mdi-magnify"
+                hide-details
+                clearable
+                @keyup.enter="onSearch"
+                @click:clear="onSearch"
+              />
+            </v-col>
+            <v-col cols="12" md="1" class="d-flex align-center">
               <AppSearchButton :loading="searching" variant="flat" @click="onSearch" />
             </v-col>
           </v-row>
@@ -45,11 +112,29 @@
       </template>
 
       <template #item.reference="{ item }">
-        <span class="font-weight-medium">{{ item.reference }}</span>
+        <span class="font-weight-bold text-primary">{{ item.reference }}</span>
       </template>
       <template #item.customer="{ item }">
-        <div>{{ item.customer_name }}</div>
-        <div class="text-caption text-medium-emphasis">{{ item.customer_phone }}</div>
+        <div class="font-weight-medium">{{ item.customer_name }}</div>
+        <div class="text-caption text-medium-emphasis d-flex align-center ga-1">
+          <v-icon icon="mdi-phone-outline" size="14" />{{ item.customer_phone }}
+        </div>
+      </template>
+      <template #item.device_name="{ item }">
+        <div class="d-flex align-center ga-2 py-2">
+          <v-avatar color="primary" variant="tonal" rounded size="36">
+            <v-icon :icon="item.device_type === 'laptop' ? 'mdi-laptop' : 'mdi-cellphone'" size="20" />
+          </v-avatar>
+          <div>
+            <div class="font-weight-medium">{{ item.device_name }}</div>
+            <div class="text-caption text-medium-emphasis">
+              {{ item.device_type === 'laptop' ? 'SN' : 'IMEI' }}: {{ item.serial_number || '-' }}
+            </div>
+          </div>
+        </div>
+      </template>
+      <template #item.target_name="{ item }">
+        <span>{{ item.target_name || '-' }}</span>
       </template>
       <template #item.customer_estimate="{ item }">
         <div>{{ formatNPR(item.customer_estimate) }}</div>
@@ -57,7 +142,7 @@
         <v-chip v-if="item.needs_manual_review" size="x-small" color="warning" variant="tonal" label>Manual review</v-chip>
       </template>
       <template #item.admin_offer="{ item }">
-        <span>{{ item.admin_offer === null ? '-' : formatNPR(item.admin_offer) }}</span>
+        <span class="font-weight-bold">{{ item.admin_offer === null ? '-' : formatNPR(item.admin_offer) }}</span>
       </template>
       <template #item.status="{ item }">
         <v-chip size="small" :color="exchangeStatusColor(item.status)" variant="tonal" label>
@@ -68,9 +153,19 @@
         <span>{{ formatDateTime(item.created_at) }}</span>
       </template>
       <template #item.action="{ item }">
-        <v-btn variant="outlined" color="primary" size="small" :to="{ name: 'admin.exchange.requests.detail', params: { id: item.id } }">
-          Details
-        </v-btn>
+        <v-tooltip text="View and decide" location="top">
+          <template #activator="{ props: tip }">
+            <v-btn
+              v-bind="tip"
+              icon="mdi-eye-outline"
+              variant="tonal"
+              color="primary"
+              size="small"
+              aria-label="View exchange request"
+              :to="{ name: 'admin.exchange.requests.detail', params: { id: item.id } }"
+            />
+          </template>
+        </v-tooltip>
       </template>
     </AppDataTable>
   </div>
@@ -78,6 +173,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import type { DataTableHeader, DataTableOptions } from '@/components/datatable/types';
 import AppPageHeader from '@/components/AppPageHeader.vue';
@@ -87,15 +183,29 @@ import { EXCHANGE_STATUS_OPTIONS, exchangeStatusColor, exchangeStatusLabel } fro
 import { formatDateTime, formatNPR } from '@/shared/formatters';
 
 const headers: DataTableHeader[] = [
-  { title: 'Reference', key: 'reference', sortable: false, width: '140' },
-  { title: 'Customer', key: 'customer', sortable: false, width: '200' },
-  { title: 'Device', key: 'device_name', sortable: false, width: '220' },
-  { title: 'Customer estimate', key: 'customer_estimate', sortable: false, width: '170' },
-  { title: 'Our offer', key: 'admin_offer', sortable: false, width: '120' },
+  { title: 'Request ID', key: 'reference', sortable: false, width: '130' },
+  { title: 'Customer', key: 'customer', sortable: false, width: '190' },
+  { title: 'Old device (exchange)', key: 'device_name', sortable: false, width: '250' },
+  { title: 'New product', key: 'target_name', sortable: false, width: '180' },
+  { title: 'Expected value', key: 'customer_estimate', sortable: false, width: '160' },
+  { title: 'Exchange value', key: 'admin_offer', sortable: false, width: '150' },
   { title: 'Status', key: 'status', sortable: false, width: '130' },
-  { title: 'Submitted', key: 'created_at', sortable: false, width: '180' },
-  { title: 'Actions', key: 'action', sortable: false, width: '100', align: 'end' },
+  { title: 'Submitted at', key: 'created_at', sortable: false, width: '170' },
+  { title: 'Action', key: 'action', sortable: false, width: '90', align: 'end' },
 ];
+
+// A tab is one status, or "Pending" which covers requests waiting and under review.
+const TABS = [
+  { key: 'all', label: 'All Requests', statuses: null as string | null },
+  { key: 'pending', label: 'Pending', statuses: 'pending,under_review' },
+  { key: 'approved', label: 'Approved', statuses: 'approved' },
+  { key: 'rejected', label: 'Rejected', statuses: 'rejected' },
+  { key: 'completed', label: 'Completed', statuses: 'completed' },
+  { key: 'cancelled', label: 'Cancelled', statuses: 'cancelled' },
+];
+
+const route = useRoute();
+const router = useRouter();
 
 const items = ref<ExchangeRequestListItem[]>([]);
 const total = ref(0);
@@ -103,18 +213,56 @@ const loading = ref(false);
 const searching = ref(false);
 const counts = ref<Record<string, number>>({});
 const options = ref<DataTableOptions>({ page: 1, itemsPerPage: 15, sortBy: [] });
-const filters = ref({ query: '', status: null as null | string });
+const filters = ref({ query: '', deviceType: 'all', dateFrom: '', dateTo: '' });
 
-const statusItems = computed(() =>
-  EXCHANGE_STATUS_OPTIONS.map((o) => ({ ...o, title: `${o.title} (${counts.value[o.value] ?? 0})` })),
+const initialStatus = typeof route.query.status === 'string' ? route.query.status : null;
+const statusParam = ref<string | null>(initialStatus);
+
+const deviceTypeItems = [
+  { title: 'All devices', value: 'all' },
+  { title: 'Mobile', value: 'phone' },
+  { title: 'Laptop', value: 'laptop' },
+];
+
+const statusItems = EXCHANGE_STATUS_OPTIONS;
+
+// The "Pending" tab covers two statuses, which the single-status dropdown cannot show, so it stays empty then.
+const dropdownStatus = computed<string | null>({
+  get: () => (statusParam.value && !statusParam.value.includes(',') ? statusParam.value : null),
+  set: (value) => applyStatus(value ?? null),
+});
+
+function countFor(statuses: string | null): number {
+  if (statuses === null) return Object.values(counts.value).reduce((sum, n) => sum + Number(n), 0);
+  return statuses.split(',').reduce((sum, s) => sum + Number(counts.value[s] ?? 0), 0);
+}
+
+const visibleTabs = computed(() =>
+  TABS.map((t) => ({ ...t, count: countFor(t.statuses) })).filter((t) => t.key !== 'cancelled' || t.count > 0),
 );
+
+const activeTab = computed<string | null>({
+  get: () => TABS.find((t) => t.statuses === statusParam.value)?.key ?? null,
+  set: () => {},
+});
+
+const summaryCards = computed(() => [
+  { key: 'total', tab: 'all', label: 'Total requests', value: countFor(null), icon: 'mdi-file-document-outline', color: 'primary' },
+  { key: 'pending', tab: 'pending', label: 'Pending evaluation', value: countFor('pending,under_review'), icon: 'mdi-clock-outline', color: 'warning' },
+  { key: 'approved', tab: 'approved', label: 'Approved', value: countFor('approved'), icon: 'mdi-check-circle-outline', color: 'success' },
+  { key: 'rejected', tab: 'rejected', label: 'Rejected', value: countFor('rejected'), icon: 'mdi-close-circle-outline', color: 'error' },
+  { key: 'completed', tab: 'completed', label: 'Completed', value: countFor('completed'), icon: 'mdi-check-decagram-outline', color: 'info' },
+]);
 
 async function fetchRequests() {
   loading.value = true;
   try {
     const params: Record<string, unknown> = { page: options.value.page, per_page: options.value.itemsPerPage };
     if (filters.value.query?.trim()) params.search = filters.value.query.trim();
-    if (filters.value.status) params.status = filters.value.status;
+    if (statusParam.value) params.status = statusParam.value;
+    if (filters.value.deviceType !== 'all') params.device_type = filters.value.deviceType;
+    if (filters.value.dateFrom) params.date_from = filters.value.dateFrom;
+    if (filters.value.dateTo) params.date_to = filters.value.dateTo;
 
     const response = await listExchangeRequests(params);
     items.value = response.data ?? [];
@@ -124,6 +272,17 @@ async function fetchRequests() {
     loading.value = false;
     searching.value = false;
   }
+}
+
+function applyStatus(next: string | null) {
+  statusParam.value = next;
+  router.replace({ query: next ? { status: next } : {} });
+  onSearch();
+}
+
+function selectTab(key: string | null) {
+  const tab = TABS.find((t) => t.key === key);
+  if (tab) applyStatus(tab.statuses);
 }
 
 function onSearch() {
@@ -139,3 +298,23 @@ function onOptions(next: DataTableOptions) {
 
 onMounted(fetchRequests);
 </script>
+
+<style scoped>
+.summary-card {
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.summary-card:hover {
+  border-color: rgb(var(--v-theme-primary));
+}
+.summary-card--active {
+  border-color: rgb(var(--v-theme-primary));
+  box-shadow: 0 0 0 1px rgb(var(--v-theme-primary));
+}
+@media (min-width: 960px) {
+  .summary-col {
+    flex: 1 1 0;
+    max-width: 20%;
+  }
+}
+</style>

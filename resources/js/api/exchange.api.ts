@@ -9,6 +9,9 @@ export type ExchangeRequestListItem = {
   customer_name: string;
   customer_phone: string;
   device_name: string;
+  serial_number: string | null;
+  device_type: 'phone' | 'laptop';
+  target_name: string | null;
   customer_estimate: number;
   admin_offer: number | null;
   needs_manual_review: boolean;

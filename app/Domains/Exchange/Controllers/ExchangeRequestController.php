@@ -26,14 +26,36 @@ final class ExchangeRequestController extends Controller
         $validated = $request->validate([
             'page' => ['nullable', 'integer', 'min:1'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
-            'status' => ['nullable', Rule::in(ExchangeRequest::STATUSES)],
+            // One status, or several separated by commas (the "Pending" tab covers pending and under review).
+            'status' => ['nullable', 'string', 'max:80'],
+            'device_type' => ['nullable', Rule::in(['phone', 'laptop'])],
+            'date_from' => ['nullable', 'date'],
+            'date_to' => ['nullable', 'date', 'after_or_equal:date_from'],
             'search' => ['nullable', 'string', 'max:100'],
         ]);
 
         $query = ExchangeRequest::query()->select(ExchangeRequest::READABLE)->latest('id');
 
         if (! empty($validated['status'])) {
-            $query->where('status', $validated['status']);
+            $statuses = array_values(array_filter(array_map('trim', explode(',', $validated['status']))));
+            if ($statuses === [] || array_diff($statuses, ExchangeRequest::STATUSES) !== []) {
+                return $this->fail('Unknown status.', ['status' => ['Choose a valid status.']]);
+            }
+            $query->whereIn('status', $statuses);
+        }
+
+        // A phone has a 15-digit IMEI; anything else saved in that field is a laptop's serial number.
+        if (($validated['device_type'] ?? null) === 'phone') {
+            $query->whereRaw("serial_number REGEXP '^[0-9]{15}$'");
+        } elseif (($validated['device_type'] ?? null) === 'laptop') {
+            $query->whereRaw("serial_number NOT REGEXP '^[0-9]{15}$'");
+        }
+
+        if (! empty($validated['date_from'])) {
+            $query->where('created_at', '>=', $validated['date_from'] . ' 00:00:00');
+        }
+        if (! empty($validated['date_to'])) {
+            $query->where('created_at', '<=', $validated['date_to'] . ' 23:59:59');
         }
 
         if (! empty($validated['search'])) {
@@ -239,6 +261,9 @@ final class ExchangeRequestController extends Controller
             'customer_name' => $r->customer_name,
             'customer_phone' => $r->customer_phone,
             'device_name' => $r->device_name,
+            'serial_number' => $r->serial_number,
+            'device_type' => preg_match('/^[0-9]{15}$/', (string) $r->serial_number) ? 'phone' : 'laptop',
+            'target_name' => $r->target_name,
             'customer_estimate' => $r->customer_estimate,
             'admin_offer' => $r->admin_offer,
             'needs_manual_review' => (bool) data_get($r->estimate_breakdown, 'needs_manual_review', true),
