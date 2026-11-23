@@ -6,6 +6,7 @@ namespace App\Domains\Order\Actions;
 
 use App\Domains\Order\DTOs\OrderListData;
 use App\Domains\Order\Models\Order;
+use Illuminate\Support\Facades\DB;
 
 final class OrderListAction
 {
@@ -36,10 +37,25 @@ final class OrderListAction
             $query->where('payment_status', $data->paymentStatus);
         }
 
+        if ($data->statuses !== null) {
+            $data->statuses === [] ? $query->whereRaw('1 = 0') : $query->whereIn('status', $data->statuses);
+        }
+
+        if ($data->dateFrom !== null) {
+            $query->where('created_at', '>=', $data->dateFrom . ' 00:00:00');
+        }
+        if ($data->dateTo !== null) {
+            $query->where('created_at', '<=', $data->dateTo . ' 23:59:59');
+        }
+
+        // How many orders are in each status, for the tabs (not narrowed by the filters above).
+        $counts = Order::query()->select('status', DB::raw('count(*) as c'))->groupBy('status')->pluck('c', 'status')->all();
+
         if ($data->perPage === -1) {
             $items = $query->get();
 
             return [
+                'counts' => $counts,
                 'items' => $items,
                 'meta' => [
                     'current_page' => 1,
@@ -56,6 +72,7 @@ final class OrderListAction
         $paginator = $query->paginate($perPage);
 
         return [
+            'counts' => $counts,
             'items' => $paginator->items(),
             'meta' => [
                 'current_page' => $paginator->currentPage(),

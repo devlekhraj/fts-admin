@@ -40,6 +40,7 @@ final class EmiRequestController extends Controller
             'total' => $paginator->total(),
             'current_page' => $paginator->currentPage(),
             'per_page' => $paginator->perPage(),
+            'counts' => $this->emiRequestService->statusCounts(),
         ]);
     }
 

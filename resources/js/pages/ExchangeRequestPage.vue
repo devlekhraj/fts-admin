@@ -2,36 +2,7 @@
   <div>
     <AppPageHeader title="Mobile & Laptop Exchange" subtitle="Manage device exchange requests, evaluation and approvals." />
 
-    <v-container fluid class="pb-0">
-      <v-row dense>
-        <v-col v-for="card in summaryCards" :key="card.key" cols="6" md="" class="summary-col">
-          <v-card
-            variant="outlined"
-            class="summary-card"
-            :class="{ 'summary-card--active': activeTab === card.tab }"
-            :aria-label="`Show ${card.label}`"
-            @click="selectTab(card.tab)"
-          >
-            <div class="d-flex align-center ga-3 pa-4">
-              <v-avatar :color="card.color" variant="tonal" size="48">
-                <v-icon :icon="card.icon" size="26" />
-              </v-avatar>
-              <div>
-                <div class="text-h5 font-weight-bold">{{ card.value }}</div>
-                <div class="text-body-2 text-medium-emphasis">{{ card.label }}</div>
-              </div>
-            </div>
-          </v-card>
-        </v-col>
-      </v-row>
-
-      <v-tabs v-model="activeTab" color="primary" class="mt-4 request-tabs" show-arrows @update:model-value="selectTab">
-        <v-tab v-for="tab in visibleTabs" :key="tab.key" :value="tab.key" class="text-none">
-          {{ tab.label }} ({{ tab.count }})
-        </v-tab>
-      </v-tabs>
-      <v-divider />
-    </v-container>
+    <RequestStatusOverview :cards="summaryCards" :tabs="visibleTabs" :model-value="activeTab" @update:model-value="selectTab" />
 
     <AppDataTable
       :headers="headers"
@@ -178,6 +149,7 @@ import AppDataTable from '@/components/datatable/AppDataTable.vue';
 import type { DataTableHeader, DataTableOptions } from '@/components/datatable/types';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppSearchButton from '@/components/shared/AppSearchButton.vue';
+import RequestStatusOverview from '@/components/shared/RequestStatusOverview.vue';
 import { listExchangeRequests, type ExchangeRequestListItem } from '@/api/exchange.api';
 import { EXCHANGE_STATUS_OPTIONS, exchangeStatusColor, exchangeStatusLabel } from '@/shared/exchange';
 import { formatDateTime, formatNPR } from '@/shared/formatters';
@@ -298,23 +270,3 @@ function onOptions(next: DataTableOptions) {
 
 onMounted(fetchRequests);
 </script>
-
-<style scoped>
-.summary-card {
-  cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-.summary-card:hover {
-  border-color: rgb(var(--v-theme-primary));
-}
-.summary-card--active {
-  border-color: rgb(var(--v-theme-primary));
-  box-shadow: 0 0 0 1px rgb(var(--v-theme-primary));
-}
-@media (min-width: 960px) {
-  .summary-col {
-    flex: 1 1 0;
-    max-width: 20%;
-  }
-}
-</style>

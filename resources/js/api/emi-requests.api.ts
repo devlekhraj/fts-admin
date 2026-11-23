@@ -6,6 +6,8 @@ export type ListEmiRequestsParams = {
   search?: string;
   emi_type?: string;
   status?: number;
+  date_from?: string;
+  date_to?: string;
 };
 
 export type EmiRequestListItem = {
@@ -34,6 +36,8 @@ export type EmiRequestListItem = {
 
 export type EmiRequestListResponse = {
   data: EmiRequestListItem[];
+  /** requests in each status number, for the tabs */
+  counts?: Record<string, number>;
   total?: number;
   current_page?: number;
   per_page?: number;

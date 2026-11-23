@@ -6,6 +6,10 @@ export type ListOrdersParams = {
   search?: string;
   pre_order?: boolean;
   payment_status?: string;
+  /** order status numbers, comma separated: 0 draft, 1 placed, 2 confirmed, 3 dispatched, 4 completed, 5 canceled, 6 delivered */
+  status?: string;
+  date_from?: string;
+  date_to?: string;
 };
 
 export type OrdersListMeta = {
@@ -43,6 +47,8 @@ export type OrdersListResponse = {
   data: OrderListItem[];
   meta?: OrdersListMeta;
   total?: number;
+  /** orders in each status number, for the tabs */
+  counts?: Record<string, number>;
 };
 
 export type OrderDetailResponse = {

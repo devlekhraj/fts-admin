@@ -11,6 +11,8 @@ final class EmiRequestListData
         public readonly string $search,
         public readonly mixed $emiType,
         public readonly mixed $status,
+        public readonly ?string $dateFrom = null,
+        public readonly ?string $dateTo = null,
     ) {}
 
     public static function fromArray(array $data): self
@@ -22,7 +24,16 @@ final class EmiRequestListData
             search: $search,
             emiType: $data['emi_type'] ?? null,
             status: $data['status'] ?? null,
+            dateFrom: self::date($data['date_from'] ?? null),
+            dateTo: self::date($data['date_to'] ?? null),
         );
+    }
+
+    private static function date(mixed $value): ?string
+    {
+        $text = trim((string) ($value ?? ''));
+
+        return preg_match('/^\d{4}-\d{2}-\d{2}$/', $text) === 1 ? $text : null;
     }
 }
 

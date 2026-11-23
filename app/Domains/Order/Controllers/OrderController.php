@@ -27,6 +27,7 @@ final class OrderController extends Controller
         return response()->json([
             'data' => OrderResource::collection($result['items']),
             'meta' => $result['meta'],
+            'counts' => $result['counts'] ?? [],
         ]);
     }
 

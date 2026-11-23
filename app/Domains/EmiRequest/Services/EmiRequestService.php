@@ -22,6 +22,11 @@ final class EmiRequestService
         return $this->emiRequestListAction->execute($data);
     }
 
+    public function statusCounts(): array
+    {
+        return $this->emiRequestListAction->counts();
+    }
+
     public function show(string $id): EmiRequest
     {
         return $this->emiRequestShowAction->execute($id);

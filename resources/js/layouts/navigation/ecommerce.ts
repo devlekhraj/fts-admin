@@ -20,9 +20,12 @@ export const ecommerceNav: NavGroup[] = [
         routeName: 'admin.emi.requests',
     },
     {
-        group: 'Exchange Requests',
+        group: 'Exchange',
         icon: 'mdi-swap-horizontal-circle-outline',
-        routeName: 'admin.exchange.requests',
+        items: [
+            { title: 'Exchange Requests', routeName: 'admin.exchange.requests', icon: 'mdi-swap-horizontal' },
+            { title: 'Exchange Prices', routeName: 'admin.exchange.pricing', icon: 'mdi-cellphone-cog' },
+        ],
     },
     {
         group: 'Orders',
@@ -95,7 +98,6 @@ export const ecommerceNav: NavGroup[] = [
         items: [
             { title: 'Payment Methods', routeName: 'admin.paymentMethods.list', icon: 'mdi-credit-card-outline' },
             { title: 'EMI Banks', routeName: 'admin.emi.banks', icon: 'mdi-bank-outline' },
-            { title: 'Exchange Prices', routeName: 'admin.exchange.pricing', icon: 'mdi-cellphone-cog' },
         ],
     },
     {

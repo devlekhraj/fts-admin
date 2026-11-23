@@ -7,6 +7,7 @@ namespace App\Domains\EmiRequest\Actions;
 use App\Domains\EmiRequest\DTOs\EmiRequestListData;
 use App\Domains\EmiRequest\Models\EmiRequest;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 final class EmiRequestListAction
 {
@@ -45,6 +46,26 @@ final class EmiRequestListAction
             $query->where('status', (int) $data->status);
         }
 
+        if ($data->dateFrom !== null) {
+            $query->where('created_at', '>=', $data->dateFrom . ' 00:00:00');
+        }
+        if ($data->dateTo !== null) {
+            $query->where('created_at', '<=', $data->dateTo . ' 23:59:59');
+        }
+
         return $query->orderByDesc('created_at')->paginate($data->perPage);
+    }
+
+    /** How many requests are in each status, for the tabs (deleted requests are not counted). */
+    public function counts(): array
+    {
+        return EmiRequest::query()
+            ->where(function ($builder) {
+                $builder->whereNull('is_deleted')->orWhere('is_deleted', false);
+            })
+            ->select('status', DB::raw('count(*) as c'))
+            ->groupBy('status')
+            ->pluck('c', 'status')
+            ->all();
     }
 }
