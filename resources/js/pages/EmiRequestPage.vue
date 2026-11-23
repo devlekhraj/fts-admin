@@ -72,6 +72,9 @@
         </v-container>
       </template>
 
+      <template #item.application_code="{ item }">
+        <RecordIdLink :to="{ name: 'admin.emi.requests.detail', params: { id: item.id } }" :label="String(item.application_code ?? item.id)" />
+      </template>
       <template #item.user="{ item }">
         <div class="d-flex align-center gap-2">
           <v-avatar size="32">
@@ -141,10 +144,12 @@ import { getStatusColor, timeAgo } from '@/shared/utils';
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppSearchButton from '@/components/shared/AppSearchButton.vue';
 import RequestStatusOverview from '@/components/shared/RequestStatusOverview.vue';
+import RecordIdLink from '@/components/shared/RecordIdLink.vue';
 
 type EmiRequest = Record<string, unknown>;
 
 const headers: DataTableHeader[] = [
+  { title: 'Request ID', key: 'application_code', sortable: false, width: '130' },
   { title: 'Product', key: 'product', sortable: false, width: '300' },
   { title: 'Customer', key: 'user', sortable: false, width: '230' },
   { title: 'EMI type', key: 'emi_type', sortable: false, width: '160' },

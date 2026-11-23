@@ -84,7 +84,7 @@
       </template>
 
       <template #item.order_number="{ item }">
-        <span class="font-weight-bold text-primary">{{ item.order_number || `#${item.id}` }}</span>
+        <RecordIdLink :to="{ name: 'admin.orders.detail', params: { id: item.id } }" :label="item.order_number || `#${item.id}`" />
       </template>
       <template #item.customer="{ item }">
         <div class="d-flex align-center ga-2">
@@ -147,6 +147,7 @@ import { formatNPR } from '@/shared/formatters';
 import { getStatusColor, timeAgo } from '@/shared/utils';
 import AppSearchButton from '@/components/shared/AppSearchButton.vue';
 import RequestStatusOverview from '@/components/shared/RequestStatusOverview.vue';
+import RecordIdLink from '@/components/shared/RecordIdLink.vue';
 
 const headers = [
   { title: 'Order #', key: 'order_number', sortable: false, minWidth: '160' },

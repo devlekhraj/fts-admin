@@ -111,7 +111,7 @@
       </template>
 
       <template #item.reference="{ item }">
-        <span class="font-weight-bold text-primary">{{ item.reference }}</span>
+        <RecordIdLink :to="{ name: 'admin.exchange.requests.detail', params: { id: item.id } }" :label="item.reference" />
       </template>
       <template #item.customer="{ item }">
         <div class="font-weight-medium">{{ item.customer_name }}</div>
@@ -204,6 +204,7 @@ import type { DataTableHeader, DataTableOptions } from '@/components/datatable/t
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppSearchButton from '@/components/shared/AppSearchButton.vue';
 import RequestStatusOverview from '@/components/shared/RequestStatusOverview.vue';
+import RecordIdLink from '@/components/shared/RecordIdLink.vue';
 import ExchangeRequestCreateDialog from '@/components/exchange/ExchangeRequestCreateDialog.vue';
 import { useSnackbar } from '@/composables/snackbar';
 import { bulkUpdateExchangeStatus, listExchangeRequests, type ExchangeRequestListItem } from '@/api/exchange.api';
