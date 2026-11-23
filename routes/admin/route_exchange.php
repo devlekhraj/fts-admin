@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::get('exchange-requests', [ExchangeRequestController::class, 'index'])->name('admin.exchange-requests.index');
+    Route::post('exchange-requests', [ExchangeRequestController::class, 'store'])->name('admin.exchange-requests.store');
+    Route::post('exchange-requests/bulk-status', [ExchangeRequestController::class, 'bulkStatus'])->name('admin.exchange-requests.bulk-status');
     Route::get('exchange-requests/{id}', [ExchangeRequestController::class, 'show'])->whereNumber('id')->name('admin.exchange-requests.show');
     Route::post('exchange-requests/{id}/status', [ExchangeRequestController::class, 'updateStatus'])->whereNumber('id')->name('admin.exchange-requests.status');
 

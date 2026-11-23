@@ -7,11 +7,13 @@ namespace App\Domains\Exchange\Controllers;
 use App\Domains\Exchange\Models\ExchangeRequest;
 use App\Domains\Exchange\Models\ExchangeRequestLog;
 use App\Domains\Exchange\Services\ExchangeNotifier;
+use App\Domains\Exchange\Support\ImeiValidator;
 use App\Support\MediaUrl;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 final class ExchangeRequestController extends Controller
@@ -157,29 +159,7 @@ final class ExchangeRequestController extends Controller
                 }
             }
 
-            $from = $row->status;
-            $row->status = $to;
-            if (array_key_exists('admin_offer', $validated) && $validated['admin_offer'] !== null) {
-                $row->admin_offer = $validated['admin_offer'];
-            }
-            if (isset($validated['admin_note'])) {
-                $row->admin_note = $validated['admin_note'];
-            }
-            if (isset($validated['customer_note'])) {
-                $row->customer_note = $validated['customer_note'];
-            }
-            $row->save();
-
-            ExchangeRequestLog::create([
-                'exchange_request_id' => $row->id,
-                'from_status' => $from,
-                'to_status' => $to,
-                'changed_by' => $actor?->getAuthIdentifier(),
-                'changed_by_type' => 'admin',
-                'note' => $validated['admin_note'] ?? ($validated['customer_note'] ?? null),
-                'meta' => $this->auditSnapshot($row, $to, $validated, $actor),
-                'created_at' => now(),
-            ]);
+            $this->recordTransition($row, $to, $validated, $actor);
 
             return response()->json(['success' => true, 'message' => 'Request updated.', 'data' => ['id' => $row->id, 'status' => $row->status]]);
         });
@@ -190,6 +170,174 @@ final class ExchangeRequestController extends Controller
         }
 
         return $response;
+    }
+
+    /** Saves one status change and writes its audit log entry. The caller has already checked the transition is allowed. */
+    private function recordTransition(ExchangeRequest $row, string $to, array $input, mixed $actor): void
+    {
+        $from = $row->status;
+        $row->status = $to;
+        if (array_key_exists('admin_offer', $input) && $input['admin_offer'] !== null) {
+            $row->admin_offer = $input['admin_offer'];
+        }
+        if (isset($input['admin_note'])) {
+            $row->admin_note = $input['admin_note'];
+        }
+        if (isset($input['customer_note'])) {
+            $row->customer_note = $input['customer_note'];
+        }
+        $row->save();
+
+        ExchangeRequestLog::create([
+            'exchange_request_id' => $row->id,
+            'from_status' => $from,
+            'to_status' => $to,
+            'changed_by' => $actor?->getAuthIdentifier(),
+            'changed_by_type' => 'admin',
+            'note' => $input['admin_note'] ?? ($input['customer_note'] ?? null),
+            'meta' => $this->auditSnapshot($row, $to, $input, $actor),
+            'created_at' => now(),
+        ]);
+    }
+
+    /**
+     * Staff enter a request for a customer who is at the counter or on the phone. It starts as pending and is always
+     * marked for an in-person check, because nothing here was calculated from the price list.
+     */
+    public function store(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'customer_name' => ['required', 'string', 'max:120'],
+            'customer_phone' => ['required', 'string', 'max:30', 'regex:/^\+?[0-9][0-9\s\-]{5,28}$/'],
+            'user_id' => ['nullable', 'integer', 'exists:users,id'],
+            'device_type' => ['required', Rule::in(['phone', 'laptop'])],
+            'device_name' => ['required', 'string', 'max:255'],
+            'serial_number' => ['required', 'string', 'max:60'],
+            'estimated_value' => ['required', 'numeric', 'min:0', 'max:10000000'],
+            'target_name' => ['nullable', 'string', 'max:255'],
+            'target_price' => ['nullable', 'numeric', 'min:0', 'max:100000000'],
+            'admin_note' => ['nullable', 'string', 'max:2000'],
+        ], [
+            'customer_phone.regex' => 'Enter a valid phone number.',
+            'serial_number.required' => 'Enter the IMEI or serial number of the device.',
+        ]);
+
+        $serial = ImeiValidator::normalize($validated['serial_number']);
+        if ($error = ImeiValidator::checkFor($serial, $validated['device_type'] === 'laptop')) {
+            return $this->fail($error, ['serial_number' => [$error]]);
+        }
+
+        $open = ExchangeRequest::query()->where('serial_number', $serial)
+            ->whereIn('status', [ExchangeRequest::STATUS_PENDING, ExchangeRequest::STATUS_UNDER_REVIEW, ExchangeRequest::STATUS_APPROVED])
+            ->exists();
+        if ($open) {
+            $message = 'An exchange request for this device is already open.';
+
+            return $this->fail($message, ['serial_number' => [$message]]);
+        }
+
+        $actor = auth('admin_api')->user();
+        $adminName = is_object($actor) && isset($actor->name) ? (string) $actor->name : 'staff';
+
+        $row = DB::transaction(function () use ($validated, $serial, $actor, $adminName) {
+            do {
+                $reference = 'EX' . now()->format('ymd') . strtoupper(Str::random(4));
+            } while (ExchangeRequest::query()->where('reference', $reference)->exists());
+
+            $row = new ExchangeRequest();
+            $row->forceFill([
+                'reference' => $reference,
+                'user_id' => $validated['user_id'] ?? null,
+                'status' => ExchangeRequest::STATUS_PENDING,
+                'customer_name' => trim($validated['customer_name']),
+                'customer_phone' => trim($validated['customer_phone']),
+                'device_name' => trim($validated['device_name']),
+                'serial_number' => $serial,
+                'customer_estimate' => (float) $validated['estimated_value'],
+                'estimate_breakdown' => [
+                    'needs_manual_review' => true,
+                    'hold' => false,
+                    'flags' => ['Entered by staff (' . $adminName . ') in the admin: no automatic valuation was done. Check the device in person.'],
+                    'created_by' => 'admin',
+                ],
+                'target_name' => isset($validated['target_name']) ? trim($validated['target_name']) : null,
+                'target_price' => $validated['target_price'] ?? null,
+                'admin_note' => isset($validated['admin_note']) ? trim($validated['admin_note']) : null,
+            ])->save();
+
+            ExchangeRequestLog::create([
+                'exchange_request_id' => $row->id,
+                'from_status' => null,
+                'to_status' => ExchangeRequest::STATUS_PENDING,
+                'changed_by' => $actor?->getAuthIdentifier(),
+                'changed_by_type' => 'admin',
+                'note' => $row->admin_note ?? 'Request entered by staff',
+                'meta' => $this->auditSnapshot($row, ExchangeRequest::STATUS_PENDING, [], $actor),
+                'created_at' => now(),
+            ]);
+
+            return $row;
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Exchange request ' . $row->reference . ' created.',
+            'data' => ['id' => $row->id, 'reference' => $row->reference],
+        ], 201);
+    }
+
+    /**
+     * The same change for several requests at once. Only moves that need no per-request decision are allowed:
+     * approving is left out on purpose (it needs the offer and the inspection note of each request).
+     * A request that cannot make the move is skipped and reported, the others still go through.
+     */
+    public function bulkStatus(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1', 'max:50'],
+            'ids.*' => ['integer', 'distinct'],
+            'status' => ['required', Rule::in([ExchangeRequest::STATUS_UNDER_REVIEW, ExchangeRequest::STATUS_REJECTED, ExchangeRequest::STATUS_COMPLETED])],
+            'customer_note' => ['nullable', 'string', 'max:1000'],
+            'admin_note' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $to = $validated['status'];
+        if ($to === ExchangeRequest::STATUS_REJECTED && trim((string) ($validated['customer_note'] ?? '')) === '') {
+            return $this->fail('Write the reason the customer will see.', ['customer_note' => ['The reason is required.']]);
+        }
+
+        $actor = auth('admin_api')->user();
+        $updated = [];
+        $skipped = [];
+
+        foreach ($validated['ids'] as $id) {
+            $result = DB::transaction(function () use ($id, $to, $validated, $actor) {
+                $row = ExchangeRequest::query()->select(ExchangeRequest::READABLE)->lockForUpdate()->find($id);
+                if (! $row) {
+                    return ['id' => $id, 'reference' => null, 'reason' => 'Request not found.'];
+                }
+                if (! in_array($to, ExchangeRequest::TRANSITIONS[$row->status] ?? [], true)) {
+                    return ['id' => $id, 'reference' => $row->reference, 'reason' => "A {$row->status} request cannot be moved to {$to}."];
+                }
+
+                $this->recordTransition($row, $to, $validated, $actor);
+
+                return null;
+            });
+
+            if ($result === null) {
+                $updated[] = $id;
+                $this->notifier->notifyCustomerOfDecision($id, $to);
+            } else {
+                $skipped[] = $result;
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => count($updated) . ' updated, ' . count($skipped) . ' skipped.',
+            'data' => ['updated' => $updated, 'skipped' => $skipped],
+        ]);
     }
 
     /** What an admin must write down before this request can be approved. */

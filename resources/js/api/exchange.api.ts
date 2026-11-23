@@ -172,3 +172,40 @@ export async function updateExchangeDamageRule(
 export async function listExchangePricingAudit(): Promise<{ data: ExchangePricingAuditEntry[] }> {
   return (await http.get('/admin/exchange-pricing-audit')) as unknown as { data: ExchangePricingAuditEntry[] };
 }
+
+export type ExchangeCreatePayload = {
+  customer_name: string;
+  customer_phone: string;
+  user_id: number | null;
+  device_type: 'phone' | 'laptop';
+  device_name: string;
+  serial_number: string;
+  estimated_value: number;
+  target_name: string | null;
+  target_price: number | null;
+  admin_note: string | null;
+};
+
+/** Staff enter a request for a customer who is at the counter or on the phone. */
+export async function createExchangeRequest(payload: ExchangeCreatePayload) {
+  return (await http.post('/admin/exchange-requests', payload)) as unknown as {
+    success: boolean;
+    message: string;
+    data: { id: number; reference: string };
+  };
+}
+
+export type ExchangeBulkResult = {
+  success: boolean;
+  message: string;
+  data: { updated: number[]; skipped: { id: number; reference: string | null; reason: string }[] };
+};
+
+/** The same status change for several requests. Approving is not allowed here: it needs each request's offer and note. */
+export async function bulkUpdateExchangeStatus(payload: {
+  ids: number[];
+  status: 'under_review' | 'rejected' | 'completed';
+  customer_note?: string | null;
+}) {
+  return (await http.post('/admin/exchange-requests/bulk-status', payload)) as unknown as ExchangeBulkResult;
+}

@@ -1,9 +1,34 @@
 <template>
   <div>
-    <AppPageHeader title="Mobile & Laptop Exchange" subtitle="Manage device exchange requests, evaluation and approvals." />
+    <AppPageHeader title="Mobile & Laptop Exchange" subtitle="Manage device exchange requests, evaluation and approvals.">
+      <template #actions>
+        <v-btn color="primary" variant="flat" prepend-icon="mdi-plus" @click="createOpen = true">Add Exchange Request</v-btn>
+      </template>
+    </AppPageHeader>
 
     <RequestStatusOverview :cards="summaryCards" :tabs="visibleTabs" :model-value="activeTab" @update:model-value="selectTab" />
 
+    <v-container v-if="selected.length" fluid class="pb-0">
+      <v-alert color="primary" variant="tonal" density="comfortable" class="selection-bar">
+        <div class="d-flex flex-wrap align-center ga-2">
+          <strong class="mr-2">{{ selected.length }} selected</strong>
+          <v-btn size="small" variant="tonal" color="info" prepend-icon="mdi-magnify-scan" :loading="bulkBusy === 'under_review'" :disabled="!!bulkBusy" @click="runBulk('under_review')">
+            Mark under review
+          </v-btn>
+          <v-btn size="small" variant="tonal" color="success" prepend-icon="mdi-check-decagram-outline" :loading="bulkBusy === 'completed'" :disabled="!!bulkBusy" @click="runBulk('completed')">
+            Mark completed
+          </v-btn>
+          <v-btn size="small" variant="tonal" color="error" prepend-icon="mdi-close-circle-outline" :disabled="!!bulkBusy" @click="openReject">
+            Reject
+          </v-btn>
+          <v-spacer />
+          <v-btn size="small" variant="text" :disabled="!!bulkBusy" @click="selected = []">Clear</v-btn>
+        </div>
+        <div class="text-caption mt-1">
+          Approving needs each request's offer and inspection note, so it is done from the request itself. Requests that cannot make the move are skipped.
+        </div>
+      </v-alert>
+    </v-container>
     <AppDataTable
       :headers="headers"
       :items="items"
@@ -11,6 +36,9 @@
       :loading="loading"
       :searchable="false"
       :items-per-page="options.itemsPerPage"
+      show-select
+      :selected="selected"
+      @update:selected="onSelected"
       @update:options="onOptions"
     >
       <template #actions>
@@ -139,6 +167,32 @@
         </v-tooltip>
       </template>
     </AppDataTable>
+
+    <ExchangeRequestCreateDialog v-model="createOpen" @created="onCreated" />
+
+    <v-dialog v-model="rejectOpen" max-width="520" persistent>
+      <v-card>
+        <v-card-title>Reject {{ selected.length }} {{ selected.length === 1 ? 'request' : 'requests' }}</v-card-title>
+        <v-card-text>
+          <v-textarea
+            v-model="rejectReason"
+            label="Reason the customer will see *"
+            rows="3"
+            auto-grow
+            maxlength="1000"
+            counter
+            variant="outlined"
+            :error-messages="rejectError"
+            @update:model-value="rejectError = ''"
+          />
+        </v-card-text>
+        <v-card-actions class="pa-4">
+          <v-spacer />
+          <v-btn variant="text" :disabled="bulkBusy === 'rejected'" @click="rejectOpen = false">Cancel</v-btn>
+          <v-btn color="error" variant="flat" :loading="bulkBusy === 'rejected'" @click="confirmReject">Reject selected</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -150,7 +204,9 @@ import type { DataTableHeader, DataTableOptions } from '@/components/datatable/t
 import AppPageHeader from '@/components/AppPageHeader.vue';
 import AppSearchButton from '@/components/shared/AppSearchButton.vue';
 import RequestStatusOverview from '@/components/shared/RequestStatusOverview.vue';
-import { listExchangeRequests, type ExchangeRequestListItem } from '@/api/exchange.api';
+import ExchangeRequestCreateDialog from '@/components/exchange/ExchangeRequestCreateDialog.vue';
+import { useSnackbar } from '@/composables/snackbar';
+import { bulkUpdateExchangeStatus, listExchangeRequests, type ExchangeRequestListItem } from '@/api/exchange.api';
 import { EXCHANGE_STATUS_OPTIONS, exchangeStatusColor, exchangeStatusLabel } from '@/shared/exchange';
 import { formatDateTime, formatNPR } from '@/shared/formatters';
 
@@ -246,6 +302,66 @@ async function fetchRequests() {
   }
 }
 
+// ---- add a request / act on several at once
+const { showSuccess, showError, showWarning } = useSnackbar();
+const createOpen = ref(false);
+const selected = ref<Array<string | number>>([]);
+const bulkBusy = ref<null | 'under_review' | 'completed' | 'rejected'>(null);
+const rejectOpen = ref(false);
+const rejectReason = ref('');
+const rejectError = ref('');
+const MAX_BULK = 50;
+
+function onSelected(next: Array<string | number>) {
+  if (next.length > MAX_BULK) {
+    showWarning(`You can act on up to ${MAX_BULK} requests at once.`);
+    selected.value = next.slice(0, MAX_BULK);
+    return;
+  }
+  selected.value = next;
+}
+
+function onCreated() {
+  onSearch();
+}
+
+function openReject() {
+  rejectReason.value = '';
+  rejectError.value = '';
+  rejectOpen.value = true;
+}
+
+function confirmReject() {
+  if (rejectReason.value.trim() === '') {
+    rejectError.value = 'Write the reason the customer will see';
+    return;
+  }
+  runBulk('rejected', rejectReason.value.trim());
+}
+
+async function runBulk(status: 'under_review' | 'completed' | 'rejected', customerNote?: string) {
+  if (bulkBusy.value || selected.value.length === 0) return;
+  bulkBusy.value = status;
+  try {
+    const response = await bulkUpdateExchangeStatus({ ids: selected.value.map(Number), status, customer_note: customerNote ?? null });
+    const { updated, skipped } = response.data;
+    if (skipped.length === 0) {
+      showSuccess(`${updated.length} ${updated.length === 1 ? 'request' : 'requests'} updated`);
+    } else {
+      const names = skipped.slice(0, 3).map((s) => s.reference ?? `#${s.id}`).join(', ');
+      showWarning(`${updated.length} updated, ${skipped.length} skipped (${names}${skipped.length > 3 ? ', ...' : ''}). ${skipped[0].reason}`);
+    }
+    rejectOpen.value = false;
+    selected.value = [];
+    await fetchRequests();
+  } catch (e) {
+    const data = (e as { response?: { data?: { message?: string } } })?.response?.data;
+    showError(data?.message ?? 'Could not update the requests');
+  } finally {
+    bulkBusy.value = null;
+  }
+}
+
 function applyStatus(next: string | null) {
   statusParam.value = next;
   router.replace({ query: next ? { status: next } : {} });
@@ -258,6 +374,7 @@ function selectTab(key: string | null) {
 }
 
 function onSearch() {
+  selected.value = [];
   options.value.page = 1;
   searching.value = true;
   fetchRequests();
