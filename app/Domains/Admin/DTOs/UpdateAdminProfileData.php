@@ -10,6 +10,7 @@ final class UpdateAdminProfileData
         public readonly string $name,
         public readonly string $username,
         public readonly ?string $avatar = null,
+        public readonly ?int $roleId = null,
     ) {}
 
     public static function fromArray(array $data): self
@@ -20,6 +21,7 @@ final class UpdateAdminProfileData
             name: (string) ($data['name'] ?? ''),
             username: (string) ($data['username'] ?? ''),
             avatar: is_string($avatar) ? trim($avatar) : null,
+            roleId: isset($data['role_id']) && $data['role_id'] !== '' ? (int) $data['role_id'] : null,
         );
     }
 }

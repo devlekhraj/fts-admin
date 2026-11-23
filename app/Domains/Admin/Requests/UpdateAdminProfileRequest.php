@@ -24,6 +24,8 @@ final class UpdateAdminProfileRequest extends FormRequest
                 Rule::unique((new Admin())->getTable(), 'username')->ignore($adminId),
             ],
             'avatar' => ['nullable', 'string', 'max:2048'],
+            // The edit form sends the role together with the name. Left out or empty means the role is not changed.
+            'role_id' => ['nullable', 'integer', 'exists:roles,id'],
         ];
     }
 }

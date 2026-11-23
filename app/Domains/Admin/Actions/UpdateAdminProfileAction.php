@@ -19,7 +19,12 @@ final class UpdateAdminProfileAction
             $admin->avatar = $data->avatar;
         }
 
-        $shouldNotify = $admin->isDirty(['name', 'username', 'avatar']);
+        // The role used to be sent here but never saved, so changing an admin's role from the edit form did nothing.
+        if ($data->roleId !== null) {
+            $admin->role_id = $data->roleId;
+        }
+
+        $shouldNotify = $admin->isDirty(['name', 'username', 'avatar', 'role_id']);
 
         $admin->save();
         $admin = $admin->refresh();
