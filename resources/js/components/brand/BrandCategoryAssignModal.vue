@@ -64,7 +64,7 @@
     <v-btn variant="text" color="error" @click="emit('close')">
       Cancel
     </v-btn>
-    <v-btn color="primary" variant="flat" :loading="saving" :disabled="saving || !brandId" @click="saveCategories">
+    <v-btn v-if="auth.can('edit-brand')" color="primary" variant="flat" :loading="saving" :disabled="saving || !brandId" @click="saveCategories">
       Save Changes
     </v-btn>
   </v-card-actions>
@@ -75,6 +75,9 @@ import { computed, onMounted, ref } from 'vue';
 import { listProductCategoriesLite, type ProductCategoryListItem } from '@/api/product-categories.api';
 import { syncBrandCategories, type ProductBrandDetailResponse } from '@/api/products.api';
 import { useSnackbarStore } from '@/stores/snackbar.store';
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 const props = defineProps<{
   brandId: string | number | null | undefined;

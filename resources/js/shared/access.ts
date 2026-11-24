@@ -14,7 +14,7 @@ export const MEDIA_PERMISSIONS = [
 
 /** null means every signed-in admin. A route name that matches nothing here is for Administrators only. First match wins. */
 const ROUTE_RULES: Array<[RegExp, string[] | null]> = [
-  [/^admin\.(overview|analytics|forbidden)$/, null],
+  [/^admin\.(overview|analytics|forbidden|account)$/, null],
 
   [/^admin\.exchange\.pricing$/, ['exchange-pricing']],
   [/^admin\.exchange\./, ['access-exchange']],

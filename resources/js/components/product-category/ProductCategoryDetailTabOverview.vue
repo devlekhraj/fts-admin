@@ -7,7 +7,7 @@
             <div class="text-h6">Product Category Overview</div>
             <div class="text-body-2 text-medium-emphasis">Edit product category name, slug, and status.</div>
           </div>
-             <v-btn color="primary" variant="flat" :loading="saving" @click="onUpdate">
+             <v-btn v-if="auth.can('edit-product-category')" color="primary" variant="flat" :loading="saving" @click="onUpdate">
             <v-icon start size="16">mdi-content-save-outline</v-icon>
             Update
           </v-btn>
@@ -94,6 +94,9 @@ import {
 } from '@/api/product-categories.api';
 import AppFieldLabel from '@/components/shared/AppFieldLabel.vue';
 import { useSnackbarStore } from '@/stores/snackbar.store';
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 const props = defineProps<{
   item: ProductCategoryDetailResponse | null;

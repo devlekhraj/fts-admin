@@ -54,7 +54,7 @@
           @click="router.push({ name: 'admin.banners.detail', params: { id: item.id } })">
           Details
         </v-btn>
-        <BannerDeleteButton :banner="item" @deleted="onBannerDeleted" />
+        <BannerDeleteButton v-if="auth.can('delete-banner')" :banner="item" @deleted="onBannerDeleted" />
       </div>
     </template>
   </AppDataTable>

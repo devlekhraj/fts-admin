@@ -44,7 +44,7 @@
               </v-row>
             </div>
             <div class="text-center py-10">
-              <v-btn variant="flat" size="large" color="primary" :loading="saving" @click="onUpdate">
+              <v-btn v-if="auth.can('edit-product')" variant="flat" size="large" color="primary" :loading="saving" @click="onUpdate">
                 <v-icon start>mdi-content-save-edit-outline</v-icon>
                 Update
               </v-btn>
@@ -61,6 +61,9 @@ import { ref, watch } from 'vue';
 import { update as updateProduct, type ProductDetailResponse } from '@/api/products.api';
 import AppFieldLabel from '@/components/shared/AppFieldLabel.vue';
 import { useSnackbarStore } from '@/stores/snackbar.store';
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 const props = defineProps<{
   item: ProductDetailResponse | null;

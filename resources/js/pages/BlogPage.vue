@@ -74,7 +74,7 @@
         <v-btn size="small" variant="outlined" color="primary" @click="onView(item)">
           details
         </v-btn>
-        <BlogDeleteButton :blog="item" @deleted="onBlogDeleted" />
+        <BlogDeleteButton v-if="auth.can('delete-blog')" :blog="item" @deleted="onBlogDeleted" />
       </div>
     </template>
   </AppDataTable>

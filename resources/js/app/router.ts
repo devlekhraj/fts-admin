@@ -22,6 +22,7 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
     children: [
       { path: 'overview', name: 'admin.overview', component: OverviewPage, meta: { title: 'Overview' } },
+      { path: 'account', name: 'admin.account', component: () => import('@/pages/AccountPage.vue'), meta: { title: 'My account' } },
       { path: 'no-access', name: 'admin.forbidden', component: () => import('@/pages/ForbiddenPage.vue'), meta: { title: 'No access' } },
       { path: 'analytics', name: 'admin.analytics', component: AnalyticsPage, meta: { title: 'Analytics' } },
       // emi requests

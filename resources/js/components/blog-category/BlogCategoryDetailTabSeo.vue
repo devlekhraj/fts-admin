@@ -7,7 +7,7 @@
             <div class="text-h6">SEO Settings</div>
             <div class="text-body-2 text-medium-emphasis">Optimize this category for search engines.</div>
           </div>
-          <v-btn color="primary" variant="flat" :loading="saving" @click="onUpdate">
+          <v-btn v-if="auth.can('edit-blog-category')" color="primary" variant="flat" :loading="saving" @click="onUpdate">
             <v-icon start size="16">mdi-content-save-outline</v-icon>
             Update
           </v-btn>
@@ -63,6 +63,9 @@ import { reactive, ref, watch } from 'vue';
 import { update as updateBlogCategory, type BlogCategoryDetailResponse } from '@/api/blog-categories.api';
 import AppFieldLabel from '@/components/shared/AppFieldLabel.vue';
 import { useSnackbarStore } from '@/stores/snackbar.store';
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 const props = defineProps<{
   item: BlogCategoryDetailResponse | null;

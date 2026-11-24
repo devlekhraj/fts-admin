@@ -168,7 +168,7 @@
       <v-icon start size="16">mdi-refresh</v-icon>
       Reload
     </v-btn>
-    <v-btn color="primary" variant="tonal" :loading="saving" :disabled="loading || saving || brands.length === 0" @click="onSave">
+    <v-btn v-if="auth.can('edit-brand')" color="primary" variant="tonal" :loading="saving" :disabled="loading || saving || brands.length === 0" @click="onSave">
       <v-icon start size="16">mdi-content-save-outline</v-icon>
       Save Order
     </v-btn>
@@ -180,6 +180,9 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { listBrands, reorderBrands, type ProductBrandListItem } from '@/api/products.api';
 import { getErrorMessage } from '@/shared/errors';
 import { useSnackbarStore } from '@/stores/snackbar.store';
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 type OrderedBrand = {
   id: number;

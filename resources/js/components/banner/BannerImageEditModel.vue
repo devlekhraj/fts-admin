@@ -62,12 +62,12 @@
   <v-divider />
 
   <v-card-actions class="pb-4 px-6 d-flex justify-space-between">
-    <v-btn color="error" variant="tonal" :loading="deleting" :disabled="updating || deleting" @click="onDelete">
+    <v-btn v-if="auth.can('edit-banner')" color="error" variant="tonal" :loading="deleting" :disabled="updating || deleting" @click="onDelete">
       <v-icon start size="16">mdi-delete</v-icon>
       Delete Image
     </v-btn>
 
-    <v-btn color="primary" variant="tonal" :loading="updating" :disabled="updating || deleting" @click="onUpdate">
+    <v-btn v-if="auth.can('edit-banner')" color="primary" variant="tonal" :loading="updating" :disabled="updating || deleting" @click="onUpdate">
       <v-icon start size="16">mdi-content-save-outline</v-icon>
       Update Image
     </v-btn>
@@ -81,6 +81,9 @@ import { getErrorMessage } from '@/shared/errors';
 import { formatBytes } from '@/shared/utils';
 import { useSnackbarStore } from '@/stores/snackbar.store';
 import AppFieldLabel from '@/components/shared/AppFieldLabel.vue';
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 type BannerFile = {
   id: number | string;

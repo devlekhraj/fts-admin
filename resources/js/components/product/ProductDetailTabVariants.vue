@@ -4,7 +4,7 @@
             <div class="text-body-2 text-medium-emphasis">
                 Total variants: {{ variants.length }}
             </div>
-            <v-btn color="primary" variant="flat" @click="onAddVariant">
+            <v-btn v-if="auth.can('edit-product')" color="primary" variant="flat" @click="onAddVariant">
                 <v-icon start size="16">mdi-plus</v-icon>
                 Add Variant
             </v-btn>
@@ -176,6 +176,9 @@ import {
 import ProductVariantFormModal from "@/components/product/ProductVariantFormModal.vue";
 import ProductVariantImagesTable from "@/components/product/ProductVariantImagesTable.vue";
 import { openModal } from "@/shared/modal";
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 const props = defineProps<{
     item: ProductDetailResponse | null;

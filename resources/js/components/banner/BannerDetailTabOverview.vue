@@ -7,7 +7,7 @@
             <div class="text-h6">Banner Overview</div>
             <div class="text-body-2 text-medium-emphasis">Edit banner name, slug, and status.</div>
           </div>
-          <v-btn color="primary" :loading="saving" @click="onUpdate" variant="tonal">
+          <v-btn v-if="auth.can('edit-banner')" color="primary" :loading="saving" @click="onUpdate" variant="tonal">
             <v-icon start size="16">mdi-content-save-outline</v-icon>
             Update
           </v-btn>
@@ -63,6 +63,9 @@ import { reactive, ref, watch } from 'vue';
 import { update as updateBanner, type BannerDetailResponse } from '@/api/banners.api';
 import AppFieldLabel from '@/components/shared/AppFieldLabel.vue';
 import { useSnackbarStore } from '@/stores/snackbar.store';
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 const props = defineProps<{
   item: BannerDetailResponse | null;

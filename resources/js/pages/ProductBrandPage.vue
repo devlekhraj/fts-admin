@@ -13,7 +13,7 @@
         </v-list>
       </v-menu>
 
-      <v-btn variant="outlined" color="primary" prepend-icon="mdi-pencil-outline" @click="openOrderModal">
+      <v-btn v-if="auth.can('edit-brand')" variant="outlined" color="primary" prepend-icon="mdi-pencil-outline" @click="openOrderModal">
         Edit Brand Sequence
       </v-btn>
 
@@ -89,7 +89,7 @@
         <v-btn size="small" variant="outlined" color="primary" @click="onView(item)">
           Details
         </v-btn>
-        <BrandDeleteButton :brand="item" @deleted="onBrandDeleted" />
+        <BrandDeleteButton v-if="auth.can('delete-brand')" :brand="item" @deleted="onBrandDeleted" />
       </div>
     </template>
   </AppDataTable>

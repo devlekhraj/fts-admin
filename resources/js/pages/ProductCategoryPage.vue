@@ -6,7 +6,7 @@
           <v-btn v-bind="props" variant="tonal" color="primary" prepend-icon="mdi-download-outline">
             Export
           </v-btn>
-          <v-btn variant="outlined" color="primary" prepend-icon="mdi-pencil-outline" @click="openOrderModal">
+          <v-btn v-if="auth.can('edit-product-category')" variant="outlined" color="primary" prepend-icon="mdi-pencil-outline" @click="openOrderModal">
             Edit Category Sequence
           </v-btn>
         </template>
@@ -87,7 +87,7 @@
         <v-btn size="small" variant="outlined" color="primary" @click="onView(item)">
           Details
         </v-btn>
-        <ProductCategoryDeleteButton :category="item" @deleted="onCategoryDeleted" />
+        <ProductCategoryDeleteButton v-if="auth.can('delete-product-category')" :category="item" @deleted="onCategoryDeleted" />
       </div>
     </template>
   </AppDataTable>

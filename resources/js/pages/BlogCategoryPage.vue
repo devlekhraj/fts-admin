@@ -67,7 +67,7 @@
         <v-btn size="small" variant="outlined" color="primary" @click="onView(item)">
           Details
         </v-btn>
-        <BlogCategoryDeleteButton :category="item" @deleted="onCategoryDeleted" />
+        <BlogCategoryDeleteButton v-if="auth.can('delete-blog-category')" :category="item" @deleted="onCategoryDeleted" />
       </div>
     </template>
   </AppDataTable>

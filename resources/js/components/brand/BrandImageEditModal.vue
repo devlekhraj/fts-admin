@@ -55,14 +55,14 @@
   <v-divider />
 
   <v-card-actions class="pb-4 px-6">
-    <v-btn v-if="!form.is_default" color="error" variant="tonal" :loading="deleting" :disabled="updating || deleting" @click="onDelete">
+    <v-btn v-if="auth.can('edit-brand') && (!form.is_default)" color="error" variant="tonal" :loading="deleting" :disabled="updating || deleting" @click="onDelete">
       <v-icon start size="16">mdi-delete</v-icon>
       Delete Image
     </v-btn>
 
     <v-spacer />
 
-    <v-btn color="primary" variant="tonal" :loading="updating" :disabled="updating || deleting" @click="onUpdate">
+    <v-btn v-if="auth.can('edit-brand')" color="primary" variant="tonal" :loading="updating" :disabled="updating || deleting" @click="onUpdate">
       <v-icon start size="16">mdi-content-save-outline</v-icon>
       Update Image
     </v-btn>
@@ -75,6 +75,9 @@ import { deleteBrandImage, updateBrandImage } from '@/api/products.api';
 import AppFieldLabel from '@/components/shared/AppFieldLabel.vue';
 import { getErrorMessage } from '@/shared/errors';
 import { useSnackbarStore } from '@/stores/snackbar.store';
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 type BrandFile = {
   id: number | string;

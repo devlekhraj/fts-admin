@@ -64,7 +64,8 @@ final class AccessMap
 
         return [
             // ---- everyone who is signed in
-            ['GET', 'dashboard/**', null],
+            ['GET', 'dashboard/**', null],   // the dashboard itself only returns what the role may see
+            ['PUT', 'account/*', null],      // your own name and password
 
             // ---- team and roles
             ['GET', 'admin-list', ['admins-view']],

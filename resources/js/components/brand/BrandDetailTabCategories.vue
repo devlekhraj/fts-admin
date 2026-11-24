@@ -5,7 +5,7 @@
         <div class="text-subtitle-1 font-weight-medium">Brand Categories ({{ categories.length }})</div>
         <div class="text-body-2 text-medium-emphasis">Categories assigned to this brand.</div>
       </div>
-      <v-btn prepend-icon="mdi-plus" variant="flat" color="primary" @click="openAssignModal">
+      <v-btn v-if="auth.can('edit-brand')" prepend-icon="mdi-plus" variant="flat" color="primary" @click="openAssignModal">
         Assign Categories
       </v-btn>
     </div>
@@ -56,6 +56,9 @@ import { computed } from 'vue';
 import type { ProductBrandDetailResponse } from '@/api/products.api';
 import { openModal } from '@/shared/modal';
 import BrandCategoryAssignModal from '@/components/brand/BrandCategoryAssignModal.vue';
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 type BrandCategoryItem = NonNullable<ProductBrandDetailResponse['categories']>[number];
 

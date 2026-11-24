@@ -7,7 +7,7 @@
             <div class="text-h6">Product Overview</div>
             <div class="text-body-2 text-medium-emphasis">Edit product name, slug, brand, categories, and status.</div>
           </div>
-          <v-btn color="primary" :loading="saving" @click="onUpdate" variant="flat">
+          <v-btn v-if="auth.can('edit-product')" color="primary" :loading="saving" @click="onUpdate" variant="flat">
             <v-icon start size="16">mdi-content-save-outline</v-icon>
             Update
           </v-btn>
@@ -119,6 +119,9 @@ import { listProductBrandsLite, type ProductBrandLiteItem } from '@/api/product-
 import { listProductCategoriesLite, type ProductCategoryListItem } from '@/api/product-categories.api';
 import AppFieldLabel from '@/components/shared/AppFieldLabel.vue';
 import { useSnackbarStore } from '@/stores/snackbar.store';
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 type SelectOption = {
   title: string;

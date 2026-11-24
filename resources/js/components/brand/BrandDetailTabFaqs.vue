@@ -7,7 +7,7 @@
             <div class="text-h6">Brand FAQs ({{ items.length }})</div>
             <div class="text-body-2 text-medium-emphasis">FAQs attached to this brand.</div>
           </div>
-          <v-btn prepend-icon="mdi-plus" variant="flat" color="primary" @click="addFaq">Add FAQ</v-btn>
+          <v-btn v-if="auth.can('edit-brand')" prepend-icon="mdi-plus" variant="flat" color="primary" @click="addFaq">Add FAQ</v-btn>
         </div>
 
         <template v-if="loading">
@@ -32,8 +32,8 @@
                     {{ idx + 1 }}. {{ faq.question }}
                   </div>
                   <div class="d-flex align-center flex-wrap ga-2">
-                    <v-btn variant="outlined" size="small" color="primary" @click="handleEdit(faq)">Edit</v-btn>
-                    <v-btn variant="outlined" size="small" color="error" @click="handleDelete(faq)">Delete</v-btn>
+                    <v-btn v-if="auth.can('edit-brand')" variant="outlined" size="small" color="primary" @click="handleEdit(faq)">Edit</v-btn>
+                    <v-btn v-if="auth.can('edit-brand')" variant="outlined" size="small" color="error" @click="handleDelete(faq)">Delete</v-btn>
                   </div>
                 </div>
               </template>
@@ -56,6 +56,9 @@ import type { ProductBrandDetailResponse } from '@/api/products.api';
 import { openModal } from '@/shared/modal';
 import FaqFormModal from '@/components/faq/FaqFormModal.vue';
 import FaqDeleteModal from '@/components/faq/FaqDeleteModal.vue';
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 const props = defineProps<{
   item: ProductBrandDetailResponse | null;

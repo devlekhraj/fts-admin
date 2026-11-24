@@ -5,7 +5,7 @@
         <div class="py-4">
           <div class="d-flex align-center justify-space-between mb-3">
             <div class="text-subtitle-2">Current Product Attributes</div>
-            <v-btn variant="tonal" color="primary" @click="onEditAttributes">
+            <v-btn v-if="auth.can('edit-product')" variant="tonal" color="primary" @click="onEditAttributes">
               <v-icon start size="16">mdi-square-edit-outline</v-icon>
               {{ attributeActionLabel }}
             </v-btn>
@@ -33,6 +33,9 @@ import { computed } from 'vue';
 import ProductAttributeClassDetailModal from '@/components/product-attribute/ProductAttributeClassDetailModal.vue';
 import type { ProductDetailResponse } from '@/api/products.api';
 import { openModal } from '@/shared/modal';
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 const props = defineProps<{
   item: ProductDetailResponse | null;

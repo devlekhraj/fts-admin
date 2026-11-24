@@ -91,7 +91,7 @@
   <v-card-actions class="pb-4 px-6">
     <v-spacer />
     <v-btn variant="text" :disabled="saving" @click="emit('close')">Cancel</v-btn>
-    <v-btn color="primary" variant="flat" :loading="saving" :disabled="saving" @click="onSubmit">
+    <v-btn v-if="auth.can('edit-product-category')" color="primary" variant="flat" :loading="saving" :disabled="saving" @click="onSubmit">
       {{ submitLabel }}
     </v-btn>
   </v-card-actions>
@@ -103,6 +103,9 @@ import { saveProductCategoryBanner, updateProductCategoryBanner } from '@/api/pr
 import AppFieldLabel from '@/components/shared/AppFieldLabel.vue';
 import { getErrorMessage } from '@/shared/errors';
 import { useSnackbarStore } from '@/stores/snackbar.store';
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 type ProductCategoryBannerItem = {
   id: number | string;

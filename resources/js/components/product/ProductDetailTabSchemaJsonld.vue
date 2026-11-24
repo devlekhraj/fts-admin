@@ -3,7 +3,7 @@
     <v-row>
       <v-col cols="12" lg="8" offset-lg="2">
         <div class="d-flex justify-end mb-4">
-          <v-btn color="primary" :loading="saving" @click="onUpdate">
+          <v-btn v-if="auth.can('edit-product')" color="primary" :loading="saving" @click="onUpdate">
             <v-icon start size="16">mdi-content-save-outline</v-icon>
             Update
           </v-btn>
@@ -29,6 +29,9 @@
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue';
 import { update as updateProduct, type ProductDetailResponse } from '@/api/products.api';
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 const props = defineProps<{
   item: ProductDetailResponse | null;

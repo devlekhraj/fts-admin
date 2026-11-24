@@ -69,7 +69,8 @@
                     </v-avatar>
                     <div class="d-flex flex-column">
                         <div class="d-flex align-center ga-1 text-body-2 font-weight-medium">
-                            <span>{{ adminDisplayName }}</span>
+                            <router-link :to="{ name: 'admin.account' }" class="text-decoration-none text-high-emphasis"
+                                title="My account: name and password">{{ adminDisplayName }}</router-link>
                             <v-btn icon size="x-small" color="error" :loading="isLoggingOut" variant="text"
                                 @click="logout">
                                 <v-icon>mdi-logout</v-icon>

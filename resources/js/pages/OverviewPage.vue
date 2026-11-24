@@ -1,8 +1,11 @@
 <template>
   <!-- Key Metrics Cards -->
   <v-container fluid>
+    <v-alert v-if="nothingToShow" type="info" variant="tonal" class="mb-6" icon="mdi-hand-wave-outline">
+      Welcome, {{ authStore.admin?.name }}. Use the menu to open the pages your role includes.
+    </v-alert>
     <v-row>
-      <v-col cols="12" sm="6" md="3">
+      <v-col v-if="show.orders" cols="12" sm="6" md="3">
         <v-card class="pa-6">
           <div class="d-flex align-center justify-space-between">
             <div>
@@ -17,7 +20,7 @@
         </v-card>
       </v-col>
 
-      <v-col cols="12" sm="6" md="3">
+      <v-col v-if="show.emi" cols="12" sm="6" md="3">
         <v-card class="pa-6">
           <div class="d-flex align-center justify-space-between">
             <div>
@@ -32,7 +35,7 @@
         </v-card>
       </v-col>
 
-      <v-col cols="12" sm="6" md="3">
+      <v-col v-if="show.products" cols="12" sm="6" md="3">
         <v-card class="pa-6">
           <div class="d-flex align-center justify-space-between">
             <div>
@@ -47,7 +50,7 @@
         </v-card>
       </v-col>
 
-      <v-col cols="12" sm="6" md="3">
+      <v-col v-if="show.customers" cols="12" sm="6" md="3">
         <v-card class="pa-6">
           <div class="d-flex align-center justify-space-between">
             <div>
@@ -67,7 +70,7 @@
     <!-- Recent Orders & EMI Requests Section -->
     <v-row>
       <v-col cols="12" md="7">
-        <div class="mb-6">
+        <div v-if="show.orders" class="mb-6">
           <v-card>
             <v-card-title class="d-flex align-center justify-space-between">
               <div class="text-h6">Recent Orders</div>
@@ -138,7 +141,7 @@
             </v-card-text>
           </v-card>
         </div>
-        <v-card>
+        <v-card v-if="show.emi">
           <v-card-title class="d-flex align-center justify-space-between">
             <div class="text-h6">Recent EMI Requests</div>
             <v-btn variant="text" size="small" :to="{ name: 'admin.emi.requests' }">
@@ -219,13 +222,22 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useAuthStore } from '../stores/auth.store';
 import { formatAmount, getStatusColor, timeAgo } from '@/shared/utils';
 import { getDashboardLatest, getDashboardMetrics, type DashboardLatestActivityLog, type DashboardLatestEmiRequest, type DashboardLatestOrder } from '@/api/dashboard.api';
 import RecentActivityCard, { type RecentActivityItem } from '@/components/dashboard/RecentActivityCard.vue';
 
 const authStore = useAuthStore();
+
+// Each part of the dashboard needs the same permission as the page it leads to (the server leaves the rest out anyway).
+const show = computed(() => ({
+  orders: authStore.can('access-orders'),
+  emi: authStore.can('access-emi'),
+  products: authStore.can('view-products'),
+  customers: authStore.can('users-view'),
+}));
+const nothingToShow = computed(() => !Object.values(show.value).some(Boolean));
 
 const chartPeriod = ref('month');
 

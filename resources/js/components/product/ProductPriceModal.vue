@@ -204,7 +204,7 @@
     <v-spacer v-else />
 
     <div class="d-flex align-center ga-2">
-      <v-btn v-if="editing" class="px-4" color="primary" variant="flat" :disabled="saving" @click="onUpdate">
+      <v-btn v-if="auth.can('edit-product') && (editing)" class="px-4" color="primary" variant="flat" :disabled="saving" @click="onUpdate">
         <template v-if="saving">
           <v-progress-circular indeterminate size="16" width="2" class="me-2" />
         </template>
@@ -224,6 +224,9 @@ import type { ProductDetailResponse } from '@/api/products.api';
 import { getProductDetail, updateProductPrice } from '@/api/products.api';
 import { formatNPRIfDecimal } from '@/shared/formatters';
 import { useSnackbarStore } from '@/stores/snackbar.store';
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 type ProductPriceLike = ProductDetailResponse & {
   id?: number | string;

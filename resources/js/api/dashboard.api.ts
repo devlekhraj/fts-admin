@@ -1,10 +1,11 @@
 import { http } from './http';
 
 export type DashboardMetrics = {
-  totalOrders: number;
-  totalEmiRequests: number;
-  totalProducts: number;
-  totalCustomers: number;
+  // null: this role may not see that number
+  totalOrders: number | null;
+  totalEmiRequests: number | null;
+  totalProducts: number | null;
+  totalCustomers: number | null;
 };
 
 export type DashboardLatestOrder = {

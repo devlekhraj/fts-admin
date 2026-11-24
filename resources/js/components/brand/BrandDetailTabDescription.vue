@@ -7,7 +7,7 @@
             <div class="text-h6">Brand Description</div>
             <div class="text-body-2 text-medium-emphasis">Update brand detailed description.</div>
           </div>
-          <v-btn color="primary" variant="flat" :loading="saving" @click="onUpdate">
+          <v-btn v-if="auth.can('edit-brand')" color="primary" variant="flat" :loading="saving" @click="onUpdate">
             <v-icon start size="16">mdi-content-save-outline</v-icon>
             Update
           </v-btn>
@@ -29,6 +29,9 @@ import { defineAsyncComponent, reactive, ref, watch } from 'vue';
 import { updateBrand, type ProductBrandDetailResponse } from '@/api/products.api';
 import AppFieldLabel from '@/components/shared/AppFieldLabel.vue';
 import { useSnackbarStore } from '@/stores/snackbar.store';
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 const RichText = defineAsyncComponent(() => import('@/components/RichText.vue'));
 

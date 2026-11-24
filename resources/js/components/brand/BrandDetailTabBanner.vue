@@ -6,7 +6,7 @@
         <div class="text-body-2 text-medium-emphasis">Total banners: {{ banners.length }}</div>
       </div>
 
-      <v-btn color="primary" variant="flat" @click="onAddBanner">
+      <v-btn v-if="auth.can('edit-brand')" color="primary" variant="flat" @click="onAddBanner">
         <v-icon start size="16">mdi-plus</v-icon>
         Add New Banner
       </v-btn>
@@ -63,10 +63,10 @@
           </td>
           <td class="py-3">
             <div class="d-flex align-center justify-end ga-2">
-              <v-btn variant="outlined" color="primary" @click="onEditBanner(banner)">
+              <v-btn v-if="auth.can('edit-brand')" variant="outlined" color="primary" @click="onEditBanner(banner)">
                 Edit
               </v-btn>
-              <v-btn variant="outlined" color="error" @click="onDeleteBanner(banner)">
+              <v-btn v-if="auth.can('edit-brand')" variant="outlined" color="error" @click="onDeleteBanner(banner)">
                 Delete
               </v-btn>
             </div>
@@ -89,6 +89,9 @@ import { type ProductBrandDetailResponse, type ProductBrandFileItem } from '@/ap
 import { openModal } from '@/shared/modal';
 import BrandBannerFormModal from '@/components/brand/BrandBannerFormModal.vue';
 import BrandBannerDeleteModal from '@/components/brand/BrandBannerDeleteModal.vue';
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 type BrandBannerItem = ProductBrandFileItem & {
   title?: string | null;

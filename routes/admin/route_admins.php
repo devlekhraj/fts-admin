@@ -2,12 +2,17 @@
 
 declare(strict_types=1);
 
+use App\Domains\Admin\Controllers\AccountController;
 use App\Domains\Admin\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:admin_api'])->prefix('admin')->group(function () {
     Route::get('admin-list', [AdminController::class, 'index'])->name('admin.users.admin-list');
     Route::post('admin-create', [AdminController::class, 'store'])->name('admin.users.admin-create');
+
+    // your own account: open to every signed-in admin
+    Route::put('account/profile', [AccountController::class, 'updateProfile'])->middleware('throttle:10,1')->name('admin.account.profile');
+    Route::put('account/password', [AccountController::class, 'updatePassword'])->middleware('throttle:6,1')->name('admin.account.password');
 
     // update routes
     Route::put('admin-users/{admin}/basic-info', [AdminController::class, 'updateProfile'])->name('admin.users.update-basic-info');

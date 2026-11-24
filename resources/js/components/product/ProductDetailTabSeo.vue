@@ -7,7 +7,7 @@
             <div class="text-h6">SEO Settings</div>
             <div class="text-body-2 text-medium-emphasis">Optimize product visibility in search results.</div>
           </div>
-          <v-btn color="primary" variant="flat" :loading="saving" @click="onUpdate">
+          <v-btn v-if="auth.can('edit-product')" color="primary" variant="flat" :loading="saving" @click="onUpdate">
             <v-icon start size="16">mdi-content-save-outline</v-icon>
             Update
           </v-btn>
@@ -63,6 +63,9 @@ import { reactive, ref, watch } from 'vue';
 import { update as updateProduct, type ProductDetailResponse } from '@/api/products.api';
 import AppFieldLabel from '@/components/shared/AppFieldLabel.vue';
 import { useSnackbarStore } from '@/stores/snackbar.store';
+import { useAuthStore } from '@/stores/auth.store';
+
+const auth = useAuthStore();
 
 const props = defineProps<{
   item: ProductDetailResponse | null;
